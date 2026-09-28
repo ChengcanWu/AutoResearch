@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>启研 · AI 科研导师</title>
+  <meta name="description" content="它认识你，它懂科研世界，它决定你此刻最值得做的一件事，陪你做完，记住结果，再给下一步。" />
+  <link rel="stylesheet" href="/static/css/styles.css?v=w19" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="boot" id="boot">
+    <p class="boot-kicker">QIYAN</p>
+    <h2>启研</h2>
+    <div class="boot-line" aria-hidden="true"><i></i></div>
+    <p class="boot-note">五个工作区，按你现在要做的事进入。</p>
+  </div>
+  <div class="guide-rail" aria-hidden="true"><span id="railFill"></span></div>
+
+  <div class="app-frame">
+  <aside class="side-nav main-nav" id="mainNav" hidden>
+    <p class="side-label">工作区</p>
+    <button class="nav-btn" type="button" data-view="today" data-workspace="today"><span>今日</span><small>状态与建议</small></button>
+    <button class="nav-btn" type="button" data-view="onboarding" data-workspace="portrait"><span>画像</span><small>对话与核对</small></button>
+    <button class="nav-btn" type="button" data-view="cards" data-workspace="cards"><span>方向</span><small>探索建议</small></button>
+    <button class="nav-btn" type="button" data-view="workbench" data-workspace="workbench"><span>任务</span><small>做到提交</small></button>
+    <button class="nav-btn" type="button" data-view="me" data-workspace="me"><span>记录</span><small>它记住的</small></button>
+  </aside>
+  <div class="app-column">
+
+  <header class="site-header">
+    <div class="brand">
+      <p class="eyebrow">AI Research Mentor</p>
+      <h1 id="brandHome">启研</h1>
+      <p class="tagline">它认识你，它懂科研世界，它决定你此刻最值得做的一件事，陪你做完，记住结果，再给下一步。</p>
+    </div>
+    <div class="header-right" id="headerRight" hidden>
+      <span class="llm-pill" id="llmPill">模型未连接</span>
+      <span class="user-chip"><span class="dot"></span><span id="userNickname"></span></span>
+    </div>
+  </header>
+
+  <main class="page" id="app">
+    <!-- 各视图由 app.js 渲染 -->
+  </main>
+
+  <footer class="site-footer">
+    <p id="footNote">课程来自北大教务公开接口。首页或右上角可连接模型；对话、方向理由、下一步和任务反馈在连通后由模型生成。</p>
+    <p>本地运行 · FastAPI + 静态页面</p>
+  </footer>
+  </div>
+  </div>
+
+  <script src="/static/js/app.js?v=w19"></script>
+</body>
+</html>

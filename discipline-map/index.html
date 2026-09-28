@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>学科瞭望 · 本科生科研入门地图</title>
+  <meta name="description" content="依据 GB/T 13745-2009 学科分类，面向本科一、二年级的科研入门导览；支持二级学科与北大相关课程搜索。" />
+  <link rel="stylesheet" href="css/styles.css?v=20260923b" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand">
+      <p class="eyebrow">面向本科 1–2 年级</p>
+      <h1>学科瞭望</h1>
+      <p class="tagline">按国家标准找到你的学科（含二级方向），看它在研究什么，并搜索北大相关课程。</p>
+    </div>
+    <div class="header-meta">
+      <p class="standard" id="standardLabel">GB/T 13745-2009</p>
+      <p class="stats" id="statsLabel">加载中…</p>
+    </div>
+  </header>
+
+  <section class="toolbar">
+    <label class="search-wrap">
+      <span class="sr-only">搜索学科</span>
+      <input id="search" type="search" placeholder="搜索学科名或代码，例如：物理学 / 140" autocomplete="off" />
+    </label>
+    <div class="chips" id="categoryChips" role="tablist" aria-label="门类筛选"></div>
+  </section>
+
+  <main class="layout">
+    <aside class="list-panel">
+      <div id="disciplineList" class="discipline-list"></div>
+      <p class="empty" id="emptyState" hidden>没有匹配的学科，换个关键词试试。</p>
+    </aside>
+    <article class="detail-panel" id="detailPanel">
+      <div class="detail-placeholder">
+        <h2>从左侧选一门学科</h2>
+        <p>先选一级学科，再点进二级方向；每个方向都有介绍，并可搜索北大公开课。</p>
+      </div>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <p id="noteText"></p>
+    <p>产品目录：<code>product/discipline-map</code> · 数据可后续按学科自动检索更新</p>
+  </footer>
+
+  <script src="js/app.js?v=20260923b"></script>
+</body>
+</html>

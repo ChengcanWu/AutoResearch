@@ -1,0 +1,357 @@
+# -*- coding: utf-8 -*-
+"""Workbench：微任务生成 + 提交 + 反馈（W0：反馈为启发式 mock，写回 UM 真实）。
+
+任务生成 = 方向模板 + 用户基础参数化；反馈 = rubric 逐条判定（启发式）+ next_hint；
+提交后写回一条 behavior 类 UserFact（source=behavior, confidence=0.8, 带提交证据）——
+这是 NEXT_PRE §3 的硬要求：反馈写回 UM 必须真实。
+
+W1 真实化（刘弘雅）：任务模板库扩充 + rubric 判定换 LLM，schema 不变。
+"""
+from __future__ import annotations
+
+from typing import Any
+
+import llm
+import store
+from schemas import Feedback, MicroTask
+
+# 每方向两级任务模板（level 1 演示档 20 分钟；level 2 进阶）
+TEMPLATES: dict[str, list[dict[str, Any]]] = {
+    "ai": [
+        {
+            "title": "机器为什么犯错？——20 分钟对比实验",
+            "brief": "亲手制造一次「机器判断错」的案例，并解释它为什么可能错。这是理解机器学习最短的路。",
+            "steps": [
+                "选 10 条你熟悉的短文本（弹幕、评论、歌词、朋友圈都行）",
+                "用两个不同的方法判断情感倾向：①关键词规则（自己定 5 个词）②任意现成工具/模型",
+                "找出两边判断不一致的 3 个例子，各写一句话：为什么可能不一致",
+                "收尾写 2 句：你从这些错误里发现了什么",
+            ],
+            "rubric": [
+                {"criterion": "提交包含至少 3 个具体的不一致例子"},
+                {"criterion": "每个例子都有一句原因分析（不是只罗列现象）"},
+                {"criterion": "结尾有自己的总结观察，而非空话"},
+            ],
+            "time_budget_min": 20,
+        },
+        {
+            "title": "给模型「喂错」数据——输入敏感度实验",
+            "brief": "观察同一个模型对轻微改动输入的反应，理解「模型学到了什么、没学到什么」。",
+            "steps": [
+                "找一句模型能正确回答的简单问题",
+                "做 3 处最小改动（换个同义词/换个语序/加个无关前缀），分别记录回答变化",
+                "总结：哪类改动影响最大？这说明模型可能依赖什么线索",
+            ],
+            "rubric": [
+                {"criterion": "有对照的原始输入与 3 个变体"},
+                {"criterion": "记录了每次输出变化"},
+                {"criterion": "给出了自己的假设并说明依据"},
+            ],
+            "time_budget_min": 20,
+        },
+    ],
+    "math": [
+        {
+            "title": "把一个定义讲给外行听——ε-δ 语言极限",
+            "brief": "检验你是否真正理解的最好方式：用生活语言讲清楚一个严格定义。",
+            "steps": [
+                "复习 ε-δ 极限定义（任何教材或网上 5 分钟视频均可）",
+                "不看书写出定义，对照检查漏了什么",
+                "用「打靶/追及」之类的生活比喻把它讲给一个假想的高中生，写下来（≤200 字）",
+            ],
+            "rubric": [
+                {"criterion": "复述的定义基本完整（ε 任意性、δ 存在性）"},
+                {"criterion": "比喻与定义的每个成分有对应关系"},
+                {"criterion": "指出了比喻在哪里失效（所有比喻都有边界）"},
+            ],
+            "time_budget_min": 20,
+        },
+        {
+            "title": "反例练习——「连续但不光滑」",
+            "brief": "数学的严格性来自反例。亲手验证 |x| 在 0 处的行为。",
+            "steps": [
+                "写出连续与可导的定义",
+                "证明 |x| 处处连续但在 0 处不可导",
+                "再举一个「连续但不可导」的例子并验证",
+            ],
+            "rubric": [
+                {"criterion": "两个定义表述正确"},
+                {"criterion": "证明用了定义而非直觉"},
+                {"criterion": "额外例子正确且经过验证"},
+            ],
+            "time_budget_min": 20,
+        },
+    ],
+    "stat": [
+        {
+            "title": "一张图如何骗人——诚实图表 vs 误导图表",
+            "brief": "亲手做一次数据误导，再修正它。你会从此对图表免疫。",
+            "steps": [
+                "找一份你感兴趣的小数据（成绩、气温、销量均可，10 个数就够）",
+                "画两张图：一张故意误导（截断 Y 轴/挑时间窗），一张诚实",
+                "写 3 句：误导发生在哪一步、读者会得出什么错误结论、如何防",
+            ],
+            "rubric": [
+                {"criterion": "两张图基于同一份数据"},
+                {"criterion": "准确指出了误导手法及其效果"},
+                {"criterion": "有可操作的防误导建议"},
+            ],
+            "time_budget_min": 20,
+        },
+        {
+            "title": "相关性 ≠ 因果性——找一个可疑相关",
+            "brief": "训练数据思维的第一课：相关背后可能另有变量。",
+            "steps": [
+                "找一个有趣的相关关系（新闻、报告均可）",
+                "列出至少 2 种非因果解释（混杂变量/反向因果/巧合）",
+                "设计一个（假想的）能区分它们的验证方案",
+            ],
+            "rubric": [
+                {"criterion": "相关关系描述清楚、有来源"},
+                {"criterion": "非因果解释 ≥ 2 种且合理"},
+                {"criterion": "验证方案在原理上可行"},
+            ],
+            "time_budget_min": 20,
+        },
+    ],
+    "psy": [
+        {
+            "title": "你就是样本——5 道题发现身边的选择偏误",
+            "brief": "用最小规模的调查体验「实验感」，并理解样本意味着什么。",
+            "steps": [
+                "围绕一个日常决策（如「选课看评分？」）设计 5 个问题",
+                "访问 3 位同学，如实记录回答",
+                "总结：发现了什么模式？3 人能下结论吗？为什么",
+            ],
+            "rubric": [
+                {"criterion": "问题设计无诱导性"},
+                {"criterion": "记录了原始回答而非只有汇总"},
+                {"criterion": "对样本局限有清醒讨论"},
+            ],
+            "time_budget_min": 20,
+        },
+        {
+            "title": "直觉 vs 系统——复现一个经典效应",
+            "brief": "从《思考，快与慢》选一个效应（如锚定），在生活中找到它的影子。",
+            "steps": [
+                "用自己的话写下该效应的定义（≤100 字）",
+                "设计一个 10 分钟就能做的观察/小实验验证它",
+                "记录结果并讨论：符合预期吗，可能的干扰是什么",
+            ],
+            "rubric": [
+                {"criterion": "效应定义准确"},
+                {"criterion": "观察方案能真正检验该效应"},
+                {"criterion": "讨论了干扰因素"},
+            ],
+            "time_budget_min": 20,
+        },
+    ],
+    "econ": [
+        {
+            "title": "找激励——校园里的一个规则改变了谁的行为",
+            "brief": "经济学视角的入门训练：看到规则背后的激励结构。",
+            "steps": [
+                "选一个校园规则（选课上限/奖学金评定/食堂定价）",
+                "分析：它激励了什么行为？谁受益、谁承担成本",
+                "写出一个「改进规则」的建议及其可能的副作用",
+            ],
+            "rubric": [
+                {"criterion": "激励分析紧扣规则条文"},
+                {"criterion": "识别了至少两类利益相关者"},
+                {"criterion": "改进建议考虑了副作用"},
+            ],
+            "time_budget_min": 20,
+        },
+        {
+            "title": "机会成本日记——记录你一天的 3 个取舍",
+            "brief": "把抽象概念落到自己的真实决策上。",
+            "steps": [
+                "记录今天 3 个真实取舍（时间/金钱均可）",
+                "为每个取舍写出被放弃的最佳选项（机会成本）",
+                "复盘：哪个决定的机会成本被你系统性低估了",
+            ],
+            "rubric": [
+                {"criterion": "取舍真实具体"},
+                {"criterion": "机会成本界定正确"},
+                {"criterion": "复盘有自我洞察"},
+            ],
+            "time_budget_min": 20,
+        },
+    ],
+    "se": [
+        {
+            "title": "拆一个 App——画出它的模块图",
+            "brief": "系统思维的第一次练习：把黑盒拆成可组合的部分。",
+            "steps": [
+                "选一个你常用的 App",
+                "只用「它有什么功能/数据」的观察，画出 6–10 个模块的草图（拍照或文字描述均可）",
+                "标注：哪两个模块耦合最紧？如果加一个新功能会动哪里",
+            ],
+            "rubric": [
+                {"criterion": "模块划分基于观察而非猜测"},
+                {"criterion": "指出了模块间的依赖关系"},
+                {"criterion": "变更影响分析合理"},
+            ],
+            "time_budget_min": 20,
+        },
+        {
+            "title": "让一段代码变可靠——防御性改造",
+            "brief": "软件工程的核心不是写出来，而是让它不坏。",
+            "steps": [
+                "找（或写）一段 30 行左右能跑的小程序",
+                "构造 3 个会让它出错的输入，记录报错",
+                "加上输入检查与错误处理，重跑 3 个输入，对比行为",
+            ],
+            "rubric": [
+                {"criterion": "错误输入构造有代表性"},
+                {"criterion": "改造后行为可预期（不再崩溃或静默出错）"},
+                {"criterion": "说明了取舍（哪些错误选择不处理）"},
+            ],
+            "time_budget_min": 20,
+        },
+    ],
+}
+
+
+def generate_task(uid: str, direction: str, level: int = 1, title: str = "", brief: str = "") -> MicroTask:
+    """从模板参数化生成微任务。若带了节点标题，就按该节点出题。"""
+    name = (title or "").strip()
+    if name:
+        task = MicroTask(
+            user_id=uid, direction=direction, title=name[:40],
+            brief=((brief or name).strip())[:240],
+            steps=[
+                f"用自己的话写下「{name[:40]}」在问什么",
+                "举一个你能核对的小例子",
+                "写两句：你现在明白了什么，还卡在哪里",
+            ],
+            rubric=[
+                {"criterion": "说明了这个节点在问什么"},
+                {"criterion": "有一个具体、能核对的例子"},
+                {"criterion": "写了自己的判断，而不是只复述介绍"},
+            ],
+            time_budget_min=20, difficulty=max(1, level), status="open",
+        )
+        store.save_task(task)
+        return task
+    tpl_list = TEMPLATES.get(direction) or TEMPLATES["ai"]
+    tpl = tpl_list[min(level, len(tpl_list)) - 1]
+    task = MicroTask(
+        user_id=uid, direction=direction, title=tpl["title"], brief=tpl["brief"],
+        steps=tpl["steps"], rubric=tpl["rubric"],
+        time_budget_min=tpl["time_budget_min"], difficulty=level, status="open",
+    )
+    store.save_task(task)
+    return task
+
+
+def submit(uid: str, task: MicroTask, payload: str) -> Feedback:
+    """提交 → 反馈 + 写回 UM（行为事实，真实入库）。"""
+    submission_id = store.save_submission(task.id, uid, payload)
+    task.status = "done"
+    store.save_task(task)
+
+    fb = _llm_feedback(task, payload) or _mock_feedback(task, payload)
+
+    # ---- 真实写回：一条 behavior 事实（NEXT_PRE 硬要求）----
+    fact_value = (
+        f"完成微任务《{task.title}》：提交了 {len(payload)} 字的分析"
+        f"（rubric {fb['score']} 分），其中包含原因分析"
+        if _has_analysis(payload) else
+        f"完成微任务《{task.title}》：提交了 {len(payload)} 字的记录"
+    )
+    from schemas import UserFact  # 延迟导入避免环
+    fact = UserFact(
+        user_id=uid, category="experience", key=f"task_done:{task.id[:8]}",
+        value=fact_value, confidence=0.8, source="behavior",
+        evidence=[{"type": "submission", "submission_id": submission_id,
+                   "task_id": task.id, "task_title": task.title}],
+        status="active",
+    )
+    store.add_fact(fact)
+    fb["learned_facts"] = [fact.to_dict()]
+    return fb
+
+
+def _has_analysis(text: str) -> bool:
+    return any(w in text for w in ("因为", "由于", "原因", "说明", "所以", "导致", "可能"))
+
+
+def _llm_feedback(task: MicroTask, payload: str) -> dict[str, Any] | None:
+    """用模型按 rubric 写评语。结构不合法则放弃，交给启发式。"""
+    if not llm.enabled() or not payload.strip():
+        return None
+    criteria = [r["criterion"] for r in task.rubric]
+    data = llm.chat_json(
+        "你在批改本科生 20 分钟科研微任务。只根据提交文本判断，不要编造学生没写的内容。"
+        "每条 rubric 给 pass(true/false) 和一句具体 comment。score 为 0-100 的整数。",
+        "任务=" + task.title + "\n要求=" + task.brief
+        + "\nrubric=" + " | ".join(criteria)
+        + "\n学生提交=\n" + payload[:1800]
+        + '\n输出 JSON：{"score":80,"rubric":[{"criterion":"...","pass":true,"comment":"..."}],'
+          '"next_hint":"...","encouragement":"..."}',
+        timeout=35,
+    )
+    if not data or not isinstance(data.get("rubric"), list):
+        return None
+    if len(data["rubric"]) != len(criteria):
+        return None
+    judged = []
+    for i, item in enumerate(data["rubric"]):
+        if not isinstance(item, dict):
+            return None
+        judged.append({
+            "criterion": criteria[i],
+            "pass": bool(item.get("pass")),
+            "comment": str(item.get("comment") or "已阅读。")[:80],
+        })
+    try:
+        score = int(data.get("score"))
+    except (TypeError, ValueError):
+        score = round(sum(1 for j in judged if j["pass"]) / len(judged) * 100)
+    score = max(0, min(100, score))
+    return {
+        "score": score,
+        "rubric": judged,
+        "next_hint": str(data.get("next_hint") or "对照未通过的条目再补一轮。")[:120],
+        "encouragement": str(data.get("encouragement") or "这次提交已经留下可核对的行为证据。")[:80],
+        "voice": "llm",
+    }
+
+
+def _mock_feedback(task: MicroTask, payload: str) -> dict[str, Any]:
+    """W0 启发式判定（代替 LLM）：按 rubric 逐条给 pass + 措辞。"""
+    p = payload.strip()
+    has_analysis = _has_analysis(p)
+    length = len(p)
+    judged: list[dict[str, Any]] = []
+    for i, r in enumerate(task.rubric):
+        crit = r["criterion"]
+        if "3 个" in crit or "≥ 2" in crit or "两个" in crit or "两类" in crit:
+            ok = length >= 150
+            comment = "例子数量足够。" if ok else "例子偏少——数量本身就是证据强度的一部分，补齐会更可信。"
+        elif "原因" in crit or "分析" in crit or "解释" in crit or "对应" in crit or "依据" in crit:
+            ok = has_analysis and length >= 80
+            comment = ("分析有自己的因果表述，不是罗列。" if ok
+                       else "还停留在「是什么」，缺「为什么」。试着对每个现象补一句原因。")
+        elif "总结" in crit or "观察" in crit or "复盘" in crit or "洞察" in crit or "讨论" in crit:
+            ok = length >= 200 or has_analysis
+            comment = "收尾有自己的判断。" if ok else "结尾可以再加两句你自己的判断——哪怕不确定，写下来。"
+        elif "定义" in crit or "准确" in crit or "正确" in crit or "可预期" in crit or "可行" in crit or "合理" in crit:
+            ok = length >= 100
+            comment = "表述经得起对照检查。" if ok else "关键概念的表述再对照一次定义，别靠印象。"
+        else:
+            ok = length >= 60
+            comment = "已按要求提交。" if ok else "内容可以再充实一些。"
+        judged.append({"criterion": crit, "pass": bool(ok), "comment": comment})
+
+    passed = sum(1 for j in judged if j["pass"])
+    score = round(passed / max(1, len(judged)) * 100)
+    if score >= 67:
+        hint = ("下一步建议：把你发现的一个「为什么」带到进阶任务里验证——"
+                "AI 已经为你准备好了同方向的第 2 个任务。")
+        encouragement = "你完成了一次完整的「观察→解释」循环，这正是科研最核心的动作。"
+    else:
+        hint = "下一步建议：不用重做，只把标红的 rubric 补一轮（10 分钟以内），然后进阶。"
+        encouragement = "完成比完美重要——第一次提交就形成了行为证据，AI 对你的认知已经更新。"
+    return {"score": score, "rubric": judged, "next_hint": hint, "encouragement": encouragement, "voice": "rules"}

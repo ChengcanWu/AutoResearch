@@ -1,0 +1,29 @@
+# 密钥。示例文件 .env.example 可以入库。
+.env
+.env.local
+
+# 依赖与虚拟环境
+node_modules/
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# 演示库与本地数据
+ResearchGuide-main/server/data/
+
+# 汇报稿的生成物
+slides/preview/
+slides/icons/
+
+# 压缩包里带有本地 .env，不入库
+product.zip
+
+# 编辑器与系统
+~$*
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+*.log

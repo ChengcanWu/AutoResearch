@@ -1,0 +1,92 @@
+# -*- coding: utf-8 -*-
+"""pku-course-skill 适配层（SkillProtocol 的 W0 进程版实现）。
+
+沿用 legacy discipline-map/server.py 验证过的做法：
+- uv run --locked 子进程调用 skills/pku-course/scripts/pku.py；
+- Windows 下强制 UTF-8，避免课程名乱码；
+- 失败返回结构化错误 {ok: False, error}，绝不编造课程。
+
+W1（陈浩文）：改为进程内 adapter（直接 import skill 的函数），子进程作为 fallback。
+"""
+from __future__ import annotations
+
+import json
+import os
+import subprocess
+from pathlib import Path
+from typing import Any
+
+ROOT = Path(__file__).resolve().parent.parent
+SKILL_DIR = (ROOT / "skills" / "pku-course").resolve()
+PKU_PY = SKILL_DIR / "scripts" / "pku.py"
+DEFAULT_TERM_FILE = Path(__file__).resolve().parent / "data" / "cached_term.txt"
+
+
+def _run_pku(args: list[str], timeout: int = 60) -> tuple[int, Any, str]:
+    if not PKU_PY.exists():
+        return 2, None, f"pku-course-skill not found at {SKILL_DIR}"
+    cmd = ["uv", "run", "--locked", "--project", str(SKILL_DIR), str(PKU_PY), *args]
+    env = os.environ.copy()
+    env["PYTHONIOENCODING"] = "utf-8"
+    env["PYTHONUTF8"] = "1"
+    try:
+        proc = subprocess.run(cmd, capture_output=True, env=env, timeout=timeout, cwd=str(ROOT))
+    except FileNotFoundError:
+        return 2, None, "uv not found; install uv 0.10+ and retry"
+    except subprocess.TimeoutExpired:
+        return 2, None, "course search timed out"
+
+    def decode(blob: bytes) -> str:
+        if not blob:
+            return ""
+        for enc in ("utf-8", "gbk", "cp936"):
+            try:
+                return blob.decode(enc)
+            except UnicodeDecodeError:
+                continue
+        return blob.decode("utf-8", errors="replace")
+
+    stdout, stderr = decode(proc.stdout).strip(), decode(proc.stderr).strip()
+    data = None
+    if stdout:
+        try:
+            data = json.loads(stdout)
+        except json.JSONDecodeError:
+            stderr = (stderr + "\n" + stdout).strip()
+    return proc.returncode, data, stderr
+
+
+def _default_term() -> str | None:
+    """默认学期：优先用缓存，拿不到就调 options 并缓存。"""
+    if DEFAULT_TERM_FILE.exists():
+        cached = DEFAULT_TERM_FILE.read_text(encoding="utf-8").strip()
+        if cached:
+            return cached
+    code, data, _err = _run_pku(["options", "--limit", "1"])
+    if code == 0 and isinstance(data, dict) and data.get("items"):
+        term = data["items"][0]["value"]
+        try:
+            DEFAULT_TERM_FILE.parent.mkdir(parents=True, exist_ok=True)
+            DEFAULT_TERM_FILE.write_text(term, encoding="utf-8")
+        except OSError:
+            pass
+        return term
+    return None
+
+
+def search_courses(query: str, limit: int = 5, term: str = "") -> dict[str, Any]:
+    """course.search：真实检索北大公开课。返回 {ok, items, term} 或 {ok: False, error}。"""
+    query = (query or "").strip()
+    if not query:
+        return {"ok": False, "error": "query is required"}
+    term = term.strip() or (_default_term() or "")
+    if not term:
+        return {"ok": False, "error": "cannot resolve current term（教务接口不可达）"}
+    args = ["search", "--term", term, "--offset", "0", "--limit", str(min(10, max(1, limit))),
+            "--query", query]
+    code, data, err = _run_pku(args, timeout=90)
+    if not isinstance(data, dict):
+        return {"ok": False, "error": err or "course search failed (live)"}
+    items = data.get("items") or data.get("results") or []
+    return {"ok": code in (0, 1), "items": items, "term": term,
+            "warning": None if code == 0 else (err or "partial retrieval")}
