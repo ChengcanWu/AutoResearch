@@ -4,7 +4,8 @@
 环境变量（也可写在项目根目录 .env）：
   LLM_API_KEY   必填才会真正请求
   LLM_BASE_URL  默认 https://api.deepseek.com/v1
-  LLM_MODEL     默认 deepseek-chat
+  LLM_MODEL     默认 deepseek-chat（DeepSeek 把它路由到 deepseek-flash 的非思考模式，最省）
+  LLM_REASONING_EFFORT  可选 low/high/max，只在支持的模型上填写
 """
 from __future__ import annotations
 
@@ -91,48 +92,69 @@ def probe() -> dict:
     return {"ok": True, "model": cfg["model"], "base_url": cfg["base_url"], "sample": text[:40]}
 
 
-def chat(system: str, user: str, *, temperature: float = 0.4, timeout: int = 25) -> str | None:
-    """返回助手文本；失败或未配置返回 None。"""
+def _post(url: str, key: str, payload: dict, timeout: int) -> tuple[dict | None, str]:
+    body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+    req = urllib.request.Request(
+        url, data=body, method="POST",
+        headers={"Content-Type": "application/json", "Authorization": f"Bearer {key}"},
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            return json.loads(resp.read().decode("utf-8")), ""
+    except urllib.error.HTTPError as exc:
+        return None, f"http {exc.code}"
+    except (urllib.error.URLError, TimeoutError, OSError) as exc:
+        return None, f"network {type(exc).__name__}"
+    except json.JSONDecodeError:
+        return None, "bad json"
+
+
+def chat(system: str, user: str, *, temperature: float = 0.4, timeout: int = 25,
+         json_mode: bool = False, tag: str = "chat") -> str | None:
+    """返回助手文本；失败或未配置返回 None。网络错误、429、5xx 重试一次。"""
     cfg = config()
     if not cfg["enabled"]:
         return None
     key = os.environ.get("LLM_API_KEY") or os.environ.get("OPENAI_API_KEY") or os.environ.get("DEEPSEEK_API_KEY")
-    url = cfg["base_url"] + "/chat/completions"
-    body = json.dumps({
+    payload: dict = {
         "model": cfg["model"],
         "temperature": temperature,
         "messages": [
             {"role": "system", "content": system},
             {"role": "user", "content": user},
         ],
-    }, ensure_ascii=False).encode("utf-8")
-    req = urllib.request.Request(
-        url, data=body, method="POST",
-        headers={
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {key}",
-        },
-    )
+    }
+    if json_mode:
+        payload["response_format"] = {"type": "json_object"}
+    effort = (os.environ.get("LLM_REASONING_EFFORT") or "").strip()
+    if effort:
+        payload["reasoning_effort"] = effort
+    url = cfg["base_url"] + "/chat/completions"
     t0 = time.time()
-    try:
-        with urllib.request.urlopen(req, timeout=timeout) as resp:
-            raw = resp.read().decode("utf-8")
-    except (urllib.error.URLError, TimeoutError, OSError) as exc:
-        print(f"[llm] request failed: {exc}")
-        return None
-    try:
-        data = json.loads(raw)
-        text = data["choices"][0]["message"]["content"]
-    except (KeyError, IndexError, json.JSONDecodeError, TypeError) as exc:
-        print(f"[llm] bad payload: {exc}")
-        return None
-    text = (text or "").strip()
-    print(f"[llm] ok model={cfg['model']} {int((time.time()-t0)*1000)}ms chars={len(text)}")
-    return text or None
+    data, err = None, ""
+    for attempt in range(2):
+        data, err = _post(url, key, payload, timeout)
+        retry = err.startswith("network") or err in ("http 429", "http 500", "http 502", "http 503", "http 504")
+        if data is not None or not retry or attempt == 1:
+            break
+        time.sleep(0.8)
+    text = None
+    if data is not None:
+        try:
+            text = (data["choices"][0]["message"]["content"] or "").strip() or None
+        except (KeyError, IndexError, TypeError):
+            err = "bad payload"
+    usage = (data or {}).get("usage") or {}
+    print(json.dumps({
+        "llm": tag, "model": cfg["model"], "ok": bool(text), "ms": int((time.time() - t0) * 1000),
+        "tokens": usage.get("total_tokens"), "error": err or None,
+    }, ensure_ascii=False))
+    return text
 
 
-def chat_json(system: str, user: str, *, timeout: int = 30) -> dict | None:
-    text = chat(system + "\n只输出一个 JSON 对象，不要 Markdown 代码块。", user, temperature=0.2, timeout=timeout)
+def chat_json(system: str, user: str, *, timeout: int = 30, tag: str = "json") -> dict | None:
+    text = chat(system + "\n只输出一个 JSON 对象，不要 Markdown 代码块。", user, temperature=0.2,
+                timeout=timeout, json_mode=True, tag=tag)
     if not text:
         return None
     cleaned = text.strip()

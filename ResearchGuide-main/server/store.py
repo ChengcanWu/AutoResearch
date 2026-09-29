@@ -10,6 +10,7 @@ from __future__ import annotations
 import json
 import sqlite3
 import threading
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 
@@ -73,15 +74,22 @@ CREATE INDEX IF NOT EXISTS idx_portraits_user ON portraits(user_id);
 """
 
 
-def _conn() -> sqlite3.Connection:
+@contextmanager
+def _conn():
+    """一次调用一个连接：成功提交、异常回滚，最后一定关闭（原来只提交不关闭，连接会一直泄漏）。"""
     DB_PATH.parent.mkdir(parents=True, exist_ok=True)
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=10)
     conn.row_factory = sqlite3.Row
-    return conn
+    try:
+        with conn:
+            yield conn
+    finally:
+        conn.close()
 
 
 def init_db() -> None:
     with _LOCK, _conn() as c:
+        c.execute("PRAGMA journal_mode=WAL")  # 读写不互相阻塞，演示时多开几个页面也不锁库
         c.executescript(_SCHEMA)
 
 
