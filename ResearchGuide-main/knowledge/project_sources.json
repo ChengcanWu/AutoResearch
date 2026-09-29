@@ -1,0 +1,1960 @@
+{
+ "about": "边学边练的来源清单。每个来源都由人工在 2026-09-29/30 实际访问核对；samples 里每条 evidence_quote 都逐字出自当时抓到的页面或接口返回，retrieved_at 为抓取时间。adapter 非空的来源由 server/project_adapters.py 实时检索，其余只作快照和「去哪找」路线。不登录、不绕验证码、不抓付费或内部内容。",
+ "generated_at": "2026-09-29T20:02:46Z",
+ "probe_vantage": "egress IP 140.112.16.175 (National Taiwan University, Taipei) — NOT mainland China",
+ "sources": [
+  {
+   "id": "ospp-summer",
+   "name": "开源之夏 OSPP（点亮计划）",
+   "home_url": "https://summer.ospp.ac.cn/",
+   "kind": "open_source",
+   "directions": [
+    "se",
+    "ai"
+   ],
+   "stage_fit": [
+    2,
+    3
+   ],
+   "access": "public_listing_login_to_apply",
+   "mainland": true,
+   "cadence": "年度暑期活动；2026 季列表共 95 个项目，测试时全部 canApply=false（已过申请期，matchedStudentName 已填）。周期字段 completionTime 为 2–4（月）。本季报名/开发时间线未能取到（/api/getNewsList 返回 HTTP 500，首页为纯 JS）。",
+   "what_a_project_looks_like": "开源社区导师发布的 2–4 个月课题，带难度（基础/进阶）、技术要求和“产出要求”清单，学生在真实仓库提交代码与文档。",
+   "manual_route": "summer.ospp.ac.cn → 顶栏“项目列表”(/org/projectlist) → 难度筛“基础” → 技术标签选 AI/Python → 点进项目看“项目产出要求”；申请需注册登录。",
+   "live_api": {
+    "method": "POST",
+    "url_template": "https://summer.ospp.ac.cn/api/getProList",
+    "params": {
+     "body_json": {
+      "pageNum": 1,
+      "pageSize": 50,
+      "programType": 1,
+      "lang": "zh",
+      "programName": "<keyword or empty>",
+      "difficulty": [
+       "基础",
+       "基础/Basic"
+      ],
+      "techTag": [],
+      "supportLanguage": [],
+      "programmingLanguageTag": [],
+      "completionTime": [],
+      "orgName": []
+     },
+     "detail": "POST https://summer.ospp.ac.cn/api/getProDetail body {\"programId\":\"<programCode>\",\"type\":\"org\"}"
+    },
+    "auth_needed": false,
+    "response_path_to_items": "rows",
+    "item_fields_map": {
+     "title": "programName",
+     "url": "https://summer.ospp.ac.cn/org/prodetail/{programCode}",
+     "description": "detail.programDesc (HTML) + detail.outputRequirement[].title + detail.techRequirement[].title",
+     "difficulty": "difficulty (mixed values: 基础 | 基础/Basic | 进阶 | 进阶/Advanced)",
+     "tags": "techTag (JSON-encoded string of [category, tag] pairs)",
+     "deadline": "none in item; detail.canApply bool; completionTime = months"
+    },
+    "tested_at": "2026-09-29T19:12:51Z",
+    "notes": "Content-Type: application/json required. programType must be 1 (0/2/3 return 0). Detail JSON contains mentor email and matched student name: drop these fields before storing. Web detail route is SPA (JS-only).",
+    "example_curl": "curl -s -X POST 'https://summer.ospp.ac.cn/api/getProList' -H 'Content-Type: application/json' -d '{\"pageNum\":1,\"pageSize\":50,\"programType\":1,\"lang\":\"zh\",\"difficulty\":[\"基础\",\"基础/Basic\"]}'"
+   },
+   "samples": [
+    {
+     "title": "基于Agent实现自然语言驱动的数据看板生成与发布（DB-GPT）",
+     "url": "https://summer.ospp.ac.cn/org/prodetail/26f420021",
+     "practices": "自然语言→SQL→图表的 BI 看板生成；Dashboard schema 设计、组件查询绑定",
+     "todo": "实现 Dashboard schema 模块代码与设计文档，完成看板编辑发布及两个演示案例（文档或视频）",
+     "direction": "ai",
+     "stage_fit": [
+      2,
+      3
+     ],
+     "difficulty_raw": "基础；completionTime=2",
+     "retrieved_at": "2026-09-29T19:13:40Z",
+     "evidence_quote": "完成看板编辑发布及两个演示案例"
+    },
+    {
+     "title": "为 AReno 增加 OPD 算法支持：接入 On-Policy Distillation 训练流程",
+     "url": "https://summer.ospp.ac.cn/org/prodetail/267bf0003",
+     "practices": "大模型后训练算法（On-Policy Distillation）、PyTorch、在已有算法注册机制上扩展",
+     "todo": "在 AReno 仓库实现完整的 OPD 算法，完善测试和文档",
+     "direction": "ai",
+     "stage_fit": [
+      3
+     ],
+     "difficulty_raw": "基础/Basic；completionTime=2",
+     "retrieved_at": "2026-09-29T19:13:41Z",
+     "evidence_quote": "在AReno仓库实现完整的OPD算法"
+    },
+    {
+     "title": "基于Agent实现财报采集分析与可追溯研究分析（DB-GPT）",
+     "url": "https://summer.ospp.ac.cn/org/prodetail/26f420016",
+     "practices": "公开财报抓取与结构化抽取（营收、毛利、现金流等）、同比/环比与公司对比分析、数据来源追踪",
+     "todo": "提供单公司财报分析和多公司财务对比分析两个可演示案例，附完整代码与设计文档",
+     "direction": "econ",
+     "stage_fit": [
+      3
+     ],
+     "difficulty_raw": "进阶；completionTime=2",
+     "retrieved_at": "2026-09-29T19:13:43Z",
+     "evidence_quote": "提供单公司财报分析和多公司财务对比分析两个可演示案例"
+    },
+    {
+     "title": "基于Kaiwu-PyTorch-Plugin实现均衡传播算法",
+     "url": "https://summer.ospp.ac.cn/org/prodetail/26b1f0072",
+     "practices": "能量模型与均衡传播（Equilibrium Propagation）、与反向传播对比实验、单元测试",
+     "todo": "实现可复用 EP 模块；在 MNIST/Fashion-MNIST/sklearn Digits 上跑分类示例并与 BP 网络对比，报告准确率与训练曲线",
+     "direction": "ai",
+     "stage_fit": [
+      3
+     ],
+     "difficulty_raw": "进阶；completionTime=3",
+     "retrieved_at": "2026-09-29T19:13:44Z",
+     "evidence_quote": "一个可直接运行的分类训练示例"
+    }
+   ],
+   "reliability_notes": "JSON API stable in 5+ calls, no auth, no rate-limit headers seen. Only 95 projects in 2026 list (all closed at test time) → treat as seasonal; mostly se/ai, nothing for psy/math. Mentor PII in detail payload.",
+   "adapter": ""
+  },
+  {
+   "id": "glcc-gitlink",
+   "name": "GLCC 开源编程夏令营（GitLink）",
+   "home_url": "https://www.gitlink.org.cn/glcc",
+   "kind": "open_source",
+   "directions": [
+    "se",
+    "ai"
+   ],
+   "stage_fit": [
+    2,
+    3
+   ],
+   "access": "public_listing_login_to_apply",
+   "mainland": true,
+   "cadence": "round=4（2025）：repoApply 2025-04-15~07-04，stuApply 2025-05-22~07-05，开发 2025-06-28~09-14，结项评审 09-15~09-26。round=5 返回 0 条：测试时未见 2026 届。",
+   "what_a_project_looks_like": "社区发布的开源课题（taskName/taskDesc/taskUrl），难度 1–3，学生申请后在 GitLink/GitHub 仓库完成开发。",
+   "manual_route": "www.gitlink.org.cn → 顶栏“开源夏令营”(/glcc) → 往届（/glcc/2025）→ 课题列表 → 点课题链接看 issue/wiki；申请需 GitLink 账号。",
+   "live_api": {
+    "method": "GET",
+    "url_template": "https://glcc.gitlink.org.cn/api/applyInformation/taskList?curPage={page}&pageSize=100&round={round}&keyword={kw}",
+    "params": {
+     "round": "1=2022 … 4=2025 (inferred from createdOn/settings); 5 → empty",
+     "timeline": "GET https://glcc.gitlink.org.cn/api/glccSettings/settingList?round={round}"
+    },
+    "auth_needed": false,
+    "response_path_to_items": "data.rows",
+    "item_fields_map": {
+     "title": "taskName",
+     "url": "taskUrl",
+     "description": "taskDesc",
+     "difficulty": "taskDifficulty (1/2/3; label text not exposed by list API)",
+     "tags": "projectType, projectName",
+     "deadline": "settingList: name=stuApply value=\"start,end\""
+    },
+    "tested_at": "2026-09-29T19:18:18Z",
+    "notes": "Base host glcc.gitlink.org.cn found via https://www.gitlink.org.cn/api/setting.json (setting.common.glcc). Response includes tutorName/tutorMail/tutorPhone/tutorAddress — PII, must be dropped at ingest. Counts: round1 116, round2 89, round3 85, round4 64.",
+    "example_curl": "curl -s 'https://glcc.gitlink.org.cn/api/applyInformation/taskList?curPage=1&pageSize=100&round=4&keyword='"
+   },
+   "samples": [
+    {
+     "title": "OpenCT-AI文本数据挖掘项目",
+     "url": "https://www.gitlink.org.cn/Open-CT/AI",
+     "practices": "用大语言模型做大规模文本分析与挖掘、撰写分析报告",
+     "todo": "基于大模型分析教育类文本资料，形成分析报告并据此撰写学术论文",
+     "direction": "ai",
+     "stage_fit": [
+      2,
+      3
+     ],
+     "difficulty_raw": "taskDifficulty=2 (GLCC 2025)",
+     "retrieved_at": "2026-09-29T19:18:18Z",
+     "evidence_quote": "对文本类大规模教育资料进行分析和挖掘"
+    },
+    {
+     "title": "基于AI的大数据挖掘（OpenCT）",
+     "url": "https://www.gitlink.org.cn/Open-CT/OpenCT-AI",
+     "practices": "爬虫开发、用大模型对爬取数据做编码分析",
+     "todo": "开发爬虫流程，用大模型对数据编码分析，撰写分析报告并形成学术论文",
+     "direction": "ai",
+     "stage_fit": [
+      2,
+      3
+     ],
+     "difficulty_raw": "taskDifficulty=2 (GLCC 2025)",
+     "retrieved_at": "2026-09-29T19:18:18Z",
+     "evidence_quote": "开发相应的爬虫流程"
+    },
+    {
+     "title": "成为开源社区的「种子运营官」（OpenGrow）",
+     "url": "https://www.gitlink.org.cn/metax-maca/opengrow/issues/1",
+     "practices": "开源社区调研、轻量贡献、运营方案设计",
+     "todo": "1周绘制技术图谱分析社区现状；2周做轻量贡献与运营实验；1周提交激活方案（文档/代码/路演）",
+     "direction": "se",
+     "stage_fit": [
+      1,
+      2
+     ],
+     "difficulty_raw": "taskDifficulty=1 (GLCC 2025)",
+     "retrieved_at": "2026-09-29T19:18:18Z",
+     "evidence_quote": "绘制技术图谱，分析社区现状"
+    },
+    {
+     "title": "具身智能训练工具链开发（x-humanoid）",
+     "url": "https://www.gitlink.org.cn/X-Humanoid/x-humanoid-training-toolchain/issues/1",
+     "practices": "具身操作模型训练工具链",
+     "todo": "优化工具链，使使用者能低门槛训练端到端主流模型",
+     "direction": "ai",
+     "stage_fit": [
+      3
+     ],
+     "difficulty_raw": "taskDifficulty=1 (GLCC 2025)",
+     "retrieved_at": "2026-09-29T19:18:18Z",
+     "evidence_quote": "实现使用者可以低门槛的高效训练端到端主流模型"
+    }
+   ],
+   "reliability_notes": "API worked on every call; wrong params return {\"message\":\"系统错误\"}. No 2026 round visible — program may be paused or not yet published; recheck each spring.",
+   "adapter": ""
+  },
+  {
+   "id": "gitee-issues",
+   "name": "Gitee Issues（API v5）",
+   "home_url": "https://gitee.com/",
+   "kind": "open_source",
+   "directions": [
+    "se",
+    "ai"
+   ],
+   "stage_fit": [
+    2,
+    3
+   ],
+   "access": "public_listing_login_to_apply",
+   "mainland": true,
+   "cadence": "持续；无统一赛季。MindSpore 主开发已迁往 GitCode（Gitee 上 intern 标签 issue 最新为 2025-03）。",
+   "what_a_project_looks_like": "开源仓库 issue（bug/算子支持/迁移任务），部分带 intern（开源实习）标签。",
+   "manual_route": "gitee.com/<org>/<repo>/issues → 标签筛 intern / intern-AI / activity/开源实习 → 看 issue 描述与复现步骤；评论认领需 Gitee 账号。",
+   "live_api": {
+    "method": "GET",
+    "url_template": "https://gitee.com/api/v5/repos/{owner}/{repo}/issues?state=open&labels={label}&per_page=20",
+    "params": {
+     "label examples": "mindspore/mindspore: intern; openeuler/community: intern-AI, activity/开源实习 (label names from /labels endpoint)"
+    },
+    "auth_needed": false,
+    "response_path_to_items": "$ (top-level array)",
+    "item_fields_map": {
+     "title": "title",
+     "url": "html_url",
+     "description": "body (markdown)",
+     "difficulty": "none (label-based only)",
+     "tags": "labels[].name",
+     "deadline": "none"
+    },
+    "tested_at": "2026-09-29T19:21:28Z",
+    "notes": "Anonymous limit X-RateLimit-Limit: 60/hour per IP. /search/issues is flooded with SEO spam (unusable); /search/repositories returned [] anonymously after ~11.7 s. No standard good-first-issue label: labels=good-first-issue returned 0 on mindspore, openeuler, openharmony, paddle, hutool.",
+    "example_curl": "curl -s 'https://gitee.com/api/v5/repos/mindspore/mindspore/issues?state=all&labels=intern&per_page=20'"
+   },
+   "samples": [
+    {
+     "title": "LeakyReLU 算子 Kernel 未注册（MindSpore, intern）",
+     "url": "https://gitee.com/mindspore/mindspore/issues/IBRPVP",
+     "practices": "深度学习框架算子注册与测试",
+     "todo": "复现 mint.nn.functional.leaky_relu 报错并补齐 Kernel 注册，配测试用例",
+     "direction": "ai",
+     "stage_fit": [
+      3
+     ],
+     "difficulty_raw": "label=intern; state=open",
+     "retrieved_at": "2026-09-29T19:21:28Z",
+     "evidence_quote": "The kernel LeakyReLUExt unregistered"
+    },
+    {
+     "title": "基于diffuser的虚拟试衣项目pytorch转换mindspore框架推理实现",
+     "url": "https://gitee.com/mindspore/mindspore/issues/IB2OYP",
+     "practices": "模型迁移（PyTorch→MindSpore）、权重迁移与推理部署",
+     "todo": "将 Ascend PyTorch 推理改为 MindSpore 推理，迁移权重（已 closed，仅作历史范例）",
+     "direction": "ai",
+     "stage_fit": [
+      3
+     ],
+     "difficulty_raw": "label=intern; state=closed",
+     "retrieved_at": "2026-09-29T19:21:28Z",
+     "evidence_quote": "将pytorch2.1替换成mindspore来进行推理"
+    }
+   ],
+   "reliability_notes": "Reachable (earlier timeout not reproduced). Low yield for freshmen: tasks are framework-internal. Use only with curated repo+label allowlist; cache aggressively because of 60/h limit.",
+   "adapter": ""
+  },
+  {
+   "id": "gitcode-issues",
+   "name": "GitCode / AtomGit Issues（API v5）",
+   "home_url": "https://gitcode.com/",
+   "kind": "open_source",
+   "directions": [
+    "se",
+    "ai"
+   ],
+   "stage_fit": [
+    3
+   ],
+   "access": "public_listing_login_to_apply",
+   "mainland": true,
+   "cadence": "持续。",
+   "what_a_project_looks_like": "MindSpore 等迁移到 GitCode 的仓库 issue，含【TASK】类任务。",
+   "manual_route": "gitcode.com/mindspore/mindspore → Issues → 搜索“【TASK】”；认领需账号。",
+   "live_api": {
+    "method": "GET",
+    "url_template": "https://api.gitcode.com/api/v5/repos/{owner}/{repo}/issues?state=open&per_page=20",
+    "params": {},
+    "auth_needed": false,
+    "response_path_to_items": "$ (top-level array)",
+    "item_fields_map": {
+     "title": "title",
+     "url": "html_url",
+     "description": "body",
+     "difficulty": "none",
+     "tags": "labels[].name",
+     "deadline": "none"
+    },
+    "tested_at": "2026-09-29T19:52:14Z",
+    "notes": "Worked without token in 2 of 4 calls; other calls timed out at 15 s (use 40 s timeout + retry). labels=good-first-issue / intern returned 0 on mindspore.",
+    "example_curl": "curl -s -m 40 'https://api.gitcode.com/api/v5/repos/mindspore/mindspore/issues?state=open&per_page=20'"
+   },
+   "samples": [
+    {
+     "title": "【TASK】aclnnLeScalar 接入（MindSpore）",
+     "url": "https://gitcode.com/mindspore/mindspore/issues/29685",
+     "practices": "深度学习框架算子接入",
+     "todo": "为 Tensor 与标量的小于等于比较补充 LeScalar 执行路径",
+     "direction": "se",
+     "stage_fit": [
+      3
+     ],
+     "difficulty_raw": "no label",
+     "retrieved_at": "2026-09-29T19:52:14Z",
+     "evidence_quote": "补充专用的 `LeScalar` 执行路径"
+    }
+   ],
+   "reliability_notes": "Flaky latency; no beginner labels → keep as stage-3 fallback only.",
+   "adapter": ""
+  },
+  {
+   "id": "aistudio-learning-comps",
+   "name": "飞桨 AI Studio 学习赛/比赛",
+   "home_url": "https://aistudio.baidu.com/competition",
+   "kind": "competition",
+   "directions": [
+    "ai",
+    "econ",
+    "math"
+   ],
+   "stage_fit": [
+    1,
+    2
+   ],
+   "access": "public_listing_login_to_apply",
+   "mainland": true,
+   "cadence": "“飞桨学习赛”长期开放（endTime 多为 2030-12-31），月度评比；/studio/match/search 当前返回 42 个报名中比赛。",
+   "what_a_project_looks_like": "给定真实数据集与官方基线项目（可 fork），训练模型并提交结果文件，平台自动评测上榜。",
+   "manual_route": "aistudio.baidu.com → 顶栏“比赛” → 筛“学习赛/报名中” → 进入比赛看“赛题说明”“学习资料” → fork 基线项目；报名、下载数据需百度账号登录。",
+   "live_api": {
+    "method": "GET",
+    "url_template": "https://aistudio.baidu.com/studio/match/search?p={page}&pageSize=50",
+    "params": {
+     "all_history": "GET https://aistudio.baidu.com/studio/match/list?p={page}&pageSize=50 (640 items, mostly ended)",
+     "detail": "GET https://aistudio.baidu.com/studio/match/detail?matchId={id} → result.matchContent[] {tabName, md}"
+    },
+    "auth_needed": false,
+    "response_path_to_items": "result.data",
+    "item_fields_map": {
+     "title": "matchName",
+     "url": "https://aistudio.baidu.com/competition/detail/{id}/0/introduction",
+     "description": "matchAbs; detail tab 赛题说明 .md",
+     "difficulty": "none (name prefix 飞桨学习赛 = learning track)",
+     "tags": "tags (free text)",
+     "deadline": "endTime; processList[].signupDeadline"
+    },
+    "tested_at": "2026-09-29T19:24:05Z",
+    "notes": "pageSize=700 timed out; keep pageSize≤50. errorCode 0 = success. Detail md contains HTML/markdown and baseline project links.",
+    "example_curl": "curl -s 'https://aistudio.baidu.com/studio/match/search?p=1&pageSize=50'"
+   },
+   "samples": [
+    {
+     "title": "飞桨学习赛：中文新闻文本标题分类",
+     "url": "https://aistudio.baidu.com/competition/detail/809/0/introduction",
+     "practices": "文本分类（THUCNews 14 类）、PaddleNLP 基线",
+     "todo": "基于新闻标题训练分类模型并提交预测结果",
+     "direction": "ai",
+     "stage_fit": [
+      1,
+      2
+     ],
+     "difficulty_raw": "学习赛；报名 907",
+     "retrieved_at": "2026-09-29T19:24:43Z",
+     "evidence_quote": "要求参赛者基于原始新闻标题文本数据训练模型"
+    },
+    {
+     "title": "飞桨学习赛：个贷违约预测",
+     "url": "https://aistudio.baidu.com/competition/detail/803/0/introduction",
+     "practices": "信贷风险二分类、表格特征工程（利率、债务收入比等）",
+     "todo": "用个人贷款与网络信用贷记录训练违约预测模型并提交",
+     "direction": "econ",
+     "stage_fit": [
+      1,
+      2
+     ],
+     "difficulty_raw": "学习赛；报名 1649",
+     "retrieved_at": "2026-09-29T19:24:45Z",
+     "evidence_quote": "train_public.csv 个人贷款违约记录数据"
+    },
+    {
+     "title": "飞桨学习赛：MarTech Challenge 用户购买预测",
+     "url": "https://aistudio.baidu.com/competition/detail/819/0/introduction",
+     "practices": "用户购买行为预测、订单数据特征构造",
+     "todo": "用历史订单数据预测下个月用户是否购买，按 submission 格式提交",
+     "direction": "econ",
+     "stage_fit": [
+      1,
+      2
+     ],
+     "difficulty_raw": "学习赛；报名 1325",
+     "retrieved_at": "2026-09-29T19:24:50Z",
+     "evidence_quote": "预测下个月用户是否购买"
+    },
+    {
+     "title": "飞桨学习赛：英雄联盟大师预测",
+     "url": "https://aistudio.baidu.com/competition/detail/797/0/introduction",
+     "practices": "表格二分类、数据挖掘入门",
+     "todo": "用对局统计（击杀、死亡、助攻等）预测输赢，可 fork 官方基线",
+     "direction": "ai",
+     "stage_fit": [
+      1
+     ],
+     "difficulty_raw": "学习赛；报名 3250",
+     "retrieved_at": "2026-09-29T19:24:48Z",
+     "evidence_quote": "预测玩家在本局游戏中的输赢情况"
+    },
+    {
+     "title": "飞桨学习赛：图神经网络入门节点分类",
+     "url": "https://aistudio.baidu.com/competition/detail/817/0/introduction",
+     "practices": "图神经网络节点分类（论文引用网络）",
+     "todo": "读取 edges.csv/feat.npy，训练 GNN 预测测试集论文类别",
+     "direction": "ai",
+     "stage_fit": [
+      2
+     ],
+     "difficulty_raw": "学习赛；报名 171",
+     "retrieved_at": "2026-09-29T19:24:47Z",
+     "evidence_quote": "图上的每个节点代表一篇论文"
+    },
+    {
+     "title": "飞桨学习赛：量子电路合成",
+     "url": "https://aistudio.baidu.com/competition/detail/815/0/introduction",
+     "practices": "量子门近似合成（线性代数/优化）",
+     "todo": "用给定量子门集合高效近似合成目标量子门",
+     "direction": "math",
+     "stage_fit": [
+      2,
+      3
+     ],
+     "difficulty_raw": "学习赛（列表字段）",
+     "retrieved_at": "2026-09-29T19:24:05Z",
+     "evidence_quote": "量子电路合成是量子计算中十分重要的问题"
+    }
+   ],
+   "reliability_notes": "Both list and detail endpoints are unauthenticated JSON; fast (<2 s). Web pages are JS-only, so always use the API.",
+   "adapter": "aistudio"
+  },
+  {
+   "id": "tianchi-learning",
+   "name": "阿里云天池 新人赛/教学赛",
+   "home_url": "https://tianchi.aliyun.com/competition/gameList/activeList",
+   "kind": "competition",
+   "directions": [
+    "econ",
+    "stat",
+    "ai"
+   ],
+   "stage_fit": [
+    0,
+    1,
+    2
+   ],
+   "access": "public_listing_login_to_apply",
+   "mainland": true,
+   "cadence": "visualTab=4“日常学习赛”长期赛；注意部分 raceEndTime=2026-03-30/31 已过期但仍出现在 isActive=1 列表中。",
+   "what_a_project_looks_like": "经典赛题 + 数据集 + 教程（金融/电商/舆情），提交预测或可视化分析，证书激励。",
+   "manual_route": "tianchi.aliyun.com → 大赛 → “日常学习赛”标签 → 进入赛题看“赛题与数据” → 报名需阿里云账号。",
+   "live_api": {
+    "method": "GET",
+    "url_template": "https://tianchi.aliyun.com/v3/proxy/competition/api/race/page?visualTab={tab}&raceName={kw}&pageNum={page}&isActive={0|1}",
+    "params": {
+     "visualTab": "1 大模型赛, 2 数据算法赛, 3 工程开发赛, 4 日常学习赛",
+     "detail": "GET https://tianchi.aliyun.com/v3/proxy/competition/api/race/getDetail?raceId={raceId} → data.race.information (markdown)"
+    },
+    "auth_needed": false,
+    "response_path_to_items": "data.list (flatten trackList[] when present)",
+    "item_fields_map": {
+     "title": "name",
+     "url": "https://tianchi.aliyun.com/competition/entrance/{raceId}/introduction",
+     "description": "introduction; detail data.race.information",
+     "difficulty": "none (visualTab=4 means learning)",
+     "tags": "tagsList[].tagNameCn",
+     "deadline": "raceEndTime"
+    },
+    "tested_at": "2026-09-29T19:25:34Z",
+    "notes": "Page size fixed at 10. Detail endpoint name found in hmod-ace-2025-tianchi-competition-detail-content bundle; data.race.agreement is a 16 KB legal text — skip it.",
+    "example_curl": "curl -s 'https://tianchi.aliyun.com/v3/proxy/competition/api/race/page?visualTab=4&raceName=&pageNum=1&isActive=1'"
+   },
+   "samples": [
+    {
+     "title": "【教学赛】金融数据分析赛题1：银行客户认购产品预测",
+     "url": "https://tianchi.aliyun.com/competition/entrance/531993/introduction",
+     "practices": "分类预测、客户特征与宏观指标（就业、银行同业拆借率）",
+     "todo": "预测客户是否购买银行产品",
+     "direction": "econ",
+     "stage_fit": [
+      1
+     ],
+     "difficulty_raw": "教学赛（visualTab=4）",
+     "retrieved_at": "2026-09-29T19:26:29Z",
+     "evidence_quote": "预测用户是否进行购买产品"
+    },
+    {
+     "title": "【教学赛】金融数据分析赛题3：证券数据可视化分析",
+     "url": "https://tianchi.aliyun.com/competition/entrance/531992/introduction",
+     "practices": "股票/指数日线月线、融资融券、MACD 等指标可视化",
+     "todo": "至少完成一种可视化分析，如个股与大盘相关性",
+     "direction": "econ",
+     "stage_fit": [
+      0,
+      1
+     ],
+     "difficulty_raw": "教学赛（visualTab=4）",
+     "retrieved_at": "2026-09-29T19:26:46Z",
+     "evidence_quote": "你感兴趣的某一支股票，和大盘之间的相关性"
+    },
+    {
+     "title": "资金流入流出预测-挑战Baseline",
+     "url": "https://tianchi.aliyun.com/competition/entrance/231573/introduction",
+     "practices": "时间序列预测、申购赎回与利率数据",
+     "todo": "用用户申购赎回、收益率与拆借利率表预测资金流入流出",
+     "direction": "econ",
+     "stage_fit": [
+      2
+     ],
+     "difficulty_raw": "新人赛系列；raceEndTime 2027-05-06",
+     "retrieved_at": "2026-09-29T19:26:55Z",
+     "evidence_quote": "用户申购赎回数据、收益率表和银行间拆借利率表"
+    },
+    {
+     "title": "【教学赛】数据分析达人赛1:用户情感可视化分析",
+     "url": "https://tianchi.aliyun.com/competition/entrance/531890/introduction",
+     "practices": "评论文本情感/议题的探索性分析与可视化",
+     "todo": "对 1 万+ 耳机评论做数据分析与可视化",
+     "direction": "stat",
+     "stage_fit": [
+      0,
+      1
+     ],
+     "difficulty_raw": "教学赛（visualTab=4）",
+     "retrieved_at": "2026-09-29T19:26:48Z",
+     "evidence_quote": "为10000+条行业用户关于耳机的评论"
+    },
+    {
+     "title": "【天池经典打榜赛】赛道六-评论观点挖掘赛",
+     "url": "https://tianchi.aliyun.com/competition/entrance/532421/introduction",
+     "practices": "属性级情感分析/信息抽取",
+     "todo": "从商品评论抽取属性特征与消费者观点并判定情感极性",
+     "direction": "ai",
+     "stage_fit": [
+      2
+     ],
+     "difficulty_raw": "经典打榜赛；end 2026-09-30",
+     "retrieved_at": "2026-09-29T19:25:34Z",
+     "evidence_quote": "在商品评论中抽取商品属性特征和消费者观点"
+    }
+   ],
+   "reliability_notes": "Stable JSON; detail endpoint works anonymously. Validate end dates yourself: listing “active” flag disagrees with raceEndTime for several teaching races.",
+   "adapter": "tianchi"
+  },
+  {
+   "id": "heywhale-camps",
+   "name": "和鲸社区 Heywhale 训练营/Workshop",
+   "home_url": "https://www.heywhale.com/home/competition",
+   "kind": "course_project",
+   "directions": [
+    "psy",
+    "econ",
+    "stat",
+    "ai"
+   ],
+   "stage_fit": [
+    0,
+    1,
+    2
+   ],
+   "access": "public_listing_login_to_apply",
+   "mainland": true,
+   "cadence": "训练营多为常驻（例：QSS1 至 2034-10-30，经管统计至 2030-12-30）；Workshop/比赛有明确起止。",
+   "what_a_project_looks_like": "分关卡“闯关”训练营：fork 教案 notebook → 完成练习题 → 平台自动出分（≥90 分晋级）。",
+   "manual_route": "heywhale.com → 顶栏“比赛/活动” → 搜“心理”“社会科学”“经管”“统计” → 进入训练营看“学习任务” → 报名后访问关卡材料（需登录）。",
+   "live_api": {
+    "method": "GET",
+    "url_template": "https://www.heywhale.com/v2/api/competitions?page={page}&perPage=100&Status=1&includeTask=true&Name={kw}",
+    "params": {
+     "detail": "GET https://www.heywhale.com/v2/api/competitions/{_id} → Tabs[].Content (markdown), Stages[].Name, EndDate, RegisterEndDate"
+    },
+    "auth_needed": false,
+    "response_path_to_items": "data",
+    "item_fields_map": {
+     "title": "Name",
+     "url": "https://www.heywhale.com/home/competition/{_id}",
+     "description": "ShortDescription; detail Tabs[].Content",
+     "difficulty": "none (DetailType: TRAINING_CAMP|WORKSHOP|ALGORITHM|LIVE|SCHEME)",
+     "tags": "DetailType",
+     "deadline": "EndDate / RegisterEndDate"
+    },
+    "tested_at": "2026-09-29T19:28:20Z",
+    "notes": "175 items with Status=1 (92 TRAINING_CAMP, 52 WORKSHOP, 24 LIVE). /v2/api/competitionsCommunity?DetailType=EXERCISE returned 0. Filter out LIVE (webinars). Web pages are JS-only.",
+    "example_curl": "curl -s 'https://www.heywhale.com/v2/api/competitions?page=1&perPage=100&Status=1&includeTask=true'"
+   },
+   "samples": [
+    {
+     "title": "R 语言心理学数据分析训练营 PSY1.0：数据读取和预处理",
+     "url": "https://www.heywhale.com/home/competition/652df88ecf318d693e2b20de",
+     "practices": "R/tidyverse 清洗心理学实验与问卷数据、反向计分、贝叶斯概率分布",
+     "todo": "复现教案并完成 3 道闯关题（均需 ≥90 分）",
+     "direction": "psy",
+     "stage_fit": [
+      0,
+      1
+     ],
+     "difficulty_raw": "TRAINING_CAMP；闯关 ≥90 分晋级",
+     "retrieved_at": "2026-09-29T19:28:40Z",
+     "evidence_quote": "对问卷数据实现反向计分与加和等操作"
+    },
+    {
+     "title": "R 语言量化社会科学训练营（上）：从统计分析到因果推断 QSS1",
+     "url": "https://www.heywhale.com/home/competition/66f7bd325ff342a282a967ea",
+     "practices": "用 CGSS 数据做描述统计、假设检验、线性回归、双重差分",
+     "todo": "依次完成 4 个关卡：收入影响因素 → 性别与收入检验 → 回归 → DID 政策评估",
+     "direction": "econ",
+     "stage_fit": [
+      1,
+      2
+     ],
+     "difficulty_raw": "TRAINING_CAMP；4 关",
+     "retrieved_at": "2026-09-29T19:28:41Z",
+     "evidence_quote": "关卡 4：因果推断：运用双重差分法评估政策效应"
+    },
+    {
+     "title": "超丝滑！经管Python统计分析",
+     "url": "https://www.heywhale.com/home/competition/65dd5b8227f874132ff7cabc",
+     "practices": "描述统计、假设检验、方差分析、相关与回归（GDP、房价数据）",
+     "todo": "5 关刷题闯关，如对北京、上海 GDP 做假设检验与方差分析",
+     "direction": "econ",
+     "stage_fit": [
+      0,
+      1
+     ],
+     "difficulty_raw": "TRAINING_CAMP；5 关满分通关",
+     "retrieved_at": "2026-09-29T19:28:42Z",
+     "evidence_quote": "对北京和上海GDP情况进行假设检验和方差分析"
+    },
+    {
+     "title": "R 语言量化社会科学训练营（下）QSS2",
+     "url": "https://www.heywhale.com/home/competition/6757b8ca2b6570ddb795f9c5",
+     "practices": "蒙特卡洛模拟、文本数据探索、因果推断与政策评估",
+     "todo": "完成 3 个进阶案例关卡（建议先完成 QSS1）",
+     "direction": "econ",
+     "stage_fit": [
+      2
+     ],
+     "difficulty_raw": "TRAINING_CAMP；进阶",
+     "retrieved_at": "2026-09-29T19:28:43Z",
+     "evidence_quote": "蒙特卡洛实验、文本数据探索、因果推断与政策评估实战操作"
+    },
+    {
+     "title": "我在和鲸狂刷统计知识100题",
+     "url": "https://www.heywhale.com/home/competition/655aedfcedce41c896f92393",
+     "practices": "统计学基础知识题库",
+     "todo": "加入新手挑战工作台后刷题，看解析查漏补缺",
+     "direction": "stat",
+     "stage_fit": [
+      0
+     ],
+     "difficulty_raw": "TRAINING_CAMP；题库",
+     "retrieved_at": "2026-09-29T19:28:44Z",
+     "evidence_quote": "一边做题查漏，一边看解析补缺"
+    }
+   ],
+   "reliability_notes": "Best-found source for psy/econ/stat at stages 0–1 with auto-graded tasks. Lesson notebooks require registration; listing+syllabus are public JSON.",
+   "adapter": "heywhale"
+  },
+  {
+   "id": "datafountain-classic",
+   "name": "DataFountain 往届经典赛",
+   "home_url": "https://www.datafountain.cn/competitions",
+   "kind": "competition",
+   "directions": [
+    "ai",
+    "psy"
+   ],
+   "stage_fit": [
+    1,
+    2
+   ],
+   "access": "public_listing_login_to_apply",
+   "mainland": true,
+   "cadence": "经典赛专题（raceId=23，51 题）“赛程不限制，无奖金”，每日可提交 3 次实时评测；正式赛各有赛期。",
+   "what_a_project_looks_like": "往届正式赛题（NLP/CV/数据挖掘），个人报名后下载数据、提交结果自动评测。",
+   "manual_route": "datafountain.cn → 比赛 → 专题“DF往届算法经典赛专题” → 进入赛题 → 报名（需账号）→ 下载数据 → 提交。",
+   "live_api": {
+    "method": "GET",
+    "url_template": "https://www.datafountain.cn/api/competitions?page={page}&per_page=20&raceId=23&search={kw}",
+    "params": {
+     "detail": "GET https://www.datafountain.cn/api/competitions/{id} → cmptDescription (markdown)"
+    },
+    "auth_needed": false,
+    "response_path_to_items": "cmpt.competitions",
+    "item_fields_map": {
+     "title": "title",
+     "url": "https://www.datafountain.cn/competitions/{id}",
+     "description": "detail.cmptDescription",
+     "difficulty": "none",
+     "tags": "tags[].nameCn",
+     "deadline": "endTime (original race; classic mode has no deadline)"
+    },
+    "tested_at": "2026-09-29T19:30:58Z",
+    "notes": "per_page>20 (tried 50, 100) → {\"errno\":\"e50010\"}. Listing HTML is SSR (Nuxt) and also scrape-able. isOpenSignup=0 on classic items although text says open signup — verify manually.",
+    "example_curl": "curl -s 'https://www.datafountain.cn/api/competitions?page=1&per_page=20&raceId=23'"
+   },
+   "samples": [
+    {
+     "title": "剧本角色情感识别（经典赛）",
+     "url": "https://www.datafountain.cn/competitions/518",
+     "practices": "多维度情感识别、上下文依赖的对白理解",
+     "todo": "对剧本对白和动作描述中每个角色做多维度情感识别，提交后按初赛 A 榜规则评测",
+     "direction": "psy",
+     "stage_fit": [
+      2
+     ],
+     "difficulty_raw": "经典赛；每日 3 次评测",
+     "retrieved_at": "2026-09-29T19:31:27Z",
+     "evidence_quote": "对剧本场景中每句对白和动作描述中涉及到的每个角色的情感"
+    },
+    {
+     "title": "疫情期间网民情绪识别（经典赛）",
+     "url": "https://www.datafountain.cn/competitions/423",
+     "practices": "微博情绪三分类（积极/消极/中性）",
+     "todo": "给定微博内容设计情绪识别算法",
+     "direction": "psy",
+     "stage_fit": [
+      1,
+      2
+     ],
+     "difficulty_raw": "经典赛",
+     "retrieved_at": "2026-09-29T19:31:29Z",
+     "evidence_quote": "判断微博内容是积极的、消极的还是中性的"
+    }
+   ],
+   "reliability_notes": "API works with default params; brittle on page size. Emotion-recognition tasks double as psy×ai practice.",
+   "adapter": ""
+  },
+  {
+   "id": "modelscope-events",
+   "name": "魔搭 ModelScope 赛事/活动",
+   "home_url": "https://www.modelscope.cn/",
+   "kind": "competition",
+   "directions": [
+    "ai"
+   ],
+   "stage_fit": [
+    1,
+    2,
+    3
+   ],
+   "access": "public_listing_login_to_apply",
+   "mainland": true,
+   "cadence": "滚动发布；150 条中多数为 meetup/hackathon 活动。",
+   "what_a_project_looks_like": "黑客松、月度开发任务（如昇腾 CANN 社区任务）、征文。",
+   "manual_route": "modelscope.cn → 顶栏“赛事/活动” → 看 Category=hackathon/devEvent → 点报名链接（多跳转外站）。",
+   "live_api": {
+    "method": "GET",
+    "url_template": "https://www.modelscope.cn/api/v1/competitions?PageNumber={page}&PageSize=50",
+    "params": {},
+    "auth_needed": false,
+    "response_path_to_items": "Data.Races",
+    "item_fields_map": {
+     "title": "Title",
+     "url": "https://www.modelscope.cn/competition/{Id} (SPA route, HTTP 200, content not verified); SignUpUrl for external",
+     "description": "Brief; Content (JSON-encoded rich text)",
+     "difficulty": "none",
+     "tags": "Category, EventType",
+     "deadline": "RegistrationDeadline (unix s)"
+    },
+    "tested_at": "2026-09-29T19:32:39Z",
+    "notes": "Slow: 50 items took >15 s once (≈420 KB); use 60 s timeout. Most items are offline meetups — filter Category in {hackathon, devEvent, llm, application}.",
+    "example_curl": "curl -s -m 60 'https://www.modelscope.cn/api/v1/competitions?PageNumber=1&PageSize=50'"
+   },
+   "samples": [
+    {
+     "title": "昇腾CANN社区任务【7月】",
+     "url": "https://www.modelscope.cn/competition/250",
+     "practices": "昇腾 CANN 算子/开发实操任务",
+     "todo": "按月领取社区任务并在月底前完成（报名跳转 hiascend.com）",
+     "direction": "se",
+     "stage_fit": [
+      2,
+      3
+     ],
+     "difficulty_raw": "devEvent",
+     "retrieved_at": "2026-09-29T19:32:39Z",
+     "evidence_quote": "任务每月更新，月底截止"
+    },
+    {
+     "title": "知乎黑客松 2026 校园新锐季",
+     "url": "https://www.modelscope.cn/competition/346",
+     "practices": "AI 应用创意与原型",
+     "todo": "用 AI 做知识社区新玩法原型（报名跳转知乎）",
+     "direction": "ai",
+     "stage_fit": [
+      1,
+      2
+     ],
+     "difficulty_raw": "hackathon",
+     "retrieved_at": "2026-09-29T19:32:39Z",
+     "evidence_quote": "用 AI 解锁知识社区的「新玩法」"
+    }
+   ],
+   "reliability_notes": "Low signal-to-noise for practice projects; secondary.",
+   "adapter": ""
+  },
+  {
+   "id": "cumcm-past-problems",
+   "name": "全国大学生数学建模竞赛 CUMCM 历年赛题",
+   "home_url": "https://www.mcm.edu.cn/html_cn/block/8579f5fce999cdc896f78bca5d4f8237.html",
+   "kind": "competition",
+   "directions": [
+    "math",
+    "stat"
+   ],
+   "stage_fit": [
+    2,
+    3
+   ],
+   "access": "public",
+   "mainland": true,
+   "cadence": "每年 9 月上旬赛题发布（2025-09-04、2026-09-10 18:00）；赛题讲评会 2026-11-20~22。",
+   "what_a_project_looks_like": "A–E 题，每题一个真实建模问题，3 天内团队完成建模论文。",
+   "manual_route": "mcm.edu.cn → “赛题与评奖” → “历年竞赛赛题” → 选年份 → 下载附件 CUMCM20xxProblems.zip。",
+   "live_api": null,
+   "samples": [
+    {
+     "title": "2026年高教社杯全国大学生数学建模竞赛赛题",
+     "url": "https://www.mcm.edu.cn/html_cn/node/27b6e148f8113f09b0269f64a02629fb.html",
+     "practices": "数学建模（题面在 zip 附件，本次未下载）",
+     "todo": "选一道题按赛制完成建模论文（题面需打开附件）",
+     "direction": "math",
+     "stage_fit": [
+      2,
+      3
+     ],
+     "difficulty_raw": "A–E 题（页面未标难度）",
+     "retrieved_at": "2026-09-29T19:33:13Z",
+     "evidence_quote": "点击链接下载赛题"
+    },
+    {
+     "title": "2025年高教社杯全国大学生数学建模竞赛赛题",
+     "url": "https://www.mcm.edu.cn/html_cn/node/03c91a444e62eee81a3740fa97a461a6.html",
+     "practices": "数学建模（题面在 zip 附件，本次未下载）",
+     "todo": "同上；适合作为赛前练习的往年题",
+     "direction": "math",
+     "stage_fit": [
+      2,
+      3
+     ],
+     "difficulty_raw": "页面未标难度",
+     "retrieved_at": "2026-09-29T19:33:35Z",
+     "evidence_quote": "赛题见附件！"
+    }
+   ],
+   "reliability_notes": "Static UTF-8 HTML, index page lists 1992–2026 year pages. Problem text exists only in zip/rar attachments (2021 rar is 44 MB) — not downloaded in this session; an adapter must download+unzip PDFs or link out.",
+   "adapter": ""
+  },
+  {
+   "id": "project-euler-cn",
+   "name": "Project Euler 欧拉计划中文站（pe-cn.github.io）",
+   "home_url": "https://pe-cn.github.io/",
+   "kind": "open_problem",
+   "directions": [
+    "math",
+    "ai"
+   ],
+   "stage_fit": [
+    0,
+    1,
+    2
+   ],
+   "access": "public",
+   "mainland": false,
+   "cadence": "常驻题库（900+ 题，中英对照）。",
+   "what_a_project_looks_like": "一道需要数学洞察+编程求解的题目，答案为一个数。",
+   "manual_route": "pe-cn.github.io → “题目” → 按编号从 001 开始 → 本地编程求解；官方判题需在 projecteuler.net 注册（该站对 curl 返回 403，浏览器可用性未测）。",
+   "live_api": {
+    "method": "GET",
+    "url_template": "https://pe-cn.github.io/search.xml",
+    "params": {
+     "problem_page": "https://pe-cn.github.io/{n}/"
+    },
+    "auth_needed": false,
+    "response_path_to_items": "search/entry (XML)",
+    "item_fields_map": {
+     "title": "entry/title",
+     "url": "entry/url (relative)",
+     "description": "entry/content (HTML with $LaTeX$)",
+     "difficulty": "none on mirror (difficulty % only on projecteuler.net)",
+     "tags": "none",
+     "deadline": "none"
+    },
+    "tested_at": "2026-09-29T19:34:44Z",
+    "notes": "Hexo static site on GitHub Pages; search.xml ≈2.2 MB full index — fetch daily at most. Content CC BY-NC-SA 4.0.",
+    "example_curl": "curl -s 'https://pe-cn.github.io/search.xml' -o pe.xml"
+   },
+   "samples": [
+    {
+     "title": "Problem 1：3或5的倍数",
+     "url": "https://pe-cn.github.io/1/",
+     "practices": "整除、容斥",
+     "todo": "求 1000 以内 3 或 5 的倍数之和",
+     "direction": "math",
+     "stage_fit": [
+      0,
+      1
+     ],
+     "difficulty_raw": "无（镜像站不含难度）",
+     "retrieved_at": "2026-09-29T19:34:44Z",
+     "evidence_quote": "求小于$1000$的自然数中所有$3$或$5$的倍数之和"
+    },
+    {
+     "title": "Problem 12：有很多约数的三角形数",
+     "url": "https://pe-cn.github.io/12/",
+     "practices": "三角形数、约数个数函数",
+     "todo": "求第一个约数数量超过五百的三角形数",
+     "direction": "math",
+     "stage_fit": [
+      1
+     ],
+     "difficulty_raw": "无",
+     "retrieved_at": "2026-09-29T19:34:45Z",
+     "evidence_quote": "第一个约数数量超过五百的三角形数是多少？"
+    },
+    {
+     "title": "Problem 31：硬币求和",
+     "url": "https://pe-cn.github.io/31/",
+     "practices": "计数/动态规划（整数分拆）",
+     "todo": "求用 8 种英国硬币凑出 £2 的方法数",
+     "direction": "math",
+     "stage_fit": [
+      1
+     ],
+     "difficulty_raw": "无",
+     "retrieved_at": "2026-09-29T19:34:46Z",
+     "evidence_quote": "不限制硬币数量，凑出£2有多少种不同的做法？"
+    },
+    {
+     "title": "Problem 100：Arranged Probability",
+     "url": "https://pe-cn.github.io/100/",
+     "practices": "概率 + 二次丢番图方程（Pell 型）",
+     "todo": "找总数超过 10^12 且恰有 50% 概率取出两个蓝盘的蓝盘数",
+     "direction": "math",
+     "stage_fit": [
+      2
+     ],
+     "difficulty_raw": "无",
+     "retrieved_at": "2026-09-29T19:34:47Z",
+     "evidence_quote": "chance of taking two blue discs"
+    }
+   ],
+   "reliability_notes": "GitHub Pages: reachable here; mainland reachability of *.github.io is variable — mirror the XML into our own store.",
+   "adapter": "project_euler"
+  },
+  {
+   "id": "pku-opendata-dataverse",
+   "name": "北京大学开放研究数据平台（Dataverse）",
+   "home_url": "https://opendata.pku.edu.cn/",
+   "kind": "dataset",
+   "directions": [
+    "psy",
+    "econ",
+    "stat",
+    "ai"
+   ],
+   "stage_fit": [
+    1,
+    2,
+    3
+   ],
+   "access": "public",
+   "mainland": true,
+   "cadence": "常驻；“contest” 子库（中国大学生数据驱动创新研究大赛）129 个数据集，多为 2018–2019 发布。",
+   "what_a_project_looks_like": "带数据与代码的学生研究/Replication Data（CC0），可做复现或改进型小项目。",
+   "manual_route": "opendata.pku.edu.cn → 搜索框输入“Replication Data”或“心理/收入/CPI” → 左侧 Dataverse 选 contest → 打开数据集看描述与文件（注意：本机非大陆 IP 访问网页 403）。",
+   "live_api": {
+    "method": "GET",
+    "url_template": "https://opendata.pku.edu.cn/api/search?q={kw}&type=dataset&subtree=contest&per_page=100&sort=date&order=desc",
+    "params": {
+     "detail": "GET https://opendata.pku.edu.cn/api/datasets/:persistentId/?persistentId={global_id} → latestVersion.metadataBlocks.citation.fields, files[], license/termsOfUse"
+    },
+    "auth_needed": false,
+    "response_path_to_items": "data.items",
+    "item_fields_map": {
+     "title": "name",
+     "url": "https://doi.org/{global_id minus \"doi:\"} (resolves to opendata.pku.edu.cn)",
+     "description": "description",
+     "difficulty": "none",
+     "tags": "subjects",
+     "deadline": "none"
+    },
+    "tested_at": "2026-09-29T19:35:19Z",
+    "notes": "API open. HTML UI (/, /dataset.xhtml, DOI landing) returned Apache 403 from this machine (Taiwan IP) → likely IP ACL; students on campus/mainland probably fine. Files checked were unrestricted (no fileAccessRequest), license CC0; file download not attempted.",
+    "example_curl": "curl -s 'https://opendata.pku.edu.cn/api/search?q=*&type=dataset&subtree=contest&per_page=100'"
+   },
+   "samples": [
+    {
+     "title": "Replication Data for: Analysis of Chinese Society's Emotional Perception in the Background of China-US Trade War Based on Weibo Public Opinion",
+     "url": "https://doi.org/10.18170/DVN/6HHMGY",
+     "practices": "社交媒体情绪感知、爬虫数据清洗、情感分析",
+     "todo": "用已公开的 2018-04~09 微博文本复现情绪感知分析",
+     "direction": "psy",
+     "stage_fit": [
+      2
+     ],
+     "difficulty_raw": "CC0；Social Sciences",
+     "retrieved_at": "2026-09-29T19:35:39Z",
+     "evidence_quote": "Sina Weibo official website"
+    },
+    {
+     "title": "The Influencing Factors of Online Fundraising Trust",
+     "url": "https://doi.org/10.18170/DVN/HLWSOX",
+     "practices": "问卷数据分析、信任影响因素（社会心理）",
+     "todo": "用南开大创问卷数据（.tab）做描述统计与影响因素回归",
+     "direction": "psy",
+     "stage_fit": [
+      1,
+      2
+     ],
+     "difficulty_raw": "CC0",
+     "retrieved_at": "2026-09-29T19:35:43Z",
+     "evidence_quote": "Training Program of Nankai University"
+    },
+    {
+     "title": "Analysis of Factors Influencing Public Behavior Decision-making Under Mass Incidents",
+     "url": "https://doi.org/10.18170/DVN/NLK783",
+     "practices": "结构方程模型（AMOS）、公众行为决策",
+     "todo": "用 279 条数据复现 SEM 分析",
+     "direction": "psy",
+     "stage_fit": [
+      2
+     ],
+     "difficulty_raw": "CC0",
+     "retrieved_at": "2026-09-29T19:35:45Z",
+     "evidence_quote": "using the structural equation method"
+    },
+    {
+     "title": "Replication Data for: Housing Price and Talent Allocation",
+     "url": "https://doi.org/10.18170/DVN/KW1AMR",
+     "practices": "Stata 面板数据清洗、房价与公私部门职业选择",
+     "todo": "运行提供的 .do 与 .dta 复现回归结果",
+     "direction": "econ",
+     "stage_fit": [
+      2,
+      3
+     ],
+     "difficulty_raw": "CC0",
+     "retrieved_at": "2026-09-29T19:35:47Z",
+     "evidence_quote": "China Labor Dynamics Survey (CLDS)"
+    },
+    {
+     "title": "CPI Weibo text data for Real-time Prediction of CPI",
+     "url": "https://doi.org/10.18170/DVN/TXXO4M",
+     "practices": "文本聚类+情感得分构造 CPI 实时预测指标",
+     "todo": "用分词结果与月度 CPI 环比数据复现预测",
+     "direction": "econ",
+     "stage_fit": [
+      2
+     ],
+     "difficulty_raw": "CC0",
+     "retrieved_at": "2026-09-29T19:35:51Z",
+     "evidence_quote": "CPI series from 2016 to 2018"
+    }
+   ],
+   "reliability_notes": "Search API fast (~2 s), no auth. Many contest items have thin descriptions or no files (e.g. XBR6IV has 0 files) — require files>0 when generating projects.",
+   "adapter": "pku_dataverse"
+  },
+  {
+   "id": "sciencedb",
+   "name": "科学数据银行 Science Data Bank（scidb.cn）",
+   "home_url": "https://www.scidb.cn/",
+   "kind": "dataset",
+   "directions": [
+    "psy",
+    "econ",
+    "stat"
+   ],
+   "stage_fit": [
+    1,
+    2,
+    3
+   ],
+   "access": "public",
+   "mainland": true,
+   "cadence": "持续更新（最新发布 2026-09-28）。",
+   "what_a_project_looks_like": "论文关联数据/代码（含心理学期刊数据），可做复现或二次分析。",
+   "manual_route": "scidb.cn → 搜索“心理学 问卷”“心理 实验”或“经济学” → 左侧学科筛“心理学” → 打开数据集看许可与文件。",
+   "live_api": {
+    "method": "POST",
+    "url_template": "https://www.scidb.cn/api/sdb-query-service/query?queryCode=&q={kw}",
+    "params": {
+     "body_json": {
+      "ordernum": 6,
+      "size": 20,
+      "page": 1
+     }
+    },
+    "auth_needed": false,
+    "response_path_to_items": "data.data",
+    "item_fields_map": {
+     "title": "titleZh (strip <span> highlight tags)",
+     "url": "https://doi.org/{doi} or https://www.scidb.cn/detail?dataSetId={dataSetId}",
+     "description": "introductionZh",
+     "difficulty": "none",
+     "tags": "taxonomy[].nameZh + keywordZh",
+     "deadline": "none"
+    },
+    "tested_at": "2026-09-29T19:37:01Z",
+    "notes": "Endpoint found in Nuxt bundle. Keyword search is broad (“实验” matches physics) — filter by taxonomy nameZh == 心理学/经济学. License in copyRight.type (CC0 / CC BY / CC BY-NC-ND). Detail page is SPA.",
+    "example_curl": "curl -s -X POST 'https://www.scidb.cn/api/sdb-query-service/query?queryCode=&q=心理学' -H 'Content-Type: application/json' -d '{\"ordernum\":6,\"size\":20,\"page\":1}'"
+   },
+   "samples": [
+    {
+     "title": "中国大学生“躺平”心理的内涵及问卷编制",
+     "url": "https://doi.org/10.57760/sciencedb.27362",
+     "practices": "量表编制、问卷数据清洗（按作答时长剔除）、信效度分析",
+     "todo": "用公开的预测试/正式测试数据复现量表结构分析",
+     "direction": "psy",
+     "stage_fit": [
+      1,
+      2
+     ],
+     "difficulty_raw": "CC BY-NC-ND 4.0",
+     "retrieved_at": "2026-09-29T19:37:01Z",
+     "evidence_quote": "《大学生躺平心态量表》预测试"
+    },
+    {
+     "title": "《心理学与脑科学研究中的样本代表性》补充材料",
+     "url": "https://doi.org/10.57760/sciencedb.17369",
+     "practices": "系统综述、被试人口学信息编码",
+     "todo": "基于补充材料统计文献中被试性别/国别等分布并作图",
+     "direction": "psy",
+     "stage_fit": [
+      1,
+      2
+     ],
+     "difficulty_raw": "CC BY 4.0",
+     "retrieved_at": "2026-09-29T19:37:01Z",
+     "evidence_quote": "女性被试多于男性"
+    },
+    {
+     "title": "基于线性混合效应模型的心理实验数据建模stan代码",
+     "url": "https://doi.org/10.57760/sciencedb.j00052.00299",
+     "practices": "线性混合效应模型、Stan 贝叶斯建模",
+     "todo": "运行 stan 代码并解释心理实验数据的随机效应",
+     "direction": "psy",
+     "stage_fit": [
+      2,
+      3
+     ],
+     "difficulty_raw": "CC0",
+     "retrieved_at": "2026-09-29T19:37:01Z",
+     "evidence_quote": "基于线性混合效应模型的心理实验数据建模"
+    },
+    {
+     "title": "中国货币政策、股票价格与非对称性——基于计量经济学与人工智能方法的比较研究",
+     "url": "https://doi.org/10.57760/sciencedb.j00214.00170",
+     "practices": "VAR/MS-VAR 与 LSTM 对比、货币政策非对称效应",
+     "todo": "复现计量模型与 LSTM 对比结论",
+     "direction": "econ",
+     "stage_fit": [
+      2,
+      3
+     ],
+     "difficulty_raw": "许可字段为空",
+     "retrieved_at": "2026-09-29T19:37:24Z",
+     "evidence_quote": "熊市下扩张性货币政策效果大于牛市下紧缩性货币政策效果"
+    }
+   ],
+   "reliability_notes": "Fast JSON (<2 s), no auth. Good psy replication feed (心理学 taxonomy + journal-linked datasets).",
+   "adapter": "sciencedb"
+  },
+  {
+   "id": "nbs-data",
+   "name": "国家统计局 国家数据（data.stats.gov.cn）",
+   "home_url": "https://data.stats.gov.cn/",
+   "kind": "dataset",
+   "directions": [
+    "econ",
+    "stat"
+   ],
+   "stage_fit": [
+    0,
+    1,
+    2
+   ],
+   "access": "unreachable",
+   "mainland": true,
+   "cadence": "官方统计持续发布。",
+   "what_a_project_looks_like": "宏观指标时间序列（作为经济学练习的数据源，而非题目源）。",
+   "manual_route": "data.stats.gov.cn → 年度/季度/月度数据 → 选指标 → 下载表格（新版为 SPA）。",
+   "live_api": null,
+   "samples": [],
+   "reliability_notes": "From this machine (egress 140.112.16.175, Taipei) the legacy easyquery.htm API returned 403 “reason:UrlACL”; site now redirects to SPA /dg/website/page.html. Retest from the real mainland backend before relying on it.",
+   "adapter": ""
+  },
+  {
+   "id": "gjcxcy-dachuang",
+   "name": "国家级大学生创新创业训练计划平台",
+   "home_url": "http://gjcxcy.bjtu.edu.cn/",
+   "kind": "innovation_program",
+   "directions": [
+    "psy",
+    "econ",
+    "math",
+    "ai",
+    "stat",
+    "se"
+   ],
+   "stage_fit": [
+    2,
+    3
+   ],
+   "access": "public",
+   "mainland": true,
+   "cadence": "年度立项（列表按 2012–2026 年份）。",
+   "what_a_project_looks_like": "往届大创立项/结题项目题目（可作选题灵感）。",
+   "manual_route": "gjcxcy.bjtu.edu.cn → 历年项目 → 选年份 → “学校查询”选项卡填项目名称关键词（如“心理”）→ 查询。",
+   "live_api": null,
+   "samples": [],
+   "reliability_notes": "List pages render no rows on GET; results require an ASP.NET postback search form (__VIEWSTATE). Per session rules no form was submitted, so no project titles/abstracts were retrieved. GET query-string variants returned 0 rows. Rows likely include student names (PII).",
+   "adapter": ""
+  },
+  {
+   "id": "tiaozhanbei",
+   "name": "“挑战杯”竞赛（含揭榜挂帅、人工智能+ 专项）",
+   "home_url": "https://www.tiaozhanbei.net/",
+   "kind": "competition",
+   "directions": [
+    "ai",
+    "econ",
+    "se",
+    "psy"
+   ],
+   "stage_fit": [
+    1,
+    2,
+    3
+   ],
+   "access": "public_listing_login_to_apply",
+   "mainland": true,
+   "cadence": "两项赛事隔年交替（官网：“每个项目每两年举办一届”）：2026 为第十五届创业计划竞赛（国赛申报 6 月、全国决赛 10–11 月）；2026 揭榜挂帅报名 5-30~6-30；第二十届课外学术科技作品竞赛联合发起高校名单已于 2025-11 公布。",
+   "what_a_project_looks_like": "企业/机构出的“揭榜挂帅”榜题，或学生自选课题（学术论文、社会调查报告、创业计划）。",
+   "manual_route": "tiaozhanbei.net → “挑战杯动态/赛事通知” → 找当年“揭榜挂帅榜题”文章 → 下载“榜题方案汇总材料”zip；报名在 20xx.tiaozhanbei.net（需注册，学校盖章）。",
+   "live_api": null,
+   "samples": [
+    {
+     "title": "第十九届“挑战杯”竞赛“人工智能+”专项赛（创意赛道）",
+     "url": "https://www.tiaozhanbei.net/article/15775/",
+     "practices": "借助大模型零/低代码做 AI 原生应用",
+     "todo": "提交项目策划书、视频介绍与线上链接",
+     "direction": "ai",
+     "stage_fit": [
+      1,
+      2
+     ],
+     "difficulty_raw": "创意赛道（开放式）",
+     "retrieved_at": "2026-09-29T19:40:47Z",
+     "evidence_quote": "通过零代码或低代码完成人工智能原生应用的设计"
+    },
+    {
+     "title": "2026年度中国青年科技创新“揭榜挂帅”擂台赛第二批榜题",
+     "url": "https://www.tiaozhanbei.net/article/15841/",
+     "practices": "企业真实技术难题攻关（信息技术、AI、机器人等）",
+     "todo": "选榜题组队报名，按发榜单位要求提交作品（榜题在 zip 附件，未下载）",
+     "direction": "ai",
+     "stage_fit": [
+      3
+     ],
+     "difficulty_raw": "未标难度",
+     "retrieved_at": "2026-09-29T19:39:59Z",
+     "evidence_quote": "揭榜报名时间为2026年5月30日至2026年6月30日"
+    },
+    {
+     "title": "2026年度“揭榜挂帅”擂台赛第一批（103 个榜题）",
+     "url": "https://www.tiaozhanbei.net/article/15836/",
+     "practices": "8 大前沿领域企业榜题",
+     "todo": "揭榜报名 5-30~6-30，课题攻关 5–9 月，终审 11–12 月",
+     "direction": "se",
+     "stage_fit": [
+      3
+     ],
+     "difficulty_raw": "未标难度",
+     "retrieved_at": "2026-09-29T19:40:52Z",
+     "evidence_quote": "严选 103 个榜题"
+    },
+    {
+     "title": "第十五届“挑战杯”中国大学生创业计划竞赛通知",
+     "url": "https://www.tiaozhanbei.net/article/15842/",
+     "practices": "商业模式创新、创业计划（8 个赛道含新消费与文化创意）",
+     "todo": "组队撰写创业计划，经校赛、省赛、国赛",
+     "direction": "econ",
+     "stage_fit": [
+      2,
+      3
+     ],
+     "difficulty_raw": "分专科/本科/研究生组",
+     "retrieved_at": "2026-09-29T19:40:02Z",
+     "evidence_quote": "围绕价值创造逻辑重构、交易结构优化、盈利模式突破"
+    }
+   ],
+   "reliability_notes": "Server-rendered HTML (/article/{id}/), easy to scrape; no JSON API found. Actual 榜题 only in zip attachments. xmk.tiaozhanbei.net (人才项目库) returned empty reply from this machine.",
+   "adapter": ""
+  },
+  {
+   "id": "cy-ncss-industry-topics",
+   "name": "中国国际大学生创新大赛（原“互联网+”）产业赛道企业命题",
+   "home_url": "https://cy.ncss.cn/mtcontest/list",
+   "kind": "open_problem",
+   "directions": [
+    "psy",
+    "econ",
+    "stat",
+    "ai",
+    "se",
+    "math"
+   ],
+   "stage_fit": [
+    2,
+    3
+   ],
+   "access": "public_listing_login_to_apply",
+   "mainland": true,
+   "cadence": "2026 届入选企业命题通知 2026-08-26 发布；产业赛道报名页提示“报名通道暂未开启”（测试时）。",
+   "what_a_project_looks_like": "企业给出的真实命题，含“命题内容及答题要求”（交付物如调研报告、模型、演示、路演 PPT）。",
+   "manual_route": "cy.ncss.cn → 顶栏“产业赛道” → “产业命题” → 命题类别选“新文科”或输入命题名称关键词（心理/经济/统计）→ 点进详情；报名需学信网账号。",
+   "live_api": {
+    "method": "GET",
+    "url_template": "https://cy.ncss.cn/mtcontest/mingtilist?pageIndex={page0}&pageSize=30&companyName=&name={kw}&zbdm={group}&lbdm={category}",
+    "params": {
+     "count": "GET https://cy.ncss.cn/mtcontest/count (same params) → plain integer",
+     "zbdm": "01 产教协同创新组, 02 区域特色产业组, 03 国产操作系统软件组",
+     "lbdm": "01 新工科, 02 新农科, 03 新文科, 04 新医科",
+     "detail": "GET https://cy.ncss.cn/mtcontest/detail?id={id} (HTML; text after 命题内容及答题要求)"
+    },
+    "auth_needed": false,
+    "response_path_to_items": "HTML fragment: <a href=\"/mtcontest/detail?id=...\"> blocks",
+    "item_fields_map": {
+     "title": "anchor block first text (命题名称)",
+     "url": "https://cy.ncss.cn/mtcontest/detail?id={id}",
+     "description": "detail page section “命题内容及答题要求”",
+     "difficulty": "none",
+     "tags": "命题组别, 命题类别",
+     "deadline": "none on page (see 大赛通知)"
+    },
+    "tested_at": "2026-09-29T19:42:09Z",
+    "notes": "Returns HTML not JSON. Totals at test: all 4301; 新文科 546; name=心理 11, 经济 34, 统计 1, 数学 1. pageIndex is 0-based. Detail pages include long company intro before the task text.",
+    "example_curl": "curl -s 'https://cy.ncss.cn/mtcontest/mingtilist?pageIndex=0&pageSize=30&companyName=&name=%E5%BF%83%E7%90%86&zbdm=&lbdm='"
+   },
+   "samples": [
+    {
+     "title": "基于多维度数据挖掘的博彩行为经济与心理危害量化分析及风险防控研究",
+     "url": "https://cy.ncss.cn/mtcontest/detail?id=2c93f4c6a00f063201a03d78660e1bf6",
+     "practices": "脱敏行为数据清洗与统计、非理性消费与成瘾风险量化",
+     "todo": "量化投注规模与亏损/成瘾关联，输出防赌科普与财务风控方案（新文科教学案例）",
+     "direction": "econ",
+     "stage_fit": [
+      2
+     ],
+     "difficulty_raw": "新文科；产教协同创新组",
+     "retrieved_at": "2026-09-29T19:43:01Z",
+     "evidence_quote": "验证长期博彩无正收益、投注越多亏损越显著的核心规律"
+    },
+    {
+     "title": "基于AI技术的心理健康风险智能筛查体系构建与应用研究的项目征集",
+     "url": "https://cy.ncss.cn/mtcontest/detail?id=2c93f4c6a00f063201a03d780884128d",
+     "practices": "心理健康筛查、量表与多模态数据融合",
+     "todo": "设计 AI 心理健康风险筛查方案（校园/社区/职场场景）",
+     "direction": "psy",
+     "stage_fit": [
+      2,
+      3
+     ],
+     "difficulty_raw": "新工科；产教协同创新组",
+     "retrieved_at": "2026-09-29T19:42:58Z",
+     "evidence_quote": "从“单一量表”到“多模态数据融合”的转变"
+    },
+    {
+     "title": "基于统计检测与机器学习研究客户对保险兴趣因素分析",
+     "url": "https://cy.ncss.cn/mtcontest/detail?id=2c93f4c6a00f063201a03d7866311bfe",
+     "practices": "客户数据预测建模、统计检验",
+     "todo": "构建预测模型识别可能对车辆保险感兴趣的客户（金融类 AI 教学案例）",
+     "direction": "stat",
+     "stage_fit": [
+      1,
+      2
+     ],
+     "difficulty_raw": "新文科；产教协同创新组",
+     "retrieved_at": "2026-09-29T19:43:04Z",
+     "evidence_quote": "帮助公司识别哪些现有客户可能对新的车辆保险产品感兴趣"
+    },
+    {
+     "title": "数字经济、智慧赋能——商业智能BI在零售业的预测与优化",
+     "url": "https://cy.ncss.cn/mtcontest/detail?id=2c93f4c6a00f063201a03d7865cc1be8",
+     "practices": "销售预测（时间序列、回归）、库存与供应链优化、BI 可视化",
+     "todo": "提交调研报告、项目计划书与路演 PPT，给出可视化预测与建议",
+     "direction": "econ",
+     "stage_fit": [
+      2
+     ],
+     "difficulty_raw": "新文科；产教协同创新组",
+     "retrieved_at": "2026-09-29T19:43:08Z",
+     "evidence_quote": "如时间序列分析、回归分析等"
+    }
+   ],
+   "reliability_notes": "Biggest pool of real, text-rich open problems found (4301), with a humanities (新文科) filter. Unauthenticated, fast. Needs HTML parsing; company boilerplate should be trimmed before LLM summarization.",
+   "adapter": "cy_ncss"
+  },
+  {
+   "id": "tjjmds-stat-modeling",
+   "name": "全国大学生统计建模大赛",
+   "home_url": "http://tjjmds.ai-learning.net/",
+   "kind": "competition",
+   "directions": [
+    "stat",
+    "econ"
+   ],
+   "stage_fit": [
+    1,
+    2,
+    3
+   ],
+   "access": "public_listing_login_to_apply",
+   "mainland": true,
+   "cadence": "每年 3 月启动（主题解读课程）→ 5-17 前校内推荐 → 6 月中旬省赛 → 7–8 月国赛评审/答辩；2026 年第十二届已结束（国赛名单 2026-08-25）。",
+   "what_a_project_looks_like": "围绕年度主题自拟题目，3 人组队写统计建模论文（正文≤16000 字符，查重≤20%）。",
+   "manual_route": "tjjmds.ai-learning.net → “大赛通知”看当年通知 → “培训资源”看主题解读与研究方向建议 → 报名由学校统一组织，队长在平台注册。",
+   "live_api": null,
+   "samples": [
+    {
+     "title": "2026年(第十二届)全国大学生统计建模大赛（主题：服务国家战略 创新统计赋能）",
+     "url": "http://tjjmds.ai-learning.net/dstz/37119.jhtml",
+     "practices": "统计建模论文写作、自拟选题",
+     "todo": "3 人组队围绕主题自拟题目写论文，附数据包与查重报告",
+     "direction": "stat",
+     "stage_fit": [
+      2,
+      3
+     ],
+     "difficulty_raw": "本科生组/研究生组",
+     "retrieved_at": "2026-09-29T19:44:14Z",
+     "evidence_quote": "参赛队围绕主题自拟题目撰写论文"
+    },
+    {
+     "title": "2026年统计建模大赛培训课程（主题讲解与研究方向建议）",
+     "url": "http://tjjmds.ai-learning.net/pxzy/37123.jhtml",
+     "practices": "选题方法、统计建模流程、AI 工具规范",
+     "todo": "观看主题解读课（扫码）后确定研究方向",
+     "direction": "stat",
+     "stage_fit": [
+      1,
+      2
+     ],
+     "difficulty_raw": "培训资源",
+     "retrieved_at": "2026-09-29T19:44:29Z",
+     "evidence_quote": "统计建模大赛主题讲解与研究方向建议"
+    },
+    {
+     "title": "2022年（第八届）统计建模大赛主题解读（文字版）",
+     "url": "http://tjjmds.ai-learning.net/dsdt/36782.jhtml",
+     "practices": "统计测度、因果推断、政策干预效果评估",
+     "todo": "从建议方向中选一题（如政策干预效果评估的统计测度）练习选题",
+     "direction": "stat",
+     "stage_fit": [
+      2
+     ],
+     "difficulty_raw": "往届主题解读",
+     "retrieved_at": "2026-09-29T19:44:16Z",
+     "evidence_quote": "政策干预效果评估的统计测度"
+    }
+   ],
+   "reliability_notes": "Static CMS (.jhtml), UTF-8, scrape-able; page chrome includes spammy “热搜词” — strip before LLM. Attachments are PDF/DOC on cmswebsite.ai-learning.net.",
+   "adapter": ""
+  },
+  {
+   "id": "cssc-market-survey",
+   "name": "全国大学生市场调查与分析大赛（中国商业统计学会）",
+   "home_url": "http://www.china-cssc.org/list-60-1.html",
+   "kind": "competition",
+   "directions": [
+    "econ",
+    "stat",
+    "psy"
+   ],
+   "stage_fit": [
+    0,
+    1,
+    2
+   ],
+   "access": "public_listing_login_to_apply",
+   "mainland": true,
+   "cadence": "第十七届：报名即日起至 2026-10-31；知识赛 2026-11-01~11-20；实践赛发文及企业命题公布 2026-11-17；校赛 2027-03-22 前完成。",
+   "what_a_project_looks_like": "个人知识赛（在线考试）+ 3–5 人团队实践赛：完成真实调研项目、提交调查报告并答辩（含企业命题赛）。",
+   "manual_route": "china-cssc.org → “调查分析技能大赛” → 看当届通知；“优秀论文”栏目看往届获奖调查报告（附件在百度网盘/PDF）；报名以学校为单位。",
+   "live_api": null,
+   "samples": [
+    {
+     "title": "第十七届全国大学生市场调查与分析大赛（通知）",
+     "url": "http://www.china-cssc.org/show-304-2179-1.html",
+     "practices": "市场调查理论（知识赛）、团队调研项目",
+     "todo": "10 月底前经学校报名；11 月参加知识赛；11-17 后按企业命题或自选题做调研报告",
+     "direction": "econ",
+     "stage_fit": [
+      0,
+      1,
+      2
+     ],
+     "difficulty_raw": "专科/本科/研究生/留学生组",
+     "retrieved_at": "2026-09-29T19:45:10Z",
+     "evidence_quote": "实践赛发文及企业命题公布"
+    },
+    {
+     "title": "优秀论文：智能手环使用现状及产品发展分析报告",
+     "url": "http://www.china-cssc.org/show-22-315-1.html",
+     "practices": "电商评论文本挖掘 + 抽样调查",
+     "todo": "参照该报告设计一份产品使用现状抽样调查（全文在 PDF 附件，未下载）",
+     "direction": "econ",
+     "stage_fit": [
+      1,
+      2
+     ],
+     "difficulty_raw": "往届优秀论文",
+     "retrieved_at": "2026-09-29T19:44:43Z",
+     "evidence_quote": "基于电商平台消费者购买评价的文本挖掘与武汉市的抽样调查"
+    },
+    {
+     "title": "优秀论文：大学生烘焙类食品消费习惯调查及产品定制",
+     "url": "http://www.china-cssc.org/show-22-313-1.html",
+     "practices": "消费习惯问卷调查",
+     "todo": "仿照题目做校园消费习惯调查（全文在百度网盘，未打开）",
+     "direction": "econ",
+     "stage_fit": [
+      1,
+      2
+     ],
+     "difficulty_raw": "往届优秀论文",
+     "retrieved_at": "2026-09-29T19:44:42Z",
+     "evidence_quote": "大学生烘焙类食品消费习惯调查及产品定制"
+    },
+    {
+     "title": "优秀论文：“读研热”的冷思考调查报告",
+     "url": "http://www.china-cssc.org/show-22-314-1.html",
+     "practices": "大学生升学意向调查",
+     "todo": "仿照题目设计升学动机问卷（全文在百度网盘，未打开）",
+     "direction": "psy",
+     "stage_fit": [
+      1,
+      2
+     ],
+     "difficulty_raw": "往届优秀论文",
+     "retrieved_at": "2026-09-29T19:44:40Z",
+     "evidence_quote": "”读研热“的冷思考调查报告"
+    }
+   ],
+   "reliability_notes": "Plain HTML over http:// only (https refused). Winning-report pages contain only titles + Baidu Pan/PDF links; use titles as topic seeds, not as full specs.",
+   "adapter": ""
+  },
+  {
+   "id": "educoder-paths",
+   "name": "头歌 EduCoder 实践课程",
+   "home_url": "https://www.educoder.net/",
+   "kind": "course_project",
+   "directions": [
+    "ai",
+    "math",
+    "stat",
+    "se"
+   ],
+   "stage_fit": [
+    0,
+    1,
+    2
+   ],
+   "access": "public_listing_login_to_apply",
+   "mainland": true,
+   "cadence": "常驻。",
+   "what_a_project_looks_like": "高校教师建的实践课程（多个“实训”关卡，在线评测）。",
+   "manual_route": "educoder.net → “实践课程” → 搜“机器学习/数学建模/统计” → 进入课程 → 登录后开始实训。",
+   "live_api": {
+    "method": "GET",
+    "url_template": "https://data.educoder.net/api/paths.json?page={page}&limit=20&keyword={kw}",
+    "params": {
+     "detail": "GET https://data.educoder.net/api/paths/{identifier}.json"
+    },
+    "auth_needed": false,
+    "response_path_to_items": "subjects",
+    "item_fields_map": {
+     "title": "name",
+     "url": "https://www.educoder.net/paths/{identifier}",
+     "description": "detail.description (markdown)",
+     "difficulty": "none",
+     "tags": "school_name, tag_name",
+     "deadline": "none"
+    },
+    "tested_at": "2026-09-29T19:45:49Z",
+    "notes": "paths.json works unsigned; shixuns.json and stages.json return status -102 (request-signature/time check). www.educoder.net web timed out (30 s) late in session though it returned 200 earlier; keyword “经济” → 0 paths, “心理” → 1.",
+    "example_curl": "curl -s 'https://data.educoder.net/api/paths.json?page=1&limit=20&keyword=%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0'"
+   },
+   "samples": [
+    {
+     "title": "机器学习实践（复旦大学）",
+     "url": "https://www.educoder.net/paths/ygpm7bqe",
+     "practices": "分类、文本分析、CNN/RNN、注意力、GAN、推荐系统",
+     "todo": "按 55 个实训逐关完成约 20 个 Python 实战案例",
+     "direction": "ai",
+     "stage_fit": [
+      1,
+      2
+     ],
+     "difficulty_raw": "55 实训；33050 人学习",
+     "retrieved_at": "2026-09-29T19:46:12Z",
+     "evidence_quote": "实现了近20个典型的实战案例"
+    },
+    {
+     "title": "数学建模实验——MATLAB版（集美大学）",
+     "url": "https://www.educoder.net/paths/ijq7wl3s",
+     "practices": "数学规划、图论、微分方程、插值拟合、数理统计",
+     "todo": "用 MATLAB 完成 5 类建模实验",
+     "direction": "math",
+     "stage_fit": [
+      1,
+      2
+     ],
+     "difficulty_raw": "5 实训",
+     "retrieved_at": "2026-09-29T19:46:15Z",
+     "evidence_quote": "数学规划模型、图论算法、微分方程、插值拟合、数理统计"
+    },
+    {
+     "title": "数理统计（头歌教研中心）",
+     "url": "https://www.educoder.net/paths/nepso6it",
+     "practices": "统计推断与预测",
+     "todo": "完成 19 个统计实训",
+     "direction": "stat",
+     "stage_fit": [
+      0,
+      1
+     ],
+     "difficulty_raw": "19 实训",
+     "retrieved_at": "2026-09-29T19:46:13Z",
+     "evidence_quote": "研究怎样用有效的方法去收集和使用受随机性影响的数据"
+    }
+   ],
+   "reliability_notes": "Listing API OK; practice itself requires login. Weak for psy/econ.",
+   "adapter": ""
+  },
+  {
+   "id": "lanqiao-courses",
+   "name": "蓝桥云课",
+   "home_url": "https://www.lanqiao.cn/",
+   "kind": "course_project",
+   "directions": [
+    "ai",
+    "se"
+   ],
+   "stage_fit": [
+    0,
+    1
+   ],
+   "access": "public_listing_login_to_apply",
+   "mainland": true,
+   "cadence": "常驻。",
+   "what_a_project_looks_like": "在线实验课程（多数付费：首页 100 门中 free 30 / member 51 / bootcamp 19）。",
+   "manual_route": "lanqiao.cn → 课程 → 筛“免费” → 搜“机器学习”。",
+   "live_api": {
+    "method": "GET",
+    "url_template": "https://www.lanqiao.cn/api/v2/courses/?page_size=100&page={page}",
+    "params": {
+     "detail": "GET https://www.lanqiao.cn/api/v2/courses/{id}/"
+    },
+    "auth_needed": false,
+    "response_path_to_items": "results",
+    "item_fields_map": {
+     "title": "name",
+     "url": "https://www.lanqiao.cn{html_url}",
+     "description": "description",
+     "difficulty": "level (numeric)",
+     "tags": "tags; fee_type",
+     "deadline": "none"
+    },
+    "tested_at": "2026-09-29T19:46:42Z",
+    "notes": "search/q/name params are ignored (always 855 results) — must page all and filter locally; filter fee_type=free.",
+    "example_curl": "curl -s 'https://www.lanqiao.cn/api/v2/courses/?page_size=100&page=1'"
+   },
+   "samples": [
+    {
+     "title": "机器学习开放基础课程",
+     "url": "https://www.lanqiao.cn/courses/1283",
+     "practices": "常用分类/回归算法与数据预处理",
+     "todo": "按课程实验完成机器学习基础实战",
+     "direction": "ai",
+     "stage_fit": [
+      0,
+      1
+     ],
+     "difficulty_raw": "free；level=2",
+     "retrieved_at": "2026-09-29T19:54:11Z",
+     "evidence_quote": "机器学习免费基础实战课"
+    }
+   ],
+   "reliability_notes": "Low relevance; mostly paid courses.",
+   "adapter": ""
+  },
+  {
+   "id": "pku-course-repos",
+   "name": "北大课程公开作业仓库（GitHub）",
+   "home_url": "https://github.com/search?q=pku+course&type=repositories",
+   "kind": "course_project",
+   "directions": [
+    "se",
+    "ai"
+   ],
+   "stage_fit": [
+    0,
+    1,
+    2,
+    3
+   ],
+   "access": "public",
+   "mainland": false,
+   "cadence": "随学期更新（OSSDevelopment Lab1 标注 2025 秋截止日期）。",
+   "what_a_project_looks_like": "北大课程的公开实验/大作业说明（编译器实践、开源贡献项目）。",
+   "manual_route": "github.com/pku-minic/online-doc（或 pku-minic.github.io/online-doc）；github.com/osslab-pku/OSSDevelopment → Assignments/。",
+   "live_api": {
+    "method": "GET",
+    "url_template": "https://api.github.com/search/repositories?q={kw}+in:name,description&sort=stars&per_page=30",
+    "params": {
+     "readme": "GET https://api.github.com/repos/{owner}/{repo}/readme (base64)",
+     "contents": "GET https://api.github.com/repos/{owner}/{repo}/contents/{path}"
+    },
+    "auth_needed": false,
+    "response_path_to_items": "items",
+    "item_fields_map": {
+     "title": "full_name",
+     "url": "html_url",
+     "description": "description + README",
+     "difficulty": "none",
+     "tags": "topics",
+     "deadline": "none"
+    },
+    "tested_at": "2026-09-29T19:46:57Z",
+    "notes": "Unauthenticated search 10 req/min, core 60 req/h. Query “pku course” → 548 repos, mostly CS; “pku psychology/econometrics” → 1–2 tiny repos (psy/econ coverage via GitHub is poor).",
+    "example_curl": "curl -s 'https://api.github.com/search/repositories?q=pku+course+in:name,description&sort=stars&per_page=30'"
+   },
+   "samples": [
+    {
+     "title": "北大编译实践在线文档（SysY → RISC-V 编译器）",
+     "url": "https://github.com/pku-minic/online-doc",
+     "practices": "词法/语法分析、IR、RISC-V 代码生成",
+     "todo": "分阶段实现一个把 SysY 编译到 RISC-V 汇编的编译器",
+     "direction": "se",
+     "stage_fit": [
+      2,
+      3
+     ],
+     "difficulty_raw": "课程大作业",
+     "retrieved_at": "2026-09-29T19:54:10Z",
+     "evidence_quote": "实现一个可将 SysY 语言编译到 RISC-V"
+    },
+    {
+     "title": "《开源软件开发》课程项目：为真正的开源项目做贡献",
+     "url": "https://github.com/osslab-pku/OSSDevelopment/blob/main/Assignments/Project.md",
+     "practices": "开源协作、PR、社区沟通",
+     "todo": "选高质量开源项目做贡献，三次展示+期末报告",
+     "direction": "se",
+     "stage_fit": [
+      2,
+      3
+     ],
+     "difficulty_raw": "课程项目",
+     "retrieved_at": "2026-09-29T19:54:08Z",
+     "evidence_quote": "对一个或多个具有一定质量水准的开源项目，做出自己的贡献"
+    },
+    {
+     "title": "《开源软件开发》Lab 1：熟悉git和GitHub",
+     "url": "https://github.com/osslab-pku/OSSDevelopment/blob/main/Assignments/Lab1.md",
+     "practices": "git/GitHub 基本流程",
+     "todo": "建仓库、提交 commit、按要求完成基础与扩展部分",
+     "direction": "se",
+     "stage_fit": [
+      0,
+      1
+     ],
+     "difficulty_raw": "Lab（7 分）",
+     "retrieved_at": "2026-09-29T19:54:07Z",
+     "evidence_quote": "熟悉开源软件开发中常用的工具、平台、和开发流程"
+    }
+   ],
+   "reliability_notes": "GitHub reachable here; mainland reachability variable. Lab1 steps reference a PKU-only GitHub org — adapt, do not copy verbatim.",
+   "adapter": ""
+  },
+  {
+   "id": "r4psy-nnu",
+   "name": "R4Psy：R语言在心理学研究中的应用（南京师范大学，GitHub）",
+   "home_url": "https://github.com/hcp4715/R4Psy",
+   "kind": "course_project",
+   "directions": [
+    "psy",
+    "stat"
+   ],
+   "stage_fit": [
+    0,
+    1,
+    2,
+    3
+   ],
+   "access": "public",
+   "mainland": false,
+   "cadence": "随学期更新（README 最后更新 2026-03-18）。",
+   "what_a_project_looks_like": "心理学数据分析作业（penguin 多站点数据）与“计算可复现性检验”报告任务。",
+   "manual_route": "github.com/hcp4715/R4Psy → practice/ 看作业 Rmd；reproducibility_check_guide/ 看复现任务流程与评分表；配套 bookdown 与 B 站录屏。",
+   "live_api": {
+    "method": "GET",
+    "url_template": "https://api.github.com/repos/hcp4715/R4Psy/contents/{path}",
+    "params": {
+     "raw": "https://raw.githubusercontent.com/hcp4715/R4Psy/main/{path}"
+    },
+    "auth_needed": false,
+    "response_path_to_items": "$ (array of files)",
+    "item_fields_map": {
+     "title": "name",
+     "url": "html_url",
+     "description": "raw file content",
+     "difficulty": "none",
+     "tags": "none",
+     "deadline": "none"
+    },
+    "tested_at": "2026-09-29T19:47:43Z",
+    "notes": "homeworks/ holds student submission files (names/IDs) — do not ingest; use practice/ and reproducibility_check_guide/ only.",
+    "example_curl": "curl -s 'https://api.github.com/repos/hcp4715/R4Psy/contents/practice'"
+   },
+   "samples": [
+    {
+     "title": "R4Psy 第二次作业：penguin 数据读取与清洗",
+     "url": "https://github.com/hcp4715/R4Psy/blob/main/practice/The_2nd_homework.Rmd",
+     "practices": "R 读数、dplyr 筛选变量、类型转换",
+     "todo": "读取 penguin_rawdata.csv，按站点选行、选 health/phone 变量并转换类型",
+     "direction": "psy",
+     "stage_fit": [
+      0,
+      1
+     ],
+     "difficulty_raw": "课程作业",
+     "retrieved_at": "2026-09-29T19:54:09Z",
+     "evidence_quote": "读取 penguin_rawdata.csv"
+    },
+    {
+     "title": "心理学量化研究的计算可复现性检验指南",
+     "url": "https://github.com/hcp4715/R4Psy/tree/main/reproducibility_check_guide",
+     "practices": "计算可复现性检验流程、报告模板与评分表",
+     "todo": "选一篇心理学量化论文，按指南复现并用模板写报告",
+     "direction": "psy",
+     "stage_fit": [
+      2,
+      3
+     ],
+     "difficulty_raw": "含 checklist & rubric",
+     "retrieved_at": "2026-09-29T19:54:10Z",
+     "evidence_quote": "完成一篇心理学量化研究的计算可复现性检验"
+    }
+   ],
+   "reliability_notes": "Same author (胡传鹏) as Heywhale PSY1.0 camp; reproducibility guide maps directly onto our zip-submission + rubric evaluation.",
+   "adapter": ""
+  },
+  {
+   "id": "osf-replications",
+   "name": "OSF 心理学重复研究（Many Labs 等）",
+   "home_url": "https://osf.io/",
+   "kind": "open_problem",
+   "directions": [
+    "psy"
+   ],
+   "stage_fit": [
+    2,
+    3
+   ],
+   "access": "public",
+   "mainland": false,
+   "cadence": "常驻。",
+   "what_a_project_looks_like": "公开预注册的重复/复现项目，含协议与数据。",
+   "manual_route": "osf.io → 搜索“Many Labs” → 打开 registration 看 description 与文件。",
+   "live_api": {
+    "method": "GET",
+    "url_template": "https://api.osf.io/v2/registrations/?filter[title]={kw}&page[size]=10",
+    "params": {
+     "curl_note": "use curl -g because of [ ] in query"
+    },
+    "auth_needed": false,
+    "response_path_to_items": "data",
+    "item_fields_map": {
+     "title": "attributes.title",
+     "url": "https://osf.io/{id}/",
+     "description": "attributes.description",
+     "difficulty": "none",
+     "tags": "attributes.tags",
+     "deadline": "none"
+    },
+    "tested_at": "2026-09-29T19:47:34Z",
+    "notes": "filter[title]=Many Labs → 32 registrations. /v2/search/ returned 404. Mainland reachability NOT verified (this machine is in Taipei).",
+    "example_curl": "curl -sg 'https://api.osf.io/v2/registrations/?filter[title]=Many%20Labs&page[size]=10'"
+   },
+   "samples": [
+    {
+     "title": "Reproduction of Many Labs' Replication of the Van Lange et al. study on SVO and Family Size",
+     "url": "https://osf.io/p4evh/",
+     "practices": "社会价值取向与兄弟姐妹数的相关、重复研究方法",
+     "todo": "用 Many Labs 2 数据重做该效应的复现分析",
+     "direction": "psy",
+     "stage_fit": [
+      2
+     ],
+     "difficulty_raw": "registration 2022-11-15",
+     "retrieved_at": "2026-09-29T19:49:11Z",
+     "evidence_quote": "was not able to reproduce this effect"
+    },
+    {
+     "title": "Many Labs 3: Participant Pool Edition",
+     "url": "https://osf.io/swiz8/",
+     "practices": "学期时间对效应可检测性的影响、多实验室协议",
+     "todo": "阅读协议，选 1 个已知效应做小规模复现分析",
+     "direction": "psy",
+     "stage_fit": [
+      2,
+      3
+     ],
+     "difficulty_raw": "registration 2014-09-17",
+     "retrieved_at": "2026-09-29T19:49:15Z",
+     "evidence_quote": "10 known effects within 30 minutes"
+    }
+   ],
+   "reliability_notes": "English-only; not a mainland source. Keep as optional/manual route unless backend reachability is confirmed.",
+   "adapter": ""
+  }
+ ]
+}

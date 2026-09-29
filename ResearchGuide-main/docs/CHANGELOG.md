@@ -6,6 +6,12 @@
 
 ---
 
+## [2026-09-30] [BUILD] 任务 3 边学边练：公开来源检索项目、交压缩包、五条标准评阅
+- 变更内容：新增侧栏「项目」。来源清单 `knowledge/project_sources.json`（24 个来源、72 条逐字核对过原文的样例）；7 个来源实时检索（和鲸、飞桨学习赛、天池学习赛、北大开放数据、科学数据银行、创新大赛产业命题、欧拉计划中文站），其余给快照和「去哪找」路线；查不到就空着。成果以 `.zip` 提交，只在内存里读、不执行，按五条标准评阅，规则判定是上限，模型引文必须在文件里逐字找得到；每次提交写回一条行为事实。模型的工作说明写在 `skills/project-scout/`、`skills/project-review/`，代码与 skill 分工见 `skills/README.md`。新增接口只加不改，见 ARCHITECTURE §5。
+- 影响模块：server/projects.py、server/project_adapters.py、server/submission.py、server/skills.py、server/store.py（新增 projects 表）、server/main.py、web/、knowledge/、skills/、docs/TASK3_PROJECTS.md
+- 决策来源：陈浩文
+- 登记人：助手
+
 ## [2026-09-30] [BUILD] 首页点线图重画 + 工作区统一样式 + 后端几处修复
 - 变更内容：首页去掉 Three.js 点云（`web/vendor/three.module.js` 5.4 万行删除），改为 Canvas 2D 点线图：六张图各一种一眼能认的线稿（台阶与门、问答气泡、罗盘、秒表、打勾的提交、生长的树），点距一致、每图一个主色；每屏前 40% 停住读字，之后像一支笔按笔画顺序改画成下一张。工作区重写 `styles.css`（1739 行叠加覆盖 → 一套 token），品牌移入侧栏，页面统一左对齐；方向树改为整齐树布局，连线不再交叉；任务与反馈去掉卡片套卡片；今日按「没聊 → 没核对 → 没方向 → 当前节点」给唯一建议。修复：视图快速切换时两个页面叠在一起、中文输入法回车误发送、今日页不认服务端已选方向、SQLite 连接不关闭、课程检索每次都起子进程（加 10 分钟缓存）、学期缓存永不过期（改为 3 天）、规则反馈对任何 60 字以上提交都给满分、LLM 无重试无 JSON 模式。
 - 影响模块：web/、server/store.py、server/pku_adapter.py、server/llm.py、server/workbench.py、.env.example、docs/DESIGN_SPEC.md

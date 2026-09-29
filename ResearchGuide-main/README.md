@@ -30,13 +30,18 @@ uv run --no-project --with fastapi --with uvicorn --with pydantic python server/
 # 打开 http://127.0.0.1:8100/
 ```
 
+## 边学边练（任务 3）
+
+侧栏「项目」：选方向和「走到哪」，从公开来源实时检索可以做的练手项目（每条带来源链接和检索时间，查不到就空着）；选一个，按要求打成 `.zip` 交上来，按五条标准逐条评阅并写回画像。说明见 [docs/TASK3_PROJECTS.md](docs/TASK3_PROJECTS.md)；离线测试：`uv run --no-project --with pytest --with fastapi --with pydantic pytest server/tests`。
+
 ## 目录结构
 
 ```text
 web/                前端（无构建静态页；设计规范 docs/DESIGN_SPEC.md）
 server/             FastAPI 后端（路由/契约/状态机/Planner/Workbench/搜课适配）
 skills/pku-course/  北大搜课工具（uv 子进程调用，契约不改）
-knowledge/          学科知识包（disciplines.json 等）
+skills/project-*/   给模型的工作说明（SKILL.md）；代码与 skill 的分工见 skills/README.md
+knowledge/          学科知识包（disciplines.json）、项目来源清单（project_sources.json）
 docs/               TASK_ASSIGNMENTS / ARCHITECTURE / DESIGN_SPEC / NEXT_PRE / CHANGELOG
 ```
 

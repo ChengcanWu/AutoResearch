@@ -58,6 +58,8 @@ const WORKSPACE = {
   confirm: "portrait",
   cards: "cards",
   workbench: "workbench",
+  projects: "projects",
+  project: "projects",
   me: "me",
 };
 
@@ -101,6 +103,8 @@ async function render() {
     case "confirm": await renderConfirm(); break;
     case "cards": await renderCards(); break;
     case "workbench": await renderWorkbench(); break;
+    case "projects": await renderProjects(); break;
+    case "project": await renderProject(); break;
     case "me": await renderMe(); break;
     case "today":
     default: await renderToday(); break;
@@ -1874,6 +1878,370 @@ async function renderMe() {
   $app.appendChild(main);
 }
 
+/* ---------- 边学边练：项目 ---------- */
+
+const STAGES = [
+  { value: 0, label: "只学了概念", hint: "刚看过定义和例子，还没动手" },
+  { value: 1, label: "做过小任务", hint: "在树上交过一两次二十分钟任务" },
+  { value: 2, label: "学完一块", hint: "走完一个分支，或学过一门相关课" },
+  { value: 3, label: "做过项目", hint: "交过一个完整的练手项目" },
+];
+
+const STATUS_CN = { pass: "做到", partial: "部分做到", fail: "还没做到" };
+const STATUS_MARK = { pass: "✓", partial: "~", fail: "!" };
+
+function fmtTime(iso) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function downloadBlob(blob, name) {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 800);
+}
+
+function projectTabs(active, mineCount) {
+  const nav = el("nav", "ws-tabs");
+  [["find", "找项目"], ["mine", mineCount ? `我的项目 · ${mineCount}` : "我的项目"]].forEach(([key, label]) => {
+    const b = el("button", `ws-tab${key === active ? " on" : ""}`, label);
+    b.type = "button";
+    b.onclick = () => { S.projectTab = key; setView("projects"); };
+    nav.appendChild(b);
+  });
+  return nav;
+}
+
+async function renderProjects() {
+  const seq = S.renderSeq;
+  await ensurePortrait();
+  if (stale(seq)) return;
+  const [ctx, mine] = await Promise.all([
+    api("GET", `/api/projects/context?uid=${S.uid}`).catch(() => null),
+    api("GET", `/api/projects/mine?uid=${S.uid}`).catch(() => ({ projects: [] })),
+  ]);
+  if (stale(seq)) return;
+  const tab = S.projectTab || "find";
+  $app.innerHTML = "";
+  $app.appendChild(workspaceHead("项目", "学完一块之后，找一个有公开来源的真项目练手。成果打成一个压缩包交上来，按五条标准看它像不像这个项目要的东西。"));
+  $app.appendChild(projectTabs(tab, (mine.projects || []).length));
+  if (tab === "mine") { renderMine(mine.projects || []); return; }
+
+  const t = trail();
+  const field = FIELD_TREES[t.code];
+  const node = field ? currentOnPath(field, t.done) : null;
+  const form = S.projectForm || {
+    direction: (ctx && ctx.direction) || t.code || "ai",
+    stage: ctx ? ctx.stage : 0,
+    keywords: "",
+  };
+  S.projectForm = form;
+
+  const panel = el("div", "panel project-form");
+  panel.appendChild(el("h3", "section-label", "方向"));
+  const dirs = el("div", "field-switch");
+  const paintDirs = () => {
+    dirs.innerHTML = "";
+    Object.entries(FIELD_TREES).forEach(([code, f]) => {
+      const b = el("button", "field-chip" + (code === form.direction ? " on" : ""), `<span>${esc(f.name)}</span>`);
+      b.type = "button";
+      b.onclick = () => { form.direction = code; paintDirs(); };
+      dirs.appendChild(b);
+    });
+  };
+  paintDirs();
+  panel.appendChild(dirs);
+
+  panel.appendChild(el("h3", "section-label", "你现在走到哪"));
+  const stages = el("div", "stage-pick");
+  stages.setAttribute("role", "radiogroup");
+  const paintStages = () => {
+    stages.innerHTML = "";
+    STAGES.forEach((st) => {
+      const b = el("button", "stage-opt" + (st.value === form.stage ? " on" : ""), `<b>${st.label}</b><small>${st.hint}</small>`);
+      b.type = "button";
+      b.setAttribute("role", "radio");
+      b.setAttribute("aria-checked", st.value === form.stage ? "true" : "false");
+      b.onclick = () => { form.stage = st.value; paintStages(); };
+      stages.appendChild(b);
+    });
+  };
+  paintStages();
+  panel.appendChild(stages);
+  if (ctx && ctx.reason) panel.appendChild(el("p", "form-note", `按你的记录预选：${esc(ctx.reason)}。不对就改。`));
+
+  panel.appendChild(el("h3", "section-label", "想练的关键词（可选）"));
+  const row = el("div", "chat-input-row");
+  const kw = el("input");
+  kw.value = form.keywords;
+  kw.placeholder = node ? `例如：${node.label}` : "例如：数据可视化、问卷、证明";
+  kw.maxLength = 40;
+  kw.setAttribute("aria-label", "关键词");
+  kw.addEventListener("input", () => { form.keywords = kw.value; });
+  const go = el("button", "btn", "找项目");
+  go.type = "button";
+  row.append(kw, go);
+  panel.appendChild(row);
+  $app.appendChild(panel);
+
+  const out = el("div", "project-results");
+  $app.appendChild(out);
+
+  const run = async () => {
+    go.disabled = true; go.textContent = "正在查…";
+    out.innerHTML = "";
+    const wait = el("div", "panel");
+    wait.appendChild(el("p", "panel-sub", "正在逐个来源检索公开项目，第一次大约十几秒。查到什么就给什么，查不到会如实写。"));
+    out.appendChild(wait);
+    try {
+      const r = await api("POST", "/api/projects/search", {
+        uid: S.uid, direction: form.direction, stage: form.stage, keywords: form.keywords.trim(),
+      });
+      if (stale(seq)) return;
+      S.projectResult = r;
+      paintResults(out, r);
+    } catch (e) {
+      out.innerHTML = "";
+      out.appendChild(el("div", "note-box", `检索失败（如实说明）：${esc(e.message)}`));
+    }
+    go.disabled = false; go.textContent = "找项目";
+  };
+  go.onclick = run;
+  kw.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.isComposing) run(); });
+  if (S.projectResult && S.projectResult.query && S.projectResult.query.direction === form.direction && S.projectResult.query.stage === form.stage) {
+    paintResults(out, S.projectResult);
+  }
+}
+
+function paintResults(out, r) {
+  out.innerHTML = "";
+  const list = r.sources || [];
+  const live = list.filter((s) => s.ok && s.live).length;
+  const snap = list.filter((s) => s.ok && s.snapshot).length;
+  const bad = list.filter((s) => !s.ok).length;
+  const sources = el("details", "source-status");
+  sources.appendChild(el("summary", "", `查了 ${list.length} 个来源：实时 ${live} 个 · 快照 ${snap} 个${bad ? ` · 没查到 ${bad} 个` : ""}`));
+  const chips = el("div", "src-chips");
+  list.forEach((s) => {
+    const ok = s.ok;
+    chips.appendChild(el("span", `src-chip ${ok ? "ok" : "bad"}`,
+      `${ok ? "✓" : "✕"} ${esc(s.name)}<i>${ok ? `${s.count} 条${s.snapshot ? " · 快照" : ""}` : esc(s.error || "没查到")}</i>`));
+  });
+  sources.appendChild(chips);
+  const head = el("div", "results-head");
+  head.appendChild(el("h3", "panel-title", r.items && r.items.length ? `找到 ${r.items.length} 个可以做的项目` : "这次没有找到合适的项目"));
+  head.appendChild(el("p", "panel-sub", `${esc(r.query.direction_name)} · ${esc(r.query.stage_label)}${r.query.keywords ? ` · 「${esc(r.query.keywords)}」` : ""} · 检索于 ${fmtTime(r.retrieved_at)}${r.voice === "llm" ? "" : " · 规则版挑选"}`));
+  out.append(head, sources);
+
+  if (!r.items || !r.items.length) {
+    out.appendChild(el("div", "note-box", esc(r.empty_reason || "来源里没有和这个方向、这个阶段对得上的公开项目。我们不补一个假的；可以换个关键词，或照下面的路线自己去看。")));
+  }
+  (r.items || []).forEach((p) => out.appendChild(projectCard(p)));
+
+  if (r.routes && r.routes.length) {
+    const routes = el("details", "panel routes");
+    routes.open = !(r.items && r.items.length);
+    routes.appendChild(el("summary", "", `去哪找更多 · ${r.routes.length} 个来源`));
+    routes.appendChild(el("p", "panel-sub", "这些来源要你自己去看（需要登录、按届发布，或没有公开接口）。每条写了点哪里、搜什么。"));
+    r.routes.forEach((rt) => {
+      const item = el("div", "route");
+      item.innerHTML = `<p class="route-name"><a href="${esc(rt.url)}" target="_blank" rel="noopener">${esc(rt.name)} ↗</a><span>${esc(rt.kind_label || "")}${rt.cadence ? " · " + esc(rt.cadence) : ""}</span></p><p class="route-how">${esc(rt.manual_route)}</p>${rt.search_terms && rt.search_terms.length ? `<p class="route-terms">搜：${rt.search_terms.map((t) => `<code>${esc(t)}</code>`).join(" ")}</p>` : ""}`;
+      routes.appendChild(item);
+    });
+    out.appendChild(routes);
+  }
+}
+
+function projectCard(p) {
+  const card = el("article", "panel project-card");
+  const top = el("div", "project-top");
+  top.appendChild(el("h3", "project-name", `<a href="${esc(p.url)}" target="_blank" rel="noopener">${esc(p.name)}</a>`));
+  if (p.difficulty) top.appendChild(el("span", "badge plain", esc(p.difficulty)));
+  card.appendChild(top);
+  card.appendChild(el("p", "project-src", `${esc(p.source_name)} · 检索于 ${fmtTime(p.retrieved_at)}${p.snapshot ? " · 快照" : ""}${p.deadline ? ` · ${p.closed ? `已截止（${esc(p.deadline)}），可当练习` : `截止 ${esc(p.deadline)}`}` : ""}`));
+  const dl = el("dl", "project-facts");
+  dl.innerHTML = `<dt>在练什么</dt><dd>${esc(p.practices || "来源里没写明。")}</dd><dt>大概要做什么</dt><dd>${esc(p.todo || "来源里没写明，打开链接看原题。")}</dd>${p.why_fit ? `<dt>为什么是现在</dt><dd>${esc(p.why_fit)}</dd>` : ""}`;
+  card.appendChild(dl);
+  if (p.evidence_quote) card.appendChild(el("p", "project-quote", `原文：「${esc(p.evidence_quote)}」`));
+  const acts = el("div", "submit-actions");
+  const pick = el("button", "btn small", p.picked ? "已在我的项目里" : "就练这个");
+  pick.type = "button";
+  pick.disabled = !!p.picked;
+  pick.onclick = async () => {
+    pick.disabled = true;
+    try {
+      const saved = await api("POST", "/api/projects/pick", { uid: S.uid, id: p.id });
+      p.picked = true;
+      S.projectId = saved.id;
+      setView("project");
+    } catch (e) { toast(e.message); pick.disabled = false; }
+  };
+  const open = el("a", "btn small secondary", "打开来源 ↗");
+  open.href = p.url; open.target = "_blank"; open.rel = "noopener";
+  acts.append(pick, open);
+  card.appendChild(acts);
+  return card;
+}
+
+function renderMine(list) {
+  const panel = el("div", "panel");
+  if (!list.length) {
+    panel.appendChild(el("p", "panel-sub", "还没有选定项目。在「找项目」里挑一个「就练这个」。"));
+    $app.appendChild(panel);
+    return;
+  }
+  const rows = el("div", "fact-list");
+  list.forEach((p) => {
+    const last = (p.reviews || [])[0];
+    const row = el("button", "mine-row");
+    row.type = "button";
+    row.innerHTML = `<span class="mine-name">${esc(p.name)}</span><span class="mine-meta">${esc(p.source_name || "")} · ${last ? `最近一次 ${last.passed}/${last.total} 条做到` : "还没交"}</span>`;
+    row.onclick = () => { S.projectId = p.id; setView("project"); };
+    rows.appendChild(row);
+  });
+  panel.appendChild(rows);
+  $app.appendChild(panel);
+}
+
+async function renderProject() {
+  const seq = S.renderSeq;
+  if (!S.projectId) { S.projectTab = "mine"; setView("projects"); return; }
+  let p;
+  try {
+    p = await api("GET", `/api/projects/${S.projectId}?uid=${S.uid}`);
+  } catch (e) {
+    if (stale(seq)) return;
+    S.projectTab = "mine"; setView("projects"); toast(e.message); return;
+  }
+  if (stale(seq)) return;
+  $app.innerHTML = "";
+  const back = el("button", "linkish back-link", "← 我的项目");
+  back.type = "button";
+  back.onclick = () => { S.projectTab = "mine"; setView("projects"); };
+  $app.appendChild(back);
+  $app.appendChild(workspaceHead(esc(p.name)));
+  $app.appendChild(el("div", "ws-status", `<span><a href="${esc(p.url)}" target="_blank" rel="noopener">${esc(p.source_name)} ↗</a></span><span>检索于 ${fmtTime(p.retrieved_at)}</span>`));
+
+  const spec = el("div", "panel");
+  const dl = el("dl", "project-facts");
+  dl.innerHTML = `<dt>在练什么</dt><dd>${esc(p.practices || "来源里没写明。")}</dd><dt>大概要做什么</dt><dd>${esc(p.todo || "来源里没写明，打开链接看原题。")}</dd>`;
+  spec.appendChild(dl);
+  spec.appendChild(el("h3", "section-label", "压缩包里至少要有"));
+  const need = el("ul", "criteria");
+  [
+    "README.md（放在最外层）：题目和来源链接、我做了什么、结果在哪、怎么复现、还没做完的",
+    "results/：你自己做出来的图、表、输出或报告，每个文件在 README 里有一句说明",
+    "代码类项目放 src/ 或 .ipynb，并写清怎么运行；调查、写作类项目写清数据来源和方法",
+    "只交 .zip，不超过 20 MB；大数据集只放样例，写下载链接",
+  ].forEach((t) => need.appendChild(el("li", "", esc(t))));
+  spec.appendChild(need);
+  spec.appendChild(el("h3", "section-label", "怎么评"));
+  const how = el("ul", "criteria");
+  ["说清了要解决什么问题", "有自己做出来的结果", "和项目要求对得上", "别人能照着核对或复现", "说清了没做完的和下一步"]
+    .forEach((t) => how.appendChild(el("li", "", t)));
+  spec.appendChild(how);
+  spec.appendChild(el("p", "form-note", "只看压缩包里的文件，不评价你这个人，也不猜你没写出来的东西。"));
+  const acts = el("div", "submit-actions");
+  const tpl = el("button", "btn small secondary", "下载 README 模板");
+  tpl.type = "button";
+  tpl.onclick = async () => {
+    const res = await fetch(`/api/projects/${p.id}/readme?uid=${S.uid}`);
+    if (!res.ok) { toast("模板下载失败"); return; }
+    downloadBlob(await res.blob(), "README.md");
+  };
+  const sample = el("button", "btn small ghost", "看一份示例压缩包");
+  sample.type = "button";
+  sample.onclick = async () => {
+    const res = await fetch(`/api/projects/${p.id}/sample.zip?uid=${S.uid}`);
+    if (!res.ok) { toast("示例生成失败"); return; }
+    downloadBlob(await res.blob(), "示例成果.zip");
+  };
+  acts.append(tpl, sample);
+  spec.appendChild(acts);
+  $app.appendChild(spec);
+
+  const up = el("div", "panel");
+  up.appendChild(el("h3", "panel-title", "交成果"));
+  const drop = el("label", "dropzone");
+  const file = el("input");
+  file.type = "file"; file.accept = ".zip,application/zip"; file.hidden = true;
+  drop.append(file, el("span", "", "把 .zip 拖到这里，或点这里选文件"));
+  up.appendChild(drop);
+  const result = el("div", "review-out");
+  up.appendChild(result);
+  $app.appendChild(up);
+
+  const send = async (f) => {
+    if (!f) return;
+    if (!/\.zip$/i.test(f.name)) { toast("只收 .zip 文件"); return; }
+    if (f.size > 20 * 1024 * 1024) { toast("压缩包超过 20 MB"); return; }
+    drop.classList.add("busy");
+    drop.querySelector("span").textContent = `正在看「${f.name}」…`;
+    try {
+      const res = await fetch(`/api/projects/${p.id}/submit?uid=${S.uid}`, {
+        method: "POST", headers: { "Content-Type": "application/zip" }, body: f,
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok) throw new Error((data && data.detail) || `提交失败 (${res.status})`);
+      paintReview(result, data);
+      result.scrollIntoView({ behavior: "smooth", block: "start" });
+    } catch (e) {
+      result.innerHTML = "";
+      result.appendChild(el("div", "note-box", esc(e.message)));
+    }
+    drop.classList.remove("busy");
+    drop.querySelector("span").textContent = "再交一版：把 .zip 拖到这里，或点这里选文件";
+    file.value = "";
+  };
+  file.onchange = () => send(file.files[0]);
+  drop.addEventListener("dragover", (e) => { e.preventDefault(); drop.classList.add("over"); });
+  drop.addEventListener("dragleave", () => drop.classList.remove("over"));
+  drop.addEventListener("drop", (e) => { e.preventDefault(); drop.classList.remove("over"); send(e.dataTransfer.files[0]); });
+
+  if (p.reviews && p.reviews.length) paintReview(result, p.reviews[0], true);
+}
+
+function paintReview(box, r, old) {
+  box.innerHTML = "";
+  const sec = el("section", "feedback");
+  const head = el("div", "feedback-head");
+  const hl = el("div");
+  hl.appendChild(el("h3", "", old ? "上一次的评阅" : "评阅"));
+  hl.appendChild(el("p", "", `${esc(r.summary || "")}${r.voice === "llm" ? "" : "（规则版）"}`));
+  head.appendChild(hl);
+  head.appendChild(el("div", "score-ring", `<span class="num">${r.passed}</span>/ ${r.total} 条做到`));
+  sec.appendChild(head);
+  const list = el("div", "rubric-list");
+  (r.criteria || []).forEach((c) => {
+    const ev = (c.evidence || []).filter((e) => e.file)
+      .map((e) => `<span class="ev"><code>${esc(e.file)}</code>${e.quote ? `「${esc(e.quote)}」` : ""}</span>`).join("");
+    list.appendChild(el("div", `rubric-item ${c.status === "pass" ? "pass" : "fail"} is-${c.status}`,
+      `<span class="rubric-mark" aria-label="${STATUS_CN[c.status]}">${STATUS_MARK[c.status]}</span><div><p class="rubric-crit">${esc(c.criterion)}<em>${STATUS_CN[c.status]}</em></p><p class="rubric-comment">${esc(c.comment)}</p>${ev ? `<p class="rubric-ev">${ev}</p>` : ""}${c.fix ? `<p class="rubric-fix">改：${esc(c.fix)}</p>` : ""}</div>`));
+  });
+  sec.appendChild(list);
+  if (r.next_step) sec.appendChild(el("div", "why-box", `<b>下一步　</b>${esc(r.next_step)}`));
+  const files = el("details", "inventory");
+  if (!(r.inventory || []).length) files.hidden = true;
+  files.appendChild(el("summary", "", `压缩包里的 ${(r.inventory || []).length} 个文件`));
+  const ul = el("ul");
+  (r.inventory || []).forEach((i) => ul.appendChild(el("li", "", `<code>${esc(i.path)}</code><span>${esc(i.kind)} · ${Math.max(1, Math.round(i.size / 1024))} KB</span>`)));
+  files.appendChild(ul);
+  (r.notes || []).forEach((n) => files.appendChild(el("p", "form-note", esc(n))));
+  sec.appendChild(files);
+  if (r.fact) {
+    const fl = el("div", "fact-list");
+    fl.appendChild(factCard(r.fact, false, !old));
+    sec.appendChild(fl);
+  }
+  box.appendChild(sec);
+}
+
 /* ---------- 事实卡组件 ---------- */
 
 function factCard(f, editable = false, isNew = false) {
@@ -1881,7 +2249,7 @@ function factCard(f, editable = false, isNew = false) {
   const valueHtml = editable
     ? `<input type="text" value="${esc(f.value)}" />`
     : `<div class="fact-value">${esc(f.value)}</div>`;
-  const evidence = (f.evidence || []).map((e) => esc(e.quote ? `「${e.quote}」` : (e.type === "submission" ? `任务提交《${e.task_title || ""}》` : e.type))).join("；");
+  const evidence = (f.evidence || []).map((e) => esc(e.quote ? `「${e.quote}」` : (e.type === "submission" ? `任务提交《${e.task_title || ""}》` : e.type === "project_submission" ? `项目成果《${e.task_title || ""}》` : e.type))).join("；");
   const when = f.source === "behavior" && f.created_at ? ` · ${esc(f.created_at.slice(5, 16).replace("T", " "))}` : "";
   card.innerHTML = `
     ${valueHtml}

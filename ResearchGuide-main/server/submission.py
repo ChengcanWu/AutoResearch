@@ -1,0 +1,379 @@
+# -*- coding: utf-8 -*-
+"""边学边练：项目成果压缩包的收取与评阅。
+
+分工（见 skills/README.md）：
+- 代码负责一切能确定的事：压缩包安全检查、文件清单、README 分段、引用的路径是否存在、有没有结果文件和代码；
+- 模型只做判断题：按 skills/project-review/SKILL.md 看成果和项目要求对不对得上、写评语；
+- 规则结果是上限：没有结果文件，模型也不能判「有自己的结果」；模型引用的原文必须真的出现在文件里。
+
+只看交上来的文件，不推测作者能力；从不解压到磁盘、从不执行任何代码。
+"""
+from __future__ import annotations
+
+import io
+import json
+import re
+import zipfile
+from typing import Any
+
+import llm
+import skills
+from schemas import now_iso
+
+MAX_ZIP_BYTES = 20 * 1024 * 1024       # 压缩包本身
+MAX_TOTAL_BYTES = 100 * 1024 * 1024    # 解压后总量
+MAX_FILE_BYTES = 20 * 1024 * 1024      # 单个文件
+MAX_FILES = 300
+MAX_RATIO = 120                        # 压缩比过高视为压缩炸弹
+TEXT_BUDGET = 14000                    # 送给模型的正文上限（字符）
+
+IGNORED = ("__MACOSX/", ".DS_Store", "Thumbs.db", ".git/", ".ipynb_checkpoints/", "__pycache__/")
+CODE_EXT = {".py", ".ipynb", ".r", ".m", ".jl", ".cpp", ".c", ".h", ".java", ".js", ".ts", ".go", ".rs", ".sql", ".sh", ".do", ".stata", ".sas", ".tex"}
+TEXT_EXT = {".md", ".txt", ".csv", ".tsv", ".json", ".yaml", ".yml", ".py", ".r", ".m", ".jl", ".tex", ".sql", ".sh", ".do", ".js", ".ts", ".go", ".rs", ".c", ".cpp", ".h", ".java", ".html"}
+FIGURE_EXT = {".png", ".jpg", ".jpeg", ".svg", ".gif", ".webp", ".pdf"}
+DATA_EXT = {".csv", ".tsv", ".xlsx", ".xls", ".json", ".parquet", ".npy", ".npz", ".mat", ".dta", ".sav", ".h5"}
+README_NAMES = ("readme.md", "readme.txt", "readme", "说明.md", "说明.txt", "readme.markdown")
+
+CRITERIA = [
+    {"key": "problem", "criterion": "说清了要解决什么问题"},
+    {"key": "results", "criterion": "有自己做出来的结果"},
+    {"key": "match", "criterion": "和项目要求对得上"},
+    {"key": "check", "criterion": "别人能照着核对或复现"},
+    {"key": "limits", "criterion": "说清了没做完的和下一步"},
+]
+
+SECTION_MARKS = {
+    "problem": ("题目", "问题", "目标", "项目", "要解决", "研究问题", "背景"),
+    "done": ("做了什么", "方法", "过程", "步骤", "我做了", "实现", "思路"),
+    "results": ("结果", "结论", "发现", "输出", "效果"),
+    "reproduce": ("复现", "运行", "怎么跑", "环境", "依赖", "使用方法", "如何运行", "数据来源"),
+    "limits": ("局限", "不足", "没做完", "未完成", "下一步", "改进", "问题与反思", "待改进"),
+}
+
+
+class SubmissionError(Exception):
+    """压缩包本身不合格（不是成果好坏的问题），直接告诉用户怎么改。"""
+
+
+# ---------- 读取压缩包 ----------
+
+def _decode_name(info: zipfile.ZipInfo) -> str:
+    name = info.filename
+    if not info.flag_bits & 0x800:
+        # Windows 自带压缩常用 GBK 写文件名却不打 UTF-8 标记，Python 会按 cp437 解出乱码
+        try:
+            name = name.encode("cp437").decode("gbk")
+        except (UnicodeEncodeError, UnicodeDecodeError):
+            pass
+    return name.replace("\\", "/")
+
+
+def _kind(path: str) -> str:
+    low = path.lower()
+    base = low.rsplit("/", 1)[-1]
+    ext = "." + base.rsplit(".", 1)[-1] if "." in base else ""
+    if base in README_NAMES:
+        return "readme"
+    if ext == ".ipynb":
+        return "notebook"
+    if ext in CODE_EXT:
+        return "code"
+    if ext in {".docx", ".doc", ".md", ".txt", ".pptx"}:
+        return "doc"
+    if ext in FIGURE_EXT:
+        return "figure"
+    if ext in DATA_EXT:
+        return "data"
+    return "other"
+
+
+def _docx_text(blob: bytes) -> str:
+    try:
+        with zipfile.ZipFile(io.BytesIO(blob)) as z:
+            xml = z.read("word/document.xml").decode("utf-8", errors="ignore")
+    except (KeyError, zipfile.BadZipFile, OSError):
+        return ""
+    xml = re.sub(r"</w:p>", "\n", xml)
+    return re.sub(r"<[^>]+>", "", xml)
+
+
+def _ipynb_text(blob: bytes) -> tuple[str, bool]:
+    try:
+        nb = json.loads(blob.decode("utf-8", errors="ignore"))
+    except json.JSONDecodeError:
+        return "", False
+    parts, has_out = [], False
+    for cell in nb.get("cells", []):
+        src = cell.get("source", "")
+        parts.append("".join(src) if isinstance(src, list) else str(src))
+        if cell.get("outputs"):
+            has_out = True
+    return "\n\n".join(parts), has_out
+
+
+def _text(blob: bytes) -> str:
+    for enc in ("utf-8", "gbk"):
+        try:
+            return blob.decode(enc)
+        except UnicodeDecodeError:
+            continue
+    return blob.decode("utf-8", errors="replace")
+
+
+def read_zip(data: bytes) -> dict[str, Any]:
+    """安全读取：只在内存里读，返回文件清单和可读正文。不合格直接抛 SubmissionError。"""
+    if len(data) > MAX_ZIP_BYTES:
+        raise SubmissionError(f"压缩包超过 {MAX_ZIP_BYTES // 1024 // 1024} MB。大数据集请只放样例，并在 README 里写下载链接。")
+    try:
+        z = zipfile.ZipFile(io.BytesIO(data))
+    except zipfile.BadZipFile:
+        raise SubmissionError("这不是一个能打开的 .zip 文件。请用系统自带的「压缩」重新打包（不要用 .rar / .7z）。")
+    infos = [i for i in z.infolist() if not i.is_dir()]
+    if len(infos) > MAX_FILES:
+        raise SubmissionError(f"文件太多（{len(infos)} 个）。请删掉依赖目录（如 node_modules、venv）后再打包。")
+    total = sum(i.file_size for i in infos)
+    if total > MAX_TOTAL_BYTES:
+        raise SubmissionError("解压后超过 100 MB。请只放必要的结果和代码。")
+    files = []
+    for info in infos:
+        name = _decode_name(info)
+        if any(tok in name for tok in IGNORED) or name.startswith("/") or ".." in name.split("/"):
+            continue
+        if info.file_size > MAX_FILE_BYTES or (info.compress_size and info.file_size / max(1, info.compress_size) > MAX_RATIO and info.file_size > 1024 * 1024):
+            raise SubmissionError(f"文件「{name}」过大或压缩比异常，已拒收。")
+        files.append((name, info))
+    if not files:
+        raise SubmissionError("压缩包是空的。")
+    # 压缩包里常套一层同名文件夹：去掉共同的顶层目录，让 README 回到根目录
+    tops = {n.split("/", 1)[0] for n, _ in files}
+    strip = ""
+    if len(tops) == 1 and all("/" in n for n, _ in files):
+        strip = next(iter(tops)) + "/"
+    inventory: list[dict[str, Any]] = []
+    texts: dict[str, str] = {}
+    notes: list[str] = []
+    for name, info in files:
+        path = name[len(strip):] if strip and name.startswith(strip) else name
+        kind = _kind(path)
+        item = {"path": path, "size": info.file_size, "kind": kind}
+        low = path.lower()
+        blob = None
+        if kind in ("readme", "doc", "code", "notebook") or low.endswith((".csv", ".tsv", ".json")):
+            blob = z.read(info)
+        if blob is not None:
+            if low.endswith(".docx"):
+                texts[path] = _docx_text(blob)
+            elif low.endswith(".ipynb"):
+                txt, has_out = _ipynb_text(blob)
+                texts[path] = txt
+                item["has_outputs"] = has_out
+            elif low.endswith((".doc", ".pptx")):
+                notes.append(f"「{path}」是 {low.rsplit('.', 1)[-1]} 格式，没有读取正文；关键内容请写进 README。")
+            elif low.endswith((".csv", ".tsv")):
+                texts[path] = "\n".join(_text(blob).splitlines()[:12])
+            else:
+                texts[path] = _text(blob)
+        if low.endswith(".pdf"):
+            notes.append(f"「{path}」是 PDF，没有读取正文，只算作一个结果文件。")
+        item["empty"] = info.file_size == 0
+        inventory.append(item)
+    inventory.sort(key=lambda x: (x["kind"] != "readme", x["path"]))
+    return {"inventory": inventory, "texts": texts, "notes": notes}
+
+
+# ---------- 规则检查（确定的事） ----------
+
+def _readme(bundle: dict[str, Any]) -> tuple[str, str]:
+    for item in bundle["inventory"]:
+        if item["kind"] == "readme" and "/" not in item["path"]:
+            return item["path"], bundle["texts"].get(item["path"], "")
+    for item in bundle["inventory"]:
+        if item["kind"] == "readme":
+            return item["path"], bundle["texts"].get(item["path"], "")
+    return "", ""
+
+
+def _sections(text: str) -> dict[str, bool]:
+    heads = "\n".join(ln for ln in text.splitlines() if ln.lstrip().startswith(("#", "**")) or len(ln.strip()) <= 20)
+    hay = heads or text
+    return {k: any(m in hay for m in marks) for k, marks in SECTION_MARKS.items()}
+
+
+def _referenced_paths(text: str, inventory: list[dict[str, Any]]) -> tuple[list[str], list[str]]:
+    paths = {i["path"] for i in inventory}
+    names = {p.rsplit("/", 1)[-1]: p for p in paths}
+    found, missing = [], []
+    for tok in set(re.findall(r"[\w\-./一-鿿]+\.(?:png|jpg|jpeg|svg|csv|xlsx|pdf|ipynb|py|txt|md|json|docx|r|m)", text, flags=re.I)):
+        tok = tok.lstrip("./")
+        if tok in paths:
+            found.append(tok)
+        elif tok.rsplit("/", 1)[-1] in names:
+            found.append(names[tok.rsplit("/", 1)[-1]])
+        elif not tok.lower().startswith("readme"):
+            missing.append(tok)
+    return sorted(set(found)), sorted(set(missing))
+
+
+def rule_checks(bundle: dict[str, Any], project: dict[str, Any]) -> dict[str, Any]:
+    inv = bundle["inventory"]
+    readme_path, readme = _readme(bundle)
+    sec = _sections(readme) if readme else {k: False for k in SECTION_MARKS}
+    found, missing = _referenced_paths(readme, inv)
+    results = [i for i in inv if not i["empty"] and i["kind"] in ("figure", "data") and i["path"] != readme_path]
+    results += [i for i in inv if not i["empty"] and i["path"].lower().startswith(("results/", "result/", "output/", "outputs/", "结果/")) and i not in results]
+    code = [i for i in inv if i["kind"] in ("code", "notebook")]
+    docs = [i for i in inv if i["kind"] == "doc"]
+    notebook_out = any(i.get("has_outputs") for i in inv if i["kind"] == "notebook")
+    title = project.get("name") or ""
+    mentions_project = bool(title) and (title[:6] in readme or (project.get("url") or "#") in readme or (project.get("source_url") or "#") in readme)
+
+    def status(ok: bool, partial: bool = False) -> str:
+        return "pass" if ok else ("partial" if partial else "fail")
+
+    caps = {
+        # 规则能确定的上限：模型只能在这个范围内往下判
+        "problem": status(bool(readme) and sec["problem"] and len(readme) >= 80, bool(readme)),
+        "results": status(bool(results) and bool(found), bool(results) or notebook_out),
+        "match": "pass" if readme else "partial",
+        "check": status((bool(code) and sec["reproduce"]) or (not code and bool(docs or results) and sec["done"]), bool(code) or sec["reproduce"] or sec["done"]),
+        "limits": status(sec["limits"]),
+    }
+    return {
+        "readme_path": readme_path, "readme_len": len(readme), "sections": sec,
+        "referenced": found, "missing_refs": missing,
+        "result_files": [i["path"] for i in results][:20], "code_files": [i["path"] for i in code][:20],
+        "doc_files": [i["path"] for i in docs][:10], "notebook_has_outputs": notebook_out,
+        "mentions_project": mentions_project, "caps": caps,
+    }
+
+
+RULE_FIX = {
+    "problem": "在根目录 README.md 开头写「## 题目」：项目名、来源链接，再用一两句自己的话说清要解决什么问题。",
+    "results": "把图、表或输出放进 results/，并在 README 的「## 结果在哪」里写出每个文件的路径和它说明了什么。",
+    "match": "对照项目要求逐条写：哪一条做了、结果在哪个文件；没做的也写出来。",
+    "check": "写「## 怎么复现」：用了什么数据（链接）、运行哪条命令或打开哪个 notebook，能得到 results/ 里的哪个文件。",
+    "limits": "加一段「## 还没做完的」：哪些要求没做到、结果哪里不可靠、下一步打算怎么改。",
+}
+
+RULE_PASS = {
+    "problem": "README 写清了题目和要解决的问题。",
+    "results": "有结果文件，README 也指向了它们。",
+    "match": "README 在回应项目要求。",
+    "check": "给出了复现或核对的方法。",
+    "limits": "写了没做完的和下一步。",
+}
+
+
+def _rule_review(checks: dict[str, Any], project: dict[str, Any]) -> list[dict[str, Any]]:
+    out = []
+    for c in CRITERIA:
+        st = checks["caps"][c["key"]]
+        if c["key"] == "match" and st == "pass":
+            # 没有模型时，用项目要求里的词和 README 的重合度粗判；拿不准就记 partial
+            st = "partial"
+        ev = []
+        if c["key"] == "results":
+            ev = [{"file": p, "quote": ""} for p in checks["referenced"] if p in checks["result_files"]][:3]
+        comment = RULE_PASS[c["key"]] if st == "pass" else RULE_FIX[c["key"]]
+        if c["key"] == "results" and checks["missing_refs"]:
+            comment += f" README 提到但压缩包里没有：{('、'.join(checks['missing_refs'][:3]))}。"
+        if c["key"] == "match" and st == "partial":
+            comment = "未连模型，没法逐条对照项目要求。" + RULE_FIX["match"]
+        out.append({"key": c["key"], "criterion": c["criterion"], "status": st, "evidence": ev,
+                    "comment": comment, "fix": "" if st == "pass" else RULE_FIX[c["key"]]})
+    return out
+
+
+# ---------- 模型评阅（判断题） ----------
+
+ORDER = {"fail": 0, "partial": 1, "pass": 2}
+
+
+def _corpus(bundle: dict[str, Any], readme_path: str) -> str:
+    parts, used = [], 0
+    ordered = sorted(bundle["texts"].items(), key=lambda kv: (kv[0] != readme_path, kv[0]))
+    for path, txt in ordered:
+        chunk = txt.strip()
+        if not chunk:
+            continue
+        room = TEXT_BUDGET - used
+        if room <= 200:
+            break
+        chunk = chunk[: min(len(chunk), 6000 if path == readme_path else 2500, room)]
+        parts.append(f"=== 文件：{path} ===\n{chunk}")
+        used += len(chunk)
+    return "\n\n".join(parts)
+
+
+def _llm_review(bundle: dict[str, Any], checks: dict[str, Any], project: dict[str, Any]) -> list[dict[str, Any]] | None:
+    if not llm.enabled():
+        return None
+    corpus = _corpus(bundle, checks["readme_path"])
+    inv = "\n".join(f"- {i['path']}（{i['kind']}，{i['size']} 字节）" for i in bundle["inventory"][:60])
+    req = json.dumps({k: project.get(k) for k in ("name", "practices", "todo", "source_name", "url")}, ensure_ascii=False)
+    caps = json.dumps(checks["caps"], ensure_ascii=False)
+    data = llm.chat_json(
+        skills.load("project-review"),
+        f"项目要求：{req}\n\n规则检查给出的上限（你只能等于或低于它）：{caps}\n"
+        f"README 路径：{checks['readme_path'] or '（没有）'}；README 里提到但不存在的文件：{checks['missing_refs'][:5]}\n\n"
+        f"文件清单：\n{inv}\n\n文件正文（节选）：\n{corpus}\n\n"
+        '输出 JSON：{"criteria":[{"key":"problem|results|match|check|limits","status":"pass|partial|fail",'
+        '"evidence":[{"file":"路径","quote":"原文，不超过 40 字"}],"comment":"一句话","fix":"没做到时写改哪个文件、补什么；做到了留空"}],'
+        '"summary":"一两句，只说这份成果"}',
+        timeout=45, tag="project-review",
+    )
+    items = (data or {}).get("criteria") if isinstance(data, dict) else None
+    if not isinstance(items, list):
+        return None
+    by_key = {i.get("key"): i for i in items if isinstance(i, dict)}
+    out = []
+    for c in CRITERIA:
+        it = by_key.get(c["key"])
+        if not it:
+            return None
+        st = str(it.get("status") or "fail")
+        if st not in ORDER:
+            st = "fail"
+        cap = checks["caps"][c["key"]]
+        if ORDER[st] > ORDER[cap]:
+            st = cap
+        ev = []
+        for e in it.get("evidence") or []:
+            if not isinstance(e, dict):
+                continue
+            f, q = str(e.get("file") or ""), str(e.get("quote") or "").strip()
+            src = bundle["texts"].get(f, "")
+            if f and (not q or q in src):  # 引文必须真的在那个文件里
+                ev.append({"file": f, "quote": q[:60]})
+        fix = str(it.get("fix") or "").strip()[:160]
+        if st != "pass" and not fix:
+            fix = RULE_FIX[c["key"]]
+        out.append({"key": c["key"], "criterion": c["criterion"], "status": st, "evidence": ev[:3],
+                    "comment": str(it.get("comment") or "").strip()[:140] or (RULE_PASS[c["key"]] if st == "pass" else RULE_FIX[c["key"]]),
+                    "fix": "" if st == "pass" else fix})
+    out_summary = str((data or {}).get("summary") or "").strip()[:160]
+    if out_summary:
+        out[0]["_summary"] = out_summary
+    return out
+
+
+def review(data: bytes, project: dict[str, Any]) -> dict[str, Any]:
+    bundle = read_zip(data)
+    checks = rule_checks(bundle, project)
+    judged = _llm_review(bundle, checks, project)
+    voice = "llm" if judged else "rules"
+    if not judged:
+        judged = _rule_review(checks, project)
+    summary = judged[0].pop("_summary", "") if judged else ""
+    passed = sum(1 for j in judged if j["status"] == "pass")
+    first_fix = next((j for j in judged if j["status"] != "pass"), None)
+    if not summary:
+        summary = f"{len(CRITERIA)} 条里做到 {passed} 条。" + ("" if first_fix else "可以把这份成果当作下一个项目的起点。")
+    return {
+        "passed": passed, "total": len(CRITERIA), "criteria": judged,
+        "summary": summary,
+        "next_step": (f"先改「{first_fix['criterion']}」：{first_fix['fix']}" if first_fix else "五条都做到了。下一步可以挑一个难一档的项目。"),
+        "inventory": bundle["inventory"], "notes": bundle["notes"],
+        "checks": {k: checks[k] for k in ("readme_path", "sections", "referenced", "missing_refs", "result_files", "code_files")},
+        "voice": voice, "reviewed_at": now_iso(),
+    }

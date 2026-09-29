@@ -9,5 +9,6 @@
 | [DESIGN_SPEC.md](DESIGN_SPEC.md) | UI 视觉唯一权威（颜色/字体/组件） | 做任何界面前读 |
 | [NEXT_PRE_2026-09-28.md](NEXT_PRE_2026-09-28.md) | 9/28 演示定义：链路、mock 边界、验收清单 | 演示相关 |
 | [CHANGELOG.md](CHANGELOG.md) | 变更唯一登记处 | 每次开工前扫一眼 |
+| [TASK3_PROJECTS.md](TASK3_PROJECTS.md) | 边学边练：来源清单与样例、检索输入输出、压缩包要求、评分标准、跑通样例 | 做项目 / 反馈相关 |
 
 历史长文档（PRD/VISION/GAP_ANALYSIS 等）已于 2026-09-25 精简归档删除，其有效内容已合并进上述文档；变更记录见 CHANGELOG。

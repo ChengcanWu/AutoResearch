@@ -11,15 +11,17 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 import llm
 import onboarding
 import planner
+import projects
 import store
+import submission
 import workbench
 from pku_adapter import search_courses
 
@@ -77,6 +79,19 @@ class LlmConnectReq(BaseModel):
     base_url: str = "https://api.deepseek.com/v1"
     api_key: str
     model: str = "deepseek-chat"
+
+
+class ProjectSearchReq(BaseModel):
+    uid: str
+    direction: str
+    stage: int = 0
+    keywords: str = ""
+    node: str = ""
+
+
+class ProjectPickReq(BaseModel):
+    uid: str
+    id: str
 
 
 class PortraitReq(BaseModel):
@@ -287,6 +302,89 @@ def explore_courses(query: str, limit: int = 5, term: str = ""):
         raise HTTPException(400, "query is required")
     res = search_courses(query, limit=limit, term=term)
     return res
+
+
+# ---------- 边学边练：项目检索 / 选定 / 交成果（任务 3） ----------
+
+@app.get("/api/projects/sources")
+def project_sources():
+    reg = projects.registry()
+    return {"generated_at": reg.get("generated_at"), "sources": [
+        {k: s.get(k) for k in ("id", "name", "home_url", "kind", "directions", "stage_fit", "access", "cadence", "manual_route", "search_terms")}
+        for s in reg["sources"]]}
+
+
+@app.get("/api/projects/context")
+def project_context(uid: str):
+    _user_or_404(uid)
+    return projects.context(uid)
+
+
+@app.post("/api/projects/search")
+def project_search(req: ProjectSearchReq):
+    _user_or_404(req.uid)
+    if req.direction not in planner.DIRECTIONS:
+        raise HTTPException(400, f"unknown direction: {req.direction}")
+    return projects.search(req.uid, req.direction, req.stage, req.keywords, req.node)
+
+
+@app.post("/api/projects/pick")
+def project_pick(req: ProjectPickReq):
+    _user_or_404(req.uid)
+    try:
+        return projects.pick(req.uid, req.id)
+    except KeyError as exc:
+        raise HTTPException(409, str(exc.args[0])) from exc
+
+
+@app.get("/api/projects/mine")
+def project_mine(uid: str):
+    _user_or_404(uid)
+    return {"projects": [{k: v for k, v in p.items() if k != "reviews"} | {"reviews": [
+        {"passed": r.get("passed"), "total": r.get("total"), "reviewed_at": r.get("reviewed_at")} for r in (p.get("reviews") or [])[:1]]}
+        for p in store.list_projects(uid)]}
+
+
+def _project_or_404(uid: str, pid: str) -> dict:
+    _user_or_404(uid)
+    p = store.get_project(uid, pid)
+    if not p:
+        raise HTTPException(404, "project not found")
+    return p
+
+
+@app.get("/api/projects/{pid}")
+def project_get(pid: str, uid: str):
+    return _project_or_404(uid, pid)
+
+
+@app.get("/api/projects/{pid}/readme")
+def project_readme(pid: str, uid: str):
+    p = _project_or_404(uid, pid)
+    return Response(projects.readme_template(p), media_type="text/markdown; charset=utf-8",
+                    headers={"Content-Disposition": "attachment; filename=README.md"})
+
+
+@app.get("/api/projects/{pid}/sample.zip")
+def project_sample(pid: str, uid: str):
+    p = _project_or_404(uid, pid)
+    return Response(projects.sample_zip(p), media_type="application/zip",
+                    headers={"Content-Disposition": "attachment; filename=sample.zip"})
+
+
+@app.post("/api/projects/{pid}/submit")
+async def project_submit(pid: str, uid: str, request: Request):
+    """请求体就是 .zip 本身（Content-Type: application/zip），不需要 multipart 依赖。"""
+    p = _project_or_404(uid, pid)
+    data = await request.body()
+    if not data:
+        raise HTTPException(400, "没有收到文件")
+    try:
+        result = submission.review(data, p)
+    except submission.SubmissionError as exc:
+        raise HTTPException(400, str(exc)) from exc
+    result["fact"] = projects.record_review(uid, p, result)
+    return result
 
 
 @app.post("/api/llm/connect")
