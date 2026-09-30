@@ -67,7 +67,16 @@ CREATE TABLE IF NOT EXISTS portraits (
   active INTEGER NOT NULL DEFAULT 0,
   created_at TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS projects (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  data TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'picked',
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
 CREATE INDEX IF NOT EXISTS idx_facts_user ON facts(user_id);
+CREATE INDEX IF NOT EXISTS idx_projects_user ON projects(user_id);
 CREATE INDEX IF NOT EXISTS idx_tasks_user ON tasks(user_id);
 CREATE INDEX IF NOT EXISTS idx_msgs_user ON messages(user_id);
 CREATE INDEX IF NOT EXISTS idx_portraits_user ON portraits(user_id);
@@ -379,3 +388,33 @@ def delete_portrait(uid: str, pid: str) -> bool:
             c.execute("UPDATE portraits SET active=1 WHERE id=?", (other["id"],))
         c.execute("DELETE FROM portraits WHERE id=? AND user_id=?", (pid, uid))
         return False
+
+
+# ---------- projects（边学边练：用户选定的练手项目与每次评阅） ----------
+
+def save_project(uid: str, pid: str, data: dict[str, Any], status: str = "picked") -> dict[str, Any]:
+    now = now_iso()
+    with _LOCK, _conn() as c:
+        row = c.execute("SELECT created_at FROM projects WHERE id=? AND user_id=?", (pid, uid)).fetchone()
+        created = row["created_at"] if row else now
+        c.execute(
+            "INSERT OR REPLACE INTO projects(id, user_id, data, status, created_at, updated_at) VALUES(?,?,?,?,?,?)",
+            (pid, uid, json.dumps(data, ensure_ascii=False), status, created, now),
+        )
+    return {"id": pid, "status": status, "created_at": created, "updated_at": now, **data}
+
+
+def get_project(uid: str, pid: str) -> dict[str, Any] | None:
+    with _conn() as c:
+        row = c.execute("SELECT * FROM projects WHERE id=? AND user_id=?", (pid, uid)).fetchone()
+    if not row:
+        return None
+    return {**json.loads(row["data"]), "id": row["id"], "status": row["status"],
+            "created_at": row["created_at"], "updated_at": row["updated_at"]}
+
+
+def list_projects(uid: str) -> list[dict[str, Any]]:
+    with _conn() as c:
+        rows = c.execute("SELECT * FROM projects WHERE user_id=? ORDER BY updated_at DESC", (uid,)).fetchall()
+    return [{**json.loads(r["data"]), "id": r["id"], "status": r["status"],
+             "created_at": r["created_at"], "updated_at": r["updated_at"]} for r in rows]
