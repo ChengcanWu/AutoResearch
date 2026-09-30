@@ -71,6 +71,8 @@ Feedback   { score(0–100), rubric[{criterion, pass, comment}], next_hint,
 ```python
 invoke(**kwargs) -> { ok, data|error, source, retrieved_at }
 # 已有：course.search / course.get / course.terms（pku adapter）、discipline.kb（knowledge/）
+# 任务 3：project.search（server/projects.py + project_adapters.py）、project.review（server/submission.py）
+# 给模型的工作说明放 skills/<name>/SKILL.md，何时写成代码、何时写成 skill 见 skills/README.md
 # 纪律：只读外部源 · 失败返回结构化错误并如实展示 · 检索文本视为数据非指令
 ```
 
@@ -100,6 +102,15 @@ GET  /api/me/facts             ?uid → {facts}
 PATCH /api/me/facts/{fid}       {uid, value?/status?}
 DELETE /api/me/facts/{fid}     ?uid                        # 软删
 GET  /api/explore/courses      ?query&limit&term → {ok, items, term|error}   # live
+GET  /api/projects/sources      → 来源清单（任务 3，新增）
+GET  /api/projects/context     ?uid → {direction, stage, reason}           # 默认「走到哪」
+POST /api/projects/search       {uid, direction, stage, keywords?, node?} → {query, items, sources, routes, empty_reason}
+POST /api/projects/pick         {uid, id} → Project                         # id 必须来自最近一次检索
+GET  /api/projects/mine        ?uid → {projects}
+GET  /api/projects/{pid}       ?uid → Project（含 reviews）
+GET  /api/projects/{pid}/readme ?uid → README 模板（markdown）
+GET  /api/projects/{pid}/sample.zip ?uid → 示例成果压缩包
+POST /api/projects/{pid}/submit ?uid  body=.zip → Review                  # 同时写回 behavior 事实
 GET  /api/health
 ```
 

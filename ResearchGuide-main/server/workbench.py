@@ -319,15 +319,44 @@ def _llm_feedback(task: MicroTask, payload: str) -> dict[str, Any] | None:
     }
 
 
+_EXAMPLE_MARKS = ("例如", "比如", "举例", "例子", "譬如", "假设", "输入", "输出", "「", "“", "\"")
+_JUDGE_MARKS = ("我认为", "我觉得", "我发现", "我现在", "我明白", "我理解", "我猜", "我的判断", "我不确定",
+                "还不明白", "还没弄懂", "不确定", "卡在", "疑问", "困惑", "我以为")
+
+
+def _node_check(crit: str, task: MicroTask, p: str) -> tuple[bool, str] | None:
+    """方向树节点任务的三条通用标准：看提交里有没有对应的证据，而不是只看字数。"""
+    if "在问什么" in crit:
+        words = [task.title[i:i + 2] for i in range(max(1, len(task.title) - 1))]
+        ok = len(p) >= 30 and (any(w in p for w in words) or any(m in p for m in ("在问", "指的是", "意思是", "是指")))
+        return ok, ("用自己的话点出了这个节点在问什么。" if ok
+                    else f"先用一句话写清「{task.title}」在问什么，比如「它在问……」。")
+    if "例子" in crit:
+        ok = any(m in p for m in _EXAMPLE_MARKS) or any(ch.isdigit() for ch in p)
+        return ok, ("有一个别人能照着复查的例子。" if ok
+                    else "补一个能核对的例子：写出具体的数据、原话或步骤，别人照着能复查。")
+    if "判断" in crit or "复述" in crit:
+        ok = any(m in p for m in _JUDGE_MARKS)
+        copied = bool(task.brief) and task.brief[:24] in p
+        if copied:
+            return False, "这段和节点介绍几乎一样。换成你自己的话，再写一句你同意或怀疑的地方。"
+        return ok, ("写出了你自己的判断，而不只是复述。" if ok
+                    else "最后加两句你自己的判断：现在明白了什么，还卡在哪。")
+    return None
+
+
 def _mock_feedback(task: MicroTask, payload: str) -> dict[str, Any]:
-    """W0 启发式判定（代替 LLM）：按 rubric 逐条给 pass + 措辞。"""
+    """规则判定（未连模型时）：按 rubric 逐条给 pass + 一句指向下一步的评语。"""
     p = payload.strip()
     has_analysis = _has_analysis(p)
     length = len(p)
     judged: list[dict[str, Any]] = []
     for i, r in enumerate(task.rubric):
         crit = r["criterion"]
-        if "3 个" in crit or "≥ 2" in crit or "两个" in crit or "两类" in crit:
+        node = _node_check(crit, task, p)
+        if node is not None:
+            ok, comment = node
+        elif "3 个" in crit or "≥ 2" in crit or "两个" in crit or "两类" in crit:
             ok = length >= 150
             comment = "例子数量足够。" if ok else "例子偏少——数量本身就是证据强度的一部分，补齐会更可信。"
         elif "原因" in crit or "分析" in crit or "解释" in crit or "对应" in crit or "依据" in crit:
@@ -347,11 +376,12 @@ def _mock_feedback(task: MicroTask, payload: str) -> dict[str, Any]:
 
     passed = sum(1 for j in judged if j["pass"])
     score = round(passed / max(1, len(judged)) * 100)
-    if score >= 67:
-        hint = ("下一步建议：把你发现的一个「为什么」带到进阶任务里验证——"
-                "AI 已经为你准备好了同方向的第 2 个任务。")
-        encouragement = "你完成了一次完整的「观察→解释」循环，这正是科研最核心的动作。"
+    missed = [j for j in judged if not j["pass"]]
+    if not missed:
+        hint = "三条都对上了。进入下一个节点时，把这次还卡住的那一点带过去。"
+        encouragement = "这次提交里有问题、有例子、有你自己的判断。"
     else:
-        hint = "下一步建议：不用重做，只把标红的 rubric 补一轮（10 分钟以内），然后进阶。"
-        encouragement = "完成比完美重要——第一次提交就形成了行为证据，AI 对你的认知已经更新。"
+        # 下一步只指一处：第一条没做到的标准该怎么补
+        hint = f"先补「{missed[0]['criterion']}」：{missed[0]['comment']}"
+        encouragement = f"做到了 {passed} / {len(judged)} 条。不用重写，按下面这一步补上就行。"
     return {"score": score, "rubric": judged, "next_hint": hint, "encouragement": encouragement, "voice": "rules"}

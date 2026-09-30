@@ -20,3 +20,4 @@ Thumbs.db
 desktop.ini
 .idea/
 .vscode/
+.pytest_cache/
