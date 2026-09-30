@@ -13,6 +13,9 @@ from __future__ import annotations
 import json
 import os
 import subprocess
+import threading
+import time
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -20,6 +23,10 @@ ROOT = Path(__file__).resolve().parent.parent
 SKILL_DIR = (ROOT / "skills" / "pku-course").resolve()
 PKU_PY = SKILL_DIR / "scripts" / "pku.py"
 DEFAULT_TERM_FILE = Path(__file__).resolve().parent / "data" / "cached_term.txt"
+TERM_MAX_AGE = 3 * 24 * 3600   # 学期缓存三天后重查，避免换学期后一直查旧学期
+SEARCH_TTL = 10 * 60           # 同一查询十分钟内复用上次的真实结果（每次都起 uv 子进程要 1–3 秒）
+_SEARCH_CACHE: dict[tuple[str, int, str], tuple[float, dict[str, Any]]] = {}
+_CACHE_LOCK = threading.Lock()
 
 
 def _run_pku(args: list[str], timeout: int = 60) -> tuple[int, Any, str]:
@@ -58,7 +65,7 @@ def _run_pku(args: list[str], timeout: int = 60) -> tuple[int, Any, str]:
 
 def _default_term() -> str | None:
     """默认学期：优先用缓存，拿不到就调 options 并缓存。"""
-    if DEFAULT_TERM_FILE.exists():
+    if DEFAULT_TERM_FILE.exists() and time.time() - DEFAULT_TERM_FILE.stat().st_mtime < TERM_MAX_AGE:
         cached = DEFAULT_TERM_FILE.read_text(encoding="utf-8").strip()
         if cached:
             return cached
@@ -82,11 +89,21 @@ def search_courses(query: str, limit: int = 5, term: str = "") -> dict[str, Any]
     term = term.strip() or (_default_term() or "")
     if not term:
         return {"ok": False, "error": "cannot resolve current term（教务接口不可达）"}
-    args = ["search", "--term", term, "--offset", "0", "--limit", str(min(10, max(1, limit))),
-            "--query", query]
+    limit = min(10, max(1, limit))
+    key = (query, limit, term)
+    with _CACHE_LOCK:
+        hit = _SEARCH_CACHE.get(key)
+    if hit and time.time() - hit[0] < SEARCH_TTL:
+        return {**hit[1], "cached": True}
+    args = ["search", "--term", term, "--offset", "0", "--limit", str(limit), "--query", query]
     code, data, err = _run_pku(args, timeout=90)
     if not isinstance(data, dict):
         return {"ok": False, "error": err or "course search failed (live)"}
     items = data.get("items") or data.get("results") or []
-    return {"ok": code in (0, 1), "items": items, "term": term,
-            "warning": None if code == 0 else (err or "partial retrieval")}
+    res = {"ok": code in (0, 1), "items": items, "term": term,
+           "retrieved_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+           "warning": None if code == 0 else (err or "partial retrieval")}
+    if code == 0:  # 只缓存完整成功的结果；失败和部分结果下次照常重查
+        with _CACHE_LOCK:
+            _SEARCH_CACHE[key] = (time.time(), res)
+    return res
