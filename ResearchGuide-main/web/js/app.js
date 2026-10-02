@@ -191,7 +191,7 @@ function renderHome() {
   const snap = el("div", "land-snap");
   const mapLayer = el("div", "land-map");
   mapLayer.setAttribute("aria-hidden", "true");
-  ROUTE_STATIONS.forEach((st) => mapLayer.appendChild(el("span", "", st.label)));
+  STATIONS.forEach((st) => mapLayer.appendChild(el("span", "", st.label)));
   HOME_PAGES.forEach((page, i) => {
     const sec = el("section", "snap");
     sec.dataset.index = String(i);
@@ -403,40 +403,34 @@ const SKETCHES = [
   },
 ];
 
-/* 路线图：换屏的中间态。一条不规则的漫游线串起六站（起点=首屏的门），成长折回画像的回环弧是产品闭环 */
-const ROUTE_STATIONS = [
-  { x: -0.62, y: 0.14, label: "起点" },
-  { x: -0.37, y: -0.1, label: "画像" },
-  { x: -0.12, y: 0.16, label: "方向" },
-  { x: 0.1, y: -0.04, label: "任务" },
-  { x: 0.35, y: 0.18, label: "反馈" },
-  { x: 0.62, y: -0.02, label: "成长" },
+/* 大地图：六个步骤落在一整张世界地图上，左右交替形成蛇形路线；
+   滚动 = 镜头沿引导线在地图里穿行，每到一站粒子就地聚成该步的图形 */
+const STATIONS = [
+  { x: -0.12, y: 0, label: "起点" },
+  { x: 1.15, y: 2.1, label: "画像" },
+  { x: -1.1, y: 4.2, label: "方向" },
+  { x: 1.2, y: 6.3, label: "任务" },
+  { x: -1.15, y: 8.4, label: "反馈" },
+  { x: 1.05, y: 10.5, label: "成长" },
 ];
 
-function routeMap(target) {
-  // 一条连续的不规则线：站与站之间用曲线相连，y 起伏让它读起来像一段路，不读作表格
-  const line = [];
-  ROUTE_STATIONS.forEach((s, i) => {
-    if (i === 0) { line.push([s.x, s.y]); return; }
-    const prev = ROUTE_STATIONS[i - 1];
-    curve([prev.x, prev.y], [s.x, s.y], 0.5).slice(1).forEach((p) => line.push(p));
-  });
-  const strokes = [{ pts: line }];
-  ROUTE_STATIONS.forEach((s, i) => {
-    strokes.push({ pts: ring(s.x, s.y, i === target ? 0.06 : 0.045, 26), accent: i === target });
-  });
-  // 回环弧走线上方，避免压到站点和下方的标签
-  const a0 = [ROUTE_STATIONS[5].x, ROUTE_STATIONS[5].y - 0.05];
-  const a2 = [ROUTE_STATIONS[1].x, ROUTE_STATIONS[1].y - 0.05];
-  const a1 = [(a0[0] + a2[0]) / 2, Math.min(a0[1], a2[1]) - 0.5];
-  const back = [];
-  for (let i = 0; i <= 30; i++) {
-    const t = i / 30;
-    const u = 1 - t;
-    back.push([u * u * a0[0] + 2 * u * t * a1[0] + t * t * a2[0], u * u * a0[1] + 2 * u * t * a1[1] + t * t * a2[1]]);
+/* Catmull-Rom 样条：过全部控制点的平滑曲线，首尾各补一拍让线从画面外伸进来、伸出去 */
+function catmullRom(ctrl) {
+  const P = [ctrl[0], ...ctrl, ctrl[ctrl.length - 1]];
+  const out = [];
+  for (let i = 1; i < P.length - 2; i++) {
+    const p0 = P[i - 1]; const p1 = P[i]; const p2 = P[i + 1]; const p3 = P[i + 2];
+    const n = Math.max(10, Math.ceil(Math.hypot(p2[0] - p1[0], p2[1] - p1[1]) / 0.02));
+    for (let j = 0; j < n; j++) {
+      const t = j / n; const u = 1 - t;
+      out.push([
+        0.5 * (2 * p1[0] + (-p0[0] + p2[0]) * t + (2 * p0[0] - 5 * p1[0] + 4 * p2[0] - p3[0]) * t * t + (-p0[0] + 3 * p1[0] - 3 * p2[0] + p3[0]) * t * t * t),
+        0.5 * (2 * p1[1] + (-p0[1] + p2[1]) * t + (2 * p0[1] - 5 * p1[1] + 4 * p2[1] - p3[1]) * t * t + (-p0[1] + 3 * p1[1] - 3 * p2[1] + p3[1]) * t * t * t),
+      ]);
+    }
   }
-  strokes.push({ pts: back });
-  return strokes;
+  out.push(ctrl[ctrl.length - 1]);
+  return out;
 }
 
 function strokeLength(pts) {
@@ -498,15 +492,19 @@ function mountSketch(canvas, scroller, rail, progress, mapLayer) {
   const INK = "rgb(237, 241, 238)";
   const ACCENT = "rgb(127, 209, 194)";
   const MARK = "rgb(229, 138, 78)";
+  const NODE = "rgb(154, 165, 160)";
+  const LINE = "rgb(93, 103, 99)";
   let W = 0; let H = 0; let cx = 0; let cy = 0; let size = 0; let dot = 1.35;
   let figs = [];
-  let maps = [];
+  let path = null; // 大地图：样条点、弧长表、站点弧长、引导线铺点
   let N = 0;
   let shown = [];
   let phase = 0;
+  let target = 0;
   let intro = still ? 1 : 0;
   let raf = 0;
   let introStart = 0;
+  let pIdx = 0; // pointAt 的弧长游标
 
   const build = () => {
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -520,12 +518,9 @@ function mountSketch(canvas, scroller, rail, progress, mapLayer) {
     dot = narrow ? 1.15 : 1.35;
     const spacing = narrow ? 4.2 : 4.6;
     const raws = SKETCHES.map((f) => f());
-    const mapRaws = [];
-    for (let k = 1; k < SKETCHES.length; k++) mapRaws.push(routeMap(k));
     const totalLen = (st) => st.reduce((s, x) => s + strokeLength(x.pts), 0);
     const need = raws.map((st) => Math.ceil((totalLen(st) * size) / spacing));
-    const mapNeed = mapRaws.map((st) => Math.ceil((totalLen(st) * size) / spacing));
-    N = Math.max(...need, ...mapNeed);
+    N = Math.max(...need);
     // 每张图只点亮自己的 need 颗，保证各图点距一致；其余粒子跟着走但不可见
     const sample = (st, want) => {
       const f = sampleSketch(st, N);
@@ -535,73 +530,129 @@ function mountSketch(canvas, scroller, rail, progress, mapLayer) {
       return f;
     };
     figs = raws.map((st, k) => sample(st, need[k]));
-    maps = mapRaws.map((st, k) => sample(st, mapNeed[k]));
-    if (mapLayer) {
-      [...mapLayer.children].forEach((sp, i) => {
-        sp.style.left = cx + ROUTE_STATIONS[i].x * size + "px";
-        sp.style.top = cy + ROUTE_STATIONS[i].y * size + "px";
-      });
+    // 引导线：样条穿过六站，向画面外各延一段；弧长表 + 站点弧长 + 固定间距铺点（缩放时点不闪移）
+    const pts = catmullRom([[-1.35, -1.7], ...STATIONS.map((s) => [s.x, s.y]), [-0.55, 12.3]]);
+    const cum = [0];
+    for (let i = 1; i < pts.length; i++) cum.push(cum[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
+    const stationArc = [];
+    let ptr = 0;
+    STATIONS.forEach((s) => {
+      while (ptr < pts.length - 1 && Math.hypot(pts[ptr][0] - s.x, pts[ptr][1] - s.y) > 1e-9) ptr++;
+      stationArc.push(cum[ptr]);
+    });
+    const dots = [];
+    let di = 0;
+    for (let sd = 0; sd <= cum[cum.length - 1]; sd += 0.085) {
+      while (di < pts.length - 2 && cum[di + 1] < sd) di++;
+      const seg = cum[di + 1] - cum[di] || 1;
+      const tt = (sd - cum[di]) / seg;
+      dots.push({ x: pts[di][0] + (pts[di + 1][0] - pts[di][0]) * tt, y: pts[di][1] + (pts[di + 1][1] - pts[di][1]) * tt, s: sd });
     }
+    path = { pts, cum, stationArc, dots };
+    pIdx = 0;
+    if (mapLayer) mapLayer.style.opacity = "1"; // 标签层常显（窄屏由 CSS 隐藏）
     shown = Array.from({ length: N }, (_, i) => {
       const ang = unitHash(i, 2) * Math.PI * 2;
-      const rad = 1.2 + unitHash(i, 3) * 0.9;
-      return [Math.cos(ang) * rad, Math.sin(ang) * rad];
+      const rad = 1.2 + unitHash(i, 3) * 1.0;
+      return [STATIONS[0].x + Math.cos(ang) * rad, STATIONS[0].y + Math.sin(ang) * rad];
     });
+  };
+
+  /* 弧长 → 样条上的点（镜头位置）；游标随 s 进退，逐帧 O(1) */
+  const pointAt = (s) => {
+    const pts = path.pts; const cum = path.cum;
+    const total = cum[cum.length - 1];
+    s = Math.min(Math.max(s, 0), total);
+    while (pIdx < cum.length - 2 && cum[pIdx + 1] < s) pIdx++;
+    while (pIdx > 0 && cum[pIdx] > s) pIdx--;
+    const seg = cum[pIdx + 1] - cum[pIdx] || 1;
+    const tt = (s - cum[pIdx]) / seg;
+    return [pts[pIdx][0] + (pts[pIdx + 1][0] - pts[pIdx][0]) * tt, pts[pIdx][1] + (pts[pIdx + 1][1] - pts[pIdx][1]) * tt];
   };
 
   const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
-  /* 换屏分四段：停在当前图 → 缩成路线图（全局）→ 锁定目标站点 → 放大进下一张图（局部） */
-  const HOLD_END = 0.4;
-  const MAP_END = 0.55;
-  const LOCK_END = 0.7;
-
+  /* 镜头沿引导线行进：停在站点时聚焦本站图形，途中轻微拉远读作「在大地图里穿梭」 */
   const draw = () => {
     ctx.clearRect(0, 0, W, H);
+    if (!path || !figs.length) return;
     const a = Math.min(figs.length - 1, Math.floor(phase));
     const b = Math.min(figs.length - 1, a + 1);
     const t = phase - a;
-    const M = maps[a];
-    let A; let B; let T = 0;
-    let lock = 0;
-    if (still || !M) {
-      A = still && t >= 0.5 ? figs[b] : figs[a];
-      B = A;
-    } else if (t < HOLD_END) {
-      A = figs[a]; B = A;
-    } else if (t < MAP_END) {
-      A = figs[a]; B = M; T = (t - HOLD_END) / (MAP_END - HOLD_END);
-    } else if (t < LOCK_END) {
-      A = M; B = M;
-      lock = Math.sin(Math.PI * ((t - MAP_END) / (LOCK_END - MAP_END)));
-    } else {
-      A = M; B = figs[b]; T = (t - LOCK_END) / (1 - LOCK_END);
+    const sa = path.stationArc[a];
+    const sb = path.stationArc[a + 1] ?? sa;
+    const cam = pointAt(sa + (sb - sa) * t);
+    const zoom = 1 - 0.2 * Math.sin(Math.PI * t);
+    const k = size * zoom;
+    const px = (wx) => cx + (wx - cam[0]) * k;
+    const py = (wy) => cy + (wy - cam[1]) * k;
+    const active = Math.min(STATIONS.length - 1, Math.round(phase));
+    const head = path.stationArc[active];
+
+    /* 引导线：走过的一段更亮 */
+    ctx.fillStyle = LINE;
+    for (let i = 0; i < path.dots.length; i++) {
+      const d = path.dots[i];
+      const sx = px(d.x); const sy = py(d.y);
+      if (sx < -20 || sx > W + 20 || sy < -20 || sy > H + 20) continue;
+      ctx.globalAlpha = d.s <= head + 0.001 ? 0.5 : 0.28;
+      ctx.beginPath();
+      ctx.arc(sx, sy, 1.1, 0, Math.PI * 2);
+      ctx.fill();
     }
-    // 贴近路线图时点子整体收小一号，读作「拉远了」
-    const mapMix = M
-      ? Math.min(1, Math.max(0, (t - HOLD_END) / (MAP_END - HOLD_END)))
-        * Math.min(1, Math.max(0, (1 - t) / (1 - LOCK_END)))
-      : 0;
+
+    /* 站点：圆环常显，走过的填主色点，聚焦站外加游标环 */
+    STATIONS.forEach((st, i) => {
+      const sx = px(st.x); const sy = py(st.y);
+      if (sx < -60 || sx > W + 60 || sy < -60 || sy > H + 60) return;
+      ctx.globalAlpha = 0.65;
+      ctx.strokeStyle = NODE;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(sx, sy, 0.05 * k, 0, Math.PI * 2);
+      ctx.stroke();
+      if (i < active) {
+        ctx.globalAlpha = 0.9;
+        ctx.fillStyle = ACCENT;
+        ctx.beginPath();
+        ctx.arc(sx, sy, 2.2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    });
+    const focus = STATIONS[active];
+    ctx.globalAlpha = 0.85;
+    ctx.strokeStyle = MARK;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(px(focus.x), py(focus.y), 0.095 * k, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+
+    /* 粒子：世界坐标 = 站点位置 + 图形局部坐标，途中散开走侧向弧线 */
+    const A = still && t >= 0.5 ? figs[b] : figs[a];
+    const B = still ? A : figs[b];
     const introE = ease(intro);
     let lastStyle = "";
     for (let i = 0; i < N; i++) {
       const f = i / N;
-      const local = still ? (T > 0.5 ? 1 : 0) : ease(Math.min(1, Math.max(0, (T - f * 0.35) / 0.65)));
-      const ax = A.xy[i * 2]; const ay = A.xy[i * 2 + 1];
-      const bx = B.xy[i * 2]; const by = B.xy[i * 2 + 1];
-      let x = ax + (bx - ax) * local;
-      let y = ay + (by - ay) * local;
+      const local = still ? (t >= 0.5 ? 1 : 0) : ease(Math.min(1, Math.max(0, (t - f * 0.35) / 0.65)));
+      const axw = STATIONS[a].x + A.xy[i * 2];
+      const ayw = STATIONS[a].y + A.xy[i * 2 + 1];
+      const bxw = STATIONS[b].x + B.xy[i * 2];
+      const byw = STATIONS[b].y + B.xy[i * 2 + 1];
+      let wx = axw + (bxw - axw) * local;
+      let wy = ayw + (byw - ayw) * local;
       const lift = Math.sin(Math.PI * local);
       if (lift > 0.001) {
-        const dx = bx - ax; const dy = by - ay;
+        const dx = bxw - axw; const dy = byw - ayw;
         const len = Math.hypot(dx, dy) || 1;
-        const amp = (0.08 + unitHash(i, 7) * 0.14) * (unitHash(i, 9) > 0.5 ? 1 : -1) * lift;
-        x += (-dy / len) * amp;
-        y += (dx / len) * amp;
+        const amp = (0.12 + unitHash(i, 7) * 0.3) * (unitHash(i, 9) > 0.5 ? 1 : -1) * lift;
+        wx += (-dy / len) * amp;
+        wy += (dx / len) * amp;
       }
       if (introE < 1) {
-        x = shown[i][0] + (x - shown[i][0]) * Math.min(1, Math.max(0, (intro - f * 0.3) / 0.7));
-        y = shown[i][1] + (y - shown[i][1]) * Math.min(1, Math.max(0, (intro - f * 0.3) / 0.7));
+        wx = shown[i][0] + (wx - shown[i][0]) * Math.min(1, Math.max(0, (intro - f * 0.3) / 0.7));
+        wy = shown[i][1] + (wy - shown[i][1]) * Math.min(1, Math.max(0, (intro - f * 0.3) / 0.7));
       }
       const vis = A.vis[i] + (B.vis[i] - A.vis[i]) * local;
       const alpha = vis * (1 - 0.35 * lift) * Math.min(1, intro * 1.4);
@@ -610,21 +661,21 @@ function mountSketch(canvas, scroller, rail, progress, mapLayer) {
       if (style !== lastStyle) { ctx.fillStyle = style; lastStyle = style; }
       ctx.globalAlpha = alpha;
       ctx.beginPath();
-      ctx.arc(cx + x * size, cy + y * size, dot * (1 - 0.2 * lift) * (1 - 0.22 * mapMix), 0, Math.PI * 2);
+      ctx.arc(px(wx), py(wy), dot * (0.8 + 0.2 * zoom) * (1 - 0.2 * lift), 0, Math.PI * 2);
       ctx.fill();
     }
     ctx.globalAlpha = 1;
-    if (lock > 0.02 && M) {
-      const st = ROUTE_STATIONS[Math.min(ROUTE_STATIONS.length - 1, a + 1)];
-      ctx.globalAlpha = lock;
-      ctx.strokeStyle = MARK;
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.arc(cx + st.x * size, cy + st.y * size, (0.105 + 0.025 * (1 - lock)) * size, 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.globalAlpha = 1;
+
+    /* 站点标签随相机投影定位，出屏的藏起来 */
+    if (mapLayer) {
+      [...mapLayer.children].forEach((sp, i) => {
+        const st = STATIONS[i];
+        const sx = px(st.x); const sy = py(st.y);
+        sp.style.left = sx + "px";
+        sp.style.top = sy + "px";
+        sp.style.opacity = (sx < -40 || sx > W + 40 || sy < -40 || sy > H + 40) ? "0" : "0.9";
+      });
     }
-    if (mapLayer) mapLayer.style.opacity = lock.toFixed(3);
   };
 
   const sections = [...scroller.querySelectorAll(".snap")];
@@ -638,52 +689,7 @@ function mountSketch(canvas, scroller, rail, progress, mapLayer) {
     if (bar) bar.style.width = `${Math.min(1, scroller.scrollTop / limit) * 100}%`;
   };
 
-  /* 转场节拍：滚动跨过半屏即切换目标屏，「缩小→锁定→放大」按固定时长播放成一段动画，
-     不再挂在滚动进度上被滚轮速度冲掉。跨多屏（导轨直达）时中间站快速掠过，终点前照常驻留 */
-  const SWEEP = 0.8;   // 每 0.625 相位的基础形变秒数（图→路线图）
-  const DWELL = 0.42;  // 停在路线图上锁定站点的秒数
-  let transit = null;
-  let lastWant = 0;
-
-  const startTransit = (want, now) => {
-    const beats = [];
-    const dir = Math.sign(want - phase);
-    let p = phase;
-    let guard = 0;
-    while (dir * (want - p) > 1e-4 && guard++ < 12) {
-      const lock = dir > 0 ? Math.ceil(p - 1e-6) + 0.625 : Math.floor(p + 1e-6) - 0.625;
-      const overshoot = dir * (lock - want) > 0;
-      const end = overshoot ? want : lock;
-      beats.push({ from: p, to: end, dur: Math.max(0.15, (Math.abs(end - p) / 0.625) * SWEEP), dwell: 0 });
-      p = end;
-      if (!overshoot) {
-        // 只有终点前的最后一个锁定点才驻留；路过的中间站只轻点一下
-        beats[beats.length - 1].dwell = dir * (want - (lock + dir * 0.375)) < 1e-4 ? DWELL : 0.06;
-      }
-    }
-    const total = beats.reduce((s, b) => s + b.dur + b.dwell, 0);
-    if (total > 3.2) {
-      // 导轨跨多屏：压缩形变时长，保住终点前的锁定驻留
-      const dwellSum = beats.reduce((s, b) => s + b.dwell, 0);
-      const k = Math.max(0.22, (3.2 - dwellSum) / (total - dwellSum));
-      beats.forEach((b) => { b.dur *= k; });
-    }
-    transit = beats.length ? { beats, t0: now } : null;
-  };
-
-  const transitAt = (now) => {
-    if (!transit) return null;
-    let e = Math.max(0, (now - transit.t0) / 1000);
-    for (const b of transit.beats) {
-      if (e < b.dur) return b.from + (b.to - b.from) * ease(e / b.dur);
-      e -= b.dur;
-      if (e < b.dwell) return b.to;
-      e -= b.dwell;
-    }
-    transit = null;
-    return null;
-  };
-
+  /* 追滚动：phase 平滑追向 target（滚动映射的连续值），镜头随之在引导线上行进 */
   const tick = (now) => {
     raf = 0;
     if (!canvas.isConnected) return;
@@ -693,31 +699,24 @@ function mountSketch(canvas, scroller, rail, progress, mapLayer) {
       intro = Math.min(1, (now - introStart) / 1600);
       moving = true;
     }
-    const want = Math.min(figs.length - 1, Math.max(0, Math.round(scrollTarget(scroller))));
-    if (want !== lastWant) {
-      lastWant = want;
-      if (still) phase = want;
-      else startTransit(want, now);
-    }
-    const p = transitAt(now);
-    if (p !== null) {
-      phase = p;
+    const gap = target - phase;
+    if (Math.abs(gap) > 0.0005) {
+      phase += still ? gap : gap * 0.14;
       moving = true;
-    } else if (phase !== lastWant) {
-      phase = lastWant;
-      moving = true;
+    } else {
+      phase = target;
     }
     draw();
     syncRail();
     if (moving) raf = requestAnimationFrame(tick);
   };
   const wake = () => { if (!raf) raf = requestAnimationFrame(tick); };
-  const onScroll = () => wake();
+  const onScroll = () => { target = scrollTarget(scroller); wake(); };
   const onResize = () => { build(); wake(); };
 
   build();
-  lastWant = Math.min(figs.length - 1, Math.max(0, Math.round(scrollTarget(scroller))));
-  phase = lastWant;
+  target = scrollTarget(scroller);
+  phase = target;
   scroller.addEventListener("scroll", onScroll, { passive: true });
   window.addEventListener("resize", onResize);
   wake();

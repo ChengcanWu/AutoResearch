@@ -46,7 +46,7 @@
 - 间距只用 `--gap-1..7`（4/8/12/16/24/32/48）；页面统一左对齐，左边距 48px（窄屏 20px）；
 - 不用投影区分层级，用 1px 描边；只有抽屉和弹窗有投影；
 - 动效：进入 `riseIn` 0.35s、新事实 `factIn` 珊瑚底淡出、树 `linkIn` 连线生长；过渡统一 `0.15s`；`prefers-reduced-motion` 时全部关闭。
-- 首页换屏：一段脚本化转场动画（约 1.7s，不挂滚动进度）——粒子缩成一条**不规则漫游线**的六站全局路线 → 停住，`--night-mark` 圆环锁定目标站点（`.land-map` 标签同步淡入）约 0.4s → 放大画成下一张图；贴近路线时点子整体收小一号读作「拉远」。右侧导轨跨屏直达时中间站快速掠过、终点前照常驻留（封顶约 3.2s）。每屏文字挂 `.is-in` 后逐条进场（默认全可见，不藏字）。
+- 首页换屏：一张**大地图**——六个步骤站（起点/画像/方向/任务/反馈/成长）左右交替落在整幅世界坐标上，一条 Catmull-Rom 弯曲引导线（canvas 虚点按固定世界间距铺成，与粒子无关）串起全程并向画面外各延一段。滚动 = 镜头沿引导线按弧长行进：停在站点时聚焦本站图形，途中轻微拉远（zoom 0.8–1）读作「穿梭」；走过段引导线更亮、走过的站填 `--night-accent` 点、聚焦站挂 `--night-mark` 外环，`.land-map` 标签按相机投影实时定位。粒子只负责在每站聚成该步图形、行走途中散开走侧向弧线。每屏文字挂 `.is-in` 后逐条进场（默认全可见，不藏字）。
 
 ## 5. 组件清单（新页面直接复用）
 
@@ -71,7 +71,7 @@
 | 通过率条 | `.pass-bar`（`i.ok/.part/.bad`） | 反馈 / 评阅头部按条目分段：teal / gold / coral |
 | 来源卡片 | `.src-grid` + `.src-card` + `.mini-chip` + `.kind-badge` | 项目「来源」标签页的网格；`.route-how.clamp` 三行截断 |
 | 读物块 | `.sheet-reading` | 方向根节点抽屉的入门读物（与 `.course-block` 同构，不带「实时」标） |
-| 首页 | `.land` + `.snap` + `.snap-no` + `.land-points` + `.land-map` + `.land-ghost` + `.fella-index` | 点线图用 Canvas 2D 绘制，见 `app.js` 的 `SKETCHES`；换屏是一段固定节拍转场：缩成不规则路线（缩小）→ 圆环锁定目标站（驻留）→ 画成新图（放大）；`.snap-no` 大编号、`.land-ghost` 首屏直达、`.is-in` 文字进场 |
+| 首页 | `.land` + `.snap` + `.snap-no` + `.land-points` + `.land-map` + `.land-ghost` + `.fella-index` | 点线图用 Canvas 2D 绘制，见 `app.js` 的 `SKETCHES` 与 `STATIONS`；换屏是镜头沿大地图弯曲引导线穿梭（站点聚焦、途中拉远），粒子在各站聚形、途中散开；`.snap-no` 大编号、`.land-ghost` 首屏直达、`.is-in` 文字进场 |
 
 **事实类别色**：background 蓝 · interest 主色 · capability 金 · preference 紫 · experience 珊瑚（只用作圆点）。
 
