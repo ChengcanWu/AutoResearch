@@ -20,6 +20,7 @@ import llm
 import onboarding
 import planner
 import projects
+import reading
 import store
 import submission
 import workbench
@@ -93,6 +94,24 @@ class ProjectSearchReq(BaseModel):
 class ProjectPickReq(BaseModel):
     uid: str
     id: str
+
+
+class TriageReq(BaseModel):
+    uid: str
+    kit: str
+    arxiv_id: str
+    verdict: str
+    why: str
+    title: str = ""
+
+
+class CardReq(BaseModel):
+    uid: str
+    kit: str
+    arxiv_id: str
+    fields: dict[str, str] = {}
+    dims: dict[str, str] = {}
+    decision_log: list[dict[str, str]] = []
 
 
 class PortraitReq(BaseModel):
@@ -392,6 +411,78 @@ async def project_submit(pid: str, uid: str, request: Request):
         raise HTTPException(400, str(exc)) from exc
     result["fact"] = projects.record_review(uid, p, result)
     return result
+
+
+# ---------- 研读：领域工具包 / 每日情报 / 阅读卡 / 矩阵 ----------
+
+def _reading(fn, *args):
+    try:
+        return fn(*args)
+    except reading.ReadingError as exc:
+        raise HTTPException(400, str(exc)) from exc
+    except reading.arxiv.ArxivError as exc:
+        raise HTTPException(502, str(exc)) from exc
+
+
+@app.get("/api/kits")
+def kits_list():
+    return {"kits": [{k: v for k, v in kit.items() if k in ("id", "name", "version", "direction", "goal", "status")}
+                     for kit in reading.kits().values()]}
+
+
+@app.get("/api/kits/{kit_id}")
+def kit_get(kit_id: str):
+    return _reading(reading.kit, kit_id)
+
+
+@app.get("/api/daily")
+def daily_feed(uid: str, kit: str):
+    _user_or_404(uid)
+    return _reading(reading.daily, uid, kit)
+
+
+@app.post("/api/daily/triage")
+def daily_triage(req: TriageReq):
+    _user_or_404(req.uid)
+    return _reading(reading.triage, req.uid, req.kit, req.arxiv_id, req.verdict, req.why, req.title)
+
+
+@app.get("/api/papers/{arxiv_id}")
+def paper_text(arxiv_id: str):
+    """论文正文（arXiv HTML 版，取不到则只有摘要）。只读、缓存。"""
+    p = _reading(reading.arxiv.fulltext, arxiv_id)
+    return {**p, "sections": [n for n, _ in reading.arxiv.sections(p["text"])]}
+
+
+@app.get("/api/cards")
+def cards_list(uid: str, kit: str):
+    _user_or_404(uid)
+    return {"cards": store.latest_cards(uid, kit), "fields": reading.CARD_FIELDS}
+
+
+@app.get("/api/cards/{arxiv_id}/history")
+def card_history(arxiv_id: str, uid: str, kit: str):
+    _user_or_404(uid)
+    return {"versions": store.card_history(uid, kit, arxiv_id)}
+
+
+@app.post("/api/cards")
+def card_submit(req: CardReq):
+    _user_or_404(req.uid)
+    return _reading(reading.submit_card, req.uid, req.kit, req.arxiv_id, req.fields, req.dims, req.decision_log)
+
+
+@app.get("/api/matrix")
+def matrix_get(uid: str, kit: str):
+    _user_or_404(uid)
+    return _reading(reading.matrix, uid, kit)
+
+
+@app.get("/api/brief")
+def agent_brief(kit: str, arxiv_id: str):
+    text = _reading(reading.brief, kit, arxiv_id)
+    return Response(text, media_type="text/markdown; charset=utf-8",
+                    headers={"Content-Disposition": f"attachment; filename=AGENTS.md"})
 
 
 @app.post("/api/llm/connect")

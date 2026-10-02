@@ -75,6 +75,27 @@ CREATE TABLE IF NOT EXISTS projects (
   created_at TEXT NOT NULL,
   updated_at TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS triage (
+  user_id TEXT NOT NULL,
+  kit_id TEXT NOT NULL,
+  arxiv_id TEXT NOT NULL,
+  verdict TEXT NOT NULL,
+  why TEXT NOT NULL,
+  title TEXT NOT NULL DEFAULT '',
+  created_at TEXT NOT NULL,
+  PRIMARY KEY (user_id, kit_id, arxiv_id)
+);
+CREATE TABLE IF NOT EXISTS cards (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  kit_id TEXT NOT NULL,
+  arxiv_id TEXT NOT NULL,
+  version INTEGER NOT NULL,
+  data TEXT NOT NULL,
+  status TEXT NOT NULL,
+  created_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_cards_user ON cards(user_id, kit_id, arxiv_id);
 CREATE INDEX IF NOT EXISTS idx_facts_user ON facts(user_id);
 CREATE INDEX IF NOT EXISTS idx_projects_user ON projects(user_id);
 CREATE INDEX IF NOT EXISTS idx_tasks_user ON tasks(user_id);
@@ -418,3 +439,57 @@ def list_projects(uid: str) -> list[dict[str, Any]]:
         rows = c.execute("SELECT * FROM projects WHERE user_id=? ORDER BY updated_at DESC", (uid,)).fetchall()
     return [{**json.loads(r["data"]), "id": r["id"], "status": r["status"],
              "created_at": r["created_at"], "updated_at": r["updated_at"]} for r in rows]
+
+
+# ---------- 研读：每日分拣与阅读卡 ----------
+
+def save_triage(uid: str, kit_id: str, arxiv_id: str, verdict: str, why: str, title: str = "") -> None:
+    with _LOCK, _conn() as c:
+        c.execute(
+            "INSERT OR REPLACE INTO triage(user_id, kit_id, arxiv_id, verdict, why, title, created_at) VALUES(?,?,?,?,?,?,?)",
+            (uid, kit_id, arxiv_id, verdict, why, title, now_iso()),
+        )
+
+
+def list_triage(uid: str, kit_id: str) -> list[dict[str, Any]]:
+    with _conn() as c:
+        rows = c.execute("SELECT * FROM triage WHERE user_id=? AND kit_id=? ORDER BY created_at DESC", (uid, kit_id)).fetchall()
+    return [dict(r) for r in rows]
+
+
+def save_card(card: dict[str, Any]) -> None:
+    card.setdefault("created_at", now_iso())
+    with _LOCK, _conn() as c:
+        c.execute(
+            "INSERT INTO cards(id, user_id, kit_id, arxiv_id, version, data, status, created_at) VALUES(?,?,?,?,?,?,?,?)",
+            (card["id"], card["uid"], card["kit_id"], card["arxiv_id"], card["version"],
+             json.dumps(card, ensure_ascii=False), card["status"], card["created_at"]),
+        )
+
+
+def _card_rows(rows: list[sqlite3.Row]) -> list[dict[str, Any]]:
+    return [json.loads(r["data"]) for r in rows]
+
+
+def latest_card(uid: str, kit_id: str, arxiv_id: str) -> dict[str, Any] | None:
+    with _conn() as c:
+        row = c.execute("SELECT data FROM cards WHERE user_id=? AND kit_id=? AND arxiv_id=? ORDER BY version DESC LIMIT 1",
+                        (uid, kit_id, arxiv_id)).fetchone()
+    return json.loads(row["data"]) if row else None
+
+
+def card_history(uid: str, kit_id: str, arxiv_id: str) -> list[dict[str, Any]]:
+    with _conn() as c:
+        rows = c.execute("SELECT data FROM cards WHERE user_id=? AND kit_id=? AND arxiv_id=? ORDER BY version DESC",
+                         (uid, kit_id, arxiv_id)).fetchall()
+    return _card_rows(rows)
+
+
+def latest_cards(uid: str, kit_id: str) -> list[dict[str, Any]]:
+    """每篇论文只取最新一版。"""
+    with _conn() as c:
+        rows = c.execute(
+            "SELECT data FROM cards c WHERE user_id=? AND kit_id=? AND version = "
+            "(SELECT MAX(version) FROM cards c2 WHERE c2.user_id=c.user_id AND c2.kit_id=c.kit_id AND c2.arxiv_id=c.arxiv_id) "
+            "ORDER BY created_at, rowid", (uid, kit_id)).fetchall()
+    return _card_rows(rows)
