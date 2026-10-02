@@ -103,8 +103,8 @@ PATCH /api/me/facts/{fid}       {uid, value?/status?}
 DELETE /api/me/facts/{fid}     ?uid                        # 软删
 GET  /api/explore/courses      ?query&limit&term → {ok, items, term|error}   # live
 GET  /api/projects/sources      → 来源清单（任务 3，新增）
-GET  /api/projects/context     ?uid → {direction, stage, reason}           # 默认「走到哪」
-POST /api/projects/search       {uid, direction, stage, keywords?, node?} → {query, items, sources, routes, empty_reason}
+GET  /api/projects/context     ?uid → {direction, stage, reason, paths, path_step}   # 默认「走到哪」；paths 来自任务 4
+POST /api/projects/search       {uid, direction, stage, keywords?, node?, path_step?} → {query, items, sources, routes, empty_reason}
 POST /api/projects/pick         {uid, id} → Project                         # id 必须来自最近一次检索
 GET  /api/projects/mine        ?uid → {projects}
 GET  /api/projects/{pid}       ?uid → Project（含 reviews）

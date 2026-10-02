@@ -595,7 +595,7 @@ function renderLogin() {
   const hero = el("section", "hero stagger");
   hero.appendChild(el("p", "hero-kicker", "启研 · 第一步"));
   hero.appendChild(el("h2", "", "怎么称呼你？"));
-  hero.appendChild(el("p", "hero-lead", "不用真实姓名。进去之后是五个工作区：今日、画像、方向、任务、记录，随时可以换。"));
+  hero.appendChild(el("p", "hero-lead", "不用真实姓名。进去之后是六个工作区：今日、画像、方向、任务、项目、记录，随时可以换。"));
   const row = el("div", "login-row");
   const input = el("input"); input.placeholder = "你的昵称，例如：小北"; input.maxLength = 24;
   input.setAttribute("aria-label", "昵称");
@@ -1936,11 +1936,15 @@ async function renderProjects() {
   const t = trail();
   const field = FIELD_TREES[t.code];
   const node = field ? currentOnPath(field, t.done) : null;
+  const pathsBy = (ctx && ctx.paths) || {};
   const form = S.projectForm || {
     direction: (ctx && ctx.direction) || t.code || "ai",
     stage: ctx ? ctx.stage : 0,
     keywords: "",
   };
+  // 任务 4 的路径：有路径的方向按「第几步」选，没有的按四个阶段选
+  const defaultStep = (stage) => ({ 0: 1, 1: 2, 2: 3, 3: 5 }[stage] || 1);
+  if (!form.pathStep) form.pathStep = (ctx && ctx.path_step) || defaultStep(form.stage);
   S.projectForm = form;
 
   const panel = el("div", "panel project-form");
@@ -1951,30 +1955,48 @@ async function renderProjects() {
     Object.entries(FIELD_TREES).forEach(([code, f]) => {
       const b = el("button", "field-chip" + (code === form.direction ? " on" : ""), `<span>${esc(f.name)}</span>`);
       b.type = "button";
-      b.onclick = () => { form.direction = code; paintDirs(); };
+      b.onclick = () => { form.direction = code; paintDirs(); paintStages(); };
       dirs.appendChild(b);
     });
   };
   paintDirs();
   panel.appendChild(dirs);
 
-  panel.appendChild(el("h3", "section-label", "你现在走到哪"));
+  const stageLabel = el("h3", "section-label");
   const stages = el("div", "stage-pick");
   stages.setAttribute("role", "radiogroup");
-  const paintStages = () => {
+  const stageNote = el("p", "form-note");
+  const radio = (b, on) => { b.type = "button"; b.setAttribute("role", "radio"); b.setAttribute("aria-checked", on ? "true" : "false"); };
+  function paintStages() {
     stages.innerHTML = "";
-    STAGES.forEach((st) => {
-      const b = el("button", "stage-opt" + (st.value === form.stage ? " on" : ""), `<b>${st.label}</b><small>${st.hint}</small>`);
-      b.type = "button";
-      b.setAttribute("role", "radio");
-      b.setAttribute("aria-checked", st.value === form.stage ? "true" : "false");
-      b.onclick = () => { form.stage = st.value; paintStages(); };
-      stages.appendChild(b);
-    });
-  };
+    const path = pathsBy[form.direction];
+    stages.classList.toggle("path", !!path);
+    if (path) {
+      stageLabel.textContent = "你在路径的哪一步";
+      path.steps.forEach((st) => {
+        const on = st.step === form.pathStep;
+        const b = el("button", "stage-opt" + (on ? " on" : ""), `<i>第 ${st.step} 步</i><b>${esc(st.name)}</b><small>过关：${esc(st.done_when)}</small>`);
+        radio(b, on);
+        b.onclick = () => { form.pathStep = st.step; form.stage = st.project_stage; paintStages(); };
+        stages.appendChild(b);
+      });
+      const cur = path.steps.find((st) => st.step === form.pathStep);
+      if (cur) form.stage = cur.project_stage;
+      stageNote.textContent = `六步来自任务 4 的「${path.name}」路径（${path.source_doc}）。按你选的这一步找能交出它过关材料的项目。${ctx && ctx.reason ? `按你的记录预选：${ctx.reason}，不对就改。` : ""}`;
+    } else {
+      stageLabel.textContent = "你现在走到哪";
+      STAGES.forEach((st) => {
+        const on = st.value === form.stage;
+        const b = el("button", "stage-opt" + (on ? " on" : ""), `<b>${st.label}</b><small>${st.hint}</small>`);
+        radio(b, on);
+        b.onclick = () => { form.stage = st.value; form.pathStep = defaultStep(st.value); paintStages(); };
+        stages.appendChild(b);
+      });
+      stageNote.textContent = ctx && ctx.reason ? `按你的记录预选：${ctx.reason}。不对就改。` : "";
+    }
+  }
   paintStages();
-  panel.appendChild(stages);
-  if (ctx && ctx.reason) panel.appendChild(el("p", "form-note", `按你的记录预选：${esc(ctx.reason)}。不对就改。`));
+  panel.append(stageLabel, stages, stageNote);
 
   panel.appendChild(el("h3", "section-label", "想练的关键词（可选）"));
   const row = el("div", "chat-input-row");
@@ -2002,6 +2024,7 @@ async function renderProjects() {
     try {
       const r = await api("POST", "/api/projects/search", {
         uid: S.uid, direction: form.direction, stage: form.stage, keywords: form.keywords.trim(),
+        path_step: pathsBy[form.direction] ? form.pathStep : 0,
       });
       if (stale(seq)) return;
       S.projectResult = r;
@@ -2014,7 +2037,8 @@ async function renderProjects() {
   };
   go.onclick = run;
   kw.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.isComposing) run(); });
-  if (S.projectResult && S.projectResult.query && S.projectResult.query.direction === form.direction && S.projectResult.query.stage === form.stage) {
+  if (S.projectResult && S.projectResult.query && S.projectResult.query.direction === form.direction && S.projectResult.query.stage === form.stage
+    && (S.projectResult.query.path_step || 0) === (pathsBy[form.direction] ? form.pathStep : 0)) {
     paintResults(out, S.projectResult);
   }
 }
@@ -2036,7 +2060,7 @@ function paintResults(out, r) {
   sources.appendChild(chips);
   const head = el("div", "results-head");
   head.appendChild(el("h3", "panel-title", r.items && r.items.length ? `找到 ${r.items.length} 个可以做的项目` : "这次没有找到合适的项目"));
-  head.appendChild(el("p", "panel-sub", `${esc(r.query.direction_name)} · ${esc(r.query.stage_label)}${r.query.keywords ? ` · 「${esc(r.query.keywords)}」` : ""} · 检索于 ${fmtTime(r.retrieved_at)}${r.voice === "llm" ? "" : " · 规则版挑选"}`));
+  head.appendChild(el("p", "panel-sub", `${esc(r.query.direction_name)} · ${r.query.path_step ? `路径第 ${r.query.path_step} 步「${esc(r.query.path_step_name)}」` : esc(r.query.stage_label)}${r.query.keywords ? ` · 「${esc(r.query.keywords)}」` : ""} · 检索于 ${fmtTime(r.retrieved_at)}${r.voice === "llm" ? "" : " · 规则版挑选"}`));
   out.append(head, sources);
 
   if (!r.items || !r.items.length) {
@@ -2064,7 +2088,7 @@ function projectCard(p) {
   top.appendChild(el("h3", "project-name", `<a href="${esc(p.url)}" target="_blank" rel="noopener">${esc(p.name)}</a>`));
   if (p.difficulty) top.appendChild(el("span", "badge plain", esc(p.difficulty)));
   card.appendChild(top);
-  card.appendChild(el("p", "project-src", `${esc(p.source_name)} · 检索于 ${fmtTime(p.retrieved_at)}${p.snapshot ? " · 快照" : ""}${p.deadline ? ` · ${p.closed ? `已截止（${esc(p.deadline)}），可当练习` : `截止 ${esc(p.deadline)}`}` : ""}`));
+  card.appendChild(el("p", "project-src", `${p.path_step ? `对应路径第 ${p.path_step} 步 · ` : ""}${esc(p.source_name)} · 检索于 ${fmtTime(p.retrieved_at)}${p.snapshot ? " · 快照" : ""}${p.deadline ? ` · ${p.closed ? `已截止（${esc(p.deadline)}），可当练习` : `截止 ${esc(p.deadline)}`}` : ""}`));
   const dl = el("dl", "project-facts");
   dl.innerHTML = `<dt>在练什么</dt><dd>${esc(p.practices || "来源里没写明。")}</dd><dt>大概要做什么</dt><dd>${esc(p.todo || "来源里没写明，打开链接看原题。")}</dd>${p.why_fit ? `<dt>为什么是现在</dt><dd>${esc(p.why_fit)}</dd>` : ""}`;
   card.appendChild(dl);

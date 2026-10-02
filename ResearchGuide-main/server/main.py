@@ -87,6 +87,7 @@ class ProjectSearchReq(BaseModel):
     stage: int = 0
     keywords: str = ""
     node: str = ""
+    path_step: int = 0
 
 
 class ProjectPickReq(BaseModel):
@@ -325,7 +326,7 @@ def project_search(req: ProjectSearchReq):
     _user_or_404(req.uid)
     if req.direction not in planner.DIRECTIONS:
         raise HTTPException(400, f"unknown direction: {req.direction}")
-    return projects.search(req.uid, req.direction, req.stage, req.keywords, req.node)
+    return projects.search(req.uid, req.direction, req.stage, req.keywords, req.node, req.path_step)
 
 
 @app.post("/api/projects/pick")

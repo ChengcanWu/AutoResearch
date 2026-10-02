@@ -611,6 +611,10 @@ body[data-view="cards"] .site-footer { max-width: 1240px; }
 .stage-opt b { font-size: 14px; font-weight: 600; }
 .stage-opt small { font-size: 12px; color: var(--ink-3); line-height: 1.5; }
 .stage-opt:hover { border-color: var(--teal); }
+.stage-pick.path { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.stage-opt i { font-style: normal; font-size: 11px; letter-spacing: 0.06em; color: var(--ink-3); }
+.stage-pick.path small { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.stage-pick.path .stage-opt.on small { -webkit-line-clamp: unset; }
 .stage-opt.on { border-color: var(--teal); background: var(--teal-soft); box-shadow: inset 0 0 0 1px var(--teal); }
 
 .project-results { margin-top: var(--gap-5); display: flex; flex-direction: column; gap: var(--gap-3); }
@@ -781,7 +785,7 @@ body.is-home .site-footer { display: none; }
   .chat-scroll { max-height: none; padding: var(--gap-4); }
   .chat-foot { padding: var(--gap-3) var(--gap-4) var(--gap-4); }
   .task-head { flex-direction: column; gap: var(--gap-1); }
-  .stage-pick { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stage-pick, .stage-pick.path { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .project-facts { grid-template-columns: 1fr; }
   .project-facts dd { margin-bottom: var(--gap-2); }
   .task-meta { padding-top: 0; }
