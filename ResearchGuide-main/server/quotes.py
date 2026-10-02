@@ -58,4 +58,5 @@ def locate(quote: str, paper: dict[str, Any]) -> dict[str, Any]:
         return {"found": True, "section": "", "where": "正文", "reason": ""}
     src_pos = pos[i] if i < len(pos) else 0
     sec = arxiv.section_at(paper["text"], src_pos)
-    return {"found": True, "section": sec, "where": sec or ("摘要" if paper.get("source") == "abstract" else "正文"), "reason": ""}
+    where = arxiv.section_cn(sec) if sec else ("摘要" if paper.get("source") == "abstract" else "正文")
+    return {"found": True, "section": sec, "where": where, "reason": ""}

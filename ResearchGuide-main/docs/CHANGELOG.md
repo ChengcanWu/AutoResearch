@@ -6,6 +6,14 @@
 
 ---
 
+## [2026-10-03] [BUILD] 研读层与定位层的第一条纵切片（设计提案 §1C、§1D）
+- 变更内容：新增两个工作区。「研读」：领域工具包「大模型评测与基准」（10 篇 arXiv 论文、7 个 GitHub 数据集、11 条逐字核对过的作者自述开放问题、7 个矩阵维度）；阅读卡工作台左边是 arXiv 正文（可按节跳转、选中原句一键引用），右边 7 栏，引文必须逐字出自原文、局限必须出自局限 / 讨论 / 结论段，「主张 / 假设 / 我会改什么」不能抄原文；可下载 AGENTS.md 交给学生自己的 Agent，并在决策日志里逐条表态；三张卡过线后出综合矩阵，空格、空列、方向相反的冲突由规则标出。「定位」：边清单（已证明的从账本自动导入，自述的自己加，含「信息源」一类）、竞争地图（需求只数有投入的人、滞后一周、k≥5、池子不够写「数据不足」；供给如实写「未知 · 去问」；势头用 arXiv 近 12 个月相对分类整体的增长，离线算好写进工具包；不提供冷门排行）、定位陈述「我是能做 X 的人，因为 Y」的规则检查（不打分）、冲 / 稳 / 保 下注组合（最多 3 个，集中风险提示）。「今日」多一块每日情报：分拣几篇当天 arXiv 新论文（留 / 过 + 一句理由）和至多一句定位微调。全部规则判定，不调用模型。
+- 修复：arXiv HTML 正文只取 `<article>`，不再混进横幅和反馈弹窗；公式保留 TeX。
+- 影响模块：server/arxiv.py、server/quotes.py、server/reading.py、server/positioning.py、server/kit_momentum.py、server/store.py、server/main.py、server/tests/、knowledge/kits/、web/js/app.js、web/css/styles.css、web/index.html
+- 影响文档：docs/READING_POSITIONING.md（新增）、docs/ARCHITECTURE.md、docs/README.md
+- 决策来源：陈浩文（依据设计提案 v2）
+- 登记人：助手
+
 ## [2026-10-02] [BUILD] 方向树画成「6 步主干 + 原有节点」（任务 4 路径进树）
 - 变更内容：新增 `GET /api/paths`；前端启动时读路径，把数学、人工智能、认知、经济四棵树组成「6 步主干 + 原有节点」：主干竖排成一条粗线、带序号，原有概念节点按 `docs/paths/改树建议.md` §3/§4/§7/§8 的改动清单挂到对应步骤右侧（`web/js/app.js` 的 `CHAIN_ATTACH`），`FIELD_TREES` 原文不动；统计、系统不变。点主干看「先弄懂什么 / 做完怎样算过了」，并能直接「找能交出这一步的项目」；任务页标出当前节点属于第几步、这一步要交什么；「项目」页按树上的位置预选步骤。修复：第一次在方向区接过服务端已选方向时没有按已交任务对齐进度。
 - 影响模块：server/main.py、web/js/app.js、web/css/styles.css、server/tests/、docs/DESIGN_SPEC.md、docs/TASK3_PROJECTS.md、docs/paths/README.md（一行）

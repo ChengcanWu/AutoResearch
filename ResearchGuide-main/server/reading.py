@@ -140,6 +140,10 @@ def review_card(k: dict[str, Any], paper: dict[str, Any], fields: dict[str, str]
             "paper_source": paper.get("source"), "reviewed_at": now_iso()}
 
 
+def _short(title: str, n: int = 40) -> str:
+    return title if len(title) <= n else title[:n].rstrip() + "…"
+
+
 def submit_card(uid: str, kit_id: str, arxiv_id: str, fields: dict[str, str], dims: dict[str, str],
                 decision_log: list[dict[str, str]] | None = None) -> dict[str, Any]:
     k = kit(kit_id)
@@ -159,9 +163,9 @@ def submit_card(uid: str, kit_id: str, arxiv_id: str, fields: dict[str, str], di
     store.save_card(card)
     if review["pass"] and not (prev and prev["status"] == "pass"):
         f = UserFact(user_id=uid, category="capability", key=f"card:{kit_id}:{aid}",
-                     value=f"已证明：能读《{paper['title'][:40]}》，定位作者自述的局限并写出自己的改动（阅读卡 v{version}）",
+                     value=f"已证明：能读《{_short(paper['title'])}》，定位作者自述的局限并写出自己的改动（阅读卡 v{version}）",
                      confidence=0.85, source="behavior",
-                     evidence=[{"type": "reading_card", "card_id": card["id"], "task_title": paper["title"][:40], "arxiv_id": aid}],
+                     evidence=[{"type": "reading_card", "card_id": card["id"], "task_title": _short(paper["title"]), "arxiv_id": aid}],
                      status="active")
         store.add_fact(f)
         card["fact"] = f.to_dict()
@@ -207,7 +211,7 @@ def brief(kit_id: str, arxiv_id: str) -> str:
     fields = "\n".join(f"- {f['label']}：{f['hint']}" for f in CARD_FIELDS)
     return f"""# 启研 · 阅读卡简报（标准 reading-card v1 · 工具包 {k['id']} v{k['version']}）
 
-你是一名本科生的研究助手。这名学生在为 arXiv:{aid}《{p['title']}》写一张阅读卡，卡由他自己写，你只做下面允许的事。
+你是一名本科生的研究助手。这名学生在为 arXiv:{aid}《{p['title']}》写一张阅读卡。卡由学生自己写，你只做下面允许的事。
 
 ## 原文
 https://arxiv.org/abs/{aid} （HTML 版：https://arxiv.org/html/{aid}）

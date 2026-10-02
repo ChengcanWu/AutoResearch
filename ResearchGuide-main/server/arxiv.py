@@ -97,6 +97,20 @@ def query(params: dict[str, Any]) -> list[dict[str, Any]]:
     return data
 
 
+def count(search_query: str) -> int:
+    """命中总数（opensearch:totalResults），不取条目。给「势头」用。"""
+    # max_results=0 会让 arXiv 返回 500，取 1 条
+    url = API + "?" + urllib.parse.urlencode({"search_query": search_query, "max_results": 1})
+    try:
+        root = ET.fromstring(_get(url))
+    except ET.ParseError as exc:
+        raise ArxivError("arXiv 返回的不是 Atom") from exc
+    total = root.findtext("{http://a9.com/-/spec/opensearch/1.1/}totalResults")
+    if total is None:
+        raise ArxivError("arXiv 没有返回总数")
+    return int(total)
+
+
 def papers(ids: list[str]) -> list[dict[str, Any]]:
     ids = [clean_id(i) for i in ids]
     return query({"id_list": ",".join(ids), "max_results": len(ids)}) if ids else []
@@ -118,9 +132,13 @@ _TAG = re.compile(r"<[^>]+>")
 
 
 def _html_to_text(page: str) -> str:
-    page = _DROP.sub(" ", page)
-    # LaTeXML 把公式的 TeX 原文放在 alttext 里；保留一个占位，免得句子断开
+    # 正文在 <article> 里；前面是 arXiv 的横幅、反馈弹窗等页面杂项
+    start = page.find("<article")
+    if start >= 0:
+        page = page[start:]
+    # LaTeXML 把公式的 TeX 原文放在 alttext 里；先换成 TeX，免得句子断开
     page = re.sub(r"<math[^>]*alttext=\"([^\"]*)\"[^>]*>.*?</math>", lambda m: f" {html.unescape(m.group(1))} ", page, flags=re.S)
+    page = _DROP.sub(" ", page)
     page = _BLOCK.sub("\n", page)
     text = html.unescape(_TAG.sub(" ", page))
     lines = [re.sub(r"[ \t ]+", " ", ln).strip() for ln in text.splitlines()]
@@ -156,6 +174,17 @@ def sections(text: str) -> list[tuple[str, int]]:
     for m in re.finditer(r"^(?:\d+(?:\.\d+)*\s+)?(Abstract|Introduction|Related Work|Background|Method[s]?|Approach|Experiments?|Results?|Discussion|Analysis|Limitations?|Future Work|Conclusions?|Broader Impact|Ethics Statement|Acknowledg(?:e)?ments?|References|Appendix)\b.*$", text, re.M | re.I):
         out.append((m.group(1).lower(), m.start()))
     return out
+
+
+SECTION_CN = {"abstract": "摘要", "introduction": "引言", "related work": "相关工作", "background": "背景",
+              "method": "方法", "methods": "方法", "approach": "方法", "experiment": "实验", "experiments": "实验",
+              "result": "结果", "results": "结果", "discussion": "讨论", "analysis": "分析", "limitation": "局限",
+              "limitations": "局限", "future work": "未来工作", "conclusion": "结论", "conclusions": "结论",
+              "broader impact": "更广的影响", "ethics statement": "伦理声明", "references": "参考文献", "appendix": "附录"}
+
+
+def section_cn(name: str) -> str:
+    return SECTION_CN.get(name, "致谢" if name.startswith("acknowledg") else name)
 
 
 def section_at(text: str, pos: int) -> str:
