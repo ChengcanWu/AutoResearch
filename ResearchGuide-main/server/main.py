@@ -6,6 +6,8 @@
 """
 from __future__ import annotations
 
+import hmac
+import os
 import sys
 from pathlib import Path
 
@@ -78,7 +80,7 @@ class FactPatchReq(BaseModel):
 class LlmConnectReq(BaseModel):
     base_url: str = "https://api.deepseek.com/v1"
     api_key: str
-    model: str = "deepseek-chat"
+    model: str = "deepseek-flash"
 
 
 class ProjectSearchReq(BaseModel):
@@ -388,8 +390,19 @@ async def project_submit(pid: str, uid: str, request: Request):
     return result
 
 
+def _may_configure(request: Request) -> bool:
+    """改服务器的模型设置（密钥、地址）只许管理员：设了 ADMIN_TOKEN 就核对请求头；没设就只许本机。
+    原来任何访客都能改，等于能换掉团队的密钥，或把所有请求转到任意 https 地址。"""
+    token = os.environ.get("ADMIN_TOKEN", "")
+    if token:
+        return hmac.compare_digest(request.headers.get("X-Admin-Token", ""), token)
+    return bool(request.client) and request.client.host in ("127.0.0.1", "::1", "localhost")
+
+
 @app.post("/api/llm/connect")
-def llm_connect(req: LlmConnectReq):
+def llm_connect(req: LlmConnectReq, request: Request):
+    if not _may_configure(request):
+        raise HTTPException(403, "只有在服务器本机，或带管理员口令，才能改模型设置")
     try:
         cfg = llm.apply_config(req.base_url, req.api_key, req.model, persist=True)
     except ValueError as exc:

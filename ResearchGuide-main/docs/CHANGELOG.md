@@ -6,6 +6,12 @@
 
 ---
 
+## [2026-10-03] [FIX] 模型设置只许管理员改；DeepSeek 默认关思考、输出封顶
+- 变更内容：`POST /api/llm/connect` 原来任何访客都能调用，可以换掉服务器的密钥，或把所有模型请求转到任意 https 地址；现在设了 `ADMIN_TOKEN` 就要带 `X-Admin-Token`，没设只许服务器本机。「连接模型」弹窗多一个可选的管理员口令。写 `.env` 改为只改三行，不再冲掉别的配置。默认模型改为 `deepseek-flash`（DeepSeek 的 /models 只剩它和 `deepseek-v4-pro`，`deepseek-chat` 已列入停用，目前仍被路由到 flash 非思考）；flash 默认开思考，对 DeepSeek 显式关掉（设了 `LLM_REASONING_EFFORT` 则不关）；每次请求 `max_tokens` 默认封顶 2000。
+- 影响模块：server/main.py、server/llm.py、web/js/app.js、.env.example、server/tests/test_llm_guard.py
+- 决策来源：陈浩文
+- 登记人：助手
+
 ## [2026-10-02] [FIX] paths.json 接上认知、经济路径；清掉 CHANGELOG 里残留的合并冲突标记
 - 变更内容：#5 加了 `docs/paths/认知.md`、`经济.md`，但没有重新生成 `knowledge/paths.json`，main 上 `server/tests` 有一条测试失败。现在跑过 `knowledge/build_paths.py`，四个方向都有 6 步路径，「项目」页的认知、经济也按路径步骤选。`改树建议.md` §5 的项目形态是为数学、人工智能写的，生成时只给这两个方向带上。另外删掉本文件里 #3 合并时留下的一行 `=======`。检索加 12 秒总时限：慢来源（今天产业命题要 20–35 秒）先用快照、后台跑完写缓存，冷启动从 40 多秒降到约 17 秒，缓存热了约 5 秒。
 - 影响模块：knowledge/paths.json、knowledge/build_paths.py、server/projects.py、server/project_adapters.py、server/tests/test_projects.py、docs/TASK3_PROJECTS.md、docs/CHANGELOG.md
