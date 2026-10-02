@@ -33,6 +33,7 @@ from schemas import now_iso
 
 ROOT = Path(__file__).resolve().parent.parent
 REGISTRY = ROOT / "knowledge" / "project_sources.json"
+PATHS = ROOT / "knowledge" / "paths.json"   # 任务 4 方向路径的机读版（目前有数学、人工智能）
 
 STAGE_LABELS = ["只学了概念", "做过小任务", "学完一块", "做过项目"]
 KIND_LABELS = {
@@ -51,6 +52,8 @@ DIR_TERMS: dict[str, list[str]] = {
 }
 
 _REG_CACHE: tuple[float, dict[str, Any]] | None = None
+_PATHS_CACHE: tuple[float, dict[str, Any]] | None = None
+DEFAULT_STEP = {0: 1, 1: 2, 2: 3, 3: 5}  # 没有路径进度时，由项目阶段推一个默认的路径步骤
 _LAST: dict[str, tuple[float, dict[str, dict[str, Any]]]] = {}
 _LAST_LOCK = threading.Lock()
 LAST_TTL = 2 * 3600
@@ -64,6 +67,26 @@ def registry() -> dict[str, Any]:
     data = json.loads(REGISTRY.read_text(encoding="utf-8"))
     _REG_CACHE = (mtime, data)
     return data
+
+
+def paths() -> dict[str, Any]:
+    """{方向代码: {name, goal, source_doc, steps:[{step, name, focus, done_when, project_stage, project_form}]}}"""
+    global _PATHS_CACHE
+    if not PATHS.exists():
+        return {}
+    mtime = PATHS.stat().st_mtime
+    if _PATHS_CACHE and _PATHS_CACHE[0] == mtime:
+        return _PATHS_CACHE[1]
+    data = json.loads(PATHS.read_text(encoding="utf-8")).get("paths") or {}
+    _PATHS_CACHE = (mtime, data)
+    return data
+
+
+def path_step(direction: str, step: int) -> dict[str, Any] | None:
+    for s in (paths().get(direction) or {}).get("steps") or []:
+        if s["step"] == step:
+            return s
+    return None
 
 
 def _pid(source_id: str, url: str, title: str) -> str:
@@ -93,7 +116,11 @@ def context(uid: str) -> dict[str, Any]:
         stage, reason = 1, f"在「{direction_name(direction)}」交过 {len(tasks)} 次小任务"
     else:
         stage, reason = 0, "还没有交过小任务" if direction else "还没有选定方向"
-    return {"direction": direction, "stage": stage, "stage_label": STAGE_LABELS[stage], "reason": reason}
+    public = {code: {"name": p["name"], "goal": p.get("goal", ""), "source_doc": p.get("source_doc", ""),
+                     "steps": [{k: st[k] for k in ("step", "name", "done_when", "project_stage")} for st in p["steps"]]}
+              for code, p in paths().items()}
+    return {"direction": direction, "stage": stage, "stage_label": STAGE_LABELS[stage], "reason": reason,
+            "paths": public, "path_step": DEFAULT_STEP[stage] if direction in public else None}
 
 
 # ---------- 检索 ----------
@@ -179,7 +206,8 @@ def _score(item: dict[str, Any], direction: str, stage: int, keywords: str) -> f
     return s
 
 
-def _pick_llm(cands: list[dict[str, Any]], direction: str, stage: int, keywords: str, node: str) -> list[dict[str, Any]] | None:
+def _pick_llm(cands: list[dict[str, Any]], direction: str, stage: int, keywords: str, node: str,
+              step: dict[str, Any] | None = None) -> list[dict[str, Any]] | None:
     if not llm.enabled() or not cands:
         return None
     lines = [
@@ -189,7 +217,8 @@ def _pick_llm(cands: list[dict[str, Any]], direction: str, stage: int, keywords:
     data = llm.chat_json(
         skills.load("project-scout"),
         f"学生：方向={direction_name(direction)}；阶段={stage}（{STAGE_LABELS[stage]}）；关键词={keywords or '无'}；当前节点={node or '无'}\n"
-        "候选（id | 来源 | 标题 | 难度 | 截止 | 原文摘录）：\n" + "\n".join(lines),
+        + (f"路径步骤：第 {step['step']} 步「{step['name']}」；这一步做完要交：{step['done_when']}；任务 4 建议的项目形态（参考）：{step.get('project_form', '')}\n" if step else "路径步骤：无\n")
+        + "候选（id | 来源 | 标题 | 难度 | 截止 | 原文摘录）：\n" + "\n".join(lines),
         timeout=40, tag="project-scout",
     )
     items = (data or {}).get("items") if isinstance(data, dict) else None
@@ -241,8 +270,13 @@ def _routes(reg: dict[str, Any], direction: str, used: set[str]) -> list[dict[st
     return out
 
 
-def search(uid: str, direction: str, stage: int, keywords: str = "", node: str = "") -> dict[str, Any]:
+def search(uid: str, direction: str, stage: int, keywords: str = "", node: str = "", step_no: int = 0) -> dict[str, Any]:
     reg = registry()
+    step = path_step(direction, int(step_no or 0))
+    if step:
+        # 有任务 4 的路径时，以路径步骤为准：步骤决定项目阶段，步骤名当作「正在学的节点」
+        stage = step["project_stage"]
+        node = node or step["name"]
     stage = max(0, min(3, int(stage)))
     keywords = (keywords or "").strip()[:40]
     sources = [s for s in reg["sources"]
@@ -265,13 +299,16 @@ def search(uid: str, direction: str, stage: int, keywords: str = "", node: str =
             uniq.setdefault(c["id"], c)
     ranked = sorted(uniq.values(), key=lambda c: -_score(c, direction, stage, keywords))
     ranked = [c for c in ranked if _score(c, direction, stage, keywords) > 0][:24]
-    chosen = _pick_llm(ranked, direction, stage, keywords, node)
+    chosen = _pick_llm(ranked, direction, stage, keywords, node, step)
     voice = "llm"
     if chosen is None:
         voice = "rules"
         chosen = [_fallback_text(c) for c in ranked[:5]]
     for c in chosen:
         c.setdefault("why_fit", "")
+        if step:
+            c["path_step"] = step["step"]
+            c["path_step_name"] = step["name"]
     picked_ids = {p.get("source_ref") for p in store.list_projects(uid)}
     for c in chosen:
         c["picked"] = c["id"] in picked_ids
@@ -284,7 +321,8 @@ def search(uid: str, direction: str, stage: int, keywords: str = "", node: str =
                         else "这次所有来源都没有返回结果。") + "不补假项目：可以换个关键词，或照下面的路线自己去看。"
     return {
         "query": {"direction": direction, "direction_name": direction_name(direction), "stage": stage,
-                  "stage_label": STAGE_LABELS[stage], "keywords": keywords},
+                  "stage_label": STAGE_LABELS[stage], "keywords": keywords,
+                  "path_step": step["step"] if step else None, "path_step_name": step["name"] if step else ""},
         "items": chosen, "sources": status, "routes": _routes(reg, direction, used),
         "empty_reason": empty_reason, "voice": voice, "retrieved_at": now_iso(),
     }
@@ -293,7 +331,8 @@ def search(uid: str, direction: str, stage: int, keywords: str = "", node: str =
 # ---------- 选定 / 模板 / 示例 ----------
 
 PUBLIC_KEYS = ("name", "url", "source_id", "source_name", "source_url", "practices", "todo", "why_fit",
-               "difficulty", "deadline", "closed", "retrieved_at", "snapshot", "evidence_quote", "kind")
+               "difficulty", "deadline", "closed", "retrieved_at", "snapshot", "evidence_quote", "kind",
+               "path_step", "path_step_name")
 
 
 def pick(uid: str, cid: str) -> dict[str, Any]:

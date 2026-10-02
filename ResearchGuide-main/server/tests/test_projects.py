@@ -146,3 +146,54 @@ def test_closed_deadline_detection():
     assert projects._closed("2020-01-01") is True
     assert projects._closed("2999-01-01") is False
     assert projects._closed("") is False
+
+
+# ---------- 任务 4 路径 ----------
+
+def test_paths_have_six_steps_with_pass_criteria():
+    data = projects.paths()
+    assert {"math", "ai"} <= set(data)
+    for code, p in data.items():
+        steps = p["steps"]
+        assert [s["step"] for s in steps] == [1, 2, 3, 4, 5, 6], code
+        assert all(s["name"] and s["done_when"] for s in steps), code
+        stages = [s["project_stage"] for s in steps]
+        assert stages == sorted(stages) and stages[0] == 0 and stages[-1] == 3, code
+
+
+def test_context_offers_path_step_for_directions_with_a_path():
+    from schemas import UserFact
+    uid = store.create_user("t")["uid"]
+    store.add_fact(UserFact(user_id=uid, category="interest", key="direction:ai", value="ai", status="confirmed"))
+    ctx = projects.context(uid)
+    assert ctx["direction"] == "ai" and ctx["path_step"] == 1 and "ai" in ctx["paths"]
+
+
+def test_path_step_sets_stage_and_is_passed_to_the_model(monkeypatch):
+    uid = store.create_user("t")["uid"]
+    cand = {"id": "c1", "name": "某学习赛：文本分类", "url": "https://example.org/c1", "source_id": "s", "source_name": "来源",
+            "source_url": "", "kind": "competition", "excerpt": "分类 数据 评价指标", "practices": "", "todo": "", "difficulty": "",
+            "deadline": "", "stage_fit": [1, 2], "directions": ["ai"], "evidence_quote": "", "retrieved_at": "", "snapshot": False, "closed": False}
+    monkeypatch.setattr(projects, "_collect", lambda src, d, st, kw: ([dict(cand)], {"id": src["id"], "name": src["name"], "ok": True, "count": 1}))
+    seen = {}
+
+    def fake_pick(cands, direction, stage, keywords, node, step=None):
+        seen.update(stage=stage, node=node, step=step)
+        return None
+
+    monkeypatch.setattr(projects, "_pick_llm", fake_pick)
+    r = projects.search(uid, "ai", 0, "", "", step_no=5)
+    assert seen["stage"] == 3 and seen["step"]["step"] == 5 and seen["node"] == seen["step"]["name"]
+    assert r["query"]["path_step"] == 5 and r["items"][0]["path_step"] == 5
+    r2 = projects.search(uid, "psy", 1, "", "", step_no=5)   # 没有路径的方向忽略 path_step
+    assert r2["query"]["path_step"] is None and r2["query"]["stage"] == 1
+
+
+def test_paths_json_is_in_sync_with_docs():
+    """docs/paths/*.md 改了却没重新生成 knowledge/paths.json 时失败。"""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("build_paths", projects.ROOT / "knowledge" / "build_paths.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    on_disk = json.loads(projects.PATHS.read_text(encoding="utf-8"))
+    assert on_disk == mod.build(), "路径文档有改动：请运行 uv run --no-project python knowledge/build_paths.py"

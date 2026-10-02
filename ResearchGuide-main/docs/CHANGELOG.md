@@ -6,6 +6,12 @@
 
 ---
 
+## [2026-10-01] [BUILD] 「项目」接上任务 4 的方向路径
+- 变更内容：新增 `knowledge/paths.json`（由 `knowledge/build_paths.py` 从 `docs/paths/*.md` 生成，目前有数学、人工智能）。「项目」页对有路径的方向改为「你在路径的哪一步」，按这一步的过关标准找项目；检索接口多一个可选字段 `path_step`，`context` 多返回 `paths` 和默认步骤。没有路径的方向不变。甲补上认知、经济后跑一次生成脚本即可接上。登录页「五个工作区」改为六个。
+- 影响模块：server/projects.py、server/main.py、skills/project-scout/SKILL.md、web/js/app.js、web/css/styles.css、knowledge/、docs/TASK3_PROJECTS.md、docs/ARCHITECTURE.md、docs/paths/README.md（一行）
+- 决策来源：陈浩文
+- 登记人：助手
+
 ## [2026-09-30] [DOC] 新增方向路径交付目录（任务 4 · 数学 / 人工智能）
 - 变更内容：新增 `docs/paths/`：`README.md`（每步的固定字段 + 主链标注约定）、`数学.md`、`人工智能.md`、`改树建议.md`。两条路径各 6 步，每步含「为什么是这一步 / 先弄懂什么 / 做完怎样算过了 / 依据 / 对应现有树节点」；文中共 41 条外部链接于 2026-09-30 逐条请求核对，核不到的四条（AMS Notices、Papers with Code、Hugging Face、Tao 某篇旧文）在文末如实记录，未用替代链接补位。
 - 影响文档：`docs/paths/`（新增）；甲的两个方向（认知、经济）待补
