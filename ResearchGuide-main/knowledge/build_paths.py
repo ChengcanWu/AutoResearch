@@ -22,7 +22,9 @@ CODES = {"数学": "math", "人工智能": "ai", "认知": "psy", "经济": "eco
 # 路径第几步 → 项目阶段（0 只学了概念 · 1 做过小任务 · 2 学完一块 · 3 做过项目）
 STEP_TO_STAGE = {1: 0, 2: 1, 3: 2, 4: 2, 5: 3, 6: 3}
 
-# docs/paths/改树建议.md §5「给任务 3 的接口」里的阶段—项目形态（原文，供模型参考）
+# docs/paths/改树建议.md §5「给任务 3 的接口」里的阶段—项目形态（原文，供模型参考）。
+# §5 是乙为数学 / 人工智能写的，认知、经济没有对应表，就只用各自路径的过关标准。
+FORM_DIRECTIONS = {"math", "ai"}
 FORM = {
     1: "复现一个小基线、把一个小结跑出来（入门赛、课程公开作业题）",
     2: "复现一个小基线、把一个小结跑出来（入门赛、课程公开作业题）",
@@ -34,14 +36,14 @@ FORM = {
 
 ABOUT = ("任务 4 方向路径的机读版，由 knowledge/build_paths.py 从 docs/paths/*.md 生成，不要手改。"
          "只抄步骤名、先弄懂什么、做完怎样算过了；project_stage 是任务 3 的换算（第 1 步→只学了概念，2→做过小任务，3–4→学完一块，5–6→做过项目），"
-         "project_form 抄自 docs/paths/改树建议.md §5。")
+         "project_form 抄自 docs/paths/改树建议.md §5（只有数学、人工智能有）。")
 
 
 def _plain(s: str) -> str:
     return re.sub(r"\*\*(.+?)\*\*", r"\1", s).strip()
 
 
-def parse(path: Path) -> dict:
+def parse(path: Path, code: str = "") -> dict:
     text = path.read_text(encoding="utf-8")
     head = re.search(r"^> 方向：(.+?) ｜.*?核对日期：(\S+)", text, re.M)
     goal = re.search(r"^> 终点定义：(.+)$", text, re.M)
@@ -58,7 +60,7 @@ def parse(path: Path) -> dict:
             return _plain(f.group(1))
 
         steps.append({"step": n, "name": name, "focus": field("先弄懂什么"), "done_when": field("做完怎样算过了"),
-                      "project_stage": STEP_TO_STAGE[n], "project_form": FORM[n]})
+                      "project_stage": STEP_TO_STAGE[n], "project_form": FORM[n] if code in FORM_DIRECTIONS else ""})
     if [s["step"] for s in steps] != list(range(1, 7)):
         raise ValueError(f"{path.name}: 需要第 1–6 步，实际是 {[s['step'] for s in steps]}")
     return {"name": head.group(1).strip(), "source_doc": f"docs/paths/{path.name}", "checked_at": head.group(2),
@@ -70,7 +72,7 @@ def build() -> dict:
     for stem, code in CODES.items():
         f = DOCS / f"{stem}.md"
         if f.exists():
-            paths[code] = parse(f)
+            paths[code] = parse(f, code)
     return {"about": ABOUT, "paths": paths}
 
 

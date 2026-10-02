@@ -218,7 +218,7 @@ _CY_REQ = ("答题要求", "预期成果", "成果要求", "交付", "考核", "
 
 
 def _cy_detail(cid: str) -> str:
-    page = http(f"https://cy.ncss.cn/mtcontest/detail?id={cid}", as_json=False, timeout=10)
+    page = http(f"https://cy.ncss.cn/mtcontest/detail?id={cid}", as_json=False, timeout=8)
     i = page.find('class="detail-content"')
     body = _clean(page[i:i + 40000], 20000) if i >= 0 else ""
     # 详情页前半是企业介绍和产业背景，学生真正要看的是后面的答题要求
@@ -242,9 +242,9 @@ def cy_ncss(src, direction, stage, terms):
             seen.add(cid)
             out.append({"id": cid, "title": _html.unescape(title), "url": f"https://cy.ncss.cn/mtcontest/detail?id={cid}",
                         "description": f"{_html.unescape(company)} 命题 · {cat}", "difficulty": cat})
-    out = out[:8]
+    out = out[:5]  # 详情页又长又慢，只取前 5 条
     from concurrent.futures import ThreadPoolExecutor
-    with ThreadPoolExecutor(max_workers=4) as pool:
+    with ThreadPoolExecutor(max_workers=5) as pool:
         details = list(pool.map(lambda it: _safe(_cy_detail, it["id"]), out))
     for it, det in zip(out, details):
         if det:
