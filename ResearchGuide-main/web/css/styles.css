@@ -815,8 +815,8 @@ body.is-home .site-footer { display: none; }
 .land-snap::-webkit-scrollbar { display: none; }
 .snap {
   min-height: 170vh;
-  padding: 26vh 0 0 max(96px, 9vw);
-  max-width: calc(max(96px, 9vw) + 440px);
+  padding: 26vh 0 0 27vw;
+  max-width: calc(27vw + 400px);
 }
 .snap:last-child { min-height: 100vh; }
 .snap .hero-kicker { color: var(--night-2); font-size: 12px; letter-spacing: 0.24em; }
@@ -899,6 +899,12 @@ body.is-home .site-footer { display: none; }
 .fella-no:hover, .fella-no.on { color: var(--night-ink); }
 .home-progress { position: fixed; left: 0; right: 0; top: 0; z-index: 2; height: 1px; background: rgba(237, 241, 238, 0.08); }
 .home-progress i { display: block; height: 100%; width: 0; background: var(--night-mark); }
+
+/* 中屏（920–1279）：走廊收窄贴边、藏站点标签，文字收窄到 360px 让位 */
+@media (min-width: 920px) and (max-width: 1279px) {
+  .snap { padding: 26vh 0 0 calc(15vw + 135px); max-width: calc(15vw + 495px); }
+  .land-map span { display: none; }
+}
 
 /* ---------- 窄屏 ---------- */
 
