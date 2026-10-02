@@ -32,7 +32,7 @@ uv run --no-project --with fastapi --with uvicorn --with pydantic python server/
 
 ## 边学边练（任务 3）
 
-侧栏「项目」：选方向和「走到哪」，从公开来源实时检索可以做的练手项目（每条带来源链接和检索时间，查不到就空着）；选一个，按要求打成 `.zip` 交上来，按五条标准逐条评阅并写回画像。说明见 [docs/TASK3_PROJECTS.md](docs/TASK3_PROJECTS.md)；离线测试：`uv run --no-project --with pytest --with fastapi --with pydantic pytest server/tests`。
+侧栏「项目」：选方向和「走到哪」，从公开来源实时检索可以做的练手项目（每条带来源链接和检索时间，查不到就空着）；选一个，按要求打成 `.zip` 交上来，按五条标准逐条评阅并写回画像。说明见 [docs/TASK3_PROJECTS.md](docs/TASK3_PROJECTS.md)；离线测试：`uv run --no-project --with pytest --with fastapi --with pydantic --with httpx pytest server/tests`（不联网、不调模型；PR 上由 GitHub Actions 自动跑，见仓库根目录 `.github/workflows/tests.yml`）。
 
 ## 目录结构
 

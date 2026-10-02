@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """边学边练的离线测试：不联网、不调模型。
 
-运行：uv run --no-project --with pytest --with fastapi --with pydantic pytest server/tests
+运行：uv run --no-project --with pytest --with fastapi --with pydantic --with httpx pytest server/tests
 """
 from __future__ import annotations
 
