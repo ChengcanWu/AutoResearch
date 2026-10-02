@@ -63,7 +63,13 @@
 | 节点抽屉 | `.node-sheet` | 桌面右侧、窄屏底部 |
 | 任务 | `.task-head` + `.step-list` + `.criteria` + `.submit-box` | 步骤是可勾选的行，标准是圆点列表 |
 | 反馈 | `.feedback` + `.rubric-item.pass/.fail` + `.why-box` | 分数写成「3 / 3 条做到」；下一步只指一处 |
-| 建议卡 | `.nba-card` | 今日唯一重点 |
+| 建议卡 | `.nba-card` + `.nba-evidence`（引用行）+ `.nba-alts`（备选行动） | 今日唯一重点；依据引用用户原话，备选为 ghost 小按钮 |
+| 闭环进度 | `.loop-strip` + `.loop-step`（`done`/`now`） | 今日页顶部六步（聊过→核对→方向→任务→项目→记录），可点跳转 |
+| 状态 chips | `.status-chip`（`.on` 主色软底） | 今日页方向 / 当前节点 / 已交次数 |
+| 骨架占位 | `.ws-skeleton` + `.sk-block` | 异步视图等待时的形状占位，数据到了整块替换；呼吸动画挂 reduced-motion |
+| 通过率条 | `.pass-bar`（`i.ok/.part/.bad`） | 反馈 / 评阅头部按条目分段：teal / gold / coral |
+| 来源卡片 | `.src-grid` + `.src-card` + `.mini-chip` + `.kind-badge` | 项目「来源」标签页的网格；`.route-how.clamp` 三行截断 |
+| 读物块 | `.sheet-reading` | 方向根节点抽屉的入门读物（与 `.course-block` 同构，不带「实时」标） |
 | 首页 | `.land` + `.snap` + `.land-points` + `.fella-index` | 点线图用 Canvas 2D 绘制，见 `app.js` 的 `SKETCHES` |
 
 **事实类别色**：background 蓝 · interest 主色 · capability 金 · preference 紫 · experience 珊瑚（只用作圆点）。

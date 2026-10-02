@@ -49,6 +49,13 @@ function toast(msg, ms = 2600) {
   document.body.appendChild(t);
   setTimeout(() => t.remove(), ms);
 }
+/* 异步视图等待时的骨架占位：数据到了整块替换，避免白屏或旧页停流 */
+function skeleton(rows = 2) {
+  const box = el("div", "ws-skeleton");
+  box.setAttribute("aria-hidden", "true");
+  for (let i = 0; i < rows; i++) box.appendChild(el("div", "sk-block"));
+  return box;
+}
 const CAT_CN = { background: "背景", interest: "兴趣", capability: "能力", preference: "偏好", experience: "经历" };
 const SRC_CN = { declared: "自述", inferred: "推断", behavior: "行为" };
 
@@ -1333,6 +1340,13 @@ function openNodeSheet(field, node, ctx) {
     sheet.appendChild(go);
   }
   if (node.id === field.root.id) {
+    if (ctx.reading && ctx.reading.title) {
+      const read = el("div", "sheet-reading");
+      read.appendChild(el("h4", "", "入门读物"));
+      read.appendChild(el("p", "reading-title", esc(ctx.reading.title)));
+      if (ctx.reading.why) read.appendChild(el("p", "reading-why", esc(ctx.reading.why)));
+      sheet.appendChild(read);
+    }
     const courses = el("div", "course-block");
     courses.appendChild(el("h4", "", "课程"));
     courses.appendChild(el("div", "course-status", "检索中"));
@@ -1456,6 +1470,7 @@ async function renderCards() {
     const card = cards.find((c) => c.direction && c.direction.code === current);
     openNodeSheet(field, node, {
       why: card && card.why_you,
+      reading: card && card.reading,
       chosen: current === chosenCode,
       hasCurrent: !!chosenCode,
       here: here && here.id,
@@ -1558,6 +1573,8 @@ async function renderWorkbench() {
   const seq = S.renderSeq;
   await ensurePortrait();
   if (stale(seq)) return;
+  $app.innerHTML = "";
+  $app.appendChild(skeleton(2));
   const [taskRes, onboard] = await Promise.all([
     api("GET", `/api/tasks?uid=${S.uid}`).catch(() => ({ tasks: [] })),
     api("GET", `/api/onboard/result?uid=${S.uid}`).catch(() => null),
@@ -1757,6 +1774,11 @@ function renderFeedbackInto(p) {
   const passed = (fb.rubric || []).filter((r) => r.pass).length;
   head.appendChild(el("div", "score-ring", `<span class="num">${passed}</span>/ ${(fb.rubric || []).length} 条做到`));
   box.appendChild(head);
+  if ((fb.rubric || []).length) {
+    const bar = el("div", "pass-bar");
+    (fb.rubric || []).forEach((r) => bar.appendChild(el("i", r.pass ? "ok" : "bad")));
+    box.appendChild(bar);
+  }
 
   const rub = el("div", "rubric-list");
   (fb.rubric || []).forEach((r) => {
@@ -1776,13 +1798,42 @@ function renderFeedbackInto(p) {
 
 /* ---------- 今日 / ⑨ NBA ---------- */
 
+/* 服务端 NBA 的 action → 按钮文案与目标视图（schemas.NBA 契约里的枚举） */
+const NBA_ACTION_VIEW = {
+  micro_task: ["去做这一步", "workbench"],
+  explore_direction: ["去方向区", "cards"],
+  course_action: ["去方向区", "cards"],
+  read_paper: ["去方向区", "cards"],
+  ask_clarifying: ["去画像", "onboarding"],
+  review_progress: ["去记录", "me"],
+};
+
+/* 今日页顶部的闭环进度条：聊过 → 核对 → 方向 → 任务 → 项目 → 记录，点任一步直接跳 */
+function loopStrip(steps, nowIdx) {
+  const strip = el("nav", "loop-strip");
+  strip.setAttribute("aria-label", "科研入门闭环");
+  steps.forEach((s, i) => {
+    const cls = "loop-step" + (s.done ? " done" : "") + (i === nowIdx ? " now" : "");
+    const b = el("button", cls, `<i></i><span>${esc(s.label)}</span>`);
+    b.type = "button";
+    b.title = s.done ? `${s.label}：已走过` : i === nowIdx ? `${s.label}：当前这一步` : `${s.label}：还没到`;
+    if (i === nowIdx) b.setAttribute("aria-current", "step");
+    b.onclick = () => setView(s.view);
+    strip.appendChild(b);
+  });
+  return strip;
+}
+
 async function renderToday() {
   const seq = S.renderSeq;
   await ensurePortrait();
   if (stale(seq)) return;
-  const [taskRes, onboard] = await Promise.all([
+  $app.innerHTML = "";
+  $app.appendChild(skeleton(3));
+  const [taskRes, onboard, mineRes] = await Promise.all([
     api("GET", `/api/tasks?uid=${S.uid}`).catch(() => null),
     api("GET", `/api/onboard/result?uid=${S.uid}`).catch(() => null),
+    api("GET", `/api/projects/mine?uid=${S.uid}`).catch(() => ({ projects: [] })),
   ]);
   if (stale(seq)) return;
   adoptDirection((onboard && onboard.facts) || []);
@@ -1799,7 +1850,10 @@ async function renderToday() {
   const facts = (onboard && onboard.facts) || [];
   const talked = onboard && onboard.state && onboard.state.phase === "done";
   const drafts = facts.filter((f) => f.status === "draft").length;
+  const doneTasks = ((taskRes && taskRes.tasks) || []).filter((t) => t.status === "done");
+  const behavior = facts.filter((f) => f.source === "behavior" && f.status !== "deleted").length;
 
+  /* 客户端兜底建议：没聊 / 没核对这两种服务端 NBA 覆盖不到的状态，仍按本地判断 */
   let title; let why; let label; let view;
   if (!field && !talked) {
     title = "先聊五个问题";
@@ -1823,15 +1877,30 @@ async function renderToday() {
     label = "去方向区"; view = "cards";
   }
 
+  /* 服务端 NBA（POST /api/nba）不挡首屏：本地建议先画出来，模型措辞回来后原地升级卡片 */
   $app.innerHTML = "";
   const wrap = el("div", "stagger");
   wrap.appendChild(workspaceHead("今日"));
-  const status = el("div", "ws-status");
-  status.appendChild(el("span", "", field ? esc(field.name) : "还没有方向"));
-  if (node) status.appendChild(el("span", "", `正在「${esc(node.label)}」`));
-  const behavior = facts.filter((f) => f.source === "behavior" && f.status !== "deleted").length;
-  if (behavior) status.appendChild(el("span", "", `已交 ${behavior} 次任务`));
+
+  const status = el("div", "status-chips");
+  status.appendChild(el("span", "status-chip" + (field ? " on" : ""), field ? esc(field.name) : "还没有方向"));
+  if (node) status.appendChild(el("span", "status-chip", `正在「${esc(node.label)}」`));
+  if (behavior) status.appendChild(el("span", "status-chip", `已交 ${behavior} 次任务`));
   wrap.appendChild(status);
+
+  /* 闭环进度：每步是否走过由真实数据判定，不猜 */
+  const confirmed = facts.filter((f) => f.status === "confirmed" || f.status === "active").length;
+  const steps = [
+    { label: "聊过", done: !!talked, view: "onboarding" },
+    { label: "核对", done: !!talked && drafts === 0 && confirmed > 0, view: "confirm" },
+    { label: "方向", done: !!field, view: "cards" },
+    { label: "任务", done: doneTasks.length > 0, view: "workbench" },
+    { label: "项目", done: ((mineRes && mineRes.projects) || []).length > 0, view: "projects" },
+    { label: "记录", done: confirmed > 0, view: "me" },
+  ];
+  const nowIdx = steps.findIndex((s) => !s.done);
+  wrap.appendChild(loopStrip(steps, nowIdx));
+
   const card = el("div", "nba-card");
   card.appendChild(el("h3", "nba-title", esc(title)));
   card.appendChild(el("p", "nba-why", esc(why)));
@@ -1843,13 +1912,52 @@ async function renderToday() {
   card.appendChild(act);
   wrap.appendChild(card);
   $app.appendChild(wrap);
+
+  /* 核对完之后问服务端 NBA：规则决策 + 可选模型措辞，带依据引用与备选行动；慢或失败就保持本地建议 */
+  if ((talked && drafts === 0) || field) {
+    api("POST", "/api/nba", { uid: S.uid }).then((nba) => {
+      if (stale(seq) || !nba || !nba.title || !nba.rationale) return;
+      card.querySelector(".nba-title").textContent = nba.title;
+      card.querySelector(".nba-why").textContent = nba.rationale;
+      const hit = NBA_ACTION_VIEW[nba.action] || NBA_ACTION_VIEW.micro_task;
+      go.textContent = hit[0];
+      go.onclick = () => setView(hit[1]);
+      (nba.rationale_facts || []).slice(0, 2).forEach((fid) => {
+        const f = facts.find((x) => x.id === fid);
+        if (f && f.value) card.insertBefore(el("p", "nba-evidence", `你说过的：「${esc(f.value)}」`), act);
+      });
+      const alts = (nba.alternatives || []).slice(0, 2);
+      if (alts.length && !card.querySelector(".nba-alts")) {
+        const altRow = el("div", "nba-alts");
+        alts.forEach((a) => {
+          const to = NBA_ACTION_VIEW[a.action];
+          const b = el("button", "btn small ghost", esc(a.title || a.action));
+          b.type = "button";
+          if (to) b.onclick = () => setView(to[1]);
+          altRow.appendChild(b);
+        });
+        card.appendChild(altRow);
+      }
+    }).catch(() => { /* 保持本地建议，不提示错误 */ });
+  }
 }
 
 /* ---------- ⑧ me 页 ---------- */
 
 async function renderMe() {
   const seq = S.renderSeq;
-  const r = await api("GET", `/api/me/facts?uid=${S.uid}`);
+  $app.innerHTML = "";
+  $app.appendChild(skeleton(3));
+  let r;
+  try {
+    r = await api("GET", `/api/me/facts?uid=${S.uid}`);
+  } catch (e) {
+    if (stale(seq)) return;
+    $app.innerHTML = "";
+    $app.appendChild(workspaceHead("记录", "它记住的每一条都写着来源。说得不对可以改，不想让它记着可以删。"));
+    $app.appendChild(el("div", "note-box", `记录读取失败（如实说明）：${esc(e.message)}`));
+    return;
+  }
   if (stale(seq)) return;
   const facts = r.facts.filter((f) => f.status !== "deleted" && f.status !== "dismissed");
   $app.innerHTML = "";
@@ -1887,6 +1995,12 @@ const STAGES = [
   { value: 3, label: "做过项目", hint: "交过一个完整的练手项目" },
 ];
 
+/* 来源 kind 的中文名，与 server/projects.py 的 KIND_LABELS 保持一致 */
+const SRC_KIND_CN = {
+  competition: "竞赛", open_source: "开源", open_problem: "公开题", dataset: "公开数据",
+  course_project: "课程大作业", innovation_program: "创新项目",
+};
+
 const STATUS_CN = { pass: "做到", partial: "部分做到", fail: "还没做到" };
 const STATUS_MARK = { pass: "✓", partial: "~", fail: "!" };
 
@@ -1909,7 +2023,7 @@ function downloadBlob(blob, name) {
 
 function projectTabs(active, mineCount) {
   const nav = el("nav", "ws-tabs");
-  [["find", "找项目"], ["mine", mineCount ? `我的项目 · ${mineCount}` : "我的项目"]].forEach(([key, label]) => {
+  [["find", "找项目"], ["sources", "来源"], ["mine", mineCount ? `我的项目 · ${mineCount}` : "我的项目"]].forEach(([key, label]) => {
     const b = el("button", `ws-tab${key === active ? " on" : ""}`, label);
     b.type = "button";
     b.onclick = () => { S.projectTab = key; setView("projects"); };
@@ -1922,6 +2036,8 @@ async function renderProjects() {
   const seq = S.renderSeq;
   await ensurePortrait();
   if (stale(seq)) return;
+  $app.innerHTML = "";
+  $app.appendChild(skeleton(2));
   const [ctx, mine] = await Promise.all([
     api("GET", `/api/projects/context?uid=${S.uid}`).catch(() => null),
     api("GET", `/api/projects/mine?uid=${S.uid}`).catch(() => ({ projects: [] })),
@@ -1932,6 +2048,7 @@ async function renderProjects() {
   $app.appendChild(workspaceHead("项目", "学完一块之后，找一个有公开来源的真项目练手。成果打成一个压缩包交上来，按五条标准看它像不像这个项目要的东西。"));
   $app.appendChild(projectTabs(tab, (mine.projects || []).length));
   if (tab === "mine") { renderMine(mine.projects || []); return; }
+  if (tab === "sources") { renderSources(); return; }
 
   const t = trail();
   const field = FIELD_TREES[t.code];
@@ -2089,10 +2206,68 @@ function projectCard(p) {
   return card;
 }
 
+/* 「来源」标签页：/api/projects/sources 的全量来源清单（后端逐个人工核对过的地图） */
+async function renderSources() {
+  const seq = S.renderSeq;
+  let reg = null;
+  try {
+    reg = await api("GET", "/api/projects/sources");
+  } catch (e) {
+    if (stale(seq)) return;
+    $app.appendChild(el("div", "note-box", `来源清单读取失败（如实说明）：${esc(e.message)}`));
+    return;
+  }
+  if (stale(seq)) return;
+  const trailCode = trail().code;
+  const list = reg.sources || [];
+  const dirName = (code) => (FIELD_TREES[code] && FIELD_TREES[code].name) || code;
+  const stageLabel = (v) => { const st = STAGES.find((s) => s.value === v); return st ? st.label : ""; };
+  const inCurrent = (s) => (s.directions || []).includes(trailCode);
+  const sorted = [...list].sort((a, b) => Number(inCurrent(b)) - Number(inCurrent(a)));
+
+  const intro = el("p", "panel-sub sources-intro",
+    `「找项目」背后的全部来源，共 ${list.length} 个，每条都由人工实际访问核对过（${fmtTime(reg.generated_at)}）。` +
+    `其中一部分能实时检索，在「找项目」里直接出结果；其余按「怎么找」的路线自己去看。查不到就如实说查不到。`);
+  $app.appendChild(intro);
+
+  const grid = el("div", "src-grid");
+  sorted.forEach((s) => {
+    const card = el("article", "panel src-card");
+    const top = el("div", "src-top");
+    top.appendChild(el("h3", "src-name",
+      s.home_url ? `<a href="${esc(s.home_url)}" target="_blank" rel="noopener">${esc(s.name)} ↗</a>` : esc(s.name)));
+    if (s.kind && SRC_KIND_CN[s.kind]) top.appendChild(el("span", "kind-badge", SRC_KIND_CN[s.kind]));
+    card.appendChild(top);
+
+    if ((s.directions || []).length) {
+      const chips = el("div", "src-chips-row");
+      s.directions.forEach((c) => chips.appendChild(el("span", "mini-chip" + (c === trailCode ? " on" : ""), esc(dirName(c)))));
+      card.appendChild(chips);
+    }
+    if ((s.stage_fit || []).length) {
+      card.appendChild(el("p", "src-meta",
+        `适合：${s.stage_fit.map((v) => stageLabel(v)).filter(Boolean).join(" / ")}`));
+    }
+    if (s.cadence) card.appendChild(el("p", "src-cadence", esc(s.cadence)));
+    if (s.manual_route) card.appendChild(el("p", "route-how clamp", `怎么找：${esc(s.manual_route)}`));
+    if ((s.search_terms || []).length) {
+      const terms = el("p", "route-terms", "搜：" + s.search_terms.slice(0, 4).map((t) => `<code>${esc(t)}</code>`).join(" "));
+      card.appendChild(terms);
+    }
+    grid.appendChild(card);
+  });
+  $app.appendChild(grid);
+}
+
 function renderMine(list) {
   const panel = el("div", "panel");
   if (!list.length) {
     panel.appendChild(el("p", "panel-sub", "还没有选定项目。在「找项目」里挑一个「就练这个」。"));
+    const go = el("button", "btn ghost", "去找项目");
+    go.type = "button";
+    go.style.marginTop = "16px";
+    go.onclick = () => { S.projectTab = "find"; setView("projects"); };
+    panel.appendChild(go);
     $app.appendChild(panel);
     return;
   }
@@ -2112,6 +2287,8 @@ function renderMine(list) {
 async function renderProject() {
   const seq = S.renderSeq;
   if (!S.projectId) { S.projectTab = "mine"; setView("projects"); return; }
+  $app.innerHTML = "";
+  $app.appendChild(skeleton(2));
   let p;
   try {
     p = await api("GET", `/api/projects/${S.projectId}?uid=${S.uid}`);
@@ -2217,6 +2394,14 @@ function paintReview(box, r, old) {
   head.appendChild(hl);
   head.appendChild(el("div", "score-ring", `<span class="num">${r.passed}</span>/ ${r.total} 条做到`));
   sec.appendChild(head);
+  if ((r.criteria || []).length) {
+    const bar = el("div", "pass-bar");
+    (r.criteria || []).forEach((c) => {
+      const seg = c.status === "pass" ? "ok" : c.status === "partial" ? "part" : "bad";
+      bar.appendChild(el("i", seg));
+    });
+    sec.appendChild(bar);
+  }
   const list = el("div", "rubric-list");
   (r.criteria || []).forEach((c) => {
     const ev = (c.evidence || []).filter((e) => e.file)

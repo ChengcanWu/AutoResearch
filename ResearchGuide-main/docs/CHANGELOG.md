@@ -6,12 +6,18 @@
 
 ---
 
+## [2026-10-02] [BUILD] 前端补齐三个未用接口 + 今日/项目/反馈视觉升级
+- 变更内容：今日页接入 `POST /api/nba`（规则决策、可连模型措辞；rationale_facts 渲染成「你说过的」引用行，alternatives 渲染成备选行动；没聊/没核对两种状态仍走本地兜底），顶部新增可点击的闭环进度条（聊过→核对→方向→任务→项目→记录）与状态 chips；项目区新增「来源」标签页（`GET /api/projects/sources` 全量来源卡片网格，按当前方向优先排序，kind/阶段文案与 server/projects.py 对齐）；方向根节点抽屉补「入门读物」块（推荐卡 reading 字段）；任务反馈与项目评阅顶部加按条目分段的通过率条；全站异步视图加骨架占位避免白屏闪烁；「我的项目」空态补引导按钮；静态资源缓存版本 w21→w22。顺手修复本文件上次合并残留的 `=======` 冲突标记。
+- 影响模块：web/js/app.js、web/css/styles.css、web/index.html、docs/DESIGN_SPEC.md（§5 回填新组件）、docs/CHANGELOG.md
+- 决策来源：Yukinannie（前端优化，按任务 4 范围）
+- 登记人：助手
+
 ## [2026-09-30] [DOC] 新增方向路径交付目录（任务 4 · 数学 / 人工智能）
 - 变更内容：新增 `docs/paths/`：`README.md`（每步的固定字段 + 主链标注约定）、`数学.md`、`人工智能.md`、`改树建议.md`。两条路径各 6 步，每步含「为什么是这一步 / 先弄懂什么 / 做完怎样算过了 / 依据 / 对应现有树节点」；文中共 41 条外部链接于 2026-09-30 逐条请求核对，核不到的四条（AMS Notices、Papers with Code、Hugging Face、Tao 某篇旧文）在文末如实记录，未用替代链接补位。
 - 影响文档：`docs/paths/`（新增）；甲的两个方向（认知、经济）待补
 - 影响模块：暂无代码改动；`web/js/app.js` 的 `FIELD_TREES` 改不改、怎么改，等两人路径合并后再定（建议见 `docs/paths/改树建议.md`）
 - 决策来源：陈旭 依据任务表（任务 4乙）
-=======
+
 ## [2026-09-30] [BUILD] 任务 3 边学边练：公开来源检索项目、交压缩包、五条标准评阅
 - 变更内容：新增侧栏「项目」。来源清单 `knowledge/project_sources.json`（24 个来源、72 条逐字核对过原文的样例）；7 个来源实时检索（和鲸、飞桨学习赛、天池学习赛、北大开放数据、科学数据银行、创新大赛产业命题、欧拉计划中文站），其余给快照和「去哪找」路线；查不到就空着。成果以 `.zip` 提交，只在内存里读、不执行，按五条标准评阅，规则判定是上限，模型引文必须在文件里逐字找得到；每次提交写回一条行为事实。模型的工作说明写在 `skills/project-scout/`、`skills/project-review/`，代码与 skill 分工见 `skills/README.md`。新增接口只加不改，见 ARCHITECTURE §5。
 - 影响模块：server/projects.py、server/project_adapters.py、server/submission.py、server/skills.py、server/store.py（新增 projects 表）、server/main.py、web/、knowledge/、skills/、docs/TASK3_PROJECTS.md
