@@ -619,7 +619,7 @@ function renderLogin() {
     btn.disabled = true; btn.textContent = "进入中…";
     try {
       const r = await api("POST", "/api/auth/login", { nickname: nick });
-      S.uid = r.uid; S.nickname = r.nickname;
+      S.uid = r.uid; S.nickname = r.nickname; S.myDir = undefined;
       localStorage.setItem("rg_uid", r.uid);
       localStorage.setItem("rg_nick", r.nickname);
       await api("POST", "/api/onboard/start", { uid: S.uid });
@@ -2094,6 +2094,9 @@ async function renderRead() {
   const passed = Object.values(byPaper).filter((c) => c.status === "pass").length;
   $app.appendChild(el("div", "ws-status", `<span>工具包「${esc(kit.name)}」v${esc(kit.version)}</span><span>过线阅读卡 ${passed} 张</span><span>${esc(kit.status)}</span>`));
   $app.appendChild(readTabs(tab));
+  const mismatch = kitMismatch(kit.direction, await myDirection());
+  if (stale(seq)) return;
+  if (mismatch) $app.appendChild(mismatch);
 
   if (tab === "cards") { renderCardList(kit, byPaper); return; }
   if (tab === "matrix") { await renderMatrix(seq, kit); return; }
@@ -2479,7 +2482,7 @@ const TIER_HINT = {
 
 function positionTabs(active) {
   const nav = el("nav", "ws-tabs");
-  [["edges", "边清单"], ["map", "竞争地图"], ["statement", "定位陈述"], ["bets", "下注组合"]].forEach(([key, label]) => {
+  [["edges", "边清单"], ["sources", "信息源"], ["map", "竞争地图"], ["statement", "定位陈述"], ["bets", "下注组合"]].forEach(([key, label]) => {
     const b = el("button", `ws-tab${key === active ? " on" : ""}`, label);
     b.type = "button";
     b.onclick = () => { S.posTab = key; setView("position"); };
@@ -2498,13 +2501,34 @@ async function renderPosition() {
   const body = el("div");
   $app.appendChild(body);
   try {
-    if (tab === "map") await paintMap(seq, body);
+    if (tab === "sources") await paintSources(seq, body);
+    else if (tab === "map") await paintMap(seq, body);
     else if (tab === "statement") await paintStatement(seq, body);
     else if (tab === "bets") await paintBets(seq, body);
     else await paintEdges(seq, body);
   } catch (e) {
     if (!stale(seq)) body.appendChild(el("div", "note-box", `加载失败：${esc(e.message)}`));
   }
+}
+
+/* 学生的方向：本机轨迹优先，没有就问服务端（直接打开定位 / 研读时本机可能还没记） */
+async function myDirection() {
+  if (trail().code) return trail().code;
+  if (S.myDir === undefined) {
+    try { S.myDir = (await api("GET", `/api/projects/context?uid=${S.uid}`)).direction || ""; } catch (_) { S.myDir = ""; }
+  }
+  return S.myDir;
+}
+
+/* 学生的方向还没有工具包时如实说，并指向不依赖工具包的「信息源」 */
+function kitMismatch(kitDirection, code) {
+  if (!code || !kitDirection || code === kitDirection || !FIELD_TREES[code]) return null;
+  const box = el("div", "note-box", `这个工具包属于「${esc((FIELD_TREES[kitDirection] || {}).name || kitDirection)}」。你的方向「${esc(FIELD_TREES[code].name)}」还没有工具包——可以先看这个方向的人在哪说话。`);
+  const go = el("button", "linkish", "去看信息源 →");
+  go.type = "button";
+  go.onclick = () => { S.posTab = "sources"; S.srcDir = code; setView("position"); };
+  box.appendChild(go);
+  return box;
 }
 
 function edgeChip(e) {
@@ -2567,9 +2591,73 @@ async function paintEdges(seq, body) {
   body.appendChild(intro);
 }
 
+const CADENCE = { daily: "每天", weekly: "每周", "when-needed": "用时再看" };
+
+async function paintSources(seq, body) {
+  const dir = S.srcDir || (await myDirection()) || "ai";
+  const m = await api("GET", `/api/channels?uid=${S.uid}&direction=${dir}`);
+  if (stale(seq)) return;
+  const panel = el("div", "panel");
+  panel.appendChild(el("p", "panel-sub", "不是每个人都读 arXiv。每个方向的人在不同的地方说话：中文圈和英文圈各自漏掉一半。标出你常看的——你常看、同学少看的地方，就是一条边。"));
+  const bar = el("div", "src-bar");
+  const sel = el("select");
+  sel.innerHTML = Object.entries(FIELD_TREES).map(([code, f]) => `<option value="${code}">${esc(f.name)}</option>`).join("");
+  sel.value = dir;
+  sel.onchange = () => { S.srcDir = sel.value; setView("position"); };
+  bar.appendChild(sel);
+  const sum = m.summary;
+  bar.appendChild(el("span", "", `你常看：中文圈 ${sum["中文圈"].read}/${sum["中文圈"].total} · 英文圈 ${sum["英文圈"].read}/${sum["英文圈"].total}${m.checked_at ? ` · 清单核对于 ${esc(m.checked_at)}` : ""}`));
+  panel.appendChild(bar);
+  if (!m.channels.length) {
+    panel.appendChild(el("div", "note-box", "这个方向的信息源清单还没有整理好。"));
+    body.appendChild(panel);
+    return;
+  }
+  if (m.blind_spot) panel.appendChild(el("div", "why-box", `<b>常见盲区　</b>${esc(m.blind_spot)}`));
+  if (m.other_circle_unread.length) panel.appendChild(el("p", "form-note", `你读得多的那一圈之外，这个方向的人还在：${m.other_circle_unread.map(esc).join("、")}`));
+  const groups = [[dir, `${(FIELD_TREES[dir] || {}).name || dir}`], ["career", "进组、夏令营与机会（各方向通用）"]];
+  groups.forEach(([g, title]) => {
+    const rows = m.channels.filter((c) => c.group === g);
+    if (!rows.length) return;
+    // 方向本身的信息源直接摊开；各方向通用的进组信息收起来，免得一页太长
+    const host = g === dir ? panel : el("details", "src-more");
+    if (g === dir) panel.appendChild(el("p", "section-label", `${esc(title)} · ${rows.length}`));
+    else { host.appendChild(el("summary", "", `${esc(title)} · ${rows.length}（你常看 ${rows.filter((c) => c.read).length}）`)); panel.appendChild(host); }
+    ["中文圈", "英文圈"].forEach((circle) => {
+      const cs = rows.filter((c) => c.circle === circle);
+      if (!cs.length) return;
+      const list = el("div", "src-list");
+      list.appendChild(el("p", "src-circle", circle));
+      cs.forEach((c) => {
+        const card = el("article", `src-card${c.read ? " on" : ""}`);
+        const where = c.url ? `<a href="${esc(c.url)}" target="_blank" rel="noopener">${esc(c.name)} ↗</a>` : `<b>${esc(c.name)}</b>`;
+        const sig = (c.signals || []).map((k) => `<span class="src-sig">${esc(m.signal_kinds[k] || k)}</span>`).join("");
+        card.innerHTML = `<div class="src-top">${where}<small>${esc(c.kind)} · ${esc(CADENCE[c.cadence] || c.cadence)} · ${esc(c.access)}${c.verified ? "" : " · 未核实"}</small></div>`
+          + `<div class="src-sigs">${sig}</div><p>${esc(c.good_for)}</p><p class="src-caveat">偏差：${esc(c.caveat)}</p>`
+          + (c.search_hint ? `<p class="src-hint">搜：「${esc(c.search_hint)}」</p>` : "")
+          + `<p class="src-band">在用启研的同学里：${esc(c.band)}</p>`;
+        const t = el("button", c.read ? "btn small" : "btn small secondary", c.read ? "✓ 我常看" : "我常看");
+        t.type = "button";
+        t.onclick = async () => {
+          try { await api("POST", "/api/channels/toggle", { uid: S.uid, id: c.id, on: !c.read, direction: dir }); setView("position"); } catch (e) { toast(e.message); }
+        };
+        card.appendChild(t);
+        list.appendChild(card);
+      });
+      host.appendChild(list);
+    });
+  });
+  if (m.career_blind_spot) panel.appendChild(el("p", "map-foot", `进组信息的盲区：${esc(m.career_blind_spot)}`));
+  if (m.access_note) panel.appendChild(el("p", "map-foot", esc(m.access_note)));
+  body.appendChild(panel);
+}
+
 async function paintMap(seq, body) {
   const m = await api("GET", `/api/map?uid=${S.uid}&kit=${S.kitId}`);
   if (stale(seq)) return;
+  const mismatch = kitMismatch(m.kit.direction, await myDirection());
+  if (stale(seq)) return;
+  if (mismatch) body.appendChild(mismatch);
   const panel = el("div", "panel");
   panel.appendChild(el("p", "panel-sub", `「${esc(m.kit.name)}」里，作者自己写下的每个开放问题都是一个可以站的位置。需求按周更新、滞后 ${m.lag_days} 天、少于 ${m.k_min} 人不报数；这里没有「最冷门」排行——冷不冷要和你自己的边一起看。`));
   const sortBar = el("div", "map-sort", "<span>排序</span>");

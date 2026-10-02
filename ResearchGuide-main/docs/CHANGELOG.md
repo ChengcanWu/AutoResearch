@@ -7,9 +7,9 @@
 ---
 
 ## [2026-10-03] [BUILD] 研读层与定位层的第一条纵切片（设计提案 §1C、§1D）
-- 变更内容：新增两个工作区。「研读」：领域工具包「大模型评测与基准」（10 篇 arXiv 论文、7 个 GitHub 数据集、11 条逐字核对过的作者自述开放问题、7 个矩阵维度）；阅读卡工作台左边是 arXiv 正文（可按节跳转、选中原句一键引用），右边 7 栏，引文必须逐字出自原文、局限必须出自局限 / 讨论 / 结论段，「主张 / 假设 / 我会改什么」不能抄原文；可下载 AGENTS.md 交给学生自己的 Agent，并在决策日志里逐条表态；三张卡过线后出综合矩阵，空格、空列、方向相反的冲突由规则标出。「定位」：边清单（已证明的从账本自动导入，自述的自己加，含「信息源」一类）、竞争地图（需求只数有投入的人、滞后一周、k≥5、池子不够写「数据不足」；供给如实写「未知 · 去问」；势头用 arXiv 近 12 个月相对分类整体的增长，离线算好写进工具包；不提供冷门排行）、定位陈述「我是能做 X 的人，因为 Y」的规则检查（不打分）、冲 / 稳 / 保 下注组合（最多 3 个，集中风险提示）。「今日」多一块每日情报：分拣几篇当天 arXiv 新论文（留 / 过 + 一句理由）和至多一句定位微调。全部规则判定，不调用模型。
+- 变更内容：新增两个工作区。「研读」：领域工具包「大模型评测与基准」（10 篇 arXiv 论文、7 个 GitHub 数据集、11 条逐字核对过的作者自述开放问题、7 个矩阵维度）；阅读卡工作台左边是 arXiv 正文（可按节跳转、选中原句一键引用），右边 7 栏，引文必须逐字出自原文、局限必须出自局限 / 讨论 / 结论段，「主张 / 假设 / 我会改什么」不能抄原文；可下载 AGENTS.md 交给学生自己的 Agent，并在决策日志里逐条表态；三张卡过线后出综合矩阵，空格、空列、方向相反的冲突由规则标出。「定位」：边清单（已证明的从账本自动导入，自述的自己加，含「信息源」一类）、竞争地图（需求只数有投入的人、滞后一周、k≥5、池子不够写「数据不足」；供给如实写「未知 · 去问」；势头用 arXiv 近 12 个月相对分类整体的增长，离线算好写进工具包；不提供冷门排行）、定位陈述「我是能做 X 的人，因为 Y」的规则检查（不打分）、冲 / 稳 / 保 下注组合（最多 3 个，集中风险提示），以及信息源地图（`knowledge/channels.json`：六个方向加进组信息共 90 个信息源，中文圈 / 英文圈并列，写明信号、具体偏差、频率与可达性，5 条标「未核实」；学生标「我常看」成为一条边，并看到自己那一圈之外的盲区）。学生的方向还没有工具包时如实说明，并指向信息源。「今日」多一块每日情报：分拣几篇当天 arXiv 新论文（留 / 过 + 一句理由）和至多一句定位微调。全部规则判定，不调用模型。
 - 修复：arXiv HTML 正文只取 `<article>`，不再混进横幅和反馈弹窗；公式保留 TeX。
-- 影响模块：server/arxiv.py、server/quotes.py、server/reading.py、server/positioning.py、server/kit_momentum.py、server/store.py、server/main.py、server/tests/、knowledge/kits/、web/js/app.js、web/css/styles.css、web/index.html
+- 影响模块：server/arxiv.py、server/quotes.py、server/reading.py、server/positioning.py、server/kit_momentum.py、server/store.py、server/main.py、server/tests/、knowledge/kits/、knowledge/channels.json、web/js/app.js、web/css/styles.css、web/index.html
 - 影响文档：docs/READING_POSITIONING.md（新增）、docs/ARCHITECTURE.md、docs/README.md
 - 决策来源：陈浩文（依据设计提案 v2）
 - 登记人：助手

@@ -131,6 +131,13 @@ class StatementReq(BaseModel):
     dry_run: bool = False
 
 
+class ChannelReq(BaseModel):
+    uid: str
+    id: str
+    on: bool
+    direction: str
+
+
 class BetReq(BaseModel):
     uid: str
     name: str
@@ -537,6 +544,19 @@ def edges_add(req: EdgeReq):
 def edges_delete(edge_id: str, uid: str):
     _user_or_404(uid)
     return _reading(positioning.delete_edge, uid, edge_id)
+
+
+@app.get("/api/channels")
+def channels_map(uid: str, direction: str):
+    """这个方向的人在哪说话：信息源地图（knowledge/channels.json），标出学生常看的和盲区。"""
+    _user_or_404(uid)
+    return positioning.channel_map(uid, direction)
+
+
+@app.post("/api/channels/toggle")
+def channels_toggle(req: ChannelReq):
+    _user_or_404(req.uid)
+    return _reading(positioning.toggle_channel, req.uid, req.id, req.on, req.direction)
 
 
 @app.get("/api/map")

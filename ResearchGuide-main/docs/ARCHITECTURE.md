@@ -27,6 +27,7 @@ server/         FastAPI 单体（Python 3.11+）
   positioning.py 定位层：边清单、竞争地图、定位陈述检查、冲 / 稳 / 保、每日微调（全规则）
   kit_momentum.py 离线脚本：给工具包的开放问题算 arXiv 势头，写回 kit
 knowledge/kits/      领域工具包（论文、数据集、逐字核对的开放问题、矩阵维度），见 docs/READING_POSITIONING.md
+knowledge/channels.json 各方向的信息源地图（中文圈 / 英文圈、信号、偏差、可达性）
 skills/pku-course/   北大搜课工具（原 pku-course-skill-main 原样迁入，不改契约）
 knowledge/           disciplines.json 等
 ```
@@ -130,6 +131,8 @@ GET  /api/brief                ?kit&arxiv_id → AGENTS.md（交给学生自己�
 GET  /api/edges                ?uid → {kinds, edges[已证明来自账本 + 自述], suggest, proven, declared}   # 定位层
 POST /api/edges                 {uid, kind, text, evidence_url?} → 同上
 DELETE /api/edges/{edge_id}    ?uid → 同上（账本里的不能删）
+GET  /api/channels             ?uid&direction → {channels[read, band], summary, blind_spot, other_circle_unread}   # 信息源地图
+POST /api/channels/toggle       {uid, id, on, direction} → 同上（「我常看」= 一条信息源边）
 GET  /api/map                  ?uid&kit → {rows[需求/供给/势头/你的相关边], formula, base, rarity, pool_enough}
 GET  /api/statement            ?uid&kit → {statement|null}
 POST /api/statement             {uid, kit, x_ref, x_text, y[edge ids], dry_run?} → 检查结果（dry_run）或新一版陈述

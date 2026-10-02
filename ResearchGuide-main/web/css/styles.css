@@ -872,6 +872,28 @@ code { font-family: var(--mono); font-size: 0.92em; padding: 1px 5px; border-rad
 .daily-tweak { display: flex; align-items: center; justify-content: space-between; gap: var(--gap-3); margin-top: var(--gap-3); padding: var(--gap-3) var(--gap-4); border-radius: var(--r-md); background: var(--teal-soft); font-size: 14px; }
 .daily-tweak b { color: var(--teal-ink); }
 
+.note-box + .panel, .note-box + .stagger { margin-top: var(--gap-4); }
+.note-box .linkish { margin-left: 6px; }
+.src-more { margin-top: var(--gap-4); }
+.src-more summary { cursor: pointer; font-size: 13px; font-weight: 600; color: var(--ink-2); margin-bottom: var(--gap-3); }
+.src-bar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--gap-3); margin: var(--gap-3) 0; font-size: 13px; color: var(--ink-3); }
+.src-bar select { padding: 6px 10px; border: 1px solid var(--line-strong); border-radius: var(--r-sm); background: var(--bg); font: inherit; font-size: 14px; }
+.src-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: var(--gap-3); margin-bottom: var(--gap-3); }
+.src-circle { grid-column: 1 / -1; font-size: 12px; font-weight: 600; color: var(--ink-3); }
+.src-card { display: flex; flex-direction: column; gap: 6px; padding: var(--gap-3) var(--gap-4); border: 1px solid var(--line); border-radius: var(--r-md); background: var(--bg); font-size: 13px; }
+.src-card.on { border-color: var(--teal); background: var(--surface); box-shadow: inset 0 0 0 1px var(--teal); }
+.src-card .btn { align-self: flex-start; margin-top: auto; }
+.src-top { display: flex; flex-direction: column; gap: 2px; }
+.src-top a, .src-top b { font-size: 14px; font-weight: 600; color: var(--ink); text-decoration: none; }
+.src-top a:hover { color: var(--teal-ink); }
+.src-top small { font-size: 11px; color: var(--ink-3); }
+.src-sigs { display: flex; flex-wrap: wrap; gap: 4px; }
+.src-sig { padding: 0 6px; border-radius: var(--r-sm); background: var(--blue-soft); color: var(--blue); font-size: 11px; }
+.src-card p { color: var(--ink-2); }
+.src-card .src-caveat { color: var(--coral); font-size: 12px; }
+.src-hint { font-family: var(--mono); font-size: 12px; }
+.src-card .src-band { font-size: 11px; color: var(--ink-3); }
+
 /* ---------- 首页：夜色 + 点线图 ---------- */
 
 body.is-home { background: var(--night); overflow: hidden; }
@@ -948,6 +970,9 @@ body.is-home .site-footer { display: none; }
   .side-foot { order: 2; margin: 0 0 0 auto; padding: 0; flex-direction: row; align-items: center; }
   .side-links { order: 3; flex-basis: 100%; flex-direction: row; gap: 0; overflow-x: auto; scrollbar-width: none; }
   .side-links::-webkit-scrollbar { display: none; }
+  .ws-tabs { max-width: 100%; overflow-x: auto; scrollbar-width: none; }
+  .ws-tabs::-webkit-scrollbar { display: none; }
+  .ws-tab { flex-shrink: 0; white-space: nowrap; padding: 5px 13px; }
   .nav-btn { flex-shrink: 0; width: auto; padding: 8px 11px 10px; border-radius: 0; white-space: nowrap; }
   .nav-btn small { display: none; }
   .nav-btn.active { background: transparent; box-shadow: none; }

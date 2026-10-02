@@ -13,6 +13,7 @@
 from __future__ import annotations
 
 import datetime as dt
+import json
 import re
 from itertools import combinations
 from typing import Any
@@ -37,6 +38,10 @@ TIERS = {"reach": "冲", "match": "稳", "safety": "保"}
 BET_KINDS = {"group": "进组", "program": "本研 / 科研计划", "contest": "竞赛", "project": "练手项目"}
 OUTCOMES = {"got": "拿到了", "missed": "没拿到", "dropped": "主动放弃"}
 X_MIN, X_MAX = 8, 60
+
+
+CHANNELS = reading.ROOT / "knowledge" / "channels.json"
+CIRCLES = ["中文圈", "英文圈"]
 
 
 class PositionError(Exception):
@@ -69,7 +74,8 @@ def edges(uid: str) -> dict[str, Any]:
     mine = store.list_edges(uid)
     for e in mine:
         out.append({"id": e["id"], "kind": e["kind"], "text": e["text"], "status": "declared", "source": "self",
-                    "key": _norm(e["text"]), "evidence_url": e["evidence_url"], "created_at": e["created_at"]})
+                    "key": f"channel:{e['ref']}" if e.get("ref") else _norm(e["text"]), "ref": e.get("ref", ""),
+                    "evidence_url": e["evidence_url"], "created_at": e["created_at"]})
     for e in out:
         e["generic"] = is_generic(e["text"])
     have = {_norm(e["text"]) for e in mine}
@@ -121,6 +127,60 @@ def combo_rarity(uid: str, kit_id: str) -> dict[str, Any]:
     return {"status": "ok", "pairs": pairs}
 
 
+# ---------- 信息源地图：这个方向的人在哪说话 ----------
+
+def _channels() -> dict[str, Any]:
+    if not CHANNELS.exists():
+        return {"channels": [], "blind_spots": {}, "signal_kinds": {}, "checked_at": ""}
+    return json.loads(CHANNELS.read_text(encoding="utf-8"))
+
+
+def channel_map(uid: str, direction: str) -> dict[str, Any]:
+    """按方向列信息源，标出学生常看的、没看的；常看的人多不多按 k 与池子规则给档位。"""
+    data = _channels()
+    mine = {e["ref"]: e["id"] for e in store.list_edges(uid) if e["kind"] == "source" and e.get("ref")}
+    readers = store.channel_readers()
+    pool = set().union(*readers.values()) if readers else set()
+    enough = len(pool) >= POOL_MIN
+    rows = []
+    for c in data["channels"]:
+        if direction not in c["directions"] and "career" not in c["directions"]:
+            continue
+        n = len(readers.get(c["id"], set()) - {uid})
+        if not enough:
+            band = "数据不足"
+        else:
+            band = "少有人看" if n < K_MIN else "常见" if n >= 0.3 * len(pool) else "有人看"
+        rows.append({**c, "read": c["id"] in mine, "edge_id": mine.get(c["id"], ""), "band": band,
+                     "group": "career" if direction not in c["directions"] else direction})
+    summary = {circle: {"read": sum(1 for r in rows if r["circle"] == circle and r["read"] and r["group"] == direction),
+                        "total": sum(1 for r in rows if r["circle"] == circle and r["group"] == direction)} for circle in CIRCLES}
+    blind = [r["name"] for r in rows if not r["read"] and r["group"] == direction and r["circle"] != _main_circle(rows, direction)]
+    return {"direction": direction, "channels": rows, "summary": summary, "signal_kinds": data.get("signal_kinds", {}),
+            "blind_spot": data.get("blind_spots", {}).get(direction, ""), "career_blind_spot": data.get("blind_spots", {}).get("career", ""),
+            "other_circle_unread": blind[:6], "checked_at": data.get("checked_at", ""), "access_note": data.get("access_note", ""),
+            "pool_enough": enough}
+
+
+def _main_circle(rows: list[dict[str, Any]], direction: str) -> str:
+    """学生读得多的那一圈；一个都没标时当作中文圈，盲区先指英文圈。"""
+    counts = {c: sum(1 for r in rows if r["circle"] == c and r["read"] and r["group"] == direction) for c in CIRCLES}
+    return max(CIRCLES, key=lambda c: (counts[c], c == "中文圈"))
+
+
+def toggle_channel(uid: str, channel_id: str, on: bool, direction: str) -> dict[str, Any]:
+    c = next((x for x in _channels()["channels"] if x["id"] == channel_id), None)
+    if not c:
+        raise PositionError("没有这个信息源")
+    mine = [e for e in store.list_edges(uid) if e["kind"] == "source" and e.get("ref") == channel_id]
+    if on and not mine:
+        store.add_edge(uid, "source", f"常看{c['name']}"[:60], "", channel_id)
+    if not on:
+        for e in mine:
+            store.delete_edge(uid, e["id"])
+    return channel_map(uid, direction)
+
+
 # ---------- 竞争地图 ----------
 
 def _matches(edge: dict[str, Any], o: dict[str, Any]) -> bool:
@@ -161,7 +221,7 @@ def competition_map(uid: str, kit_id: str) -> dict[str, Any]:
             "my_edges": [{"text": e["text"], "status": e["status"]} for e in mine],
             "read": o["arxiv_id"] in passed,
         })
-    return {"kit": {"id": k["id"], "name": k["name"]}, "rows": rows, "pool_enough": enough,
+    return {"kit": {"id": k["id"], "name": k["name"], "direction": k.get("direction", "")}, "rows": rows, "pool_enough": enough,
             "base": k.get("momentum_base", {}), "lag_days": LAG_DAYS, "k_min": K_MIN,
             "formula": "拥挤度 = 需求档位 ÷ 已知供给；势头（近 12 个月 arXiv 论文数的增长 ÷ 所在分类整体的增长）只作修正",
             "rarity": combo_rarity(uid, kit_id)}

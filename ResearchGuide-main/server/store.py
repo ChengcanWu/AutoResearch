@@ -103,6 +103,7 @@ CREATE TABLE IF NOT EXISTS edges (
   kind TEXT NOT NULL,
   text TEXT NOT NULL,
   evidence_url TEXT NOT NULL DEFAULT '',
+  ref TEXT NOT NULL DEFAULT '',
   created_at TEXT NOT NULL
 );
 CREATE TABLE IF NOT EXISTS statements (
@@ -150,6 +151,9 @@ def init_db() -> None:
     with _LOCK, _conn() as c:
         c.execute("PRAGMA journal_mode=WAL")  # 读写不互相阻塞，演示时多开几个页面也不锁库
         c.executescript(_SCHEMA)
+        cols = {r["name"] for r in c.execute("PRAGMA table_info(edges)")}
+        if "ref" not in cols:  # 早期本地库没有 ref 列（信息源边指向 knowledge/channels.json 的 id）
+            c.execute("ALTER TABLE edges ADD COLUMN ref TEXT NOT NULL DEFAULT ''")
 
 
 # ---------- users ----------
@@ -533,11 +537,22 @@ def kit_pool(kit_id: str) -> list[str]:
 
 # ---------- 定位：边、定位陈述、下注组合 ----------
 
-def add_edge(uid: str, kind: str, text: str, evidence_url: str = "") -> dict[str, Any]:
-    row = {"id": new_id(), "user_id": uid, "kind": kind, "text": text, "evidence_url": evidence_url, "created_at": now_iso()}
+def add_edge(uid: str, kind: str, text: str, evidence_url: str = "", ref: str = "") -> dict[str, Any]:
+    row = {"id": new_id(), "user_id": uid, "kind": kind, "text": text, "evidence_url": evidence_url, "ref": ref, "created_at": now_iso()}
     with _LOCK, _conn() as c:
-        c.execute("INSERT INTO edges(id, user_id, kind, text, evidence_url, created_at) VALUES(:id,:user_id,:kind,:text,:evidence_url,:created_at)", row)
+        c.execute("INSERT INTO edges(id, user_id, kind, text, evidence_url, ref, created_at) "
+                  "VALUES(:id,:user_id,:kind,:text,:evidence_url,:ref,:created_at)", row)
     return row
+
+
+def channel_readers() -> dict[str, set[str]]:
+    """每个信息源有哪些用户标了「我常看」。"""
+    with _conn() as c:
+        rows = c.execute("SELECT user_id, ref FROM edges WHERE kind='source' AND ref != ''").fetchall()
+    out: dict[str, set[str]] = {}
+    for r in rows:
+        out.setdefault(r["ref"], set()).add(r["user_id"])
+    return out
 
 
 def list_edges(uid: str) -> list[dict[str, Any]]:

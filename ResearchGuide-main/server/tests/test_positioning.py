@@ -119,3 +119,42 @@ def test_daily_tweak_points_to_one_small_action():
     assert positioning.daily_tweak(u, "llm-eval", []) is None
     kept = [{"title": "Controlling False Discoveries in Contamination Audits via Multiple Testing", "why": "和多重比较有关"}]
     assert positioning.daily_tweak(u, "llm-eval", kept)["view"] == "read"
+
+
+CHANNELS = {
+    "checked_at": "2026-10-03", "signal_kinds": {"review": "同行评审与争议", "experience": "经验帖"},
+    "blind_spots": {"ai": "中文圈常漏评审讨论", "career": "英文圈常漏经验帖"},
+    "channels": [
+        {"id": "openreview", "name": "OpenReview", "url": "https://openreview.net/", "search_hint": "", "directions": ["ai"],
+         "circle": "英文圈", "kind": "评审平台", "signals": ["review"], "good_for": "看审稿人怎么挑毛病", "caveat": "只覆盖部分会议",
+         "cadence": "weekly", "access": "境内直连", "feed": "", "verified": True, "verified_how": "test"},
+        {"id": "zhihu-ml", "name": "知乎 · 机器学习话题", "url": "https://www.zhihu.com/", "search_hint": "", "directions": ["ai"],
+         "circle": "中文圈", "kind": "问答", "signals": ["review"], "good_for": "中文解读", "caveat": "二手转述",
+         "cadence": "daily", "access": "境内直连", "feed": "", "verified": True, "verified_how": "test"},
+        {"id": "xhs-camp", "name": "小红书 · 夏令营经验", "url": "", "search_hint": "北大 夏令营 经验", "directions": ["career"],
+         "circle": "中文圈", "kind": "社交媒体", "signals": ["experience"], "good_for": "哪些组今年收人", "caveat": "幸存者偏差",
+         "cadence": "weekly", "access": "境内直连", "feed": "", "verified": False, "verified_how": "test"},
+        {"id": "nber", "name": "NBER", "url": "https://www.nber.org/", "search_hint": "", "directions": ["econ"],
+         "circle": "英文圈", "kind": "预印本", "signals": ["review"], "good_for": "-", "caveat": "-",
+         "cadence": "weekly", "access": "境内直连", "feed": "", "verified": True, "verified_how": "test"},
+    ],
+}
+
+
+def test_channel_map_marks_reads_and_blind_spots(tmp_path, monkeypatch):
+    path = tmp_path / "channels.json"
+    path.write_text(__import__("json").dumps(CHANNELS, ensure_ascii=False), encoding="utf-8")
+    monkeypatch.setattr(positioning, "CHANNELS", path)
+    u = user(with_card=False)
+    m = positioning.channel_map(u, "ai")
+    assert [c["id"] for c in m["channels"]] == ["openreview", "zhihu-ml", "xhs-camp"]  # 不混进别的方向
+    assert m["other_circle_unread"] == ["OpenReview"] and m["channels"][0]["band"] == "数据不足"
+    m = positioning.toggle_channel(u, "zhihu-ml", True, "ai")
+    assert m["summary"]["中文圈"] == {"read": 1, "total": 1}
+    edge = next(e for e in positioning.edges(u)["edges"] if e["kind"] == "source")
+    assert edge["key"] == "channel:zhihu-ml"  # 跨用户可比，算稀有度用
+    positioning.toggle_channel(u, "zhihu-ml", True, "ai")  # 重复点不重复加
+    assert sum(e["kind"] == "source" for e in positioning.edges(u)["edges"]) == 1
+    assert not positioning.toggle_channel(u, "zhihu-ml", False, "ai")["channels"][1]["read"]
+    with pytest.raises(positioning.PositionError):
+        positioning.toggle_channel(u, "nope", True, "ai")
