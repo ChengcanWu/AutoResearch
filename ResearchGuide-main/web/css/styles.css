@@ -813,10 +813,16 @@ body.is-home .site-footer { display: none; }
   scrollbar-width: none;
 }
 .land-snap::-webkit-scrollbar { display: none; }
+/* 内容列逐屏左右交替：图形画在列上部（canvas 锚点），文字从 56vh 起排在图形下面；
+   地图站点在对面一侧（见 app.js 的 stx/gxArr），奇数屏内容左、偶数屏内容右 */
 .snap {
   min-height: 170vh;
-  padding: 26vh 0 0 27vw;
-  max-width: calc(27vw + 400px);
+  padding: 56vh 0 0 max(64px, 7vw);
+  max-width: calc(max(64px, 7vw) + 440px);
+}
+.snap:nth-child(even) {
+  padding-left: 56vw;
+  max-width: calc(56vw + 440px);
 }
 .snap:last-child { min-height: 100vh; }
 .snap .hero-kicker { color: var(--night-2); font-size: 12px; letter-spacing: 0.24em; }
@@ -900,9 +906,10 @@ body.is-home .site-footer { display: none; }
 .home-progress { position: fixed; left: 0; right: 0; top: 0; z-index: 2; height: 1px; background: rgba(237, 241, 238, 0.08); }
 .home-progress i { display: block; height: 100%; width: 0; background: var(--night-mark); }
 
-/* 中屏（920–1279）：走廊收窄贴边、藏站点标签，文字收窄到 360px 让位 */
+/* 中屏（920–1279）：交替照旧，内容收窄到 360px、站点列更贴边，藏站点标签 */
 @media (min-width: 920px) and (max-width: 1279px) {
-  .snap { padding: 26vh 0 0 calc(15vw + 135px); max-width: calc(15vw + 495px); }
+  .snap { padding: 56vh 0 0 max(48px, 6vw); max-width: calc(max(48px, 6vw) + 360px); }
+  .snap:nth-child(even) { padding-left: 56vw; max-width: calc(56vw + 360px); }
   .land-map span { display: none; }
 }
 
@@ -952,6 +959,7 @@ body.is-home .site-footer { display: none; }
   @keyframes sheetUp { from { transform: translateY(24px); opacity: 0; } }
   .hero { margin-top: 10vh; }
   .snap { min-height: 150vh; padding: 52vh 24px 0 28px; max-width: none; }
+  .snap:nth-child(even) { padding-left: 28px; max-width: none; }
   .snap h2 { font-size: 32px; }
   .fella-index { display: none; }
   .snap-no { font-size: 44px; }

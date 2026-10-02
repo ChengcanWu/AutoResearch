@@ -403,15 +403,15 @@ const SKETCHES = [
   },
 ];
 
-/* 大地图：六个步骤竖着排成一列（左右轻摆成蛇形），落在屏幕左侧的走廊里；
-   滚动 = 镜头沿引导线行进；粒子图形画在屏幕右侧，与地图无关 */
+/* 大地图：六站竖向排布，屏幕上一屏左一屏右地交替；内容列（图形+文字）总在站的对面。
+   滚动 = 镜头沿弧长竖向行进：走过段发光生长、前端亮点沿线走 */
 const STATIONS = [
-  { x: 0, y: 0, label: "起点" },
-  { x: 0.2, y: 2, label: "画像" },
-  { x: -0.22, y: 4, label: "方向" },
-  { x: 0.22, y: 6, label: "任务" },
-  { x: -0.2, y: 8, label: "反馈" },
-  { x: 0.12, y: 10, label: "成长" },
+  { y: 0, label: "起点" },
+  { y: 1.9, label: "画像" },
+  { y: 3.8, label: "方向" },
+  { y: 5.7, label: "任务" },
+  { y: 7.6, label: "反馈" },
+  { y: 9.5, label: "成长" },
 ];
 
 /* Catmull-Rom 样条：过全部控制点的平滑曲线，首尾各补一拍让线从画面外伸进来、伸出去 */
@@ -493,7 +493,10 @@ function mountSketch(canvas, scroller, rail, progress, mapLayer) {
   const ACCENT = "rgb(127, 209, 194)";
   const MARK = "rgb(229, 138, 78)";
   const NODE = "rgb(154, 165, 160)";
-  let W = 0; let H = 0; let gx = 0; let gy = 0; let mapX = 0; let mapY = 0; let size = 0; let dot = 1.35;
+  let W = 0; let H = 0; let gy = 0; let size = 0; let dot = 1.35;
+  let stx = [];   // 站点屏幕 x（逐屏左右交替）
+  let gxArr = []; // 各屏图形锚点 x（与站点对面同列）
+  let kY = 1;     // 世界 y → 像素
   let figs = [];
   let path = null; // 大地图：样条点、弧长表、站点弧长、引导线铺点
   let N = 0;
@@ -511,12 +514,13 @@ function mountSketch(canvas, scroller, rail, progress, mapLayer) {
     canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     const narrow = W < 920;
-    const mid = !narrow && W < 1280; // 中屏三栏放不下，整组收窄：图形小一号、走廊贴边、文字 360px
-    size = narrow ? Math.min(W * 0.34, H * 0.2) : mid ? Math.min(H * 0.28, W * 0.18) : Math.min(H * 0.3, W * 0.19);
-    gx = narrow ? W * 0.5 : mid ? W * 0.82 : W * 0.77; // 粒子图形锚点（右侧）
-    gy = narrow ? H * 0.27 : H * 0.5;
-    mapX = narrow ? W * 0.5 : mid ? W * 0.13 : W * 0.16; // 大地图走廊（左侧）
-    mapY = H * 0.5;
+    const mid = !narrow && W < 1280;
+    size = narrow ? Math.min(W * 0.34, H * 0.2) : mid ? Math.min(H * 0.22, W * 0.17) : Math.min(H * 0.25, W * 0.16);
+    gy = narrow ? H * 0.27 : H * 0.3; // 图形锚点高度（内容列上部，文字在下面）
+    const nodeX = mid ? 0.79 : 0.76; // 站点列位置（偶数屏在右、奇数屏在左）
+    stx = Array.from({ length: STATIONS.length }, (_, i) => (i % 2 === 0 ? W * nodeX : W * (1 - nodeX)));
+    gxArr = STATIONS.map((_, i) => (narrow ? W * 0.5 : i % 2 === 0 ? W * (1 - nodeX) : W * nodeX));
+    kY = H * (narrow ? 0.5 : 0.55);
     dot = narrow ? 1.15 : 1.35;
     const spacing = narrow ? 4.2 : 4.6;
     const raws = SKETCHES.map((f) => f());
@@ -532,30 +536,27 @@ function mountSketch(canvas, scroller, rail, progress, mapLayer) {
       return f;
     };
     figs = raws.map((st, k) => sample(st, need[k]));
-    // 引导线：样条穿过六站，向画面上下各延一段；弧长表 + 站点弧长 + 固定间距铺点（缩放时点不闪移）
-    const pts = catmullRom([[-0.05, -1.6], ...STATIONS.map((s) => [s.x, s.y]), [0.05, 11.6]]);
+    // 引导线：样条过六站（x 用屏幕像素、y 用世界坐标的混合坐标），向画面上下各延一段；
+    // 弧长表 + 站点弧长。dots 仅作弧长均匀参考，不参与绘制
+    const pts = catmullRom([
+      [stx[0] + (W * 0.5 - stx[0]) * 0.25, -1.2],
+      ...STATIONS.map((s, i) => [stx[i], s.y]),
+      [stx[STATIONS.length - 1] + (W * 0.5 - stx[STATIONS.length - 1]) * 0.25, STATIONS[STATIONS.length - 1].y + 1.3],
+    ]);
     const cum = [0];
     for (let i = 1; i < pts.length; i++) cum.push(cum[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
     const stationArc = [];
     let ptr = 0;
-    STATIONS.forEach((s) => {
-      while (ptr < pts.length - 1 && Math.hypot(pts[ptr][0] - s.x, pts[ptr][1] - s.y) > 1e-9) ptr++;
+    STATIONS.forEach((s, i) => {
+      while (ptr < pts.length - 1 && Math.hypot(pts[ptr][0] - stx[i], pts[ptr][1] - s.y) > 1e-9) ptr++;
       stationArc.push(cum[ptr]);
     });
-    const dots = [];
-    let di = 0;
-    for (let sd = 0; sd <= cum[cum.length - 1]; sd += 0.085) {
-      while (di < pts.length - 2 && cum[di + 1] < sd) di++;
-      const seg = cum[di + 1] - cum[di] || 1;
-      const tt = (sd - cum[di]) / seg;
-      dots.push({ x: pts[di][0] + (pts[di + 1][0] - pts[di][0]) * tt, y: pts[di][1] + (pts[di + 1][1] - pts[di][1]) * tt, s: sd });
-    }
-    path = { pts, cum, stationArc, dots };
+    path = { pts, cum, stationArc };
     pIdx = 0;
     if (mapLayer) mapLayer.style.opacity = "1"; // 标签层常显（窄屏由 CSS 隐藏）
     shown = Array.from({ length: N }, (_, i) => {
       const ang = unitHash(i, 2) * Math.PI * 2;
-      const rad = 1.2 + unitHash(i, 3) * 1.0;
+      const rad = 0.9 + unitHash(i, 3) * 0.7;
       return [Math.cos(ang) * rad, Math.sin(ang) * rad];
     });
   };
@@ -574,7 +575,7 @@ function mountSketch(canvas, scroller, rail, progress, mapLayer) {
 
   const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
-  /* 地图在左走廊随镜头行进，粒子图形画在右侧锚点，两区互不相干 */
+  /* 站点 x 固定在两侧交替、镜头只竖向行进：走过段发光生长，图形+文字列在站的对面 */
   const draw = () => {
     ctx.clearRect(0, 0, W, H);
     if (!path || !figs.length) return;
@@ -583,69 +584,83 @@ function mountSketch(canvas, scroller, rail, progress, mapLayer) {
     const t = phase - a;
     const sa = path.stationArc[a];
     const sb = path.stationArc[a + 1] ?? sa;
-    const cam = pointAt(sa + (sb - sa) * t);
-    const zoom = 1 - 0.12 * Math.sin(Math.PI * t);
-    const k = size * zoom;
-    const mx = (wx) => mapX + (wx - cam[0]) * k;
-    const my = (wy) => mapY + (wy - cam[1]) * k;
+    const camY = STATIONS[a].y + (STATIONS[b].y - STATIONS[a].y) * t;
+    const my = (wy) => H * 0.5 + (wy - camY) * kY;
     const active = Math.min(STATIONS.length - 1, Math.round(phase));
     /* 走过段的前端在行进前半程连续长到下一站，后半程停住等聚焦环跳站 */
     const head = sa + (sb - sa) * Math.min(1, Math.max(0, t * 2));
     const total = path.cum[path.cum.length - 1];
 
-    /* 引导线（实线）：走过段主色点亮，未走段灰 */
-    const strokeSeg = (fromArc, toArc, style, alpha) => {
+    /* 引导线（加粗实线）：未走段灰在下，走过段主色发光叠在上面 */
+    const strokeSeg = (fromArc, toArc, style, alpha, glow) => {
       if (toArc - fromArc < 1e-6) return;
       const p0 = pointAt(fromArc);
       const p1 = pointAt(toArc);
       ctx.strokeStyle = style;
       ctx.globalAlpha = alpha;
-      ctx.lineWidth = 1.5;
+      ctx.lineWidth = 4;
+      ctx.lineJoin = "round";
       ctx.lineCap = "round";
+      ctx.shadowColor = glow ? ACCENT : "transparent";
+      ctx.shadowBlur = glow ? 12 : 0;
       ctx.beginPath();
-      ctx.moveTo(mx(p0[0]), my(p0[1]));
+      ctx.moveTo(p0[0], my(p0[1]));
       for (let i = 0; i < path.pts.length; i++) {
         const c = path.cum[i];
         if (c <= fromArc + 1e-6 || c >= toArc - 1e-6) continue;
-        ctx.lineTo(mx(path.pts[i][0]), my(path.pts[i][1]));
+        ctx.lineTo(path.pts[i][0], my(path.pts[i][1]));
       }
-      ctx.lineTo(mx(p1[0]), my(p1[1]));
+      ctx.lineTo(p1[0], my(p1[1]));
       ctx.stroke();
+      ctx.shadowBlur = 0;
     };
-    strokeSeg(0, head, ACCENT, 0.6);
-    strokeSeg(head, total, NODE, 0.35);
+    strokeSeg(head, total, NODE, 0.32, false);
+    strokeSeg(0, head, ACCENT, 0.9, true);
     ctx.globalAlpha = 1;
 
-    /* 站点：圆环常显，走过的填主色点，聚焦站外加游标环 */
+    /* 站点：实心圆 + 外圆环；走过的填主色带微光，聚焦站外环换 --night-mark */
     STATIONS.forEach((st, i) => {
-      const sx = mx(st.x); const sy = my(st.y);
-      if (sx < -60 || sx > W + 60 || sy < -60 || sy > H + 60) return;
-      ctx.globalAlpha = 0.65;
-      ctx.strokeStyle = NODE;
-      ctx.lineWidth = 1;
+      const sx = stx[i]; const sy = my(st.y);
+      if (sy < -60 || sy > H + 60) return;
+      const isActive = i === active;
+      ctx.globalAlpha = isActive ? 1 : 0.6;
+      ctx.strokeStyle = isActive ? MARK : NODE;
+      ctx.lineWidth = isActive ? 2 : 1.5;
       ctx.beginPath();
-      ctx.arc(sx, sy, 0.05 * k, 0, Math.PI * 2);
+      ctx.arc(sx, sy, isActive ? 15 : 12, 0, Math.PI * 2);
       ctx.stroke();
-      if (i < active) {
-        ctx.globalAlpha = 0.9;
-        ctx.fillStyle = ACCENT;
-        ctx.beginPath();
-        ctx.arc(sx, sy, 2.2, 0, Math.PI * 2);
-        ctx.fill();
-      }
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = i <= active ? ACCENT : INK;
+      ctx.shadowColor = ACCENT;
+      ctx.shadowBlur = i <= active ? 6 : 0;
+      ctx.beginPath();
+      ctx.arc(sx, sy, 6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
     });
-    const focus = STATIONS[active];
-    ctx.globalAlpha = 0.85;
-    ctx.strokeStyle = MARK;
-    ctx.lineWidth = 1.5;
+
+    /* 行进最前端的亮点：沿走过段顶端，亮核 + 柔光晕 */
+    const hp = pointAt(head);
+    const hx = hp[0]; const hy = my(hp[1]);
+    ctx.fillStyle = ACCENT;
+    ctx.globalAlpha = 0.22;
     ctx.beginPath();
-    ctx.arc(mx(focus.x), my(focus.y), 0.095 * k, 0, Math.PI * 2);
-    ctx.stroke();
+    ctx.arc(hx, hy, 11, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 0.95;
+    ctx.shadowColor = ACCENT;
+    ctx.shadowBlur = 14;
+    ctx.beginPath();
+    ctx.arc(hx, hy, 4.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
     ctx.globalAlpha = 1;
 
-    /* 粒子：图形画在右侧锚点（屏幕坐标），换图途中散开走侧向弧线 */
+    /* 粒子：图形锚点逐屏换到站的对面，行进中锚点跟着插值（粒子横穿屏幕飞过去） */
     const A = still && t >= 0.5 ? figs[b] : figs[a];
     const B = still ? A : figs[b];
+    const anchorT = still ? (t >= 0.5 ? 1 : 0) : ease(Math.min(1, Math.max(0, t / 0.8)));
+    const gxa = gxArr[a] + (gxArr[b] - gxArr[a]) * anchorT;
     const introE = ease(intro);
     let lastStyle = "";
     for (let i = 0; i < N; i++) {
@@ -674,19 +689,19 @@ function mountSketch(canvas, scroller, rail, progress, mapLayer) {
       if (style !== lastStyle) { ctx.fillStyle = style; lastStyle = style; }
       ctx.globalAlpha = alpha;
       ctx.beginPath();
-      ctx.arc(gx + x * size, gy + y * size, dot * (1 - 0.2 * lift), 0, Math.PI * 2);
+      ctx.arc(gxa + x * size, gy + y * size, dot * (1 - 0.2 * lift), 0, Math.PI * 2);
       ctx.fill();
     }
     ctx.globalAlpha = 1;
 
-    /* 站点标签随相机投影定位，出屏的藏起来 */
+    /* 站点标签随镜头竖向投影定位，出屏的藏起来 */
     if (mapLayer) {
       [...mapLayer.children].forEach((sp, i) => {
         const st = STATIONS[i];
-        const sx = mx(st.x); const sy = my(st.y);
+        const sx = stx[i]; const sy = my(st.y);
         sp.style.left = sx + "px";
         sp.style.top = sy + "px";
-        sp.style.opacity = (sx < -40 || sx > W + 40 || sy < -40 || sy > H + 40) ? "0" : "0.9";
+        sp.style.opacity = (sy < -40 || sy > H + 40) ? "0" : "0.9";
       });
     }
   };
