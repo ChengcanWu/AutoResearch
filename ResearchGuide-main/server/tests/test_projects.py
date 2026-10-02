@@ -152,7 +152,7 @@ def test_closed_deadline_detection():
 
 def test_paths_have_six_steps_with_pass_criteria():
     data = projects.paths()
-    assert {"math", "ai"} <= set(data)
+    assert {"math", "ai", "psy", "econ"} <= set(data)
     for code, p in data.items():
         steps = p["steps"]
         assert [s["step"] for s in steps] == [1, 2, 3, 4, 5, 6], code
@@ -185,7 +185,7 @@ def test_path_step_sets_stage_and_is_passed_to_the_model(monkeypatch):
     r = projects.search(uid, "ai", 0, "", "", step_no=5)
     assert seen["stage"] == 3 and seen["step"]["step"] == 5 and seen["node"] == seen["step"]["name"]
     assert r["query"]["path_step"] == 5 and r["items"][0]["path_step"] == 5
-    r2 = projects.search(uid, "psy", 1, "", "", step_no=5)   # 没有路径的方向忽略 path_step
+    r2 = projects.search(uid, "stat", 1, "", "", step_no=5)   # 没有路径的方向忽略 path_step
     assert r2["query"]["path_step"] is None and r2["query"]["stage"] == 1
 
 
@@ -197,3 +197,26 @@ def test_paths_json_is_in_sync_with_docs():
     spec.loader.exec_module(mod)
     on_disk = json.loads(projects.PATHS.read_text(encoding="utf-8"))
     assert on_disk == mod.build(), "路径文档有改动：请运行 uv run --no-project python knowledge/build_paths.py"
+
+
+def test_slow_source_falls_back_to_snapshot_within_budget(monkeypatch):
+    """一个来源卡住时，检索按时返回，并如实标出这个来源用了快照。"""
+    import threading
+    uid = store.create_user("t")["uid"]
+    release = threading.Event()
+    real = projects._collect
+
+    def slow_collect(src, d, st, kw):
+        if src.get("adapter"):
+            release.wait(5)
+            return [], {"id": src["id"], "name": src["name"], "ok": False, "count": 0}
+        return real(src, d, st, kw)
+
+    monkeypatch.setattr(projects, "_collect", slow_collect)
+    monkeypatch.setattr(projects, "SEARCH_BUDGET", 0.3)
+    t0 = projects.time.time()
+    r = projects.search(uid, "econ", 1)
+    release.set()
+    assert projects.time.time() - t0 < 3
+    slow = [s for s in r["sources"] if "没返回" in (s.get("error") or "")]
+    assert slow and all(s.get("snapshot") for s in slow)

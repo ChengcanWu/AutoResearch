@@ -6,6 +6,12 @@
 
 ---
 
+## [2026-10-02] [FIX] paths.json 接上认知、经济路径；清掉 CHANGELOG 里残留的合并冲突标记
+- 变更内容：#5 加了 `docs/paths/认知.md`、`经济.md`，但没有重新生成 `knowledge/paths.json`，main 上 `server/tests` 有一条测试失败。现在跑过 `knowledge/build_paths.py`，四个方向都有 6 步路径，「项目」页的认知、经济也按路径步骤选。`改树建议.md` §5 的项目形态是为数学、人工智能写的，生成时只给这两个方向带上。另外删掉本文件里 #3 合并时留下的一行 `=======`。检索加 12 秒总时限：慢来源（今天产业命题要 20–35 秒）先用快照、后台跑完写缓存，冷启动从 40 多秒降到约 17 秒，缓存热了约 5 秒。
+- 影响模块：knowledge/paths.json、knowledge/build_paths.py、server/projects.py、server/project_adapters.py、server/tests/test_projects.py、docs/TASK3_PROJECTS.md、docs/CHANGELOG.md
+- 决策来源：陈浩文
+- 登记人：助手
+
 ## [2026-10-01] [BUILD] 「项目」接上任务 4 的方向路径
 - 变更内容：新增 `knowledge/paths.json`（由 `knowledge/build_paths.py` 从 `docs/paths/*.md` 生成，目前有数学、人工智能）。「项目」页对有路径的方向改为「你在路径的哪一步」，按这一步的过关标准找项目；检索接口多一个可选字段 `path_step`，`context` 多返回 `paths` 和默认步骤。没有路径的方向不变。甲补上认知、经济后跑一次生成脚本即可接上。登录页「五个工作区」改为六个。
 - 影响模块：server/projects.py、server/main.py、skills/project-scout/SKILL.md、web/js/app.js、web/css/styles.css、knowledge/、docs/TASK3_PROJECTS.md、docs/ARCHITECTURE.md、docs/paths/README.md（一行）
@@ -17,7 +23,7 @@
 - 影响文档：`docs/paths/`（新增）；甲的两个方向（认知、经济）待补
 - 影响模块：暂无代码改动；`web/js/app.js` 的 `FIELD_TREES` 改不改、怎么改，等两人路径合并后再定（建议见 `docs/paths/改树建议.md`）
 - 决策来源：陈旭 依据任务表（任务 4乙）
-=======
+
 ## [2026-09-30] [BUILD] 任务 3 边学边练：公开来源检索项目、交压缩包、五条标准评阅
 - 变更内容：新增侧栏「项目」。来源清单 `knowledge/project_sources.json`（24 个来源、72 条逐字核对过原文的样例）；7 个来源实时检索（和鲸、飞桨学习赛、天池学习赛、北大开放数据、科学数据银行、创新大赛产业命题、欧拉计划中文站），其余给快照和「去哪找」路线；查不到就空着。成果以 `.zip` 提交，只在内存里读、不执行，按五条标准评阅，规则判定是上限，模型引文必须在文件里逐字找得到；每次提交写回一条行为事实。模型的工作说明写在 `skills/project-scout/`、`skills/project-review/`，代码与 skill 分工见 `skills/README.md`。新增接口只加不改，见 ARCHITECTURE §5。
 - 影响模块：server/projects.py、server/project_adapters.py、server/submission.py、server/skills.py、server/store.py（新增 projects 表）、server/main.py、web/、knowledge/、skills/、docs/TASK3_PROJECTS.md
