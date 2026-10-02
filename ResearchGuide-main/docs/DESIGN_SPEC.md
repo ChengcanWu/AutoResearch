@@ -60,6 +60,7 @@
 | 选项 | `.chip` | 对话选项、方向切换同形 |
 | 事实行 | `.fact-card` + `.badge.cat-*` | 行内：值 → 类别圆点 · 来源 · 待核对 → 依据 → 修改/删除 |
 | 方向树 | `.frontier-node`（`is-now` / `is-past` / `is-path` / `is-pick`）+ `.frontier-link` | 整齐树布局，连线不交叉；图例 `.tree-legend` |
+| 路径主干 | `.frontier-node.is-main` + `.step-no` + `.frontier-trunk` | 有任务 4 路径的方向：六步竖排成一条粗线（序号圆点），原有节点作为岔路挂在右侧；主干讲「这一学期走到哪」，节点讲「二十分钟一件事」，两种尺度一眼可分 |
 | 节点抽屉 | `.node-sheet` | 桌面右侧、窄屏底部 |
 | 任务 | `.task-head` + `.step-list` + `.criteria` + `.submit-box` | 步骤是可勾选的行，标准是圆点列表 |
 | 反馈 | `.feedback` + `.rubric-item.pass/.fail` + `.why-box` | 分数写成「3 / 3 条做到」；下一步只指一处 |

@@ -261,6 +261,7 @@ bank-subscribe/
 
 - 机读版：`knowledge/paths.json`，由 `knowledge/build_paths.py` 从 `docs/paths/*.md` 生成（只抄步骤名、先弄懂什么、做完怎样算过了），不要手改。甲补上 `认知.md` / `经济.md` 后跑一次 `uv run --no-project python knowledge/build_paths.py` 就接上；`server/tests` 里有一条测试会在文档和 json 不一致时失败。
 - 检索：`POST /api/projects/search` 多一个可选字段 `path_step`（1–6）。有路径时以它为准换算项目阶段，步骤名当作「正在学的节点」，这一步的过关标准和 `改树建议.md` §5 的项目形态一起交给模型，优先挑「做完能直接交出这一步过关材料」的项目。没有路径的方向忽略它，仍按四个阶段。
+- 「项目」页的默认步骤优先取方向树上的位置（当前节点属于主干第几步），其次才按记录推。方向树里点主干上的任一步，也能直接「找能交出这一步的项目」。
 - `GET /api/projects/context` 多返回 `paths` 和默认的 `path_step`（按记录推：只学了概念→第 1 步，做过小任务→第 2 步，学完一块→第 3 步，做过项目→第 5 步）。
 
 | 路径 | 步骤 | 换算成项目阶段 |

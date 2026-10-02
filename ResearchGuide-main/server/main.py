@@ -315,6 +315,12 @@ def project_sources():
         for s in reg["sources"]]}
 
 
+@app.get("/api/paths")
+def direction_paths():
+    """任务 4 的方向路径（knowledge/paths.json），前端用它把方向树画成「6 步主干 + 原有节点」。"""
+    return {"paths": projects.paths()}
+
+
 @app.get("/api/projects/context")
 def project_context(uid: str):
     _user_or_404(uid)
