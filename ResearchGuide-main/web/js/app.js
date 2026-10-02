@@ -197,23 +197,27 @@ function renderHome() {
     sec.dataset.index = String(i);
     const points = (page.points || [])
       .map(([k, v], j) => `<li style="--i:${j}"><b>${k}</b><span>${v}</span></li>`).join("");
-    sec.innerHTML = (i === 0 ? `<p class="hero-kicker">${page.kicker}</p>` : `<p class="snap-no">${page.kicker}</p>`)
+    // snap-inner 钉在视口固定高度（sticky），不随滚动上下移动；显隐由 JS 按相位渐变
+    sec.innerHTML = `<div class="snap-inner">`
+      + (i === 0 ? `<p class="hero-kicker">${page.kicker}</p>` : `<p class="snap-no">${page.kicker}</p>`)
       + `<h2>${page.title}</h2>`
       + `<p class="land-lead">${page.lead}</p>`
       + (points ? `<ul class="land-points">${points}</ul>` : "")
       + (page.closing ? `<p class="land-closing">${page.closing}</p>` : "")
-      + (page.hint ? `<p class="snap-hint">${page.hint}</p>` : "");
+      + (page.hint ? `<p class="snap-hint">${page.hint}</p>` : "")
+      + `</div>`;
+    const inner = sec.querySelector(".snap-inner");
     if (i === 0) {
       const quick = el("button", "land-ghost", "直接开始");
       quick.type = "button";
       quick.onclick = beginExperience;
-      sec.insertBefore(quick, sec.querySelector(".snap-hint"));
+      inner.insertBefore(quick, inner.querySelector(".snap-hint"));
     }
     if (i === HOME_PAGES.length - 1) {
       const btn = el("button", "btn land-cta", "立即开始体验");
       btn.type = "button";
       btn.onclick = beginExperience;
-      sec.appendChild(btn);
+      inner.appendChild(btn);
     }
     snap.appendChild(sec);
   });
@@ -493,14 +497,30 @@ function mountSketch(canvas, scroller, rail, progress, mapLayer) {
   const ACCENT = "rgb(127, 209, 194)";
   const MARK = "rgb(229, 138, 78)";
   const NODE = "rgb(154, 165, 160)";
-  let W = 0; let H = 0; let gy = 0; let size = 0; let dot = 1.35;
+  let W = 0; let H = 0; let gy = 0; let size = 0; let dot = 1.15;
   let stx = [];   // 站点屏幕 x（逐屏左右交替）
   let gxArr = []; // 各屏图形锚点 x（与站点对面同列）
   let kY = 1;     // 世界 y → 像素
   let figs = [];
-  let path = null; // 大地图：样条点、弧长表、站点弧长、引导线铺点
+  let path = null; // 大地图：样条点、弧长表、站点弧长
   let N = 0;
-  let shown = [];
+  let scatter = []; // 换图途中粒子均匀散布的全屏目标位（也是开场出发点）
+
+  /* 发光粒子 sprite：径向渐变画一次，逐点 drawImage（逐点 shadowBlur 顶不住这个点数） */
+  const glowSprite = (rgb) => {
+    const c = document.createElement("canvas");
+    c.width = 32; c.height = 32;
+    const g = c.getContext("2d");
+    const grad = g.createRadialGradient(16, 16, 0, 16, 16, 16);
+    grad.addColorStop(0, `rgba(${rgb},1)`);
+    grad.addColorStop(0.3, `rgba(${rgb},0.9)`);
+    grad.addColorStop(1, `rgba(${rgb},0)`);
+    g.fillStyle = grad;
+    g.fillRect(0, 0, 32, 32);
+    return c;
+  };
+  const SPR_INK = glowSprite("237,241,238");
+  const SPR_ACC = glowSprite("127,209,194");
   let phase = 0;
   let target = 0;
   let intro = still ? 1 : 0;
@@ -521,8 +541,8 @@ function mountSketch(canvas, scroller, rail, progress, mapLayer) {
     stx = Array.from({ length: STATIONS.length }, (_, i) => (i % 2 === 0 ? W * nodeX : W * (1 - nodeX)));
     gxArr = STATIONS.map((_, i) => (narrow ? W * 0.5 : i % 2 === 0 ? W * (1 - nodeX) : W * nodeX));
     kY = H * (narrow ? 0.5 : 0.55);
-    dot = narrow ? 1.15 : 1.35;
-    const spacing = narrow ? 4.2 : 4.6;
+    dot = narrow ? 1.0 : 1.15;
+    const spacing = narrow ? 3.0 : 2.8; // 更密：聚形后近似连续的发光线
     const raws = SKETCHES.map((f) => f());
     const totalLen = (st) => st.reduce((s, x) => s + strokeLength(x.pts), 0);
     const need = raws.map((st) => Math.ceil((totalLen(st) * size) / spacing));
@@ -554,11 +574,10 @@ function mountSketch(canvas, scroller, rail, progress, mapLayer) {
     path = { pts, cum, stationArc };
     pIdx = 0;
     if (mapLayer) mapLayer.style.opacity = "1"; // 标签层常显（窄屏由 CSS 隐藏）
-    shown = Array.from({ length: N }, (_, i) => {
-      const ang = unitHash(i, 2) * Math.PI * 2;
-      const rad = 0.9 + unitHash(i, 3) * 0.7;
-      return [Math.cos(ang) * rad, Math.sin(ang) * rad];
-    });
+    scatter = Array.from({ length: N }, (_, i) => [
+      W * (0.06 + 0.88 * unitHash(i, 11)),
+      H * (0.06 + 0.88 * unitHash(i, 13)),
+    ]);
   };
 
   /* 弧长 → 样条上的点（镜头位置）；游标随 s 进退，逐帧 O(1) */
@@ -656,41 +675,39 @@ function mountSketch(canvas, scroller, rail, progress, mapLayer) {
     ctx.shadowBlur = 0;
     ctx.globalAlpha = 1;
 
-    /* 粒子：图形锚点逐屏换到站的对面，行进中锚点跟着插值（粒子横穿屏幕飞过去） */
+    /* 粒子：图形锚点逐屏换到站的对面；行进中先均匀散布全屏（变暗变细）再聚回图形（渐亮变粗） */
     const A = still && t >= 0.5 ? figs[b] : figs[a];
     const B = still ? A : figs[b];
     const anchorT = still ? (t >= 0.5 ? 1 : 0) : ease(Math.min(1, Math.max(0, t / 0.8)));
     const gxa = gxArr[a] + (gxArr[b] - gxArr[a]) * anchorT;
-    const introE = ease(intro);
-    let lastStyle = "";
     for (let i = 0; i < N; i++) {
       const f = i / N;
       const local = still ? (t >= 0.5 ? 1 : 0) : ease(Math.min(1, Math.max(0, (t - f * 0.35) / 0.65)));
       const ax = A.xy[i * 2]; const ay = A.xy[i * 2 + 1];
       const bx = B.xy[i * 2]; const by = B.xy[i * 2 + 1];
-      let x = ax + (bx - ax) * local;
-      let y = ay + (by - ay) * local;
-      const lift = Math.sin(Math.PI * local);
+      const x = ax + (bx - ax) * local;
+      const y = ay + (by - ay) * local;
+      let px = gxa + x * size;
+      let py = gy + y * size;
+      const lift = Math.sin(Math.PI * local); // 散开程度：0 聚成图形、1 均匀铺满全屏
       if (lift > 0.001) {
-        const dx = bx - ax; const dy = by - ay;
-        const len = Math.hypot(dx, dy) || 1;
-        const amp = (0.09 + unitHash(i, 7) * 0.2) * (unitHash(i, 9) > 0.5 ? 1 : -1) * lift;
-        x += (-dy / len) * amp;
-        y += (dx / len) * amp;
+        px += (scatter[i][0] - px) * lift;
+        py += (scatter[i][1] - py) * lift;
       }
-      if (introE < 1) {
-        x = shown[i][0] + (x - shown[i][0]) * Math.min(1, Math.max(0, (intro - f * 0.3) / 0.7));
-        y = shown[i][1] + (y - shown[i][1]) * Math.min(1, Math.max(0, (intro - f * 0.3) / 0.7));
+      if (intro < 1) { // 开场：从全屏散布的暗点聚成首图
+        const k2 = Math.min(1, Math.max(0, (intro - f * 0.3) / 0.7));
+        px += (scatter[i][0] - px) * (1 - k2);
+        py += (scatter[i][1] - py) * (1 - k2);
       }
       const vis = A.vis[i] + (B.vis[i] - A.vis[i]) * local;
-      const alpha = vis * (1 - 0.35 * lift) * Math.min(1, intro * 1.4);
+      const focus = 1 - lift; // 聚形度：散开暗而细，聚形亮而粗，聚拢完成时最强
+      const alpha = vis * (0.28 + 0.72 * Math.pow(focus, 1.4)) * Math.min(1, intro * 1.4);
       if (alpha < 0.03) continue;
-      const style = (local < 0.5 ? A.acc[i] : B.acc[i]) ? ACCENT : INK;
-      if (style !== lastStyle) { ctx.fillStyle = style; lastStyle = style; }
+      const spr = (local < 0.5 ? A.acc[i] : B.acc[i]) ? SPR_ACC : SPR_INK;
+      const r = dot * (0.6 + 0.85 * focus);
+      const s = r * 3;
       ctx.globalAlpha = alpha;
-      ctx.beginPath();
-      ctx.arc(gxa + x * size, gy + y * size, dot * (1 - 0.2 * lift), 0, Math.PI * 2);
-      ctx.fill();
+      ctx.drawImage(spr, px - s, py - s, s * 2, s * 2);
     }
     ctx.globalAlpha = 1;
 
@@ -712,7 +729,20 @@ function mountSketch(canvas, scroller, rail, progress, mapLayer) {
     const active = Math.min(nos.length - 1, Math.round(phase));
     nos.forEach((d, i) => d.classList.toggle("on", i === active));
     if (mark && nos[active]) mark.style.transform = `translateY(${nos[active].offsetTop}px)`;
-    sections.forEach((sec, i) => sec.classList.toggle("is-in", i === active));
+    /* 文字钉在视口不动，只按相位渐显渐隐：行进后段（聚形近完成）渐入，
+       开始滚向下一步就渐出；首屏等开场粒子聚完再出现 */
+    sections.forEach((sec, i) => {
+      const d = phase - i;
+      let vis;
+      if (still) vis = d > -0.5 && d < 0.5 ? 1 : 0;
+      else if (d <= -0.36 || d >= 0.18) vis = 0;
+      else if (d < -0.03) vis = (d + 0.36) / 0.33;
+      else if (d <= 0.02) vis = 1;
+      else vis = 1 - (d - 0.02) / 0.16;
+      if (i === 0) vis *= Math.min(1, Math.max(0, (intro - 0.5) / 0.4));
+      sec.style.opacity = String(Math.min(1, Math.max(0, vis)));
+      sec.classList.toggle("lit", vis > 0.5);
+    });
     const limit = Math.max(1, scroller.scrollHeight - scroller.clientHeight);
     if (bar) bar.style.width = `${Math.min(1, scroller.scrollTop / limit) * 100}%`;
   };

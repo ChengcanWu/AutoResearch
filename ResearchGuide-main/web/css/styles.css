@@ -813,29 +813,32 @@ body.is-home .site-footer { display: none; }
   scrollbar-width: none;
 }
 .land-snap::-webkit-scrollbar { display: none; }
-/* 内容列逐屏左右交替：图形画在列上部（canvas 锚点），文字从 56vh 起排在图形下面；
-   地图站点在对面一侧（见 app.js 的 stx/gxArr），奇数屏内容左、偶数屏内容右 */
-.snap {
-  min-height: 170vh;
-  padding: 56vh 0 0 max(64px, 7vw);
+/* 内容列逐屏左右交替：section 只负责撑滚动高度，文字块 sticky 钉在视口 56vh 不随滚动移动；
+   图形画在列上部（canvas 锚点），显隐由 JS 按相位渐变；站点在对面一侧（见 app.js 的 stx/gxArr） */
+.snap { min-height: 170vh; }
+.snap:last-child { min-height: 140vh; }
+.snap-inner {
+  position: sticky;
+  top: 56vh;
   max-width: calc(max(64px, 7vw) + 440px);
+  padding-left: max(64px, 7vw);
 }
-.snap:nth-child(even) {
-  padding-left: 56vw;
-  max-width: calc(56vw + 440px);
+.snap:nth-child(even) .snap-inner {
+  margin-left: 56vw;
+  max-width: 440px;
+  padding-left: 0;
 }
-.snap:last-child { min-height: 100vh; }
 .snap .hero-kicker { color: var(--night-2); font-size: 12px; letter-spacing: 0.24em; }
 .snap h2 {
   margin: var(--gap-4) 0 var(--gap-4);
   font-family: var(--serif); font-size: clamp(34px, 4.2vw, 56px); line-height: 1.18; letter-spacing: 0.04em;
   color: var(--night-ink);
 }
-.land-lead { font-size: 16px; line-height: 1.85; color: var(--night-2); }
-.land-points { margin: var(--gap-6) 0 0; padding: 0; list-style: none; border-top: 1px solid rgba(237, 241, 238, 0.12); }
-.land-points li { display: grid; grid-template-columns: 84px 1fr; gap: var(--gap-3); padding: 14px 0; border-bottom: 1px solid rgba(237, 241, 238, 0.12); }
-.land-points b { font-size: 13px; font-weight: 600; color: var(--night-ink); }
-.land-points span { font-size: 14px; line-height: 1.7; color: var(--night-2); }
+.land-lead { font-size: 14px; line-height: 1.8; color: var(--night-2); }
+.land-points { margin: var(--gap-5) 0 0; padding: 0; list-style: none; border-top: 1px solid rgba(237, 241, 238, 0.12); }
+.land-points li { display: grid; grid-template-columns: 76px 1fr; gap: var(--gap-3); padding: 12px 0; border-bottom: 1px solid rgba(237, 241, 238, 0.12); }
+.land-points b { font-size: 12px; font-weight: 600; color: var(--night-ink); }
+.land-points span { font-size: 13px; line-height: 1.7; color: var(--night-2); }
 .snap-hint { margin-top: var(--gap-6); font-size: 12px; letter-spacing: 0.12em; color: var(--night-3); }
 .snap-hint::after { content: ""; display: block; width: 1px; height: 40px; margin-top: var(--gap-3); background: linear-gradient(var(--night-3), transparent); }
 .land-cta { margin-top: var(--gap-6); background: var(--night-ink); border-color: var(--night-ink); color: var(--night); }
@@ -876,14 +879,17 @@ body.is-home .site-footer { display: none; }
   white-space: nowrap;
 }
 
-/* 每屏滚到时文字逐条进场；默认全可见，只有挂上 .is-in 才播动画（reduced-motion / 无 JS 不藏字） */
-.snap.is-in :is(.hero-kicker, .snap-no, h2, .land-lead, .land-points li, .land-closing, .land-ghost, .snap-hint, .land-cta) { animation: riseIn 0.45s var(--ease) both; }
-.snap.is-in .hero-kicker, .snap.is-in .snap-no { animation-delay: 0s; }
-.snap.is-in h2 { animation-delay: 0.05s; }
-.snap.is-in .land-lead { animation-delay: 0.1s; }
-.snap.is-in .land-points li { animation-delay: calc(0.15s + var(--i, 0) * 0.06s); }
-.snap.is-in .land-closing, .snap.is-in .land-ghost { animation-delay: 0.22s; }
-.snap.is-in .snap-hint, .snap.is-in .land-cta { animation-delay: 0.28s; }
+/* 文字显隐：JS 把 .snap 的 opacity 按滚动相位渐入渐出；挂 .lit 后块内两段进场——
+   标题先出现，内容（导语/要点/按钮）延迟 0.26s 再出现；摘掉 .lit 时整体快速淡出 */
+.snap-inner > * { opacity: 0; transition: opacity 0.22s var(--ease); }
+.snap.lit .snap-inner > :is(.hero-kicker, .snap-no, h2) {
+  opacity: 1;
+  transition: opacity 0.6s var(--ease);
+}
+.snap.lit .snap-inner > :is(.land-lead, .land-points, .land-closing, .land-ghost, .snap-hint, .land-cta) {
+  opacity: 1;
+  transition: opacity 0.6s var(--ease) 0.26s;
+}
 
 .fella-index {
   position: fixed; left: 32px; top: 50%; z-index: 2;
@@ -908,8 +914,8 @@ body.is-home .site-footer { display: none; }
 
 /* 中屏（920–1279）：交替照旧，内容收窄到 360px、站点列更贴边，藏站点标签 */
 @media (min-width: 920px) and (max-width: 1279px) {
-  .snap { padding: 56vh 0 0 max(48px, 6vw); max-width: calc(max(48px, 6vw) + 360px); }
-  .snap:nth-child(even) { padding-left: 56vw; max-width: calc(56vw + 360px); }
+  .snap-inner { max-width: calc(max(48px, 6vw) + 360px); padding-left: max(48px, 6vw); }
+  .snap:nth-child(even) .snap-inner { margin-left: 56vw; max-width: 360px; }
   .land-map span { display: none; }
 }
 
@@ -958,8 +964,9 @@ body.is-home .site-footer { display: none; }
   .node-sheet { top: auto; left: 0; width: 100vw; max-height: 72vh; border-left: 0; border-top: 1px solid var(--line); border-radius: var(--r-lg) var(--r-lg) 0 0; box-shadow: 0 -18px 40px rgba(28, 40, 35, 0.1); animation-name: sheetUp; }
   @keyframes sheetUp { from { transform: translateY(24px); opacity: 0; } }
   .hero { margin-top: 10vh; }
-  .snap { min-height: 150vh; padding: 52vh 24px 0 28px; max-width: none; }
-  .snap:nth-child(even) { padding-left: 28px; max-width: none; }
+  .snap { min-height: 150vh; }
+  .snap-inner { top: 52vh; max-width: none; margin-left: 0; padding: 0 24px 0 28px; }
+  .snap:nth-child(even) .snap-inner { margin-left: 0; max-width: none; }
   .snap h2 { font-size: 32px; }
   .fella-index { display: none; }
   .snap-no { font-size: 44px; }
@@ -970,5 +977,5 @@ body.is-home .site-footer { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: 0.01ms !important; animation-delay: 0ms !important; transition-duration: 0.01ms !important; }
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-delay: 0ms !important; transition-duration: 0.01ms !important; transition-delay: 0ms !important; }
 }
