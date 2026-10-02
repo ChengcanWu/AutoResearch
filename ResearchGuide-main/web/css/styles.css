@@ -67,6 +67,7 @@ body {
   line-height: 1.7;
   color: var(--ink);
   background: var(--bg);
+  transition: background-color 0.5s var(--ease);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -804,7 +805,7 @@ body.is-home { background: var(--night); overflow: hidden; }
 body.is-home .page { max-width: none; padding: 0; height: 100vh; overflow: hidden; }
 body.is-home .site-footer { display: none; }
 
-.land { position: relative; height: 100vh; color: var(--night-ink); }
+.land { position: relative; height: 100vh; color: var(--night-ink); background: var(--night); }
 .land-field { position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; }
 .land-snap {
   position: relative; z-index: 1;
@@ -833,6 +834,50 @@ body.is-home .site-footer { display: none; }
 .snap-hint::after { content: ""; display: block; width: 1px; height: 40px; margin-top: var(--gap-3); background: linear-gradient(var(--night-3), transparent); }
 .land-cta { margin-top: var(--gap-6); background: var(--night-ink); border-color: var(--night-ink); color: var(--night); }
 .land-cta:hover { background: #fff; border-color: #fff; }
+
+/* 大编号：01–05 屏的衬线数字，压在标题上方做编辑排版 */
+.snap-no {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: clamp(44px, 8vw, 92px);
+  line-height: 1;
+  letter-spacing: 0.06em;
+  color: var(--night-3);
+}
+.snap-no + h2 { margin-top: -10px; }
+
+/* 首屏直达：不想滚完六屏的人 */
+.land-ghost {
+  min-height: 42px; padding: 0 22px;
+  border: 1px solid var(--night-3); border-radius: var(--r-md);
+  background: transparent; color: var(--night-ink);
+  font-size: 14px; font-weight: 600;
+  transition: border-color var(--fast), background var(--fast);
+}
+.land-ghost:hover { border-color: var(--night-ink); background: rgba(237, 241, 238, 0.07); }
+
+/* 尾屏收束句 */
+.land-closing { margin-top: var(--gap-6); font-family: var(--serif); font-size: 19px; letter-spacing: 0.02em; color: var(--night-ink); }
+
+/* 路线图站点标签：换屏锁定窗口内随圆环一起淡入（定位由 app.js 按 canvas 投影写入） */
+.land-map { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0; }
+.land-map span {
+  position: absolute;
+  transform: translate(-50%, 14px);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  color: var(--night-2);
+  white-space: nowrap;
+}
+
+/* 每屏滚到时文字逐条进场；默认全可见，只有挂上 .is-in 才播动画（reduced-motion / 无 JS 不藏字） */
+.snap.is-in :is(.hero-kicker, .snap-no, h2, .land-lead, .land-points li, .land-closing, .land-ghost, .snap-hint, .land-cta) { animation: riseIn 0.45s var(--ease) both; }
+.snap.is-in .hero-kicker, .snap.is-in .snap-no { animation-delay: 0s; }
+.snap.is-in h2 { animation-delay: 0.05s; }
+.snap.is-in .land-lead { animation-delay: 0.1s; }
+.snap.is-in .land-points li { animation-delay: calc(0.15s + var(--i, 0) * 0.06s); }
+.snap.is-in .land-closing, .snap.is-in .land-ghost { animation-delay: 0.22s; }
+.snap.is-in .snap-hint, .snap.is-in .land-cta { animation-delay: 0.28s; }
 
 .fella-index {
   position: fixed; left: 32px; top: 50%; z-index: 2;
@@ -903,6 +948,11 @@ body.is-home .site-footer { display: none; }
   .snap { min-height: 150vh; padding: 52vh 24px 0 28px; max-width: none; }
   .snap h2 { font-size: 32px; }
   .fella-index { display: none; }
+  .snap-no { font-size: 44px; }
+  .snap-no + h2 { margin-top: -6px; }
+  .land-ghost { margin-top: var(--gap-4); }
+  .land-closing { margin-top: var(--gap-5); font-size: 16px; }
+  .land-map { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {

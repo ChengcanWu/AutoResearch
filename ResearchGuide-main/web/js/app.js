@@ -176,6 +176,7 @@ const HOME_PAGES = [
       ["记住", "反馈写回画像，下一次先看这些证据再开口。"],
       ["再下一步", "只给一件最值得做的事。做完，再进入下一轮。"],
     ],
+    closing: "五步走完一圈，每一步它都记得。",
   },
 ];
 
@@ -188,15 +189,26 @@ function renderHome() {
   const canvas = el("canvas", "land-field");
   canvas.setAttribute("aria-hidden", "true");
   const snap = el("div", "land-snap");
+  const mapLayer = el("div", "land-map");
+  mapLayer.setAttribute("aria-hidden", "true");
+  ROUTE_STATIONS.forEach((st) => mapLayer.appendChild(el("span", "", st.label)));
   HOME_PAGES.forEach((page, i) => {
     const sec = el("section", "snap");
     sec.dataset.index = String(i);
     const points = (page.points || [])
-      .map(([k, v]) => `<li><b>${k}</b><span>${v}</span></li>`).join("");
-    sec.innerHTML = `<p class="hero-kicker">${page.kicker}</p><h2>${page.title}</h2>`
+      .map(([k, v], j) => `<li style="--i:${j}"><b>${k}</b><span>${v}</span></li>`).join("");
+    sec.innerHTML = (i === 0 ? `<p class="hero-kicker">${page.kicker}</p>` : `<p class="snap-no">${page.kicker}</p>`)
+      + `<h2>${page.title}</h2>`
       + `<p class="land-lead">${page.lead}</p>`
       + (points ? `<ul class="land-points">${points}</ul>` : "")
+      + (page.closing ? `<p class="land-closing">${page.closing}</p>` : "")
       + (page.hint ? `<p class="snap-hint">${page.hint}</p>` : "");
+    if (i === 0) {
+      const quick = el("button", "land-ghost", "直接开始");
+      quick.type = "button";
+      quick.onclick = beginExperience;
+      sec.insertBefore(quick, sec.querySelector(".snap-hint"));
+    }
     if (i === HOME_PAGES.length - 1) {
       const btn = el("button", "btn land-cta", "立即开始体验");
       btn.type = "button";
@@ -219,9 +231,9 @@ function renderHome() {
   });
   const progress = el("div", "home-progress");
   progress.appendChild(el("i"));
-  land.append(canvas, snap, rail, progress);
+  land.append(canvas, mapLayer, snap, rail, progress);
   $app.appendChild(land);
-  stopField = mountSketch(canvas, snap, rail, progress);
+  stopField = mountSketch(canvas, snap, rail, progress, mapLayer);
 }
 
 function beginExperience() {
@@ -391,6 +403,42 @@ const SKETCHES = [
   },
 ];
 
+/* 路线图：换屏的中间态。一条不规则的漫游线串起六站（起点=首屏的门），成长折回画像的回环弧是产品闭环 */
+const ROUTE_STATIONS = [
+  { x: -0.62, y: 0.14, label: "起点" },
+  { x: -0.37, y: -0.1, label: "画像" },
+  { x: -0.12, y: 0.16, label: "方向" },
+  { x: 0.1, y: -0.04, label: "任务" },
+  { x: 0.35, y: 0.18, label: "反馈" },
+  { x: 0.62, y: -0.02, label: "成长" },
+];
+
+function routeMap(target) {
+  // 一条连续的不规则线：站与站之间用曲线相连，y 起伏让它读起来像一段路，不读作表格
+  const line = [];
+  ROUTE_STATIONS.forEach((s, i) => {
+    if (i === 0) { line.push([s.x, s.y]); return; }
+    const prev = ROUTE_STATIONS[i - 1];
+    curve([prev.x, prev.y], [s.x, s.y], 0.5).slice(1).forEach((p) => line.push(p));
+  });
+  const strokes = [{ pts: line }];
+  ROUTE_STATIONS.forEach((s, i) => {
+    strokes.push({ pts: ring(s.x, s.y, i === target ? 0.06 : 0.045, 26), accent: i === target });
+  });
+  // 回环弧走线上方，避免压到站点和下方的标签
+  const a0 = [ROUTE_STATIONS[5].x, ROUTE_STATIONS[5].y - 0.05];
+  const a2 = [ROUTE_STATIONS[1].x, ROUTE_STATIONS[1].y - 0.05];
+  const a1 = [(a0[0] + a2[0]) / 2, Math.min(a0[1], a2[1]) - 0.5];
+  const back = [];
+  for (let i = 0; i <= 30; i++) {
+    const t = i / 30;
+    const u = 1 - t;
+    back.push([u * u * a0[0] + 2 * u * t * a1[0] + t * t * a2[0], u * u * a0[1] + 2 * u * t * a1[1] + t * t * a2[1]]);
+  }
+  strokes.push({ pts: back });
+  return strokes;
+}
+
 function strokeLength(pts) {
   let L = 0;
   for (let i = 1; i < pts.length; i++) L += Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]);
@@ -440,7 +488,7 @@ function scrollTarget(scroller) {
   return Math.min(secs.length - 1, a + t);
 }
 
-function mountSketch(canvas, scroller, rail, progress) {
+function mountSketch(canvas, scroller, rail, progress, mapLayer) {
   const ctx = canvas.getContext("2d");
   if (!ctx) return () => {};
   const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -449,12 +497,13 @@ function mountSketch(canvas, scroller, rail, progress) {
   const bar = progress.querySelector("i");
   const INK = "rgb(237, 241, 238)";
   const ACCENT = "rgb(127, 209, 194)";
+  const MARK = "rgb(229, 138, 78)";
   let W = 0; let H = 0; let cx = 0; let cy = 0; let size = 0; let dot = 1.35;
   let figs = [];
+  let maps = [];
   let N = 0;
   let shown = [];
   let phase = 0;
-  let target = 0;
   let intro = still ? 1 : 0;
   let raf = 0;
   let introStart = 0;
@@ -471,16 +520,28 @@ function mountSketch(canvas, scroller, rail, progress) {
     dot = narrow ? 1.15 : 1.35;
     const spacing = narrow ? 4.2 : 4.6;
     const raws = SKETCHES.map((f) => f());
-    const need = raws.map((st) => Math.ceil((st.reduce((s, x) => s + strokeLength(x.pts), 0) * size) / spacing));
-    N = Math.max(...need);
-    figs = raws.map((st, k) => {
+    const mapRaws = [];
+    for (let k = 1; k < SKETCHES.length; k++) mapRaws.push(routeMap(k));
+    const totalLen = (st) => st.reduce((s, x) => s + strokeLength(x.pts), 0);
+    const need = raws.map((st) => Math.ceil((totalLen(st) * size) / spacing));
+    const mapNeed = mapRaws.map((st) => Math.ceil((totalLen(st) * size) / spacing));
+    N = Math.max(...need, ...mapNeed);
+    // 每张图只点亮自己的 need 颗，保证各图点距一致；其余粒子跟着走但不可见
+    const sample = (st, want) => {
       const f = sampleSketch(st, N);
-      // 每张图只点亮 need[k] 颗，保证各图点距一致；其余粒子跟着走但不可见
       const vis = new Uint8Array(N);
-      for (let j = 0; j < need[k]; j++) vis[Math.floor((j * N) / need[k])] = 1;
+      for (let j = 0; j < want; j++) vis[Math.floor((j * N) / want)] = 1;
       f.vis = vis;
       return f;
-    });
+    };
+    figs = raws.map((st, k) => sample(st, need[k]));
+    maps = mapRaws.map((st, k) => sample(st, mapNeed[k]));
+    if (mapLayer) {
+      [...mapLayer.children].forEach((sp, i) => {
+        sp.style.left = cx + ROUTE_STATIONS[i].x * size + "px";
+        sp.style.top = cy + ROUTE_STATIONS[i].y * size + "px";
+      });
+    }
     shown = Array.from({ length: N }, (_, i) => {
       const ang = unitHash(i, 2) * Math.PI * 2;
       const rad = 1.2 + unitHash(i, 3) * 0.9;
@@ -490,13 +551,37 @@ function mountSketch(canvas, scroller, rail, progress) {
 
   const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
+  /* 换屏分四段：停在当前图 → 缩成路线图（全局）→ 锁定目标站点 → 放大进下一张图（局部） */
+  const HOLD_END = 0.4;
+  const MAP_END = 0.55;
+  const LOCK_END = 0.7;
+
   const draw = () => {
     ctx.clearRect(0, 0, W, H);
     const a = Math.min(figs.length - 1, Math.floor(phase));
     const b = Math.min(figs.length - 1, a + 1);
-    const T = phase - a;
-    const A = figs[a];
-    const B = figs[b];
+    const t = phase - a;
+    const M = maps[a];
+    let A; let B; let T = 0;
+    let lock = 0;
+    if (still || !M) {
+      A = still && t >= 0.5 ? figs[b] : figs[a];
+      B = A;
+    } else if (t < HOLD_END) {
+      A = figs[a]; B = A;
+    } else if (t < MAP_END) {
+      A = figs[a]; B = M; T = (t - HOLD_END) / (MAP_END - HOLD_END);
+    } else if (t < LOCK_END) {
+      A = M; B = M;
+      lock = Math.sin(Math.PI * ((t - MAP_END) / (LOCK_END - MAP_END)));
+    } else {
+      A = M; B = figs[b]; T = (t - LOCK_END) / (1 - LOCK_END);
+    }
+    // 贴近路线图时点子整体收小一号，读作「拉远了」
+    const mapMix = M
+      ? Math.min(1, Math.max(0, (t - HOLD_END) / (MAP_END - HOLD_END)))
+        * Math.min(1, Math.max(0, (1 - t) / (1 - LOCK_END)))
+      : 0;
     const introE = ease(intro);
     let lastStyle = "";
     for (let i = 0; i < N; i++) {
@@ -525,18 +610,78 @@ function mountSketch(canvas, scroller, rail, progress) {
       if (style !== lastStyle) { ctx.fillStyle = style; lastStyle = style; }
       ctx.globalAlpha = alpha;
       ctx.beginPath();
-      ctx.arc(cx + x * size, cy + y * size, dot * (1 - 0.2 * lift), 0, Math.PI * 2);
+      ctx.arc(cx + x * size, cy + y * size, dot * (1 - 0.2 * lift) * (1 - 0.22 * mapMix), 0, Math.PI * 2);
       ctx.fill();
     }
     ctx.globalAlpha = 1;
+    if (lock > 0.02 && M) {
+      const st = ROUTE_STATIONS[Math.min(ROUTE_STATIONS.length - 1, a + 1)];
+      ctx.globalAlpha = lock;
+      ctx.strokeStyle = MARK;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(cx + st.x * size, cy + st.y * size, (0.105 + 0.025 * (1 - lock)) * size, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
+    if (mapLayer) mapLayer.style.opacity = lock.toFixed(3);
   };
+
+  const sections = [...scroller.querySelectorAll(".snap")];
 
   const syncRail = () => {
     const active = Math.min(nos.length - 1, Math.round(phase));
     nos.forEach((d, i) => d.classList.toggle("on", i === active));
     if (mark && nos[active]) mark.style.transform = `translateY(${nos[active].offsetTop}px)`;
+    sections.forEach((sec, i) => sec.classList.toggle("is-in", i === active));
     const limit = Math.max(1, scroller.scrollHeight - scroller.clientHeight);
     if (bar) bar.style.width = `${Math.min(1, scroller.scrollTop / limit) * 100}%`;
+  };
+
+  /* 转场节拍：滚动跨过半屏即切换目标屏，「缩小→锁定→放大」按固定时长播放成一段动画，
+     不再挂在滚动进度上被滚轮速度冲掉。跨多屏（导轨直达）时中间站快速掠过，终点前照常驻留 */
+  const SWEEP = 0.8;   // 每 0.625 相位的基础形变秒数（图→路线图）
+  const DWELL = 0.42;  // 停在路线图上锁定站点的秒数
+  let transit = null;
+  let lastWant = 0;
+
+  const startTransit = (want, now) => {
+    const beats = [];
+    const dir = Math.sign(want - phase);
+    let p = phase;
+    let guard = 0;
+    while (dir * (want - p) > 1e-4 && guard++ < 12) {
+      const lock = dir > 0 ? Math.ceil(p - 1e-6) + 0.625 : Math.floor(p + 1e-6) - 0.625;
+      const overshoot = dir * (lock - want) > 0;
+      const end = overshoot ? want : lock;
+      beats.push({ from: p, to: end, dur: Math.max(0.15, (Math.abs(end - p) / 0.625) * SWEEP), dwell: 0 });
+      p = end;
+      if (!overshoot) {
+        // 只有终点前的最后一个锁定点才驻留；路过的中间站只轻点一下
+        beats[beats.length - 1].dwell = dir * (want - (lock + dir * 0.375)) < 1e-4 ? DWELL : 0.06;
+      }
+    }
+    const total = beats.reduce((s, b) => s + b.dur + b.dwell, 0);
+    if (total > 3.2) {
+      // 导轨跨多屏：压缩形变时长，保住终点前的锁定驻留
+      const dwellSum = beats.reduce((s, b) => s + b.dwell, 0);
+      const k = Math.max(0.22, (3.2 - dwellSum) / (total - dwellSum));
+      beats.forEach((b) => { b.dur *= k; });
+    }
+    transit = beats.length ? { beats, t0: now } : null;
+  };
+
+  const transitAt = (now) => {
+    if (!transit) return null;
+    let e = Math.max(0, (now - transit.t0) / 1000);
+    for (const b of transit.beats) {
+      if (e < b.dur) return b.from + (b.to - b.from) * ease(e / b.dur);
+      e -= b.dur;
+      if (e < b.dwell) return b.to;
+      e -= b.dwell;
+    }
+    transit = null;
+    return null;
   };
 
   const tick = (now) => {
@@ -548,24 +693,31 @@ function mountSketch(canvas, scroller, rail, progress) {
       intro = Math.min(1, (now - introStart) / 1600);
       moving = true;
     }
-    const gap = target - phase;
-    if (Math.abs(gap) > 0.0005) {
-      phase += still ? gap : gap * 0.14;
+    const want = Math.min(figs.length - 1, Math.max(0, Math.round(scrollTarget(scroller))));
+    if (want !== lastWant) {
+      lastWant = want;
+      if (still) phase = want;
+      else startTransit(want, now);
+    }
+    const p = transitAt(now);
+    if (p !== null) {
+      phase = p;
       moving = true;
-    } else {
-      phase = target;
+    } else if (phase !== lastWant) {
+      phase = lastWant;
+      moving = true;
     }
     draw();
     syncRail();
     if (moving) raf = requestAnimationFrame(tick);
   };
   const wake = () => { if (!raf) raf = requestAnimationFrame(tick); };
-  const onScroll = () => { target = scrollTarget(scroller); wake(); };
-  const onResize = () => { build(); onScroll(); };
+  const onScroll = () => wake();
+  const onResize = () => { build(); wake(); };
 
   build();
-  target = scrollTarget(scroller);
-  phase = target;
+  lastWant = Math.min(figs.length - 1, Math.max(0, Math.round(scrollTarget(scroller))));
+  phase = lastWant;
   scroller.addEventListener("scroll", onScroll, { passive: true });
   window.addEventListener("resize", onResize);
   wake();
@@ -600,7 +752,7 @@ function renderLogin() {
   $nav.hidden = true; $header.hidden = true;
   $app.innerHTML = "";
   const hero = el("section", "hero stagger");
-  hero.appendChild(el("p", "hero-kicker", "启研 · 第一步"));
+  hero.appendChild(el("p", "hero-kicker", "启研 · AI RESEARCH MENTOR"));
   hero.appendChild(el("h2", "", "怎么称呼你？"));
   hero.appendChild(el("p", "hero-lead", "不用真实姓名。进去之后是五个工作区：今日、画像、方向、任务、记录，随时可以换。"));
   const row = el("div", "login-row");
