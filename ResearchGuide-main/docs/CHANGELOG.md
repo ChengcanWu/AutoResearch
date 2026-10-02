@@ -6,6 +6,12 @@
 
 ---
 
+## [2026-10-03] [DOC] 产品设计提案 v1（HCI）
+- 变更内容：新增 `docs/DESIGN_PROPOSAL.md`。把产品重新定位为「帮有野心的大一大二自己读懂一个小领域、找到值得做的问题、拿出老师认的证据，直到进组」；主轴是研究思维层（阅读卡 → 综合矩阵 → 问题阶梯 → 提案画布 → 最小测试）、离线核对的领域工具包、双窗口（学生自己的 Agent 是手，启研是地图、标准和账本）；不做聊天。含市场与竞争、IA（五标签）、关键界面线框、AI 八件受约束的活、伦理、现状保留 / 改 / 删、排期与验证计划（含「Agent 单独 vs Agent + 启研」对照）。是提案，不改任何代码与契约；采纳哪些部分在群里定。
+- 影响文档：docs/DESIGN_PROPOSAL.md（新增）、docs/README.md
+- 决策来源：陈浩文
+- 登记人：助手
+
 ## [2026-10-01] [BUILD] 「项目」接上任务 4 的方向路径
 - 变更内容：新增 `knowledge/paths.json`（由 `knowledge/build_paths.py` 从 `docs/paths/*.md` 生成，目前有数学、人工智能）。「项目」页对有路径的方向改为「你在路径的哪一步」，按这一步的过关标准找项目；检索接口多一个可选字段 `path_step`，`context` 多返回 `paths` 和默认步骤。没有路径的方向不变。甲补上认知、经济后跑一次生成脚本即可接上。登录页「五个工作区」改为六个。
 - 影响模块：server/projects.py、server/main.py、skills/project-scout/SKILL.md、web/js/app.js、web/css/styles.css、knowledge/、docs/TASK3_PROJECTS.md、docs/ARCHITECTURE.md、docs/paths/README.md（一行）
