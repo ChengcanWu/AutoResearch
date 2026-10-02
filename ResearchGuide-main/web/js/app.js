@@ -1118,7 +1118,9 @@ function applyPaths(paths) {
       done_when: st.done_when,
       stage: st.step,
       main: true,
-      children: (attach[st.step] || []).map((lp) => findTwig(old, lp)).filter(Boolean).map(cloneTwig),
+      // 挂上来的整支和这一步同名（如经济第 2 步「激励」挂「激励」）时，直接挂它的子节点，免得出现「激励 — 激励」
+      children: (attach[st.step] || []).map((lp) => findTwig(old, lp)).filter(Boolean).map(cloneTwig)
+        .flatMap((tw) => (tw.label === st.name.split("：")[0] && tw.children.length ? tw.children : [tw])),
     }));
     field.root = stampTree({ label: path.name, intro: path.goal, virtual: true, children: steps }, code);
     field.chain = true;
