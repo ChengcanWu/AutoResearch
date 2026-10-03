@@ -120,19 +120,41 @@ def _peer_keys(uids: list[str]) -> list[set[str]]:
     return [proofs[u] | {_self_key(r) for r in rows[u]} for u in uids]
 
 
+RARITY_SHOW = 20  # 组合太多时只列最少见的这么多组，另给总数
+
+
 def combo_rarity(uid: str, kit_id: str) -> dict[str, Any]:
-    """两两组合在同一工具包的池子里有多少人也有；k ≥ K_MIN 才计数，按档显示。"""
+    """两两组合在同一工具包的池子里有多少人也有；k ≥ K_MIN 才计数，按档显示。
+    先把每个同学的边压成「我的哪些边他也有」的位图，相同位图合并计数，再只在位图内部数组合：
+    不再「我的每一对 × 每个同学」逐一检查（120 条边、5000 人时约一秒）。"""
     pool = [u for u in store.kit_pool(kit_id) if u != uid]
     mine = edges(uid)["edges"]
     if len(pool) + 1 < POOL_MIN:
         return {"status": "数据不足", "why": f"这个工具包里有过线阅读卡的同学还不到 {POOL_MIN} 人，组合稀有度先不算"}
-    others = _peer_keys(pool)
+    text_of: dict[str, str] = {}
+    for e in mine:
+        text_of.setdefault(e["key"], e["text"])
+    keys = list(text_of)
+    bit = {k: i for i, k in enumerate(keys)}
+    masks: Counter = Counter()
+    for peer in _peer_keys(pool):
+        m = 0
+        for k in peer:
+            if k in bit:
+                m |= 1 << bit[k]
+        if m & (m - 1):  # 至少两条和我重合才可能贡献组合
+            masks[m] += 1
+    together: Counter = Counter()
+    for m, n in masks.items():
+        for a, b in combinations([i for i in range(len(keys)) if m >> i & 1], 2):
+            together[(a, b)] += n
     pairs = []
-    for a, b in combinations(mine, 2):
-        n = sum(1 for keys in others if a["key"] in keys and b["key"] in keys)
+    for a, b in combinations(range(len(keys)), 2):
+        n = together[(a, b)]
         band = "罕见" if n < K_MIN else "少见" if n < 0.15 * len(pool) else "常见"
-        pairs.append({"a": a["text"], "b": b["text"], "band": band})
-    return {"status": "ok", "pairs": pairs}
+        pairs.append((n, {"a": text_of[keys[a]], "b": text_of[keys[b]], "band": band}))
+    pairs.sort(key=lambda x: x[0])
+    return {"status": "ok", "total": len(pairs), "pairs": [p for _, p in pairs[:RARITY_SHOW]]}
 
 
 # ---------- 信息源地图：这个方向的人在哪说话 ----------

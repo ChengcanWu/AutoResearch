@@ -14,7 +14,7 @@ import threading
 import time
 import urllib.error
 import urllib.request
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import Future, ThreadPoolExecutor
 from concurrent.futures import TimeoutError as FutureTimeout
 from collections import OrderedDict
 from typing import Any, Hashable
@@ -59,6 +59,28 @@ def read_limited(resp: Any, max_bytes: int, deadline: float) -> bytes:
 
 
 _DNS_POOL = ThreadPoolExecutor(max_workers=4, thread_name_prefix="dns")
+# 同一主机正在解析就共用那一次：一个解析很慢的主机最多占一个解析线程，不会把四个都占满、连累别的主机
+_DNS_INFLIGHT: dict[tuple[str, int], Future] = {}
+_DNS_LOCK = threading.Lock()
+
+
+def _resolve_shared(host: str, port: int) -> Future:
+    key = (host, port)
+    with _DNS_LOCK:
+        fut = _DNS_INFLIGHT.get(key)
+        created = fut is None
+        if created:
+            fut = _DNS_POOL.submit(socket.getaddrinfo, host, port, 0, socket.SOCK_STREAM)
+            _DNS_INFLIGHT[key] = fut
+    if created:  # 在锁外加回调：已完成的 future 会立刻在本线程回调，回调里要拿同一把锁
+        fut.add_done_callback(lambda done, k=key: _forget_dns(k, done))
+    return fut
+
+
+def _forget_dns(key: tuple[str, int], done: Future) -> None:
+    with _DNS_LOCK:
+        if _DNS_INFLIGHT.get(key) is done:
+            del _DNS_INFLIGHT[key]
 
 
 class _Watch:
@@ -79,11 +101,11 @@ class _Watch:
         left = self.left()
         if left <= 0:
             raise ReadLimitError("超过总时限")
-        fut = _DNS_POOL.submit(socket.getaddrinfo, host, port, 0, socket.SOCK_STREAM)
+        fut = _resolve_shared(host, port)
         try:
             return fut.result(timeout=left)
         except FutureTimeout as exc:
-            fut.cancel()
+            # 不取消：别的请求可能也在等这一次解析；它完成后自动从共享表里移除
             raise ReadLimitError("超过总时限（域名解析）") from exc
 
     def adopt(self, sock: socket.socket) -> None:

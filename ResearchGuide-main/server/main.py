@@ -361,11 +361,12 @@ def me_fact_delete(fid: str, uid: str):
 # ---------- explore（真实课程检索透传） ----------
 
 @app.get("/api/explore/courses")
-def explore_courses(query: str, limit: int = 5, term: str = ""):
+async def explore_courses(query: str, limit: int = 5, term: str = ""):
+    """相同的课程检索在事件循环里共等一个结果；原来跟随者各占一个工作线程干等。"""
     if not query.strip():
         raise HTTPException(400, "query is required")
-    res = search_courses(query, limit=limit, term=term)
-    return res
+    key = ("courses", query.strip(), min(10, max(1, limit)), term.strip())
+    return await _shared(key, search_courses, query, limit, term)
 
 
 # ---------- 边学边练：项目检索 / 选定 / 交成果（任务 3） ----------

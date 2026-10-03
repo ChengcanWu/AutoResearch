@@ -551,3 +551,98 @@ def test_matrix_highlights_every_conflicting_row():
                           "dims": {"metric": "准确率", "direction": "up"}}), "pass", now)])
     m = reading.matrix("u", "llm-eval")
     assert sum(r["conflict"] for r in m["rows"]) == 30 and len(m["flags"]["conflicts"][0]["up"]) == reading.CONFLICT_SHOW
+
+
+# ---------- 第五轮 ----------
+
+def test_identical_course_searches_share_without_holding_threads(monkeypatch):
+    calls = []
+    monkeypatch.setattr(main, "search_courses", lambda q, limit=5, term="": calls.append(q) or time.sleep(0.4) or {"ok": True, "items": []})
+
+    async def go():
+        async with _asgi() as c:
+            reqs = [asyncio.create_task(c.get("/api/explore/courses?query=统计")) for _ in range(40)]
+            await asyncio.sleep(0.05)
+            t0 = time.perf_counter()
+            health = await c.get("/api/health")
+            waited = time.perf_counter() - t0
+            return [r.status_code for r in await asyncio.gather(*reqs)], health.status_code, waited
+
+    codes, health, waited = asyncio.run(go())
+    assert set(codes) == {200} and health == 200 and waited < 0.3 and len(calls) == 1
+
+
+def test_one_slow_host_cannot_fill_the_resolver_pool(monkeypatch):
+    import socket
+    import limits
+    real = socket.getaddrinfo
+
+    def fake(host, *a, **k):
+        if host == "slow.invalid":
+            time.sleep(0.6)
+        return [(socket.AF_INET, socket.SOCK_STREAM, 6, "", ("127.0.0.1", 9))]
+
+    monkeypatch.setattr(socket, "getaddrinfo", fake)
+    for _ in range(4):
+        with pytest.raises(limits.ReadLimitError):
+            limits._Watch(time.monotonic() + 0.05).resolve("slow.invalid", 80)
+    assert limits._Watch(time.monotonic() + 0.2).resolve("fast.invalid", 80)  # 四次慢解析只占了一个线程
+    monkeypatch.setattr(socket, "getaddrinfo", real)
+    time.sleep(0.6)
+
+
+def test_zip_text_is_bounded_while_extracting():
+    import os
+    import tracemalloc
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
+        z.writestr("README.md", "# 题目\n")
+        for i in range(4):
+            z.writestr(f"notes{i}.txt", os.urandom(4_000_000))
+    data = buf.getvalue()
+    tracemalloc.start()
+    bundle = submission.read_zip(data)
+    peak = tracemalloc.get_traced_memory()[1]
+    tracemalloc.stop()
+    assert all(len(t) <= submission.MAX_TEXT_CHARS for t in bundle["texts"].values())
+    assert peak < 20 * 1024 * 1024  # 原来每个 4 MB 文件整份解压、整份解码再攒到最后截
+
+
+def test_rarity_counts_pairs_from_peer_bitmasks(monkeypatch):
+    import positioning
+    me = store.create_user("me")["uid"]
+    texts = [f"边{i:03d}" for i in range(120)]
+    now = "2026-10-03T00:00:00+00:00"
+    with sqlite3.connect(store.DB_PATH) as c:
+        c.executemany("INSERT INTO edges(id, user_id, kind, text, evidence_url, ref, created_at) VALUES(?,?,?,?,?,?,?)",
+                      [(f"m{i}", me, "background", t, "", "", now) for i, t in enumerate(texts)])
+        c.executemany("INSERT INTO cards VALUES(?,?,?,?,?,?,?,?)",
+                      [(f"c{u}", f"u{u}", "llm-eval", "2310.17623", 1, "{}", "pass", now) for u in range(5000)])
+        c.executemany("INSERT INTO edges(id, user_id, kind, text, evidence_url, ref, created_at) VALUES(?,?,?,?,?,?,?)",
+                      [(f"p{u}-{j}", f"u{u}", "background", texts[(u + j * 7) % 120], "", "", now) for u in range(5000) for j in range(3)])
+    t0 = time.perf_counter()
+    r = positioning.combo_rarity(me, "llm-eval")
+    assert time.perf_counter() - t0 < 0.5
+    assert r["total"] == 120 * 119 // 2 and len(r["pairs"]) == positioning.RARITY_SHOW
+
+
+def test_abstract_fallback_is_retried_after_transient_failures(tmp_path, monkeypatch):
+    monkeypatch.setattr(arxiv, "CACHE_DIR", tmp_path / "papers")
+    monkeypatch.setattr(arxiv, "papers", lambda ids: [{"title": "T", "summary": "abstract only", "url": "u"}])
+    html = "<article><p>" + "Full text sentence. " * 200 + "</p></article>"
+    state = {"err": arxiv.ArxivError("连不上 arXiv")}
+
+    def get(url, timeout=20, max_bytes=0):
+        if state["err"]:
+            raise state["err"]
+        return html.encode()
+
+    monkeypatch.setattr(arxiv, "_get", get)
+    assert arxiv.fulltext("2310.17623")["source"] == "abstract"
+    state["err"] = None
+    assert arxiv.fulltext("2310.17623")["source"] == "abstract"  # 十分钟内不重复打
+    monkeypatch.setattr(arxiv.time, "time", lambda: 10 ** 12)
+    assert arxiv.fulltext("2310.17623")["source"] == "html"  # 到期后再试，拿到了正文
+    state["err"] = arxiv.ArxivError("arXiv 返回 HTTP 404", 404)  # 确实没有 HTML 版：隔一周再试
+    got = arxiv._fetch_fulltext("2401.00001")
+    assert got["source"] == "abstract" and got["retry_after"] - arxiv.time.time() > 6 * 24 * 3600

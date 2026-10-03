@@ -176,13 +176,22 @@ def _ipynb_text(blob: bytes) -> tuple[str, bool]:
     return "\n\n".join(parts), has_out
 
 
-def _text(blob: bytes) -> str:
-    for enc in ("utf-8", "gbk"):
-        try:
-            return blob.decode(enc)
-        except UnicodeDecodeError:
-            continue
+def _text(blob: bytes, cut: bool = False) -> str:
+    """cut=True 表示只读了文件开头：末尾可能截断在一个多字节字符中间，先去掉这半个字再判断编码。"""
+    for enc, tail in (("utf-8", 3), ("gbk", 1)):
+        for k in range(tail + 1 if cut else 1):
+            try:
+                return (blob[:len(blob) - k] if k else blob).decode(enc)
+            except UnicodeDecodeError:
+                continue
     return blob.decode("utf-8", errors="replace")
+
+
+def _head(z: zipfile.ZipFile, info: zipfile.ZipInfo, limit: int) -> tuple[bytes, bool]:
+    """只读文件开头 limit 字节：纯文本最后只留 MAX_TEXT_CHARS 个字符，没必要整份解压进内存。"""
+    with z.open(info) as f:
+        blob = f.read(limit)
+    return blob, info.file_size > limit
 
 
 def read_zip(data: bytes) -> dict[str, Any]:
@@ -219,24 +228,24 @@ def read_zip(data: bytes) -> dict[str, Any]:
         kind = _kind(path)
         item = {"path": path, "size": info.file_size, "kind": kind}
         low = path.lower()
-        blob = None
+        # 每个文件读完就截到上限再存，不把几十 MB 的完整正文攒到最后才截
         if kind in ("readme", "doc", "code", "notebook") or low.endswith((".csv", ".tsv", ".json")):
-            blob = z.read(info)
-        if blob is not None:
-            if low.endswith(".docx"):
-                texts[path] = _docx_text(blob)
+            if low.endswith((".doc", ".pptx")):
+                notes.append(f"「{path}」是 {low.rsplit('.', 1)[-1]} 格式，没有读取正文；关键内容请写进 README。")
+            elif low.endswith(".docx"):  # 本身是压缩包，要整份；单个文件已限 20 MB
+                texts[path] = _docx_text(z.read(info))
                 if not texts[path]:
                     notes.append(f"「{path}」读不出正文（文件损坏或解压后过大），关键内容请写进 README。")
-            elif low.endswith(".ipynb"):
-                txt, has_out = _ipynb_text(blob)
-                texts[path] = txt
+            elif low.endswith(".ipynb"):  # JSON 要整份才能解析
+                txt, has_out = _ipynb_text(z.read(info))
+                texts[path] = txt[:MAX_TEXT_CHARS]
                 item["has_outputs"] = has_out
-            elif low.endswith((".doc", ".pptx")):
-                notes.append(f"「{path}」是 {low.rsplit('.', 1)[-1]} 格式，没有读取正文；关键内容请写进 README。")
-            elif low.endswith((".csv", ".tsv")):
-                texts[path] = "\n".join(_text(blob).splitlines()[:12])
+            elif low.endswith((".csv", ".tsv")):  # 只看前 12 行
+                blob, cut = _head(z, info, 64 * 1024)
+                texts[path] = "\n".join(_text(blob, cut).splitlines()[:12])
             else:
-                texts[path] = _text(blob)
+                blob, cut = _head(z, info, MAX_TEXT_CHARS * 4)  # UTF-8 一个字最多 4 字节
+                texts[path] = _text(blob, cut)[:MAX_TEXT_CHARS]
         if low.endswith(".pdf"):
             notes.append(f"「{path}」是 PDF，没有读取正文，只算作一个结果文件。")
         item["empty"] = info.file_size == 0

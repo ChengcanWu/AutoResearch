@@ -2694,7 +2694,11 @@ async function paintMap(seq, body) {
   });
   const base = m.base && m.base.growth ? `；cs.CL / cs.LG / cs.AI 整体近 12 个月是前 12 个月的 ×${m.base.growth}（核对于 ${esc(m.base.checked_at)}）` : "";
   panel.appendChild(el("p", "map-foot", `依据：${esc(m.formula)}${base}。供给要靠人：问学长学姐哪些组在做、收不收本科生。`));
-  if (m.rarity) panel.appendChild(el("p", "map-foot", `你的边两两组合有多稀有：${m.rarity.status === "ok" ? m.rarity.pairs.map((p) => `${esc(p.a)} × ${esc(p.b)}：${esc(p.band)}`).join("；") || "边不到两条" : esc(m.rarity.why)}`));
+  if (m.rarity) {
+    const r = m.rarity;
+    const more = r.status === "ok" && r.total > r.pairs.length ? `（共 ${r.total} 组，只列最少见的 ${r.pairs.length} 组）` : "";
+    panel.appendChild(el("p", "map-foot", `你的边两两组合有多稀有${more}：${r.status === "ok" ? r.pairs.map((p) => `${esc(p.a)} × ${esc(p.b)}：${esc(p.band)}`).join("；") || "边不到两条" : esc(r.why)}`));
+  }
   body.appendChild(panel);
 }
 

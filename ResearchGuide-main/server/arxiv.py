@@ -38,7 +38,9 @@ ID_RE = re.compile(r"^\d{4}\.\d{4,5}$")
 
 
 class ArxivError(Exception):
-    pass
+    def __init__(self, msg: str, status: int = 0) -> None:
+        super().__init__(msg)
+        self.status = status  # HTTP 状态码；网络错误、超时为 0
 
 
 def clean_id(raw: str) -> str:
@@ -62,7 +64,7 @@ def _get(url: str, timeout: int = 20, max_bytes: int = MAX_ATOM_BYTES) -> bytes:
         try:
             body = fetch(req, timeout=timeout, max_bytes=max_bytes)  # 总时限含响应头：拿着限速锁的请求最多占 timeout 秒
         except urllib.error.HTTPError as exc:
-            raise ArxivError(f"arXiv 返回 HTTP {exc.code}") from exc
+            raise ArxivError(f"arXiv 返回 HTTP {exc.code}", exc.code) from exc
         except ReadLimitError as exc:
             raise ArxivError(f"arXiv 响应{exc}") from exc
         except (urllib.error.URLError, TimeoutError, OSError) as exc:
@@ -161,32 +163,54 @@ def _html_to_text(page: str) -> str:
     return "\n".join(ln for ln in lines if ln)
 
 
+# 只拿到摘要时，什么时候再试一次 HTML 正文：确实没有 HTML 版（404 或正文太短）隔一周；网络错误、超时、5xx 十分钟
+RETRY_NO_HTML = 7 * 24 * 3600
+RETRY_TRANSIENT = 10 * 60
+
+
+def _cached(aid: str) -> dict[str, Any] | None:
+    """磁盘缓存：正文版一直有效；只有摘要的到了重试时间就当没有（旧缓存没有重试时间，也当到期）。"""
+    path = CACHE_DIR / f"{aid}.json"
+    if not path.exists():
+        return None
+    got = json.loads(path.read_text(encoding="utf-8"))
+    if got.get("source") == "abstract" and time.time() >= got.get("retry_after", 0):
+        return None
+    return got
+
+
 def fulltext(arxiv_id: str) -> dict[str, Any]:
     """{id, source: 'html' | 'abstract', text, title}；全文落盘缓存。"""
     aid = clean_id(arxiv_id)
-    cached = CACHE_DIR / f"{aid}.json"
-    if cached.exists():
-        return json.loads(cached.read_text(encoding="utf-8"))
+    got = _cached(aid)
+    if got is not None:
+        return got
     return _FLIGHT.do(("fulltext", aid), lambda: _fetch_fulltext(aid))
 
 
 def _fetch_fulltext(aid: str) -> dict[str, Any]:
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
     cached = CACHE_DIR / f"{aid}.json"
-    if cached.exists():  # 排在前面的那一个刚写好
-        return json.loads(cached.read_text(encoding="utf-8"))
+    got = _cached(aid)
+    if got is not None:  # 排在前面的那一个刚写好
+        return got
     meta = papers([aid])
     if not meta:
         raise ArxivError(f"arXiv 上没有 {aid}")
     m = meta[0]
     result = {"id": aid, "title": m["title"], "source": "abstract", "text": m["summary"], "url": m["url"]}
+    retry = RETRY_NO_HTML
     try:
         page = _get(f"https://arxiv.org/html/{aid}", timeout=30, max_bytes=MAX_HTML_BYTES).decode("utf-8", errors="replace")
         text = _html_to_text(page)
         if len(text) > 2000:
             result.update(source="html", text=text)
-    except ArxivError:
-        pass  # 没有 HTML 版就只用摘要，调用方会看到 source=abstract
+    except ArxivError as exc:
+        # 没有 HTML 版（404）就只用摘要；临时失败（超时、断网、5xx）也先给摘要，但很快再试，不把半份论文永久缓存
+        if exc.status != 404:
+            retry = RETRY_TRANSIENT
+    if result["source"] == "abstract":
+        result["retry_after"] = time.time() + retry
     cached.write_text(json.dumps(result, ensure_ascii=False), encoding="utf-8")
     return result
 
