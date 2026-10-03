@@ -551,7 +551,13 @@ body[data-view="cards"] .site-footer { max-width: 1240px; }
 
 .course-block { padding: var(--gap-3) 0 0; border-top: 1px solid var(--line); margin-top: var(--gap-2); }
 .course-block h4 { display: flex; align-items: center; gap: var(--gap-2); font-size: 12px; font-weight: 600; letter-spacing: 0.08em; color: var(--ink-3); margin-bottom: var(--gap-2); }
-.course-block h4::after { content: "北大教务 · 实时"; font-weight: 400; letter-spacing: 0; color: var(--teal); }
+.course-block h4::after { content: "北大教务 · " attr(data-source); font-weight: 400; letter-spacing: 0; color: var(--teal); }
+.teacher-link {
+  border: 0; padding: 0; background: none; color: var(--teal-ink);
+  cursor: pointer; font: inherit;
+}
+.teacher-link:hover { text-decoration: underline; }
+.teacher-sheet { z-index: 40; }
 .course-item { padding: 6px 0; font-size: 14px; border-top: 1px dashed var(--line); }
 .course-item:first-of-type { border-top: 0; }
 .course-item .meta { display: block; font-size: 12px; color: var(--ink-3); }

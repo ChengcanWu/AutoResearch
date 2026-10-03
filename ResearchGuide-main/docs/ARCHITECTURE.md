@@ -101,7 +101,8 @@ POST /api/tasks/{tid}/submit    {uid, payload} → Feedback  # 同时写回 beha
 GET  /api/me/facts             ?uid → {facts}
 PATCH /api/me/facts/{fid}       {uid, value?/status?}
 DELETE /api/me/facts/{fid}     ?uid                        # 软删
-GET  /api/explore/courses      ?query&limit&term → {ok, items, term|error}   # live
+GET  /api/explore/courses      ?query&limit&term → {ok, items, term|error}   # 有 knowledge/catalog/ 时读快照
+GET  /api/explore/teachers     ?name → {ok, bio?, courses[]}                 # 本学期授课 + 能对上的简介
 GET  /api/projects/sources      → 来源清单（任务 3，新增）
 GET  /api/projects/context     ?uid → {direction, stage, reason, paths, path_step}   # 默认「走到哪」；paths 来自任务 4
 POST /api/projects/search       {uid, direction, stage, keywords?, node?, path_step?} → {query, items, sources, routes, empty_reason}
@@ -114,7 +115,7 @@ POST /api/projects/{pid}/submit ?uid  body=.zip → Review                  # �
 GET  /api/health
 ```
 
-前端课程懒加载走 `/api/explore/courses?query=<direction.course_query>`。
+前端课程懒加载走 `/api/explore/courses?query=<节点名>`；有学期快照时本地返回。
 
 ## 6. 技术决策（ADR 摘要）
 

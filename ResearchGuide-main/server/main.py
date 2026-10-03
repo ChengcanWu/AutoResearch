@@ -16,6 +16,7 @@ from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
+import catalog
 import llm
 import onboarding
 import planner
@@ -303,6 +304,13 @@ def explore_courses(query: str, limit: int = 5, term: str = ""):
         raise HTTPException(400, "query is required")
     res = search_courses(query, limit=limit, term=term)
     return res
+
+
+@app.get("/api/explore/teachers")
+def explore_teacher(name: str):
+    if not name.strip():
+        raise HTTPException(400, "name is required")
+    return catalog.teacher_payload(name.strip())
 
 
 # ---------- 边学边练：项目检索 / 选定 / 交成果（任务 3） ----------
