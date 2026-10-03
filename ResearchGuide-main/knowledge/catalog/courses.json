@@ -1,0 +1,6935 @@
+[
+  {
+    "ref": "pku2:2026-2027-1:00100514:1:BZ2627100100514_15551",
+    "term": "2026-2027-1",
+    "course_id": "00100514",
+    "section": "1",
+    "name": "AI for Math与数学形式化",
+    "teachers": null,
+    "teacher_names": [],
+    "department": "数学科学学院",
+    "credits": "2",
+    "schedule": "星期一(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "全校公选课"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00100873:1:BZ2627100100873_14994",
+    "term": "2026-2027-1",
+    "course_id": "00100873",
+    "section": "1",
+    "name": "图像处理中的数学方法",
+    "teachers": "董彬",
+    "teacher_names": [
+      "董彬"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期三(第7节-第8节)\n星期五(第5节-第6节)(单)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00102071:1:BZ2627100102071_11152",
+    "term": "2026-2027-1",
+    "course_id": "00102071",
+    "section": "1",
+    "name": "高等信息处理选讲",
+    "teachers": "姜明",
+    "teacher_names": [
+      "姜明"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期二(第5节-第6节)\n星期四(第7节-第8节)(单)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00102265:1:BZ2627100102265_13430",
+    "term": "2026-2027-1",
+    "course_id": "00102265",
+    "section": "1",
+    "name": "数论专题II",
+    "teachers": "袁新意",
+    "teacher_names": [
+      "袁新意"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期二(第5节-第6节)(单)\n星期四(第7节-第8节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00102516:1:BZ2627100102516_10129",
+    "term": "2026-2027-1",
+    "course_id": "00102516",
+    "section": "1",
+    "name": "统计模型和计算方法",
+    "teachers": "苗旺",
+    "teacher_names": [
+      "苗旺"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期一(第7节-第8节)\n星期三(第3节-第4节)(双)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00102534:1:BZ2627100102534_12811",
+    "term": "2026-2027-1",
+    "course_id": "00102534",
+    "section": "1",
+    "name": "代数几何 I",
+    "teachers": "刘济豪",
+    "teacher_names": [
+      "刘济豪"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期二(第5节-第6节)(单)\n星期四(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00102721:1:BZ2627100102721_18216",
+    "term": "2026-2027-1",
+    "course_id": "00102721",
+    "section": "1",
+    "name": "高等统计学II",
+    "teachers": "林伟",
+    "teacher_names": [
+      "林伟"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期三(第5节-第6节)\n星期五(第3节-第4节)(单)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00102892:1:BZ2627100102892_12894",
+    "term": "2026-2027-1",
+    "course_id": "00102892",
+    "section": "1",
+    "name": "统计学习",
+    "teachers": "席瑞斌",
+    "teacher_names": [
+      "席瑞斌"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期二(第5节-第6节)\n星期四(第3节-第4节)(单)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00103330:1:BZ2627100103330_12410",
+    "term": "2026-2027-1",
+    "course_id": "00103330",
+    "section": "1",
+    "name": "环簇",
+    "teachers": "郭帅",
+    "teacher_names": [
+      "郭帅"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期二(第7节-第8节)\n星期四(第5节-第6节)(单)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00103335:1:BZ2627100103335_13593",
+    "term": "2026-2027-1",
+    "course_id": "00103335",
+    "section": "1",
+    "name": "深度学习与强化学习",
+    "teachers": "杨文昊",
+    "teacher_names": [
+      "杨文昊"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期一(第5节-第6节)(单)\n星期三(第7节-第8节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00104315:1:BZ2627100104315_11909",
+    "term": "2026-2027-1",
+    "course_id": "00104315",
+    "section": "1",
+    "name": "科学机器学习",
+    "teachers": "黄政宇",
+    "teacher_names": [
+      "黄政宇"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期二(第3节-第4节)(单)\n星期四(第7节-第8节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00110000:1:BZ2627100110000_19771",
+    "term": "2026-2027-1",
+    "course_id": "00110000",
+    "section": "1",
+    "name": "黎曼几何引论",
+    "teachers": "刘小博",
+    "teacher_names": [
+      "刘小博"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期一(第1节-第2节)(单)\n星期三(第7节-第8节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00110010:1:BZ2627100110010_10498",
+    "term": "2026-2027-1",
+    "course_id": "00110010",
+    "section": "1",
+    "name": "同调论",
+    "teachers": "杨文元",
+    "teacher_names": [
+      "杨文元"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期三(第3节-第4节)(双)\n星期五(第5节-第6节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00110070:1:BZ2627100110070_19526",
+    "term": "2026-2027-1",
+    "course_id": "00110070",
+    "section": "1",
+    "name": "经典力学的数学方法",
+    "teachers": "徐晓濛",
+    "teacher_names": [
+      "徐晓濛"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期二(第5节-第6节)(双)\n星期四(第7节-第8节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00110130:1:BZ2627100110130_14172",
+    "term": "2026-2027-1",
+    "course_id": "00110130",
+    "section": "1",
+    "name": "泛函分析（二）",
+    "teachers": "章志飞",
+    "teacher_names": [
+      "章志飞"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期二(第3节-第4节)(单)\n星期四(第7节-第8节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00110400:1:BZ2627100110400_15925",
+    "term": "2026-2027-1",
+    "course_id": "00110400",
+    "section": "1",
+    "name": "随机分析",
+    "teachers": "刘勇",
+    "teacher_names": [
+      "刘勇"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期一(第3节-第4节)(单)\n星期三(第7节-第8节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00110940:1:BZ2627100110940_16180",
+    "term": "2026-2027-1",
+    "course_id": "00110940",
+    "section": "1",
+    "name": "复分析",
+    "teachers": "方汉隆",
+    "teacher_names": [
+      "方汉隆"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期三(第5节-第6节)(双)\n星期五(第5节-第6节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00111940:1:BZ2627100111940_10027",
+    "term": "2026-2027-1",
+    "course_id": "00111940",
+    "section": "1",
+    "name": "遍历论",
+    "teachers": "葛灵睿",
+    "teacher_names": [
+      "葛灵睿"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期三(第3节-第4节)\n星期五(第5节-第6节)(双)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00112250:1:BZ2627100112250_15956",
+    "term": "2026-2027-1",
+    "course_id": "00112250",
+    "section": "1",
+    "name": "随机过程 II",
+    "teachers": "Baverez Guillaume",
+    "teacher_names": [
+      "Baverez Guillaume"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期三(第3节-第4节)(单)\n星期五(第7节-第8节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00112400:1:BZ2627100112400_15944",
+    "term": "2026-2027-1",
+    "course_id": "00112400",
+    "section": "1",
+    "name": "代数组合论",
+    "teachers": "高奕博",
+    "teacher_names": [
+      "高奕博"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期三(第5节-第6节)\n星期五(第3节-第4节)(单)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00112610:1:BZ2627100112610_17502",
+    "term": "2026-2027-1",
+    "course_id": "00112610",
+    "section": "1",
+    "name": "同调代数",
+    "teachers": "李文威",
+    "teacher_names": [
+      "李文威"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期一(第5节-第6节)\n星期三(第7节-第8节)(单)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00112630:1:BZ2627100112630_10135",
+    "term": "2026-2027-1",
+    "course_id": "00112630",
+    "section": "1",
+    "name": "高等概率论",
+    "teachers": "孙鑫",
+    "teacher_names": [
+      "孙鑫"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期二(第5节-第6节)(单)\n星期四(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00112640:1:BZ2627100112640_13697",
+    "term": "2026-2027-1",
+    "course_id": "00112640",
+    "section": "1",
+    "name": "高等统计学",
+    "teachers": "姚方",
+    "teacher_names": [
+      "姚方"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期一(第3节-第4节)(单)\n星期三(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00112710:1:BZ2627100112710_16407",
+    "term": "2026-2027-1",
+    "course_id": "00112710",
+    "section": "1",
+    "name": "二阶椭圆型方程",
+    "teachers": "Albert Lee Ai",
+    "teacher_names": [
+      "Albert Lee Ai"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期二(第7节-第8节)\n星期四(第1节-第2节)(单)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00112711:1:BZ2627100112711_11503",
+    "term": "2026-2027-1",
+    "course_id": "00112711",
+    "section": "1",
+    "name": "抽象代数Ⅱ",
+    "teachers": "傅翔",
+    "teacher_names": [
+      "傅翔"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期二(第5节-第6节)(双)\n星期五(第7节-第8节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00112720:1:BZ2627100112720_13638",
+    "term": "2026-2027-1",
+    "course_id": "00112720",
+    "section": "1",
+    "name": "数论1",
+    "teachers": "谢俊逸",
+    "teacher_names": [
+      "谢俊逸"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期一(第7节-第8节)\n星期三(第3节-第4节)(单)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00113690:1:BZ2627100113690_15241",
+    "term": "2026-2027-1",
+    "course_id": "00113690",
+    "section": "1",
+    "name": "随机模拟方法",
+    "teachers": "李铁军",
+    "teacher_names": [
+      "李铁军"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期一(第3节-第4节)\n星期三(第5节-第6节)(单)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00130161:1:BZ2627100130161_18437",
+    "term": "2026-2027-1",
+    "course_id": "00130161",
+    "section": "1",
+    "name": "拓扑学",
+    "teachers": "王家军",
+    "teacher_names": [
+      "王家军"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期二(第7节-第8节)\n星期四(第1节-第2节)(单)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00130201:2:BZ2627100130201_24246",
+    "term": "2026-2027-1",
+    "course_id": "00130201",
+    "section": "2",
+    "name": "高等数学 (B) (一)",
+    "teachers": "吴金彪",
+    "teacher_names": [
+      "吴金彪"
+    ],
+    "department": "数学科学学院",
+    "credits": "5",
+    "schedule": "星期二(第1节-第2节)\n星期五(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00130201:3:BZ2627100130201_34299",
+    "term": "2026-2027-1",
+    "course_id": "00130201",
+    "section": "3",
+    "name": "高等数学 (B) (一)",
+    "teachers": "杨建生",
+    "teacher_names": [
+      "杨建生"
+    ],
+    "department": "数学科学学院",
+    "credits": "5",
+    "schedule": "星期二(第1节-第2节)\n星期五(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00130201:1:BZ2627100130201_19168",
+    "term": "2026-2027-1",
+    "course_id": "00130201",
+    "section": "1",
+    "name": "高等数学 (B) (一)",
+    "teachers": "唐林",
+    "teacher_names": [
+      "唐林"
+    ],
+    "department": "数学科学学院",
+    "credits": "5",
+    "schedule": "星期二(第1节-第2节)\n星期五(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00130201:4:BZ2627100130201_43339",
+    "term": "2026-2027-1",
+    "course_id": "00130201",
+    "section": "4",
+    "name": "高等数学 (B) (一)",
+    "teachers": "楚健春",
+    "teacher_names": [
+      "楚健春"
+    ],
+    "department": "数学科学学院",
+    "credits": "5",
+    "schedule": "星期二(第1节-第2节)\n星期五(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00130201:5:BZ2627100130201_51885",
+    "term": "2026-2027-1",
+    "course_id": "00130201",
+    "section": "5",
+    "name": "高等数学 (B) (一)",
+    "teachers": "刘建明",
+    "teacher_names": [
+      "刘建明"
+    ],
+    "department": "数学科学学院",
+    "credits": "5",
+    "schedule": "星期二(第3节-第4节)\n星期五(第1节-第2节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00130201:6:BZ2627100130201_68960",
+    "term": "2026-2027-1",
+    "course_id": "00130201",
+    "section": "6",
+    "name": "高等数学 (B) (一)",
+    "teachers": "柳彬",
+    "teacher_names": [
+      "柳彬"
+    ],
+    "department": "数学科学学院",
+    "credits": "5",
+    "schedule": "星期二(第3节-第4节)\n星期五(第1节-第2节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00130201:7:BZ2627100130201_74404",
+    "term": "2026-2027-1",
+    "course_id": "00130201",
+    "section": "7",
+    "name": "高等数学 (B) (一)",
+    "teachers": "刘若川",
+    "teacher_names": [
+      "刘若川"
+    ],
+    "department": "数学科学学院",
+    "credits": "5",
+    "schedule": "星期一(第5节-第6节)\n星期三(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00130201:8:BZ2627100130201_86730",
+    "term": "2026-2027-1",
+    "course_id": "00130201",
+    "section": "8",
+    "name": "高等数学 (B) (一)",
+    "teachers": "柳彬",
+    "teacher_names": [
+      "柳彬"
+    ],
+    "department": "数学科学学院",
+    "credits": "5",
+    "schedule": "星期一(第10节-第11节)\n星期三(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00130211:17:BZ2627100130211176522",
+    "term": "2026-2027-1",
+    "course_id": "00130211",
+    "section": "17",
+    "name": "高等数学 (B) (一)习题课",
+    "teachers": "柳彬",
+    "teacher_names": [
+      "柳彬"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期二(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00130211:18:BZ2627100130211185235",
+    "term": "2026-2027-1",
+    "course_id": "00130211",
+    "section": "18",
+    "name": "高等数学 (B) (一)习题课",
+    "teachers": "柳彬",
+    "teacher_names": [
+      "柳彬"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期二(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00130211:19:BZ2627100130211193411",
+    "term": "2026-2027-1",
+    "course_id": "00130211",
+    "section": "19",
+    "name": "高等数学 (B) (一)习题课",
+    "teachers": "刘若川",
+    "teacher_names": [
+      "刘若川"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期二(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00130211:2:BZ2627100130211_27049",
+    "term": "2026-2027-1",
+    "course_id": "00130211",
+    "section": "2",
+    "name": "高等数学 (B) (一)习题课",
+    "teachers": "唐林",
+    "teacher_names": [
+      "唐林"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期二(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00130211:10:BZ2627100130211101413",
+    "term": "2026-2027-1",
+    "course_id": "00130211",
+    "section": "10",
+    "name": "高等数学 (B) (一)习题课",
+    "teachers": "楚健春",
+    "teacher_names": [
+      "楚健春"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期二(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00130211:14:BZ2627100130211141694",
+    "term": "2026-2027-1",
+    "course_id": "00130211",
+    "section": "14",
+    "name": "高等数学 (B) (一)习题课",
+    "teachers": "刘建明",
+    "teacher_names": [
+      "刘建明"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期二(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00130211:15:BZ2627100130211159368",
+    "term": "2026-2027-1",
+    "course_id": "00130211",
+    "section": "15",
+    "name": "高等数学 (B) (一)习题课",
+    "teachers": "刘建明",
+    "teacher_names": [
+      "刘建明"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期二(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00130211:16:BZ2627100130211167536",
+    "term": "2026-2027-1",
+    "course_id": "00130211",
+    "section": "16",
+    "name": "高等数学 (B) (一)习题课",
+    "teachers": "柳彬",
+    "teacher_names": [
+      "柳彬"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期二(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00130211:20:BZ2627100130211208794",
+    "term": "2026-2027-1",
+    "course_id": "00130211",
+    "section": "20",
+    "name": "高等数学 (B) (一)习题课",
+    "teachers": "刘若川",
+    "teacher_names": [
+      "刘若川"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期二(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00130211:21:BZ2627100130211219252",
+    "term": "2026-2027-1",
+    "course_id": "00130211",
+    "section": "21",
+    "name": "高等数学 (B) (一)习题课",
+    "teachers": "刘若川",
+    "teacher_names": [
+      "刘若川"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期二(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00130211:3:BZ2627100130211_34255",
+    "term": "2026-2027-1",
+    "course_id": "00130211",
+    "section": "3",
+    "name": "高等数学 (B) (一)习题课",
+    "teachers": "唐林",
+    "teacher_names": [
+      "唐林"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期二(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00130211:4:BZ2627100130211_42432",
+    "term": "2026-2027-1",
+    "course_id": "00130211",
+    "section": "4",
+    "name": "高等数学 (B) (一)习题课",
+    "teachers": "吴金彪",
+    "teacher_names": [
+      "吴金彪"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期二(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00130211:8:BZ2627100130211_81828",
+    "term": "2026-2027-1",
+    "course_id": "00130211",
+    "section": "8",
+    "name": "高等数学 (B) (一)习题课",
+    "teachers": "杨建生",
+    "teacher_names": [
+      "杨建生"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期二(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00130211:9:BZ2627100130211_93237",
+    "term": "2026-2027-1",
+    "course_id": "00130211",
+    "section": "9",
+    "name": "高等数学 (B) (一)习题课",
+    "teachers": "杨建生",
+    "teacher_names": [
+      "杨建生"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期二(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00130211:11:BZ2627100130211119143",
+    "term": "2026-2027-1",
+    "course_id": "00130211",
+    "section": "11",
+    "name": "高等数学 (B) (一)习题课",
+    "teachers": "楚健春",
+    "teacher_names": [
+      "楚健春"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期二(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00130211:12:BZ2627100130211127249",
+    "term": "2026-2027-1",
+    "course_id": "00130211",
+    "section": "12",
+    "name": "高等数学 (B) (一)习题课",
+    "teachers": "楚健春",
+    "teacher_names": [
+      "楚健春"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期二(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00130211:1:BZ2627100130211136131",
+    "term": "2026-2027-1",
+    "course_id": "00130211",
+    "section": "1",
+    "name": "高等数学 (B) (一)习题课",
+    "teachers": "唐林",
+    "teacher_names": [
+      "唐林"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期二(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00130211:13:BZ2627100130211137064",
+    "term": "2026-2027-1",
+    "course_id": "00130211",
+    "section": "13",
+    "name": "高等数学 (B) (一)习题课",
+    "teachers": "刘建明",
+    "teacher_names": [
+      "刘建明"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期二(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00130211:22:BZ2627100130211225455",
+    "term": "2026-2027-1",
+    "course_id": "00130211",
+    "section": "22",
+    "name": "高等数学 (B) (一)习题课",
+    "teachers": "柳彬",
+    "teacher_names": [
+      "柳彬"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期二(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00130211:23:BZ2627100130211230719",
+    "term": "2026-2027-1",
+    "course_id": "00130211",
+    "section": "23",
+    "name": "高等数学 (B) (一)习题课",
+    "teachers": "柳彬",
+    "teacher_names": [
+      "柳彬"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期二(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00130211:24:BZ2627100130211242040",
+    "term": "2026-2027-1",
+    "course_id": "00130211",
+    "section": "24",
+    "name": "高等数学 (B) (一)习题课",
+    "teachers": "柳彬",
+    "teacher_names": [
+      "柳彬"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期二(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00130211:5:BZ2627100130211_56848",
+    "term": "2026-2027-1",
+    "course_id": "00130211",
+    "section": "5",
+    "name": "高等数学 (B) (一)习题课",
+    "teachers": "吴金彪",
+    "teacher_names": [
+      "吴金彪"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期二(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00130211:6:BZ2627100130211_61280",
+    "term": "2026-2027-1",
+    "course_id": "00130211",
+    "section": "6",
+    "name": "高等数学 (B) (一)习题课",
+    "teachers": "吴金彪",
+    "teacher_names": [
+      "吴金彪"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期二(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00130211:7:BZ2627100130211_79491",
+    "term": "2026-2027-1",
+    "course_id": "00130211",
+    "section": "7",
+    "name": "高等数学 (B) (一)习题课",
+    "teachers": "杨建生",
+    "teacher_names": [
+      "杨建生"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期二(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00130280:1:BZ2627100130280_13333",
+    "term": "2026-2027-1",
+    "course_id": "00130280",
+    "section": "1",
+    "name": "计算方法(B)",
+    "teachers": "张磊",
+    "teacher_names": [
+      "张磊"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期二(第3节-第4节)(双)\n星期二(第3节-第4节)(单)\n星期四(第3节-第4节)",
+    "weeks": "6-6",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00130280:2:BZ2627100130280_26960",
+    "term": "2026-2027-1",
+    "course_id": "00130280",
+    "section": "2",
+    "name": "计算方法(B)",
+    "teachers": "裴玉茹",
+    "teacher_names": [
+      "裴玉茹"
+    ],
+    "department": "信息科学技术学院",
+    "credits": "3",
+    "schedule": "星期一(第3节-第4节)\n星期四(第5节-第6节)(单)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00130310:1:BZ2627100130310_16453",
+    "term": "2026-2027-1",
+    "course_id": "00130310",
+    "section": "1",
+    "name": "线性代数 (C)",
+    "teachers": "章复熹",
+    "teacher_names": [
+      "章复熹"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期一(第3节-第4节)\n星期三(第1节-第2节)(单)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00130310:2:BZ2627100130310_22528",
+    "term": "2026-2027-1",
+    "course_id": "00130310",
+    "section": "2",
+    "name": "线性代数 (C)",
+    "teachers": "赵博原",
+    "teacher_names": [
+      "赵博原"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期一(第3节-第4节)\n星期三(第1节-第2节)(单)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00130550:1:BZ2627100130550_14210",
+    "term": "2026-2027-1",
+    "course_id": "00130550",
+    "section": "1",
+    "name": "数值代数",
+    "teachers": "胡俊",
+    "teacher_names": [
+      "胡俊"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期一(第7节-第8节)(双)\n星期三(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00130630:1:BZ2627100130630_18076",
+    "term": "2026-2027-1",
+    "course_id": "00130630",
+    "section": "1",
+    "name": "最优化方法",
+    "teachers": "文再文",
+    "teacher_names": [
+      "文再文"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期一(第1节-第2节)\n星期四(第1节-第2节)(单)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00130640:1:BZ2627100130640_18446",
+    "term": "2026-2027-1",
+    "course_id": "00130640",
+    "section": "1",
+    "name": "流体力学引论",
+    "teachers": "黄得",
+    "teacher_names": [
+      "黄得"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期一(第5节-第6节)\n星期三(第1节-第2节)(单)\n星期三(第1节-第2节)(双)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00130730:1:BZ2627100130730_13204",
+    "term": "2026-2027-1",
+    "course_id": "00130730",
+    "section": "1",
+    "name": "数理逻辑",
+    "teachers": "Kyle Gannon",
+    "teacher_names": [
+      "Kyle Gannon"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期一(第7节-第9节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00131100:1:BZ2627100131100_14148",
+    "term": "2026-2027-1",
+    "course_id": "00131100",
+    "section": "1",
+    "name": "金融时间序列分析",
+    "teachers": "张瑞勋",
+    "teacher_names": [
+      "张瑞勋"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期一(第3节-第4节)\n星期四(第5节-第6节)(双)\n星期四(第5节-第6节)(单)",
+    "weeks": "1-16",
+    "category": "专业限选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00131300:2:BZ2627100131300_28133",
+    "term": "2026-2027-1",
+    "course_id": "00131300",
+    "section": "2",
+    "name": "概率论",
+    "teachers": "章复熹",
+    "teacher_names": [
+      "章复熹"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期二(第3节-第4节)\n星期四(第1节-第2节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00131300:1:BZ2627100131300_11982",
+    "term": "2026-2027-1",
+    "course_id": "00131300",
+    "section": "1",
+    "name": "概率论",
+    "teachers": "任艳霞",
+    "teacher_names": [
+      "任艳霞"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期二(第3节-第4节)\n星期四(第1节-第2节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00131300:3:BZ2627100131300_39227",
+    "term": "2026-2027-1",
+    "course_id": "00131300",
+    "section": "3",
+    "name": "概率论",
+    "teachers": "李秋月",
+    "teacher_names": [
+      "李秋月"
+    ],
+    "department": "国家发展研究院",
+    "credits": "3",
+    "schedule": "星期二(第7节-第8节)\n星期四(第7节-第8节)(单)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00131300:4:BZ2627100131300_42779",
+    "term": "2026-2027-1",
+    "course_id": "00131300",
+    "section": "4",
+    "name": "概率论",
+    "teachers": "李秋月",
+    "teacher_names": [
+      "李秋月"
+    ],
+    "department": "国家发展研究院",
+    "credits": "3",
+    "schedule": "星期四(第7节-第8节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00131421:2:BZ2627100131421_24560",
+    "term": "2026-2027-1",
+    "course_id": "00131421",
+    "section": "2",
+    "name": "高等数学C (一)",
+    "teachers": "汤华中",
+    "teacher_names": [
+      "汤华中"
+    ],
+    "department": "数学科学学院",
+    "credits": "4",
+    "schedule": "星期二(第1节-第2节)\n星期四(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00131421:7:BZ2627100131421_34480",
+    "term": "2026-2027-1",
+    "course_id": "00131421",
+    "section": "7",
+    "name": "高等数学C (一)",
+    "teachers": "王正栋",
+    "teacher_names": [
+      "王正栋"
+    ],
+    "department": "数学科学学院",
+    "credits": "4",
+    "schedule": "星期一(第1节-第2节)\n星期四(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00131421:4:BZ2627100131421_49044",
+    "term": "2026-2027-1",
+    "course_id": "00131421",
+    "section": "4",
+    "name": "高等数学C (一)",
+    "teachers": "安冬",
+    "teacher_names": [
+      "安冬"
+    ],
+    "department": "数学科学学院",
+    "credits": "4",
+    "schedule": "星期二(第1节-第2节)\n星期四(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00131421:5:BZ2627100131421_51335",
+    "term": "2026-2027-1",
+    "course_id": "00131421",
+    "section": "5",
+    "name": "高等数学C (一)",
+    "teachers": "周默",
+    "teacher_names": [
+      "周默"
+    ],
+    "department": "数学科学学院",
+    "credits": "4",
+    "schedule": "星期二(第1节-第2节)\n星期四(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00131421:6:BZ2627100131421_66903",
+    "term": "2026-2027-1",
+    "course_id": "00131421",
+    "section": "6",
+    "name": "高等数学C (一)",
+    "teachers": "王超",
+    "teacher_names": [
+      "王超"
+    ],
+    "department": "数学科学学院",
+    "credits": "4",
+    "schedule": "星期二(第1节-第2节)\n星期四(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00131421:3:BZ2627100131421_78692",
+    "term": "2026-2027-1",
+    "course_id": "00131421",
+    "section": "3",
+    "name": "高等数学C (一)",
+    "teachers": "何云帆",
+    "teacher_names": [
+      "何云帆"
+    ],
+    "department": "数学科学学院",
+    "credits": "4",
+    "schedule": "星期二(第1节-第2节)\n星期四(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00131421:8:BZ2627100131421_80515",
+    "term": "2026-2027-1",
+    "course_id": "00131421",
+    "section": "8",
+    "name": "高等数学C (一)",
+    "teachers": "关启安",
+    "teacher_names": [
+      "关启安"
+    ],
+    "department": "数学科学学院",
+    "credits": "4",
+    "schedule": "星期一(第5节-第6节)\n星期四(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00131421:1:BZ2627100131421_19964",
+    "term": "2026-2027-1",
+    "course_id": "00131421",
+    "section": "1",
+    "name": "高等数学C (一)",
+    "teachers": "甘少波",
+    "teacher_names": [
+      "甘少波"
+    ],
+    "department": "数学科学学院",
+    "credits": "4",
+    "schedule": "星期二(第1节-第2节)\n星期四(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00131460:1:BZ2627100131460_19715",
+    "term": "2026-2027-1",
+    "course_id": "00131460",
+    "section": "1",
+    "name": "线性代数 (B)",
+    "teachers": "李德洲",
+    "teacher_names": [
+      "李德洲"
+    ],
+    "department": "数学科学学院",
+    "credits": "4",
+    "schedule": "星期一(第3节-第4节)\n星期三(第1节-第2节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00131460:2:BZ2627100131460_27429",
+    "term": "2026-2027-1",
+    "course_id": "00131460",
+    "section": "2",
+    "name": "线性代数 (B)",
+    "teachers": "尹航",
+    "teacher_names": [
+      "尹航"
+    ],
+    "department": "数学科学学院",
+    "credits": "4",
+    "schedule": "星期一(第3节-第4节)\n星期三(第1节-第2节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00131460:3:BZ2627100131460_34105",
+    "term": "2026-2027-1",
+    "course_id": "00131460",
+    "section": "3",
+    "name": "线性代数 (B)",
+    "teachers": "谢羿",
+    "teacher_names": [
+      "谢羿"
+    ],
+    "department": "数学科学学院",
+    "credits": "4",
+    "schedule": "星期一(第3节-第4节)\n星期三(第1节-第2节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00131460:4:BZ2627100131460_42281",
+    "term": "2026-2027-1",
+    "course_id": "00131460",
+    "section": "4",
+    "name": "线性代数 (B)",
+    "teachers": "刘旭峰",
+    "teacher_names": [
+      "刘旭峰"
+    ],
+    "department": "数学科学学院",
+    "credits": "4",
+    "schedule": "星期一(第3节-第4节)\n星期三(第1节-第2节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00131460:5:BZ2627100131460_53974",
+    "term": "2026-2027-1",
+    "course_id": "00131460",
+    "section": "5",
+    "name": "线性代数 (B)",
+    "teachers": "娄晗",
+    "teacher_names": [
+      "娄晗"
+    ],
+    "department": "数学科学学院",
+    "credits": "4",
+    "schedule": "星期一(第3节-第4节)\n星期三(第1节-第2节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00131460:6:BZ2627100131460_62521",
+    "term": "2026-2027-1",
+    "course_id": "00131460",
+    "section": "6",
+    "name": "线性代数 (B)",
+    "teachers": "李谷川",
+    "teacher_names": [
+      "李谷川"
+    ],
+    "department": "数学科学学院",
+    "credits": "4",
+    "schedule": "星期一(第3节-第4节)\n星期三(第1节-第2节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00131460:7:BZ2627100131460_78133",
+    "term": "2026-2027-1",
+    "course_id": "00131460",
+    "section": "7",
+    "name": "线性代数 (B)",
+    "teachers": "周健",
+    "teacher_names": [
+      "周健"
+    ],
+    "department": "数学科学学院",
+    "credits": "4",
+    "schedule": "星期一(第3节-第4节)\n星期三(第1节-第2节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00131460:8:BZ2627100131460_80653",
+    "term": "2026-2027-1",
+    "course_id": "00131460",
+    "section": "8",
+    "name": "线性代数 (B)",
+    "teachers": "周健",
+    "teacher_names": [
+      "周健"
+    ],
+    "department": "数学科学学院",
+    "credits": "4",
+    "schedule": "星期一(第1节-第2节)\n星期三(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00131470:12:BZ2627100131470121669",
+    "term": "2026-2027-1",
+    "course_id": "00131470",
+    "section": "12",
+    "name": "线性代数 (B)习题",
+    "teachers": "刘旭峰",
+    "teacher_names": [
+      "刘旭峰"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期一(第10节-第11节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00131470:10:BZ2627100131470108638",
+    "term": "2026-2027-1",
+    "course_id": "00131470",
+    "section": "10",
+    "name": "线性代数 (B)习题",
+    "teachers": "刘旭峰",
+    "teacher_names": [
+      "刘旭峰"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期一(第10节-第11节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00131470:14:BZ2627100131470144048",
+    "term": "2026-2027-1",
+    "course_id": "00131470",
+    "section": "14",
+    "name": "线性代数 (B)习题",
+    "teachers": "娄晗",
+    "teacher_names": [
+      "娄晗"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期一(第10节-第11节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00131470:21:BZ2627100131470215102",
+    "term": "2026-2027-1",
+    "course_id": "00131470",
+    "section": "21",
+    "name": "线性代数 (B)习题",
+    "teachers": "周健",
+    "teacher_names": [
+      "周健"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期一(第10节-第11节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00131470:22:BZ2627100131470220212",
+    "term": "2026-2027-1",
+    "course_id": "00131470",
+    "section": "22",
+    "name": "线性代数 (B)习题",
+    "teachers": "周健",
+    "teacher_names": [
+      "周健"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期一(第10节-第11节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00131470:23:BZ2627100131470237208",
+    "term": "2026-2027-1",
+    "course_id": "00131470",
+    "section": "23",
+    "name": "线性代数 (B)习题",
+    "teachers": "周健",
+    "teacher_names": [
+      "周健"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期一(第10节-第11节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00131470:24:BZ2627100131470242274",
+    "term": "2026-2027-1",
+    "course_id": "00131470",
+    "section": "24",
+    "name": "线性代数 (B)习题",
+    "teachers": "周健",
+    "teacher_names": [
+      "周健"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期一(第10节-第11节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00131470:1:BZ2627100131470_16301",
+    "term": "2026-2027-1",
+    "course_id": "00131470",
+    "section": "1",
+    "name": "线性代数 (B)习题",
+    "teachers": "李德洲",
+    "teacher_names": [
+      "李德洲"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期一(第10节-第11节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00131470:5:BZ2627100131470_58580",
+    "term": "2026-2027-1",
+    "course_id": "00131470",
+    "section": "5",
+    "name": "线性代数 (B)习题",
+    "teachers": "尹航",
+    "teacher_names": [
+      "尹航"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期一(第10节-第11节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00131470:8:BZ2627100131470_85255",
+    "term": "2026-2027-1",
+    "course_id": "00131470",
+    "section": "8",
+    "name": "线性代数 (B)习题",
+    "teachers": "谢羿",
+    "teacher_names": [
+      "谢羿"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期一(第10节-第11节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00131470:9:BZ2627100131470_97043",
+    "term": "2026-2027-1",
+    "course_id": "00131470",
+    "section": "9",
+    "name": "线性代数 (B)习题",
+    "teachers": "谢羿",
+    "teacher_names": [
+      "谢羿"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期一(第10节-第11节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00131470:11:BZ2627100131470116409",
+    "term": "2026-2027-1",
+    "course_id": "00131470",
+    "section": "11",
+    "name": "线性代数 (B)习题",
+    "teachers": "刘旭峰",
+    "teacher_names": [
+      "刘旭峰"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期一(第10节-第11节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00131470:15:BZ2627100131470158951",
+    "term": "2026-2027-1",
+    "course_id": "00131470",
+    "section": "15",
+    "name": "线性代数 (B)习题",
+    "teachers": "娄晗",
+    "teacher_names": [
+      "娄晗"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期一(第10节-第11节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00131470:13:BZ2627100131470168854",
+    "term": "2026-2027-1",
+    "course_id": "00131470",
+    "section": "13",
+    "name": "线性代数 (B)习题",
+    "teachers": "娄晗",
+    "teacher_names": [
+      "娄晗"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期一(第10节-第11节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00131470:17:BZ2627100131470172053",
+    "term": "2026-2027-1",
+    "course_id": "00131470",
+    "section": "17",
+    "name": "线性代数 (B)习题",
+    "teachers": "李谷川",
+    "teacher_names": [
+      "李谷川"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期一(第10节-第11节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00131470:18:BZ2627100131470189698",
+    "term": "2026-2027-1",
+    "course_id": "00131470",
+    "section": "18",
+    "name": "线性代数 (B)习题",
+    "teachers": "李谷川",
+    "teacher_names": [
+      "李谷川"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期一(第10节-第11节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00131470:2:BZ2627100131470_26755",
+    "term": "2026-2027-1",
+    "course_id": "00131470",
+    "section": "2",
+    "name": "线性代数 (B)习题",
+    "teachers": "李德洲",
+    "teacher_names": [
+      "李德洲"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期一(第10节-第11节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00131470:3:BZ2627100131470_32553",
+    "term": "2026-2027-1",
+    "course_id": "00131470",
+    "section": "3",
+    "name": "线性代数 (B)习题",
+    "teachers": "李德洲",
+    "teacher_names": [
+      "李德洲"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期一(第10节-第11节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00131470:4:BZ2627100131470_43247",
+    "term": "2026-2027-1",
+    "course_id": "00131470",
+    "section": "4",
+    "name": "线性代数 (B)习题",
+    "teachers": "尹航",
+    "teacher_names": [
+      "尹航"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期一(第10节-第11节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00131470:6:BZ2627100131470_64553",
+    "term": "2026-2027-1",
+    "course_id": "00131470",
+    "section": "6",
+    "name": "线性代数 (B)习题",
+    "teachers": "尹航",
+    "teacher_names": [
+      "尹航"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期一(第10节-第11节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00131470:7:BZ2627100131470_71126",
+    "term": "2026-2027-1",
+    "course_id": "00131470",
+    "section": "7",
+    "name": "线性代数 (B)习题",
+    "teachers": "谢羿",
+    "teacher_names": [
+      "谢羿"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期一(第10节-第11节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00131470:16:BZ2627100131470190297",
+    "term": "2026-2027-1",
+    "course_id": "00131470",
+    "section": "16",
+    "name": "线性代数 (B)习题",
+    "teachers": "李谷川",
+    "teacher_names": [
+      "李谷川"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期一(第10节-第11节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00131470:20:BZ2627100131470209337",
+    "term": "2026-2027-1",
+    "course_id": "00131470",
+    "section": "20",
+    "name": "线性代数 (B)习题",
+    "teachers": "周健",
+    "teacher_names": [
+      "周健"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期一(第10节-第11节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00131470:19:BZ2627100131470256136",
+    "term": "2026-2027-1",
+    "course_id": "00131470",
+    "section": "19",
+    "name": "线性代数 (B)习题",
+    "teachers": "周健",
+    "teacher_names": [
+      "周健"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期一(第10节-第11节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00131480:1:BZ2627100131480_19293",
+    "term": "2026-2027-1",
+    "course_id": "00131480",
+    "section": "1",
+    "name": "概率统计 （A）",
+    "teachers": "蒋达权",
+    "teacher_names": [
+      "蒋达权"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期二(第3节-第4节)\n星期四(第7节-第8节)(单)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00131810:1:BZ2627100131810_19030",
+    "term": "2026-2027-1",
+    "course_id": "00131810",
+    "section": "1",
+    "name": "线性代数 D",
+    "teachers": "甘锐",
+    "teacher_names": [
+      "甘锐"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期一(第3节-第4节)\n星期三(第3节-第4节)(单)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00131960:1:BZ2627100131960_14213",
+    "term": "2026-2027-1",
+    "course_id": "00131960",
+    "section": "1",
+    "name": "高等数学（D类基础）",
+    "teachers": "宋春伟",
+    "teacher_names": [
+      "宋春伟"
+    ],
+    "department": "数学科学学院",
+    "credits": "4",
+    "schedule": "星期二(第1节-第2节)\n星期四(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00131970:1:BZ2627100131970_12491",
+    "term": "2026-2027-1",
+    "course_id": "00131970",
+    "section": "1",
+    "name": "高等数学（D类基础）习题课",
+    "teachers": "宋春伟",
+    "teacher_names": [
+      "宋春伟"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期二(第10节-第11节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00131970:2:BZ2627100131970_23801",
+    "term": "2026-2027-1",
+    "course_id": "00131970",
+    "section": "2",
+    "name": "高等数学（D类基础）习题课",
+    "teachers": "宋春伟",
+    "teacher_names": [
+      "宋春伟"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期二(第10节-第11节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132301:1:BZ2627100132301_16196",
+    "term": "2026-2027-1",
+    "course_id": "00132301",
+    "section": "1",
+    "name": "数学分析（I）",
+    "teachers": "王嵬",
+    "teacher_names": [
+      "王嵬"
+    ],
+    "department": "数学科学学院",
+    "credits": "5",
+    "schedule": "星期一(第3节-第4节)\n星期三(第1节-第2节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132301:2:BZ2627100132301_25597",
+    "term": "2026-2027-1",
+    "course_id": "00132301",
+    "section": "2",
+    "name": "数学分析（I）",
+    "teachers": "王振富",
+    "teacher_names": [
+      "王振富"
+    ],
+    "department": "数学科学学院",
+    "credits": "5",
+    "schedule": "星期一(第3节-第4节)\n星期三(第1节-第2节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132301:3:BZ2627100132301_38011",
+    "term": "2026-2027-1",
+    "course_id": "00132301",
+    "section": "3",
+    "name": "数学分析（I）",
+    "teachers": "ThiangGuoChuan",
+    "teacher_names": [
+      "ThiangGuoChuan"
+    ],
+    "department": "数学科学学院",
+    "credits": "5",
+    "schedule": "星期一(第3节-第4节)\n星期三(第1节-第2节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132304:1:BZ2627100132304_11573",
+    "term": "2026-2027-1",
+    "course_id": "00132304",
+    "section": "1",
+    "name": "数学分析 (III)",
+    "teachers": "童嘉骏",
+    "teacher_names": [
+      "童嘉骏"
+    ],
+    "department": "数学科学学院",
+    "credits": "4",
+    "schedule": "星期一(第3节-第4节)\n星期三(第1节-第2节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132304:2:BZ2627100132304_22765",
+    "term": "2026-2027-1",
+    "course_id": "00132304",
+    "section": "2",
+    "name": "数学分析 (III)",
+    "teachers": "王冠香",
+    "teacher_names": [
+      "王冠香"
+    ],
+    "department": "数学科学学院",
+    "credits": "4",
+    "schedule": "星期一(第3节-第4节)\n星期三(第1节-第2节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132304:3:BZ2627100132304_36193",
+    "term": "2026-2027-1",
+    "course_id": "00132304",
+    "section": "3",
+    "name": "数学分析 (III)",
+    "teachers": "杨家忠",
+    "teacher_names": [
+      "杨家忠"
+    ],
+    "department": "数学科学学院",
+    "credits": "4",
+    "schedule": "星期一(第3节-第4节)\n星期三(第1节-第2节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132310:1:BZ2627100132310_19844",
+    "term": "2026-2027-1",
+    "course_id": "00132310",
+    "section": "1",
+    "name": "微分几何",
+    "teachers": "史宇光",
+    "teacher_names": [
+      "史宇光"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期二(第5节-第6节)\n星期五(第7节-第8节)(双)\n星期五(第7节-第8节)(单)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132311:12:BZ2627100132311129510",
+    "term": "2026-2027-1",
+    "course_id": "00132311",
+    "section": "12",
+    "name": "数学分析 (I)习题",
+    "teachers": "梅文俊",
+    "teacher_names": [
+      "梅文俊"
+    ],
+    "department": "工学院",
+    "credits": "0",
+    "schedule": "星期二(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132311:1:BZ2627100132311_17782",
+    "term": "2026-2027-1",
+    "course_id": "00132311",
+    "section": "1",
+    "name": "数学分析 (I)习题",
+    "teachers": "王振富",
+    "teacher_names": [
+      "王振富"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期一(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132311:2:BZ2627100132311_24482",
+    "term": "2026-2027-1",
+    "course_id": "00132311",
+    "section": "2",
+    "name": "数学分析 (I)习题",
+    "teachers": "王嵬",
+    "teacher_names": [
+      "王嵬"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期一(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132311:3:BZ2627100132311_38772",
+    "term": "2026-2027-1",
+    "course_id": "00132311",
+    "section": "3",
+    "name": "数学分析 (I)习题",
+    "teachers": "王嵬",
+    "teacher_names": [
+      "王嵬"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期一(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132311:4:BZ2627100132311_42570",
+    "term": "2026-2027-1",
+    "course_id": "00132311",
+    "section": "4",
+    "name": "数学分析 (I)习题",
+    "teachers": "王振富",
+    "teacher_names": [
+      "王振富"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期一(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132311:10:BZ2627100132311103451",
+    "term": "2026-2027-1",
+    "course_id": "00132311",
+    "section": "10",
+    "name": "数学分析 (I)习题",
+    "teachers": "欧阳智萌",
+    "teacher_names": [
+      "欧阳智萌"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期一(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132311:13:BZ2627100132311130434",
+    "term": "2026-2027-1",
+    "course_id": "00132311",
+    "section": "13",
+    "name": "数学分析 (I)习题",
+    "teachers": "梅文俊",
+    "teacher_names": [
+      "梅文俊"
+    ],
+    "department": "工学院",
+    "credits": "0",
+    "schedule": "星期二(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132311:14:BZ2627100132311147518",
+    "term": "2026-2027-1",
+    "course_id": "00132311",
+    "section": "14",
+    "name": "数学分析 (I)习题",
+    "teachers": "梅文俊",
+    "teacher_names": [
+      "梅文俊"
+    ],
+    "department": "工学院",
+    "credits": "0",
+    "schedule": "星期二(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132311:15:BZ2627100132311159113",
+    "term": "2026-2027-1",
+    "course_id": "00132311",
+    "section": "15",
+    "name": "数学分析 (I)习题",
+    "teachers": "王圣凯",
+    "teacher_names": [
+      "王圣凯"
+    ],
+    "department": "工学院",
+    "credits": "0",
+    "schedule": "星期二(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132311:16:BZ2627100132311167659",
+    "term": "2026-2027-1",
+    "course_id": "00132311",
+    "section": "16",
+    "name": "数学分析 (I)习题",
+    "teachers": "王圣凯",
+    "teacher_names": [
+      "王圣凯"
+    ],
+    "department": "工学院",
+    "credits": "0",
+    "schedule": "星期二(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132311:17:BZ2627100132311175748",
+    "term": "2026-2027-1",
+    "course_id": "00132311",
+    "section": "17",
+    "name": "数学分析 (I)习题",
+    "teachers": "王圣凯",
+    "teacher_names": [
+      "王圣凯"
+    ],
+    "department": "工学院",
+    "credits": "0",
+    "schedule": "星期二(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132311:5:BZ2627100132311_54529",
+    "term": "2026-2027-1",
+    "course_id": "00132311",
+    "section": "5",
+    "name": "数学分析 (I)习题",
+    "teachers": "王振富",
+    "teacher_names": [
+      "王振富"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期一(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132311:6:BZ2627100132311_68864",
+    "term": "2026-2027-1",
+    "course_id": "00132311",
+    "section": "6",
+    "name": "数学分析 (I)习题",
+    "teachers": "王振富",
+    "teacher_names": [
+      "王振富"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期一(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132311:8:BZ2627100132311_82543",
+    "term": "2026-2027-1",
+    "course_id": "00132311",
+    "section": "8",
+    "name": "数学分析 (I)习题",
+    "teachers": "ThiangGuoChuan",
+    "teacher_names": [
+      "ThiangGuoChuan"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期一(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132311:9:BZ2627100132311_96781",
+    "term": "2026-2027-1",
+    "course_id": "00132311",
+    "section": "9",
+    "name": "数学分析 (I)习题",
+    "teachers": "ThiangGuoChuan",
+    "teacher_names": [
+      "ThiangGuoChuan"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期一(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132311:11:BZ2627100132311112034",
+    "term": "2026-2027-1",
+    "course_id": "00132311",
+    "section": "11",
+    "name": "数学分析 (I)习题",
+    "teachers": "欧阳智萌",
+    "teacher_names": [
+      "欧阳智萌"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期一(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132311:18:BZ2627100132311189062",
+    "term": "2026-2027-1",
+    "course_id": "00132311",
+    "section": "18",
+    "name": "数学分析 (I)习题",
+    "teachers": "史一蓬",
+    "teacher_names": [
+      "史一蓬"
+    ],
+    "department": "工学院",
+    "credits": "0",
+    "schedule": "星期二(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132311:7:BZ2627100132311_76316",
+    "term": "2026-2027-1",
+    "course_id": "00132311",
+    "section": "7",
+    "name": "数学分析 (I)习题",
+    "teachers": "ThiangGuoChuan",
+    "teacher_names": [
+      "ThiangGuoChuan"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期一(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132313:10:BZ2627100132313108525",
+    "term": "2026-2027-1",
+    "course_id": "00132313",
+    "section": "10",
+    "name": "数学分析 (III)习题",
+    "teachers": "周斌",
+    "teacher_names": [
+      "周斌"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期四(第10节-第11节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132313:11:BZ2627100132313114693",
+    "term": "2026-2027-1",
+    "course_id": "00132313",
+    "section": "11",
+    "name": "数学分析 (III)习题",
+    "teachers": "周斌",
+    "teacher_names": [
+      "周斌"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期四(第10节-第11节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132313:2:BZ2627100132313_26331",
+    "term": "2026-2027-1",
+    "course_id": "00132313",
+    "section": "2",
+    "name": "数学分析 (III)习题",
+    "teachers": "童嘉骏",
+    "teacher_names": [
+      "童嘉骏"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期四(第10节-第11节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132313:3:BZ2627100132313_35044",
+    "term": "2026-2027-1",
+    "course_id": "00132313",
+    "section": "3",
+    "name": "数学分析 (III)习题",
+    "teachers": "童嘉骏",
+    "teacher_names": [
+      "童嘉骏"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期四(第10节-第11节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132313:4:BZ2627100132313_49978",
+    "term": "2026-2027-1",
+    "course_id": "00132313",
+    "section": "4",
+    "name": "数学分析 (III)习题",
+    "teachers": "王冠香",
+    "teacher_names": [
+      "王冠香"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期四(第10节-第11节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132313:5:BZ2627100132313_59925",
+    "term": "2026-2027-1",
+    "course_id": "00132313",
+    "section": "5",
+    "name": "数学分析 (III)习题",
+    "teachers": "王冠香",
+    "teacher_names": [
+      "王冠香"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期四(第10节-第11节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132313:6:BZ2627100132313_68198",
+    "term": "2026-2027-1",
+    "course_id": "00132313",
+    "section": "6",
+    "name": "数学分析 (III)习题",
+    "teachers": "王冠香",
+    "teacher_names": [
+      "王冠香"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期四(第10节-第11节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132313:1:BZ2627100132313_12058",
+    "term": "2026-2027-1",
+    "course_id": "00132313",
+    "section": "1",
+    "name": "数学分析 (III)习题",
+    "teachers": "童嘉骏",
+    "teacher_names": [
+      "童嘉骏"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期四(第10节-第11节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132313:7:BZ2627100132313_73625",
+    "term": "2026-2027-1",
+    "course_id": "00132313",
+    "section": "7",
+    "name": "数学分析 (III)习题",
+    "teachers": "杨家忠",
+    "teacher_names": [
+      "杨家忠"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期四(第10节-第11节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132313:8:BZ2627100132313_85168",
+    "term": "2026-2027-1",
+    "course_id": "00132313",
+    "section": "8",
+    "name": "数学分析 (III)习题",
+    "teachers": "杨家忠",
+    "teacher_names": [
+      "杨家忠"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期四(第10节-第11节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132313:9:BZ2627100132313_93380",
+    "term": "2026-2027-1",
+    "course_id": "00132313",
+    "section": "9",
+    "name": "数学分析 (III)习题",
+    "teachers": "杨家忠",
+    "teacher_names": [
+      "杨家忠"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期四(第10节-第11节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132320:1:BZ2627100132320_18393",
+    "term": "2026-2027-1",
+    "course_id": "00132320",
+    "section": "1",
+    "name": "复变函数",
+    "teachers": "李智强",
+    "teacher_names": [
+      "李智强"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期二(第5节-第6节)\n星期四(第5节-第6节)(单)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132321:1:BZ2627100132321_13025",
+    "term": "2026-2027-1",
+    "course_id": "00132321",
+    "section": "1",
+    "name": "高等代数（I）",
+    "teachers": "王立中",
+    "teacher_names": [
+      "王立中"
+    ],
+    "department": "数学科学学院",
+    "credits": "5",
+    "schedule": "星期二(第3节-第4节)\n星期四(第1节-第2节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132321:2:BZ2627100132321_26320",
+    "term": "2026-2027-1",
+    "course_id": "00132321",
+    "section": "2",
+    "name": "高等代数（I）",
+    "teachers": "王福正",
+    "teacher_names": [
+      "王福正"
+    ],
+    "department": "数学科学学院",
+    "credits": "5",
+    "schedule": "星期二(第3节-第4节)\n星期四(第1节-第2节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132321:3:BZ2627100132321_30747",
+    "term": "2026-2027-1",
+    "course_id": "00132321",
+    "section": "3",
+    "name": "高等代数（I）",
+    "teachers": "肖梁",
+    "teacher_names": [
+      "肖梁"
+    ],
+    "department": "数学科学学院",
+    "credits": "5",
+    "schedule": "星期二(第3节-第4节)\n星期四(第1节-第2节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132330:1:BZ2627100132330_17856",
+    "term": "2026-2027-1",
+    "course_id": "00132330",
+    "section": "1",
+    "name": "偏微分方程",
+    "teachers": "刘保平",
+    "teacher_names": [
+      "刘保平"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期四(第5节-第6节)\n星期五(第3节-第4节)(单)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132331:1:BZ2627100132331_11522",
+    "term": "2026-2027-1",
+    "course_id": "00132331",
+    "section": "1",
+    "name": "高等代数（I）习题",
+    "teachers": "王立中",
+    "teacher_names": [
+      "王立中"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期四(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132331:10:BZ2627100132331100539",
+    "term": "2026-2027-1",
+    "course_id": "00132331",
+    "section": "10",
+    "name": "高等代数（I）习题",
+    "teachers": "安金鹏",
+    "teacher_names": [
+      "安金鹏"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期四(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132331:11:BZ2627100132331114468",
+    "term": "2026-2027-1",
+    "course_id": "00132331",
+    "section": "11",
+    "name": "高等代数（I）习题",
+    "teachers": "安金鹏",
+    "teacher_names": [
+      "安金鹏"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期四(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132331:2:BZ2627100132331_29819",
+    "term": "2026-2027-1",
+    "course_id": "00132331",
+    "section": "2",
+    "name": "高等代数（I）习题",
+    "teachers": "王立中",
+    "teacher_names": [
+      "王立中"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期四(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132331:3:BZ2627100132331_35889",
+    "term": "2026-2027-1",
+    "course_id": "00132331",
+    "section": "3",
+    "name": "高等代数（I）习题",
+    "teachers": "王立中",
+    "teacher_names": [
+      "王立中"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期四(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132331:4:BZ2627100132331_48502",
+    "term": "2026-2027-1",
+    "course_id": "00132331",
+    "section": "4",
+    "name": "高等代数（I）习题",
+    "teachers": "王福正",
+    "teacher_names": [
+      "王福正"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期四(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132331:5:BZ2627100132331_58652",
+    "term": "2026-2027-1",
+    "course_id": "00132331",
+    "section": "5",
+    "name": "高等代数（I）习题",
+    "teachers": "王福正",
+    "teacher_names": [
+      "王福正"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期四(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132331:6:BZ2627100132331_65859",
+    "term": "2026-2027-1",
+    "course_id": "00132331",
+    "section": "6",
+    "name": "高等代数（I）习题",
+    "teachers": "王福正",
+    "teacher_names": [
+      "王福正"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期四(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132331:7:BZ2627100132331_70018",
+    "term": "2026-2027-1",
+    "course_id": "00132331",
+    "section": "7",
+    "name": "高等代数（I）习题",
+    "teachers": "肖梁",
+    "teacher_names": [
+      "肖梁"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期四(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132331:8:BZ2627100132331_83734",
+    "term": "2026-2027-1",
+    "course_id": "00132331",
+    "section": "8",
+    "name": "高等代数（I）习题",
+    "teachers": "肖梁",
+    "teacher_names": [
+      "肖梁"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期四(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132331:9:BZ2627100132331_97162",
+    "term": "2026-2027-1",
+    "course_id": "00132331",
+    "section": "9",
+    "name": "高等代数（I）习题",
+    "teachers": "肖梁",
+    "teacher_names": [
+      "肖梁"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期四(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132341:1:BZ2627100132341_16270",
+    "term": "2026-2027-1",
+    "course_id": "00132341",
+    "section": "1",
+    "name": "几何学",
+    "teachers": "叶帆",
+    "teacher_names": [
+      "叶帆"
+    ],
+    "department": "数学科学学院",
+    "credits": "5",
+    "schedule": "星期三(第3节-第4节)\n星期五(第1节-第2节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132341:2:BZ2627100132341_26598",
+    "term": "2026-2027-1",
+    "course_id": "00132341",
+    "section": "2",
+    "name": "几何学",
+    "teachers": "包志强",
+    "teacher_names": [
+      "包志强"
+    ],
+    "department": "数学科学学院",
+    "credits": "5",
+    "schedule": "星期三(第3节-第4节)\n星期五(第1节-第2节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132351:1:BZ2627100132351_12790",
+    "term": "2026-2027-1",
+    "course_id": "00132351",
+    "section": "1",
+    "name": "几何学习题",
+    "teachers": "叶帆",
+    "teacher_names": [
+      "叶帆"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期三(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132351:2:BZ2627100132351_20488",
+    "term": "2026-2027-1",
+    "course_id": "00132351",
+    "section": "2",
+    "name": "几何学习题",
+    "teachers": "叶帆",
+    "teacher_names": [
+      "叶帆"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期三(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132351:3:BZ2627100132351_30569",
+    "term": "2026-2027-1",
+    "course_id": "00132351",
+    "section": "3",
+    "name": "几何学习题",
+    "teachers": "叶帆",
+    "teacher_names": [
+      "叶帆"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期三(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132351:4:BZ2627100132351_44882",
+    "term": "2026-2027-1",
+    "course_id": "00132351",
+    "section": "4",
+    "name": "几何学习题",
+    "teachers": "包志强",
+    "teacher_names": [
+      "包志强"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期三(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132351:5:BZ2627100132351_58177",
+    "term": "2026-2027-1",
+    "course_id": "00132351",
+    "section": "5",
+    "name": "几何学习题",
+    "teachers": "包志强",
+    "teacher_names": [
+      "包志强"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期三(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132351:6:BZ2627100132351_63287",
+    "term": "2026-2027-1",
+    "course_id": "00132351",
+    "section": "6",
+    "name": "几何学习题",
+    "teachers": "包志强",
+    "teacher_names": [
+      "包志强"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期三(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132351:7:BZ2627100132351_70869",
+    "term": "2026-2027-1",
+    "course_id": "00132351",
+    "section": "7",
+    "name": "几何学习题",
+    "teachers": "刘毅",
+    "teacher_names": [
+      "刘毅"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期三(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132351:8:BZ2627100132351_87451",
+    "term": "2026-2027-1",
+    "course_id": "00132351",
+    "section": "8",
+    "name": "几何学习题",
+    "teachers": "刘毅",
+    "teacher_names": [
+      "刘毅"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期三(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132361:1:BZ2627100132361_11431",
+    "term": "2026-2027-1",
+    "course_id": "00132361",
+    "section": "1",
+    "name": "数学分析I(实验班)",
+    "teachers": "欧阳智萌",
+    "teacher_names": [
+      "欧阳智萌"
+    ],
+    "department": "数学科学学院",
+    "credits": "5",
+    "schedule": "星期一(第3节-第4节)\n星期三(第1节-第2节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132363:1:BZ2627100132363_17592",
+    "term": "2026-2027-1",
+    "course_id": "00132363",
+    "section": "1",
+    "name": "数学分析 III (实验班)",
+    "teachers": "周斌",
+    "teacher_names": [
+      "周斌"
+    ],
+    "department": "数学科学学院",
+    "credits": "4",
+    "schedule": "星期一(第3节-第4节)\n星期三(第1节-第2节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132370:1:BZ2627100132370_13655",
+    "term": "2026-2027-1",
+    "course_id": "00132370",
+    "section": "1",
+    "name": "实变函数",
+    "teachers": "张栋",
+    "teacher_names": [
+      "张栋"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期三(第7节-第8节)\n星期五(第3节-第4节)(双)\n星期六(第7节-第8节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132370:2:BZ2627100132370_22054",
+    "term": "2026-2027-1",
+    "course_id": "00132370",
+    "section": "2",
+    "name": "实变函数",
+    "teachers": "杨诗武",
+    "teacher_names": [
+      "杨诗武"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期三(第7节-第8节)\n星期五(第3节-第4节)(双)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132371:1:BZ2627100132371_11823",
+    "term": "2026-2027-1",
+    "course_id": "00132371",
+    "section": "1",
+    "name": "高等代数I（实验班）",
+    "teachers": "安金鹏",
+    "teacher_names": [
+      "安金鹏"
+    ],
+    "department": "数学科学学院",
+    "credits": "5",
+    "schedule": "星期二(第3节-第4节)\n星期四(第1节-第2节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132380:1:BZ2627100132380_23909",
+    "term": "2026-2027-1",
+    "course_id": "00132380",
+    "section": "1",
+    "name": "概率统计 (B)",
+    "teachers": "邓明华",
+    "teacher_names": [
+      "邓明华"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期三(第3节-第4节)(单)\n星期五(第1节-第2节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132380:2:BZ2627100132380_33550",
+    "term": "2026-2027-1",
+    "course_id": "00132380",
+    "section": "2",
+    "name": "概率统计 (B)",
+    "teachers": "何洋波",
+    "teacher_names": [
+      "何洋波"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期三(第3节-第4节)(单)\n星期五(第1节-第2节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132380:3:BZ2627100132380_38333",
+    "term": "2026-2027-1",
+    "course_id": "00132380",
+    "section": "3",
+    "name": "概率统计 (B)",
+    "teachers": "陈大岳",
+    "teacher_names": [
+      "陈大岳"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期三(第3节-第4节)(单)\n星期五(第1节-第2节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132381:1:BZ2627100132381_17737",
+    "term": "2026-2027-1",
+    "course_id": "00132381",
+    "section": "1",
+    "name": "几何学I(实验班)",
+    "teachers": "刘毅",
+    "teacher_names": [
+      "刘毅"
+    ],
+    "department": "数学科学学院",
+    "credits": "5",
+    "schedule": "星期三(第3节-第4节)\n星期五(第1节-第2节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132511:6:BZ2627100132511_18927",
+    "term": "2026-2027-1",
+    "course_id": "00132511",
+    "section": "6",
+    "name": "高等数学A（一）",
+    "teachers": "周铁",
+    "teacher_names": [
+      "周铁"
+    ],
+    "department": "数学科学学院",
+    "credits": "5",
+    "schedule": "星期二(第1节-第2节)\n星期四(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132511:1:BZ2627100132511_17001",
+    "term": "2026-2027-1",
+    "course_id": "00132511",
+    "section": "1",
+    "name": "高等数学A（一）",
+    "teachers": "封子强",
+    "teacher_names": [
+      "封子强"
+    ],
+    "department": "数学科学学院",
+    "credits": "5",
+    "schedule": "星期二(第1节-第2节)\n星期四(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132511:2:BZ2627100132511_28544",
+    "term": "2026-2027-1",
+    "course_id": "00132511",
+    "section": "2",
+    "name": "高等数学A（一）",
+    "teachers": "刘培东",
+    "teacher_names": [
+      "刘培东"
+    ],
+    "department": "数学科学学院",
+    "credits": "5",
+    "schedule": "星期二(第1节-第2节)\n星期四(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132511:3:BZ2627100132511_38535",
+    "term": "2026-2027-1",
+    "course_id": "00132511",
+    "section": "3",
+    "name": "高等数学A（一）",
+    "teachers": "戴波",
+    "teacher_names": [
+      "戴波"
+    ],
+    "department": "数学科学学院",
+    "credits": "5",
+    "schedule": "星期二(第1节-第2节)\n星期四(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132511:4:BZ2627100132511_43698",
+    "term": "2026-2027-1",
+    "course_id": "00132511",
+    "section": "4",
+    "name": "高等数学A（一）",
+    "teachers": "束琳",
+    "teacher_names": [
+      "束琳"
+    ],
+    "department": "数学科学学院",
+    "credits": "5",
+    "schedule": "星期二(第1节-第2节)\n星期四(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132511:5:BZ2627100132511_55609",
+    "term": "2026-2027-1",
+    "course_id": "00132511",
+    "section": "5",
+    "name": "高等数学A（一）",
+    "teachers": "周蜀林",
+    "teacher_names": [
+      "周蜀林"
+    ],
+    "department": "数学科学学院",
+    "credits": "5",
+    "schedule": "星期二(第1节-第2节)\n星期四(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132511:7:BZ2627100132511_72331",
+    "term": "2026-2027-1",
+    "course_id": "00132511",
+    "section": "7",
+    "name": "高等数学A（一）",
+    "teachers": "李若",
+    "teacher_names": [
+      "李若"
+    ],
+    "department": "数学科学学院",
+    "credits": "5",
+    "schedule": "星期二(第1节-第2节)\n星期四(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132611:2:BZ2627100132611_29822",
+    "term": "2026-2027-1",
+    "course_id": "00132611",
+    "section": "2",
+    "name": "线性代数A (I)",
+    "teachers": "陈阳",
+    "teacher_names": [
+      "陈阳"
+    ],
+    "department": "数学科学学院",
+    "credits": "4",
+    "schedule": "星期一(第3节-第4节)\n星期三(第1节-第2节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132611:1:BZ2627100132611_32903",
+    "term": "2026-2027-1",
+    "course_id": "00132611",
+    "section": "1",
+    "name": "线性代数A (I)",
+    "teachers": "高峡",
+    "teacher_names": [
+      "高峡"
+    ],
+    "department": "数学科学学院",
+    "credits": "4",
+    "schedule": "星期一(第3节-第4节)\n星期三(第1节-第2节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132611:3:BZ2627100132611_33374",
+    "term": "2026-2027-1",
+    "course_id": "00132611",
+    "section": "3",
+    "name": "线性代数A (I)",
+    "teachers": "向圣权",
+    "teacher_names": [
+      "向圣权"
+    ],
+    "department": "数学科学学院",
+    "credits": "4",
+    "schedule": "星期一(第3节-第4节)\n星期三(第1节-第2节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132711:1:BZ2627100132711_17978",
+    "term": "2026-2027-1",
+    "course_id": "00132711",
+    "section": "1",
+    "name": "高等数学A（一）习题",
+    "teachers": "封子强",
+    "teacher_names": [
+      "封子强"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期三(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132711:10:BZ2627100132711109499",
+    "term": "2026-2027-1",
+    "course_id": "00132711",
+    "section": "10",
+    "name": "高等数学A（一）习题",
+    "teachers": "束琳",
+    "teacher_names": [
+      "束琳"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期三(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132711:11:BZ2627100132711115244",
+    "term": "2026-2027-1",
+    "course_id": "00132711",
+    "section": "11",
+    "name": "高等数学A（一）习题",
+    "teachers": "束琳",
+    "teacher_names": [
+      "束琳"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期三(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132711:12:BZ2627100132711126891",
+    "term": "2026-2027-1",
+    "course_id": "00132711",
+    "section": "12",
+    "name": "高等数学A（一）习题",
+    "teachers": "束琳",
+    "teacher_names": [
+      "束琳"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期三(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132711:14:BZ2627100132711145858",
+    "term": "2026-2027-1",
+    "course_id": "00132711",
+    "section": "14",
+    "name": "高等数学A（一）习题",
+    "teachers": "周蜀林",
+    "teacher_names": [
+      "周蜀林"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期三(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132711:15:BZ2627100132711156043",
+    "term": "2026-2027-1",
+    "course_id": "00132711",
+    "section": "15",
+    "name": "高等数学A（一）习题",
+    "teachers": "周蜀林",
+    "teacher_names": [
+      "周蜀林"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期三(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132711:2:BZ2627100132711_21632",
+    "term": "2026-2027-1",
+    "course_id": "00132711",
+    "section": "2",
+    "name": "高等数学A（一）习题",
+    "teachers": "封子强",
+    "teacher_names": [
+      "封子强"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期三(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132711:3:BZ2627100132711_32918",
+    "term": "2026-2027-1",
+    "course_id": "00132711",
+    "section": "3",
+    "name": "高等数学A（一）习题",
+    "teachers": "封子强",
+    "teacher_names": [
+      "封子强"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期三(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132711:4:BZ2627100132711_45209",
+    "term": "2026-2027-1",
+    "course_id": "00132711",
+    "section": "4",
+    "name": "高等数学A（一）习题",
+    "teachers": "刘培东",
+    "teacher_names": [
+      "刘培东"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期三(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132711:5:BZ2627100132711_57861",
+    "term": "2026-2027-1",
+    "course_id": "00132711",
+    "section": "5",
+    "name": "高等数学A（一）习题",
+    "teachers": "刘培东",
+    "teacher_names": [
+      "刘培东"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期三(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132711:6:BZ2627100132711_69085",
+    "term": "2026-2027-1",
+    "course_id": "00132711",
+    "section": "6",
+    "name": "高等数学A（一）习题",
+    "teachers": "刘培东",
+    "teacher_names": [
+      "刘培东"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期三(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132711:13:BZ2627100132711137581",
+    "term": "2026-2027-1",
+    "course_id": "00132711",
+    "section": "13",
+    "name": "高等数学A（一）习题",
+    "teachers": "周蜀林",
+    "teacher_names": [
+      "周蜀林"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期三(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132711:16:BZ2627100132711161586",
+    "term": "2026-2027-1",
+    "course_id": "00132711",
+    "section": "16",
+    "name": "高等数学A（一）习题",
+    "teachers": "周铁",
+    "teacher_names": [
+      "周铁"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期三(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132711:19:BZ2627100132711165695",
+    "term": "2026-2027-1",
+    "course_id": "00132711",
+    "section": "19",
+    "name": "高等数学A（一）习题",
+    "teachers": "李若",
+    "teacher_names": [
+      "李若"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期三(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132711:20:BZ2627100132711178309",
+    "term": "2026-2027-1",
+    "course_id": "00132711",
+    "section": "20",
+    "name": "高等数学A（一）习题",
+    "teachers": "李若",
+    "teacher_names": [
+      "李若"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期三(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132711:17:BZ2627100132711179909",
+    "term": "2026-2027-1",
+    "course_id": "00132711",
+    "section": "17",
+    "name": "高等数学A（一）习题",
+    "teachers": "周铁",
+    "teacher_names": [
+      "周铁"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期三(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132711:21:BZ2627100132711183877",
+    "term": "2026-2027-1",
+    "course_id": "00132711",
+    "section": "21",
+    "name": "高等数学A（一）习题",
+    "teachers": "李若",
+    "teacher_names": [
+      "李若"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期三(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132711:18:BZ2627100132711189221",
+    "term": "2026-2027-1",
+    "course_id": "00132711",
+    "section": "18",
+    "name": "高等数学A（一）习题",
+    "teachers": "周铁",
+    "teacher_names": [
+      "周铁"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期三(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132711:7:BZ2627100132711_72854",
+    "term": "2026-2027-1",
+    "course_id": "00132711",
+    "section": "7",
+    "name": "高等数学A（一）习题",
+    "teachers": "戴波",
+    "teacher_names": [
+      "戴波"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期三(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132711:8:BZ2627100132711_81262",
+    "term": "2026-2027-1",
+    "course_id": "00132711",
+    "section": "8",
+    "name": "高等数学A（一）习题",
+    "teachers": "戴波",
+    "teacher_names": [
+      "戴波"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期三(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132711:9:BZ2627100132711_90980",
+    "term": "2026-2027-1",
+    "course_id": "00132711",
+    "section": "9",
+    "name": "高等数学A（一）习题",
+    "teachers": "戴波",
+    "teacher_names": [
+      "戴波"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期三(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132811:2:BZ2627100132811_27360",
+    "term": "2026-2027-1",
+    "course_id": "00132811",
+    "section": "2",
+    "name": "线性代数 A（ I ）习题",
+    "teachers": "高峡",
+    "teacher_names": [
+      "高峡"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期一(第10节-第11节)(单)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132811:3:BZ2627100132811_39739",
+    "term": "2026-2027-1",
+    "course_id": "00132811",
+    "section": "3",
+    "name": "线性代数 A（ I ）习题",
+    "teachers": "高峡",
+    "teacher_names": [
+      "高峡"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期一(第10节-第11节)(单)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132811:4:BZ2627100132811_44030",
+    "term": "2026-2027-1",
+    "course_id": "00132811",
+    "section": "4",
+    "name": "线性代数 A（ I ）习题",
+    "teachers": "陈阳",
+    "teacher_names": [
+      "陈阳"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期一(第10节-第11节)(单)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132811:5:BZ2627100132811_51530",
+    "term": "2026-2027-1",
+    "course_id": "00132811",
+    "section": "5",
+    "name": "线性代数 A（ I ）习题",
+    "teachers": "陈阳",
+    "teacher_names": [
+      "陈阳"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期一(第10节-第11节)(单)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132811:6:BZ2627100132811_61574",
+    "term": "2026-2027-1",
+    "course_id": "00132811",
+    "section": "6",
+    "name": "线性代数 A（ I ）习题",
+    "teachers": "陈阳",
+    "teacher_names": [
+      "陈阳"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期一(第10节-第11节)(单)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132811:7:BZ2627100132811_76127",
+    "term": "2026-2027-1",
+    "course_id": "00132811",
+    "section": "7",
+    "name": "线性代数 A（ I ）习题",
+    "teachers": "向圣权",
+    "teacher_names": [
+      "向圣权"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期一(第10节-第11节)(单)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132811:1:BZ2627100132811_77936",
+    "term": "2026-2027-1",
+    "course_id": "00132811",
+    "section": "1",
+    "name": "线性代数 A（ I ）习题",
+    "teachers": "高峡",
+    "teacher_names": [
+      "高峡"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期一(第10节-第11节)(单)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132811:8:BZ2627100132811_89538",
+    "term": "2026-2027-1",
+    "course_id": "00132811",
+    "section": "8",
+    "name": "线性代数 A（ I ）习题",
+    "teachers": "向圣权",
+    "teacher_names": [
+      "向圣权"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期一(第10节-第11节)(单)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132811:9:BZ2627100132811_97750",
+    "term": "2026-2027-1",
+    "course_id": "00132811",
+    "section": "9",
+    "name": "线性代数 A（ I ）习题",
+    "teachers": "向圣权",
+    "teacher_names": [
+      "向圣权"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期一(第10节-第11节)(单)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00132830:1:BZ2627100132830_12458",
+    "term": "2026-2027-1",
+    "course_id": "00132830",
+    "section": "1",
+    "name": "金融数学引论",
+    "teachers": "黄海",
+    "teacher_names": [
+      "黄海"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期三(第3节-第4节)\n星期五(第1节-第2节)(单)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00133050:1:BZ2627100133050_17523",
+    "term": "2026-2027-1",
+    "course_id": "00133050",
+    "section": "1",
+    "name": "应用多元统计分析",
+    "teachers": "邱宇谋",
+    "teacher_names": [
+      "邱宇谋"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期二(第1节-第2节)\n星期四(第3节-第4节)(双)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00133090:1:BZ2627100133090_19463",
+    "term": "2026-2027-1",
+    "course_id": "00133090",
+    "section": "1",
+    "name": "应用随机过程",
+    "teachers": "葛颢",
+    "teacher_names": [
+      "葛颢"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期二(第3节-第4节)(双)\n星期四(第7节-第8节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00134330:1:BZ2627100134330_15029",
+    "term": "2026-2027-1",
+    "course_id": "00134330",
+    "section": "1",
+    "name": "金融经济学",
+    "teachers": "程雪",
+    "teacher_names": [
+      "程雪"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期二(第5节-第6节)\n星期四(第3节-第4节)(双)\n星期四(第3节-第4节)(单)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00135040:1:BZ2627100135040_12214",
+    "term": "2026-2027-1",
+    "course_id": "00135040",
+    "section": "1",
+    "name": "程序设计技术与方法",
+    "teachers": "孙猛",
+    "teacher_names": [
+      "孙猛"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期二(第3节-第4节)(单)\n星期四(第5节-第6节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00135050:1:BZ2627100135050_18041",
+    "term": "2026-2027-1",
+    "course_id": "00135050",
+    "section": "1",
+    "name": "理论计算机科学基础",
+    "teachers": "夏壁灿",
+    "teacher_names": [
+      "夏壁灿"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期三(第3节-第4节)\n星期五(第1节-第2节)(双)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00135290:1:BZ2627100135290_19303",
+    "term": "2026-2027-1",
+    "course_id": "00135290",
+    "section": "1",
+    "name": "集合论与图论",
+    "teachers": "牟克典",
+    "teacher_names": [
+      "牟克典"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期二(第1节-第2节)\n星期四(第1节-第2节)(双)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00135450:1:BZ2627100135450_24281",
+    "term": "2026-2027-1",
+    "course_id": "00135450",
+    "section": "1",
+    "name": "抽象代数",
+    "teachers": "冯荣权",
+    "teacher_names": [
+      "冯荣权"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期一(第1节-第2节)(单)\n星期四(第7节-第8节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00135450:2:BZ2627100135450_25269",
+    "term": "2026-2027-1",
+    "course_id": "00135450",
+    "section": "2",
+    "name": "抽象代数",
+    "teachers": "蔡金星",
+    "teacher_names": [
+      "蔡金星"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期一(第1节-第2节)(单)\n星期四(第7节-第8节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00135460:1:BZ2627100135460_10732",
+    "term": "2026-2027-1",
+    "course_id": "00135460",
+    "section": "1",
+    "name": "数理统计",
+    "teachers": "周晓华",
+    "teacher_names": [
+      "周晓华"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期一(第7节-第8节)\n星期三(第5节-第6节)(双)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00135520:1:BZ2627100135520_17404",
+    "term": "2026-2027-1",
+    "course_id": "00135520",
+    "section": "1",
+    "name": "偏微分方程数值解",
+    "teachers": "吴朔男",
+    "teacher_names": [
+      "吴朔男"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期二(第1节-第2节)\n星期五(第1节-第2节)(单)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00136540:1:BZ2627100136540_17661",
+    "term": "2026-2027-1",
+    "course_id": "00136540",
+    "section": "1",
+    "name": "数值方法：原理，算法及应用",
+    "teachers": "卢朓",
+    "teacher_names": [
+      "卢朓"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期二(第1节-第2节)\n星期四(第7节-第8节)(双)",
+    "weeks": "1-16",
+    "category": "通选课"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00136680:1:BZ2627100136680_12970",
+    "term": "2026-2027-1",
+    "course_id": "00136680",
+    "section": "1",
+    "name": "调和分析",
+    "teachers": "韦东奕",
+    "teacher_names": [
+      "韦东奕"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期一(第5节-第6节)(双)\n星期三(第1节-第2节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00136700:1:BZ2627100136700_14272",
+    "term": "2026-2027-1",
+    "course_id": "00136700",
+    "section": "1",
+    "name": "普通统计学",
+    "teachers": "艾明要",
+    "teacher_names": [
+      "艾明要"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期一(第3节-第4节)\n星期三(第3节-第4节)(单)",
+    "weeks": "1-16",
+    "category": "通选课"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00136760:1:BZ2627100136760_10215",
+    "term": "2026-2027-1",
+    "course_id": "00136760",
+    "section": "1",
+    "name": "金融数据分析导论",
+    "teachers": "何洋波",
+    "teacher_names": [
+      "何洋波"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期二(第7节-第8节)\n星期四(第5节-第6节)(单)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00136780:1:BZ2627100136780_19133",
+    "term": "2026-2027-1",
+    "course_id": "00136780",
+    "section": "1",
+    "name": "概率论（实验班）",
+    "teachers": "李欣意",
+    "teacher_names": [
+      "李欣意"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期二(第3节-第4节)\n星期四(第5节-第6节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00136880:1:BZ2627100136880_15710",
+    "term": "2026-2027-1",
+    "course_id": "00136880",
+    "section": "1",
+    "name": "数论基础",
+    "teachers": "丁一文",
+    "teacher_names": [
+      "丁一文"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期三(第5节-第6节)\n星期五(第5节-第6节)(单)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00137150:1:BZ2627100137150_14945",
+    "term": "2026-2027-1",
+    "course_id": "00137150",
+    "section": "1",
+    "name": "并行与分布式计算基础",
+    "teachers": "杨超",
+    "teacher_names": [
+      "杨超"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期二(第5节-第6节)(单)\n星期三(第5节-第6节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00137290:1:BZ2627100137290_19263",
+    "term": "2026-2027-1",
+    "course_id": "00137290",
+    "section": "1",
+    "name": "高维概率论",
+    "teachers": "张志华",
+    "teacher_names": [
+      "张志华"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期二(第3节-第4节)(单)\n星期四(第1节-第2节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00137913:1:BZ2627100137913_18729",
+    "term": "2026-2027-1",
+    "course_id": "00137913",
+    "section": "1",
+    "name": "机器学习数学导引",
+    "teachers": "吴磊",
+    "teacher_names": [
+      "吴磊"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期四(第3节-第4节)\n星期五(第3节-第4节)(单)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00137940:1:BZ2627100137940_23965",
+    "term": "2026-2027-1",
+    "course_id": "00137940",
+    "section": "1",
+    "name": "高等数学D",
+    "teachers": "杨磊",
+    "teacher_names": [
+      "杨磊"
+    ],
+    "department": "数学科学学院",
+    "credits": "4",
+    "schedule": "星期二(第1节-第2节)\n星期四(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00137940:2:BZ2627100137940_23663",
+    "term": "2026-2027-1",
+    "course_id": "00137940",
+    "section": "2",
+    "name": "高等数学D",
+    "teachers": "杨磊",
+    "teacher_names": [
+      "杨磊"
+    ],
+    "department": "数学科学学院",
+    "credits": "4",
+    "schedule": "星期一(第3节-第4节)\n星期三(第1节-第2节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00137950:1:BZ2627100137950_15617",
+    "term": "2026-2027-1",
+    "course_id": "00137950",
+    "section": "1",
+    "name": "高等数学（D）习题课",
+    "teachers": "杨磊",
+    "teacher_names": [
+      "杨磊"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期二(第10节-第11节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00137950:2:BZ2627100137950_27071",
+    "term": "2026-2027-1",
+    "course_id": "00137950",
+    "section": "2",
+    "name": "高等数学（D）习题课",
+    "teachers": "杨磊",
+    "teacher_names": [
+      "杨磊"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期二(第10节-第11节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00137950:3:BZ2627100137950_32005",
+    "term": "2026-2027-1",
+    "course_id": "00137950",
+    "section": "3",
+    "name": "高等数学（D）习题课",
+    "teachers": "杨磊",
+    "teacher_names": [
+      "杨磊"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期二(第10节-第11节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00137950:4:BZ2627100137950_46634",
+    "term": "2026-2027-1",
+    "course_id": "00137950",
+    "section": "4",
+    "name": "高等数学（D）习题课",
+    "teachers": "杨磊",
+    "teacher_names": [
+      "杨磊"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期二(第10节-第11节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00137950:5:BZ2627100137950_55364",
+    "term": "2026-2027-1",
+    "course_id": "00137950",
+    "section": "5",
+    "name": "高等数学（D）习题课",
+    "teachers": "杨磊",
+    "teacher_names": [
+      "杨磊"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期二(第10节-第11节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00137950:6:BZ2627100137950_66183",
+    "term": "2026-2027-1",
+    "course_id": "00137950",
+    "section": "6",
+    "name": "高等数学（D）习题课",
+    "teachers": "杨磊",
+    "teacher_names": [
+      "杨磊"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期二(第10节-第11节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00137971:1:BZ2627100137971_12080",
+    "term": "2026-2027-1",
+    "course_id": "00137971",
+    "section": "1",
+    "name": "代数学（实验班）I",
+    "teachers": "訚琪峥",
+    "teacher_names": [
+      "訚琪峥"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期一(第10节-第11节)(单)\n星期四(第7节-第8节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00137975:1:BZ2627100137975_13261",
+    "term": "2026-2027-1",
+    "course_id": "00137975",
+    "section": "1",
+    "name": "音乐与数学",
+    "teachers": "王杰",
+    "teacher_names": [
+      "王杰"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期一(第10节-第12节)",
+    "weeks": "1-16",
+    "category": "通选课"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00137976:1:BZ2627100137976_17487",
+    "term": "2026-2027-1",
+    "course_id": "00137976",
+    "section": "1",
+    "name": "数学应用与实践",
+    "teachers": "董子静",
+    "teacher_names": [
+      "董子静"
+    ],
+    "department": "数学科学学院",
+    "credits": "1",
+    "schedule": null,
+    "weeks": "1-16",
+    "category": "实习实践"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00137977:1:BZ2627100137977_11792",
+    "term": "2026-2027-1",
+    "course_id": "00137977",
+    "section": "1",
+    "name": "Frobenius流形与可积系统",
+    "teachers": "Emanuel Gilbert Scheidegger",
+    "teacher_names": [
+      "Emanuel Gilbert Scheidegger"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期三(第3节-第4节)(单)\n星期五(第7节-第8节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00137978:1:BZ2627100137978_19940",
+    "term": "2026-2027-1",
+    "course_id": "00137978",
+    "section": "1",
+    "name": "曲线模空间",
+    "teachers": "方博汉",
+    "teacher_names": [
+      "方博汉"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期一(第7节-第8节)\n星期三(第3节-第4节)(双)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00137981:1:BZ2627100137981_10485",
+    "term": "2026-2027-1",
+    "course_id": "00137981",
+    "section": "1",
+    "name": "霍奇理论与复代数几何",
+    "teachers": "田志宇",
+    "teacher_names": [
+      "田志宇"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期二(第3节-第4节)\n星期四(第1节-第2节)(单)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00137990:1:BZ2627100137990_11972",
+    "term": "2026-2027-1",
+    "course_id": "00137990",
+    "section": "1",
+    "name": "应用随机过程(实验班)",
+    "teachers": "丁剑",
+    "teacher_names": [
+      "丁剑"
+    ],
+    "department": "数学科学学院",
+    "credits": "3",
+    "schedule": "星期二(第3节-第4节)(双)\n星期四(第7节-第8节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00137994:1:BZ2627100137994_14965",
+    "term": "2026-2027-1",
+    "course_id": "00137994",
+    "section": "1",
+    "name": "代数学（实验班）习题课",
+    "teachers": "訚琪峥",
+    "teacher_names": [
+      "訚琪峥"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期四(第10节-第11节)(单)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00137994:2:BZ2627100137994_24493",
+    "term": "2026-2027-1",
+    "course_id": "00137994",
+    "section": "2",
+    "name": "代数学（实验班）习题课",
+    "teachers": "訚琪峥",
+    "teacher_names": [
+      "訚琪峥"
+    ],
+    "department": "数学科学学院",
+    "credits": "0",
+    "schedule": "星期四(第10节-第11节)(单)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00314180:1:BZ2627100314180_13138",
+    "term": "2026-2027-1",
+    "course_id": "00314180",
+    "section": "1",
+    "name": "计算岩土力学",
+    "teachers": "邸元",
+    "teacher_names": [
+      "邸元"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期二(第10节-第12节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00330050:1:BZ2627100330050_12320",
+    "term": "2026-2027-1",
+    "course_id": "00330050",
+    "section": "1",
+    "name": "计算方法",
+    "teachers": "李水乡",
+    "teacher_names": [
+      "李水乡"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期二(第7节-第8节)(双)\n星期四(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00330220:1:BZ2627100330220_12513",
+    "term": "2026-2027-1",
+    "course_id": "00330220",
+    "section": "1",
+    "name": "自动控制原理",
+    "teachers": "黄天云",
+    "teacher_names": [
+      "黄天云"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期二(第3节-第4节)\n星期五(第5节-第6节)(单)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00330280:1:BZ2627100330280_14566",
+    "term": "2026-2027-1",
+    "course_id": "00330280",
+    "section": "1",
+    "name": "振动理论",
+    "teachers": "陈永强",
+    "teacher_names": [
+      "陈永强"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期一(第5节-第6节)\n星期三(第10节-第11节)(单)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00330630:1:BZ2627100330630_14619",
+    "term": "2026-2027-1",
+    "course_id": "00330630",
+    "section": "1",
+    "name": "工程制图",
+    "teachers": "陈军",
+    "teacher_names": [
+      "陈军"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期一(第7节-第8节)\n星期四(第5节-第6节)(单)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00330700:1:BZ2627100330700_19192",
+    "term": "2026-2027-1",
+    "course_id": "00330700",
+    "section": "1",
+    "name": "常微分方程",
+    "teachers": "国萌",
+    "teacher_names": [
+      "国萌"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期二(第1节-第2节)\n星期四(第7节-第8节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00330700:2:BZ2627100330700_26686",
+    "term": "2026-2027-1",
+    "course_id": "00330700",
+    "section": "2",
+    "name": "常微分方程",
+    "teachers": "唐少强 袁子峰 吴谦",
+    "teacher_names": [
+      "唐少强",
+      "袁子峰",
+      "吴谦"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期二(第1节-第2节)\n星期四(第7节-第8节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00331501:1:BZ2627100331501_12566",
+    "term": "2026-2027-1",
+    "course_id": "00331501",
+    "section": "1",
+    "name": "数学分析 (一)",
+    "teachers": "梅文俊",
+    "teacher_names": [
+      "梅文俊"
+    ],
+    "department": "工学院",
+    "credits": "4",
+    "schedule": "星期二(第1节-第2节)\n星期五(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00331501:2:BZ2627100331501_28831",
+    "term": "2026-2027-1",
+    "course_id": "00331501",
+    "section": "2",
+    "name": "数学分析 (一)",
+    "teachers": "王圣凯",
+    "teacher_names": [
+      "王圣凯"
+    ],
+    "department": "工学院",
+    "credits": "4",
+    "schedule": "星期二(第1节-第2节)\n星期五(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00331501:3:BZ2627100331501_32519",
+    "term": "2026-2027-1",
+    "course_id": "00331501",
+    "section": "3",
+    "name": "数学分析 (一)",
+    "teachers": "史一蓬",
+    "teacher_names": [
+      "史一蓬"
+    ],
+    "department": "工学院",
+    "credits": "4",
+    "schedule": "星期二(第1节-第2节)\n星期五(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00331510:1:BZ2627100331510_14496",
+    "term": "2026-2027-1",
+    "course_id": "00331510",
+    "section": "1",
+    "name": "数学分析（三）",
+    "teachers": "冯帆",
+    "teacher_names": [
+      "冯帆"
+    ],
+    "department": "工学院",
+    "credits": "2",
+    "schedule": "星期三(第1节-第2节)(单)\n星期五(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00331540:1:BZ2627100331540_13404",
+    "term": "2026-2027-1",
+    "course_id": "00331540",
+    "section": "1",
+    "name": "弹性力学",
+    "teachers": "韦小丁",
+    "teacher_names": [
+      "韦小丁"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期一(第5节-第6节)\n星期四(第5节-第6节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00331540:2:BZ2627100331540_29879",
+    "term": "2026-2027-1",
+    "course_id": "00331540",
+    "section": "2",
+    "name": "弹性力学",
+    "teachers": "荣起国",
+    "teacher_names": [
+      "荣起国"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期二(第1节-第2节)\n星期四(第5节-第6节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00331590:1:BZ2627100331590_18778",
+    "term": "2026-2027-1",
+    "course_id": "00331590",
+    "section": "1",
+    "name": "结构力学及其矩阵方法",
+    "teachers": "孙树立",
+    "teacher_names": [
+      "孙树立"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期三(第7节-第8节)\n星期五(第1节-第2节)(双)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00331770:1:BZ2627100331770_17227",
+    "term": "2026-2027-1",
+    "course_id": "00331770",
+    "section": "1",
+    "name": "线性代数与几何",
+    "teachers": "陈璞",
+    "teacher_names": [
+      "陈璞"
+    ],
+    "department": "工学院",
+    "credits": "4",
+    "schedule": "星期一(第3节-第4节)\n星期三(第5节-第6节)\n星期五(第1节-第2节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00331770:2:BZ2627100331770_23112",
+    "term": "2026-2027-1",
+    "course_id": "00331770",
+    "section": "2",
+    "name": "线性代数与几何",
+    "teachers": "陈伟",
+    "teacher_names": [
+      "陈伟"
+    ],
+    "department": "工学院",
+    "credits": "4",
+    "schedule": "星期一(第3节-第4节)\n星期三(第5节-第6节)\n星期五(第1节-第2节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00331770:3:BZ2627100331770_30453",
+    "term": "2026-2027-1",
+    "course_id": "00331770",
+    "section": "3",
+    "name": "线性代数与几何",
+    "teachers": "孙志勇",
+    "teacher_names": [
+      "孙志勇"
+    ],
+    "department": "工学院",
+    "credits": "4",
+    "schedule": "星期一(第3节-第4节)\n星期三(第5节-第6节)\n星期五(第1节-第2节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00331860:1:BZ2627100331860_16326",
+    "term": "2026-2027-1",
+    "course_id": "00331860",
+    "section": "1",
+    "name": "高等微积分",
+    "teachers": "唐少强",
+    "teacher_names": [
+      "唐少强"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期三(第1节-第2节)\n星期五(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00331900:1:BZ2627100331900_14012",
+    "term": "2026-2027-1",
+    "course_id": "00331900",
+    "section": "1",
+    "name": "概率与数理统计",
+    "teachers": "张玺",
+    "teacher_names": [
+      "张玺"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期二(第5节-第6节)\n星期五(第5节-第6节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00331900:2:BZ2627100331900_21045",
+    "term": "2026-2027-1",
+    "course_id": "00331900",
+    "section": "2",
+    "name": "概率与数理统计",
+    "teachers": "尤鹏程",
+    "teacher_names": [
+      "尤鹏程"
+    ],
+    "department": "元培学院",
+    "credits": "3",
+    "schedule": "星期二(第7节-第9节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00331910:1:BZ2627100331910_10990",
+    "term": "2026-2027-1",
+    "course_id": "00331910",
+    "section": "1",
+    "name": "理论力学",
+    "teachers": "满怡",
+    "teacher_names": [
+      "满怡"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期一(第3节-第4节)\n星期四(第1节-第2节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00331910:2:BZ2627100331910_21131",
+    "term": "2026-2027-1",
+    "course_id": "00331910",
+    "section": "2",
+    "name": "理论力学",
+    "teachers": "张寅",
+    "teacher_names": [
+      "张寅"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期一(第3节-第4节)\n星期四(第1节-第2节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00331910:3:BZ2627100331910_38567",
+    "term": "2026-2027-1",
+    "course_id": "00331910",
+    "section": "3",
+    "name": "理论力学",
+    "teachers": "王勇 张智琅",
+    "teacher_names": [
+      "王勇",
+      "张智琅"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期一(第3节-第4节)\n星期四(第1节-第2节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00331910:4:BZ2627100331910_43481",
+    "term": "2026-2027-1",
+    "course_id": "00331910",
+    "section": "4",
+    "name": "理论力学",
+    "teachers": "李忠奎",
+    "teacher_names": [
+      "李忠奎"
+    ],
+    "department": "元培学院",
+    "credits": "3",
+    "schedule": "星期三(第7节-第9节)\n星期五(第1节-第2节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00331970:1:BZ2627100331970_11617",
+    "term": "2026-2027-1",
+    "course_id": "00331970",
+    "section": "1",
+    "name": "新能源技术",
+    "teachers": "宋柏",
+    "teacher_names": [
+      "宋柏"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期二(第7节-第8节)(单)\n星期二(第7节-第8节)(双)\n星期五(第1节-第2节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00332020:1:BZ2627100332020_17784",
+    "term": "2026-2027-1",
+    "course_id": "00332020",
+    "section": "1",
+    "name": "传热传质学",
+    "teachers": "王昊 杨荣贵",
+    "teacher_names": [
+      "王昊",
+      "杨荣贵"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期一(第3节-第4节)\n星期五(第7节-第8节)(单)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00332242:1:BZ2627100332242_11158",
+    "term": "2026-2027-1",
+    "course_id": "00332242",
+    "section": "1",
+    "name": "数学物理方法(下)",
+    "teachers": "朱驰",
+    "teacher_names": [
+      "朱驰"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期一(第1节-第2节)(单)\n星期三(第5节-第6节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00332243:1:BZ2627100332243_13387",
+    "term": "2026-2027-1",
+    "course_id": "00332243",
+    "section": "1",
+    "name": "数学物理方法(下)习题课",
+    "teachers": "朱驰",
+    "teacher_names": [
+      "朱驰"
+    ],
+    "department": "工学院",
+    "credits": "0",
+    "schedule": "星期三(第10节-第11节)(双)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00332281:1:BZ2627100332281_14797",
+    "term": "2026-2027-1",
+    "course_id": "00332281",
+    "section": "1",
+    "name": "流体力学(上)",
+    "teachers": "肖左利",
+    "teacher_names": [
+      "肖左利"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期二(第7节-第8节)(单)\n星期二(第7节-第8节)(双)\n星期四(第3节-第4节)\n星期五(第7节-第8节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00332281:2:BZ2627100332281_23246",
+    "term": "2026-2027-1",
+    "course_id": "00332281",
+    "section": "2",
+    "name": "流体力学(上)",
+    "teachers": "陶建军",
+    "teacher_names": [
+      "陶建军"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期一(第1节-第2节)(双)\n星期四(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00332300:1:BZ2627100332300_19325",
+    "term": "2026-2027-1",
+    "course_id": "00332300",
+    "section": "1",
+    "name": "工程流体力学",
+    "teachers": "江贤洋",
+    "teacher_names": [
+      "江贤洋"
+    ],
+    "department": "元培学院",
+    "credits": "3",
+    "schedule": "星期一(第7节-第8节)(双)\n星期四(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00332300:2:BZ2627100332300_20498",
+    "term": "2026-2027-1",
+    "course_id": "00332300",
+    "section": "2",
+    "name": "工程流体力学",
+    "teachers": "沈在意",
+    "teacher_names": [
+      "沈在意"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期二(第7节-第8节)\n星期五(第3节-第4节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00332300:3:BZ2627100332300_33458",
+    "term": "2026-2027-1",
+    "course_id": "00332300",
+    "section": "3",
+    "name": "工程流体力学",
+    "teachers": "陈帜",
+    "teacher_names": [
+      "陈帜"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期二(第1节-第2节)(双)\n星期四(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00332470:1:BZ2627100332470_10031",
+    "term": "2026-2027-1",
+    "course_id": "00332470",
+    "section": "1",
+    "name": "航空航天概论",
+    "teachers": "刘才山",
+    "teacher_names": [
+      "刘才山"
+    ],
+    "department": "工学院",
+    "credits": "2",
+    "schedule": "星期五(第5节-第6节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00332510:1:BZ2627100332510_18700",
+    "term": "2026-2027-1",
+    "course_id": "00332510",
+    "section": "1",
+    "name": "电路与电子学",
+    "teachers": "黄迅",
+    "teacher_names": [
+      "黄迅"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期二(第3节-第4节)\n星期五(第7节-第8节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00332600:1:BZ2627100332600_19251",
+    "term": "2026-2027-1",
+    "course_id": "00332600",
+    "section": "1",
+    "name": "分子细胞生物学",
+    "teachers": "席建忠 汪阳明",
+    "teacher_names": [
+      "席建忠",
+      "汪阳明"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期三(第1节-第2节)\n星期五(第7节-第8节)(单)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00332680:1:BZ2627100332680_14643",
+    "term": "2026-2027-1",
+    "course_id": "00332680",
+    "section": "1",
+    "name": "飞行器结构力学",
+    "teachers": "裴永茂",
+    "teacher_names": [
+      "裴永茂"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期一(第3节-第4节)\n星期四(第5节-第6节)(单)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00332690:1:BZ2627100332690_11075",
+    "term": "2026-2027-1",
+    "course_id": "00332690",
+    "section": "1",
+    "name": "机械设计基础",
+    "teachers": "王雪峰",
+    "teacher_names": [
+      "王雪峰"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期三(第10节-第11节)\n星期五(第5节-第6节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00333270:1:BZ2627100333270_17180",
+    "term": "2026-2027-1",
+    "course_id": "00333270",
+    "section": "1",
+    "name": "生物材料分析方法",
+    "teachers": "段小洁",
+    "teacher_names": [
+      "段小洁"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期三(第5节-第6节)\n星期五(第1节-第2节)(双)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00333360:1:BZ2627100333360_16353",
+    "term": "2026-2027-1",
+    "course_id": "00333360",
+    "section": "1",
+    "name": "魅力机器人",
+    "teachers": "谢广明",
+    "teacher_names": [
+      "谢广明"
+    ],
+    "department": "工学院",
+    "credits": "2",
+    "schedule": "星期二(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "全校公选课"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00333580:1:BZ2627100333580_19269",
+    "term": "2026-2027-1",
+    "course_id": "00333580",
+    "section": "1",
+    "name": "生物医学信号处理",
+    "teachers": "谢天宇",
+    "teacher_names": [
+      "谢天宇"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期二(第10节-第12节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00333610:1:BZ2627100333610_16865",
+    "term": "2026-2027-1",
+    "course_id": "00333610",
+    "section": "1",
+    "name": "实验室安全与防护",
+    "teachers": "张杨飞",
+    "teacher_names": [
+      "张杨飞"
+    ],
+    "department": "材料科学与工程学院",
+    "credits": "1",
+    "schedule": "星期一(第10节-第11节)",
+    "weeks": "9-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00333790:1:BZ2627100333790_14379",
+    "term": "2026-2027-1",
+    "course_id": "00333790",
+    "section": "1",
+    "name": "飞行器设计与动力",
+    "teachers": "周超",
+    "teacher_names": [
+      "周超"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期三(第10节-第12节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00333900:1:BZ2627100333900_12590",
+    "term": "2026-2027-1",
+    "course_id": "00333900",
+    "section": "1",
+    "name": "热力学与统计力学导论",
+    "teachers": "康炜",
+    "teacher_names": [
+      "康炜"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期一(第7节-第8节)(双)\n星期四(第7节-第8节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00333940:1:BZ2627100333940_19887",
+    "term": "2026-2027-1",
+    "course_id": "00333940",
+    "section": "1",
+    "name": "环境流体力学",
+    "teachers": "薄童",
+    "teacher_names": [
+      "薄童"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期一(第5节-第6节)\n星期三(第7节-第8节)(单)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00333971:1:BZ2627100333971_11550",
+    "term": "2026-2027-1",
+    "course_id": "00333971",
+    "section": "1",
+    "name": "分析化学",
+    "teachers": "郭少军",
+    "teacher_names": [
+      "郭少军"
+    ],
+    "department": "材料科学与工程学院",
+    "credits": "2",
+    "schedule": "星期二(第5节-第6节)\n星期四(第3节-第4节)",
+    "weeks": "9-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00334010:1:BZ2627100334010_16230",
+    "term": "2026-2027-1",
+    "course_id": "00334010",
+    "section": "1",
+    "name": "现代工学通论",
+    "teachers": "段慧玲 杨延涛",
+    "teacher_names": [
+      "段慧玲",
+      "杨延涛"
+    ],
+    "department": "工学院",
+    "credits": "1",
+    "schedule": "星期四(第7节-第8节)",
+    "weeks": "1-14",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00334020:1:BZ2627100334020_15684",
+    "term": "2026-2027-1",
+    "course_id": "00334020",
+    "section": "1",
+    "name": "生物医学工程设计II",
+    "teachers": "陈海峰",
+    "teacher_names": [
+      "陈海峰"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期三(第7节-第9节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00334020:2:BZ2627100334020_27435",
+    "term": "2026-2027-1",
+    "course_id": "00334020",
+    "section": "2",
+    "name": "生物医学工程设计II",
+    "teachers": "韩梦迪",
+    "teacher_names": [
+      "韩梦迪"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期一(第7节-第9节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00334020:3:BZ2627100334020_38913",
+    "term": "2026-2027-1",
+    "course_id": "00334020",
+    "section": "3",
+    "name": "生物医学工程设计II",
+    "teachers": "李宁宁",
+    "teacher_names": [
+      "李宁宁"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期三(第10节-第12节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00334030:1:BZ2627100334030_19648",
+    "term": "2026-2027-1",
+    "course_id": "00334030",
+    "section": "1",
+    "name": "工学创新实践",
+    "teachers": "吕鹏宇",
+    "teacher_names": [
+      "吕鹏宇"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期三(第7节-第9节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00334081:1:BZ2627100334081_17323",
+    "term": "2026-2027-1",
+    "course_id": "00334081",
+    "section": "1",
+    "name": "本科生实践大课堂I",
+    "teachers": "邓航",
+    "teacher_names": [
+      "邓航"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": null,
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00334100:1:BZ2627100334100_19005",
+    "term": "2026-2027-1",
+    "course_id": "00334100",
+    "section": "1",
+    "name": "生物医学工程原理",
+    "teachers": "李长辉",
+    "teacher_names": [
+      "李长辉"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期一(第5节-第6节)(单)\n星期四(第5节-第6节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00334100:2:BZ2627100334100_22830",
+    "term": "2026-2027-1",
+    "course_id": "00334100",
+    "section": "2",
+    "name": "生物医学工程原理",
+    "teachers": "那帅",
+    "teacher_names": [
+      "那帅"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期一(第5节-第6节)(单)\n星期四(第5节-第6节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00334100:3:BZ2627100334100_39588",
+    "term": "2026-2027-1",
+    "course_id": "00334100",
+    "section": "3",
+    "name": "生物医学工程原理",
+    "teachers": "唐水晶",
+    "teacher_names": [
+      "唐水晶"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期一(第5节-第6节)(单)\n星期四(第5节-第6节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00334200:1:BZ2627100334200_10962",
+    "term": "2026-2027-1",
+    "course_id": "00334200",
+    "section": "1",
+    "name": "能源与环境工程实验",
+    "teachers": "李康康",
+    "teacher_names": [
+      "李康康"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期四(第7节-第9节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00334220:1:BZ2627100334220_11368",
+    "term": "2026-2027-1",
+    "course_id": "00334220",
+    "section": "1",
+    "name": "模拟电子技术",
+    "teachers": "孙环波",
+    "teacher_names": [
+      "孙环波"
+    ],
+    "department": "工学院",
+    "credits": "4",
+    "schedule": "星期二(第5节-第6节)\n星期五(第7节-第8节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00334260:1:BZ2627100334260_18301",
+    "term": "2026-2027-1",
+    "course_id": "00334260",
+    "section": "1",
+    "name": "机器人学概论",
+    "teachers": "陈光",
+    "teacher_names": [
+      "陈光"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期三(第7节-第9节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00334280:1:BZ2627100334280_12407",
+    "term": "2026-2027-1",
+    "course_id": "00334280",
+    "section": "1",
+    "name": "仿生机器人",
+    "teachers": "喻俊志",
+    "teacher_names": [
+      "喻俊志"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期二(第10节-第12节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00334320:1:BZ2627100334320_12918",
+    "term": "2026-2027-1",
+    "course_id": "00334320",
+    "section": "1",
+    "name": "理论力学（B）",
+    "teachers": "荣起国",
+    "teacher_names": [
+      "荣起国"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期一(第3节-第4节)\n星期四(第1节-第2节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00334390:1:BZ2627100334390_16839",
+    "term": "2026-2027-1",
+    "course_id": "00334390",
+    "section": "1",
+    "name": "机器学习基础",
+    "teachers": "史一蓬 吴建国 何冠楠 唐聿劼",
+    "teacher_names": [
+      "史一蓬",
+      "吴建国",
+      "何冠楠",
+      "唐聿劼"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期一(第7节-第8节)(双)\n星期三(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00334420:1:BZ2627100334420_17755",
+    "term": "2026-2027-1",
+    "course_id": "00334420",
+    "section": "1",
+    "name": "工程优化设计",
+    "teachers": "刘珂",
+    "teacher_names": [
+      "刘珂"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期二(第5节-第6节)(单)\n星期四(第5节-第6节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00334440:1:BZ2627100334440_10944",
+    "term": "2026-2027-1",
+    "course_id": "00334440",
+    "section": "1",
+    "name": "计算固体力学（II）",
+    "teachers": "黎波",
+    "teacher_names": [
+      "黎波"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期一(第10节-第12节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00334450:1:BZ2627100334450_17614",
+    "term": "2026-2027-1",
+    "course_id": "00334450",
+    "section": "1",
+    "name": "数理统计",
+    "teachers": "何冠楠",
+    "teacher_names": [
+      "何冠楠"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期三(第7节-第8节)(双)\n星期五(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00334550:1:BZ2627100334550_15346",
+    "term": "2026-2027-1",
+    "course_id": "00334550",
+    "section": "1",
+    "name": "最优化方法",
+    "teachers": "丁陈森",
+    "teacher_names": [
+      "丁陈森"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期一(第7节-第8节)(单)\n星期三(第5节-第6节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00334570:1:BZ2627100334570_15223",
+    "term": "2026-2027-1",
+    "course_id": "00334570",
+    "section": "1",
+    "name": "能源系统分析与优化",
+    "teachers": "张川",
+    "teacher_names": [
+      "张川"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期一(第5节-第6节)\n星期三(第7节-第8节)(单)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00334580:1:BZ2627100334580_12263",
+    "term": "2026-2027-1",
+    "course_id": "00334580",
+    "section": "1",
+    "name": "化工原理",
+    "teachers": "徐克",
+    "teacher_names": [
+      "徐克"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期二(第3节-第4节)\n星期四(第1节-第2节)(单)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00334590:1:BZ2627100334590_15779",
+    "term": "2026-2027-1",
+    "course_id": "00334590",
+    "section": "1",
+    "name": "先进制造与机器人实践",
+    "teachers": "袁小婷",
+    "teacher_names": [
+      "袁小婷"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期四(第7节-第9节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00334593:1:BZ2627100334593_11923",
+    "term": "2026-2027-1",
+    "course_id": "00334593",
+    "section": "1",
+    "name": "机器人学实验（三）",
+    "teachers": "王启宁 袁小婷",
+    "teacher_names": [
+      "王启宁",
+      "袁小婷"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期一(第7节-第9节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00334620:1:BZ2627100334620_15734",
+    "term": "2026-2027-1",
+    "course_id": "00334620",
+    "section": "1",
+    "name": "生物医学工程通论",
+    "teachers": "朱怀球",
+    "teacher_names": [
+      "朱怀球"
+    ],
+    "department": "工学院",
+    "credits": "1",
+    "schedule": "星期一(第7节-第8节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00334640:1:BZ2627100334640_18812",
+    "term": "2026-2027-1",
+    "course_id": "00334640",
+    "section": "1",
+    "name": "应用微分方程",
+    "teachers": "符策基",
+    "teacher_names": [
+      "符策基"
+    ],
+    "department": "工学院",
+    "credits": "4",
+    "schedule": "星期二(第1节-第2节)\n星期五(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00334650:1:BZ2627100334650_18998",
+    "term": "2026-2027-1",
+    "course_id": "00334650",
+    "section": "1",
+    "name": "能源与环境工程导论",
+    "teachers": "邓航",
+    "teacher_names": [
+      "邓航"
+    ],
+    "department": "工学院",
+    "credits": "2",
+    "schedule": "星期二(第5节-第6节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00334660:1:BZ2627100334660_17716",
+    "term": "2026-2027-1",
+    "course_id": "00334660",
+    "section": "1",
+    "name": "先进电子器件与制造",
+    "teachers": "LIQILIANG（李启亮）",
+    "teacher_names": [
+      "LIQILIANG（李启亮）"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期一(第5节-第6节)(单)\n星期三(第7节-第8节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00334670:1:BZ2627100334670_12280",
+    "term": "2026-2027-1",
+    "course_id": "00334670",
+    "section": "1",
+    "name": "航空航天材料与制造",
+    "teachers": "王海洋",
+    "teacher_names": [
+      "王海洋"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期一(第5节-第6节)(双)\n星期三(第7节-第8节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00334680:1:BZ2627100334680_11874",
+    "term": "2026-2027-1",
+    "course_id": "00334680",
+    "section": "1",
+    "name": "力学研究方法与创新实践",
+    "teachers": "HUANGGUOLIANG（黄国良）",
+    "teacher_names": [
+      "HUANGGUOLIANG（黄国良）"
+    ],
+    "department": "工学院",
+    "credits": "2",
+    "schedule": "星期四(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00334690:1:BZ2627100334690_12923",
+    "term": "2026-2027-1",
+    "course_id": "00334690",
+    "section": "1",
+    "name": "工业数据安全",
+    "teachers": "孙铭阳",
+    "teacher_names": [
+      "孙铭阳"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期三(第7节-第8节)\n星期五(第5节-第6节)(单)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00334720:1:BZ2627100334720_16033",
+    "term": "2026-2027-1",
+    "course_id": "00334720",
+    "section": "1",
+    "name": "突触连接组学",
+    "teachers": "宋坤",
+    "teacher_names": [
+      "宋坤"
+    ],
+    "department": "工学院",
+    "credits": "2",
+    "schedule": "星期一(第7节-第8节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00334770:1:BZ2627100334770_13908",
+    "term": "2026-2027-1",
+    "course_id": "00334770",
+    "section": "1",
+    "name": "医学大数据与人工智能",
+    "teachers": "朱怀球 马雷",
+    "teacher_names": [
+      "朱怀球",
+      "马雷"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期三(第7节-第8节)\n星期五(第5节-第6节)(单)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00334780:1:BZ2627100334780_12220",
+    "term": "2026-2027-1",
+    "course_id": "00334780",
+    "section": "1",
+    "name": "生物医学信号与影像",
+    "teachers": "李长辉",
+    "teacher_names": [
+      "李长辉"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期四(第10节-第12节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00334790:1:BZ2627100334790_15920",
+    "term": "2026-2027-1",
+    "course_id": "00334790",
+    "section": "1",
+    "name": "机器人具身智能系统开发实践基础",
+    "teachers": "ZhiBo Pang（庞智博）",
+    "teacher_names": [
+      "ZhiBo Pang（庞智博）"
+    ],
+    "department": "工学院",
+    "credits": "3",
+    "schedule": "星期二(第7节-第9节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00400140:1:BZ2627100400140_15601",
+    "term": "2026-2027-1",
+    "course_id": "00400140",
+    "section": "1",
+    "name": "群论Ⅰ",
+    "teachers": "张亿",
+    "teacher_names": [
+      "张亿"
+    ],
+    "department": "物理学院",
+    "credits": "4",
+    "schedule": "星期二(第3节-第4节)\n星期四(第1节-第2节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00400440:1:BZ2627100400440_13689",
+    "term": "2026-2027-1",
+    "course_id": "00400440",
+    "section": "1",
+    "name": "量子多体理论",
+    "teachers": "RYUICHI SHINDO",
+    "teacher_names": [
+      "RYUICHI SHINDO"
+    ],
+    "department": "物理学院",
+    "credits": "4",
+    "schedule": "星期一(第3节-第4节)\n星期五(第5节-第6节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00401894:1:BZ2627100401894_11548",
+    "term": "2026-2027-1",
+    "course_id": "00401894",
+    "section": "1",
+    "name": "超短超强激光物理与实验",
+    "teachers": "马文君",
+    "teacher_names": [
+      "马文君"
+    ],
+    "department": "物理学院",
+    "credits": "3",
+    "schedule": "星期三(第7节-第9节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00405572:1:BZ2627100405572_18667",
+    "term": "2026-2027-1",
+    "course_id": "00405572",
+    "section": "1",
+    "name": "等离子体物理实验基础",
+    "teachers": "李湘庆",
+    "teacher_names": [
+      "李湘庆"
+    ],
+    "department": "物理学院",
+    "credits": "3",
+    "schedule": "星期一(第1节-第3节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00405596:1:BZ2627100405596_15205",
+    "term": "2026-2027-1",
+    "course_id": "00405596",
+    "section": "1",
+    "name": "量子材料前沿讲座",
+    "teachers": "王捷",
+    "teacher_names": [
+      "王捷"
+    ],
+    "department": "物理学院",
+    "credits": "2",
+    "schedule": "星期三(第7节-第8节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00405611:1:BZ2627100405611_11002",
+    "term": "2026-2027-1",
+    "course_id": "00405611",
+    "section": "1",
+    "name": "激光等离子体物理",
+    "teachers": "乔宾",
+    "teacher_names": [
+      "乔宾"
+    ],
+    "department": "物理学院",
+    "credits": "3",
+    "schedule": "星期三(第7节-第9节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00405612:1:BZ2627100405612_15462",
+    "term": "2026-2027-1",
+    "course_id": "00405612",
+    "section": "1",
+    "name": "量子材料的物性",
+    "teachers": "王健",
+    "teacher_names": [
+      "王健"
+    ],
+    "department": "物理学院",
+    "credits": "3",
+    "schedule": "星期四(第10节-第12节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00405625:1:BZ2627100405625_15135",
+    "term": "2026-2027-1",
+    "course_id": "00405625",
+    "section": "1",
+    "name": "半导体器件物理",
+    "teachers": "马仁敏",
+    "teacher_names": [
+      "马仁敏"
+    ],
+    "department": "物理学院",
+    "credits": "3",
+    "schedule": "星期三(第7节-第9节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00405628:1:BZ2627100405628_14316",
+    "term": "2026-2027-1",
+    "course_id": "00405628",
+    "section": "1",
+    "name": "固体散射谱学简介",
+    "teachers": "彭莹莹",
+    "teacher_names": [
+      "彭莹莹"
+    ],
+    "department": "物理学院",
+    "credits": "3",
+    "schedule": "星期一(第5节-第6节)\n星期三(第5节-第6节)(单)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00405647:1:BZ2627100405647_11981",
+    "term": "2026-2027-1",
+    "course_id": "00405647",
+    "section": "1",
+    "name": "量子信息物理：原理与应用",
+    "teachers": "何琼毅 王剑威",
+    "teacher_names": [
+      "何琼毅",
+      "王剑威"
+    ],
+    "department": "物理学院",
+    "credits": "4",
+    "schedule": "星期二(第3节-第4节)\n星期四(第5节-第6节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00405649:1:BZ2627100405649_17919",
+    "term": "2026-2027-1",
+    "course_id": "00405649",
+    "section": "1",
+    "name": "高等原子核物理",
+    "teachers": "叶沿林 杨晓菲",
+    "teacher_names": [
+      "叶沿林",
+      "杨晓菲"
+    ],
+    "department": "物理学院",
+    "credits": "4",
+    "schedule": "星期二(第3节-第4节)\n星期四(第7节-第8节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00405650:1:BZ2627100405650_16545",
+    "term": "2026-2027-1",
+    "course_id": "00405650",
+    "section": "1",
+    "name": "凝聚态物理导论",
+    "teachers": "戴伦 吴孝松 徐莉梅 林熙 贾爽 李新征 全海涛 陈剑豪 王垡 马仁敏 张焱 彭莹莹 黄华卿 罗昭初 杨志成",
+    "teacher_names": [
+      "戴伦",
+      "吴孝松",
+      "徐莉梅",
+      "林熙",
+      "贾爽",
+      "李新征",
+      "全海涛",
+      "陈剑豪",
+      "王垡",
+      "马仁敏",
+      "张焱",
+      "彭莹莹",
+      "黄华卿",
+      "罗昭初",
+      "杨志成"
+    ],
+    "department": "物理学院",
+    "credits": "3",
+    "schedule": "星期一(第7节-第9节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00405660:1:BZ2627100405660_10097",
+    "term": "2026-2027-1",
+    "course_id": "00405660",
+    "section": "1",
+    "name": "量子输运模拟",
+    "teachers": "吕劲",
+    "teacher_names": [
+      "吕劲"
+    ],
+    "department": "物理学院",
+    "credits": "3",
+    "schedule": "星期一(第10节-第12节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00405666:1:BZ2627100405666_14061",
+    "term": "2026-2027-1",
+    "course_id": "00405666",
+    "section": "1",
+    "name": "物理学前沿中的精密测量",
+    "teachers": "肖云峰 江颖 林熙 李奇特 刘开辉 马文君 刘阳 张艳席 杨振伟 王国庆",
+    "teacher_names": [
+      "肖云峰",
+      "江颖",
+      "林熙",
+      "李奇特",
+      "刘开辉",
+      "马文君",
+      "刘阳",
+      "张艳席",
+      "杨振伟",
+      "王国庆"
+    ],
+    "department": "物理学院",
+    "credits": "3",
+    "schedule": "星期三(第5节-第12节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00405666:2:BZ2627100405666_24749",
+    "term": "2026-2027-1",
+    "course_id": "00405666",
+    "section": "2",
+    "name": "物理学前沿中的精密测量",
+    "teachers": "肖云峰 江颖 林熙 李奇特 刘开辉 马文君 刘阳 张艳席 杨振伟 王国庆",
+    "teacher_names": [
+      "肖云峰",
+      "江颖",
+      "林熙",
+      "李奇特",
+      "刘开辉",
+      "马文君",
+      "刘阳",
+      "张艳席",
+      "杨振伟",
+      "王国庆"
+    ],
+    "department": "物理学院",
+    "credits": "3",
+    "schedule": "星期四(第5节-第12节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00405667:1:BZ2627100405667_10405",
+    "term": "2026-2027-1",
+    "course_id": "00405667",
+    "section": "1",
+    "name": "物理与人工智能",
+    "teachers": "宋慧超 林晨 马滟青 冯旭 陈基 张亿 王力乐 朱华星",
+    "teacher_names": [
+      "宋慧超",
+      "林晨",
+      "马滟青",
+      "冯旭",
+      "陈基",
+      "张亿",
+      "王力乐",
+      "朱华星"
+    ],
+    "department": "物理学院",
+    "credits": "3",
+    "schedule": "星期一(第7节-第9节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00406490:1:BZ2627100406490_11356",
+    "term": "2026-2027-1",
+    "course_id": "00406490",
+    "section": "1",
+    "name": "天体物理辐射过程",
+    "teachers": "黎卓",
+    "teacher_names": [
+      "黎卓"
+    ],
+    "department": "物理学院",
+    "credits": "3",
+    "schedule": null,
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00406811:1:BZ2627100406811_15286",
+    "term": "2026-2027-1",
+    "course_id": "00406811",
+    "section": "1",
+    "name": "大气科学前沿（一）",
+    "teachers": "李熙晨",
+    "teacher_names": [
+      "李熙晨"
+    ],
+    "department": "物理学院",
+    "credits": "2",
+    "schedule": "星期三(第7节-第8节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00407771:1:BZ2627100407771_12124",
+    "term": "2026-2027-1",
+    "course_id": "00407771",
+    "section": "1",
+    "name": "核物理与粒子物理实验方法（二）",
+    "teachers": "班勇 王大勇",
+    "teacher_names": [
+      "班勇",
+      "王大勇"
+    ],
+    "department": "物理学院",
+    "credits": "3",
+    "schedule": "星期一(第3节-第4节)\n星期三(第7节-第8节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00407778:1:BZ2627100407778_13022",
+    "term": "2026-2027-1",
+    "course_id": "00407778",
+    "section": "1",
+    "name": "中尺度动力学",
+    "teachers": "孟智勇",
+    "teacher_names": [
+      "孟智勇"
+    ],
+    "department": "物理学院",
+    "credits": "4",
+    "schedule": "星期一(第3节-第4节)\n星期三(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00407779:1:BZ2627100407779_18740",
+    "term": "2026-2027-1",
+    "course_id": "00407779",
+    "section": "1",
+    "name": "气候物理化学",
+    "teachers": "张霖",
+    "teacher_names": [
+      "张霖"
+    ],
+    "department": "物理学院",
+    "credits": "4",
+    "schedule": "星期二(第5节-第6节)\n星期三(第5节-第6节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00407780:1:BZ2627100407780_12168",
+    "term": "2026-2027-1",
+    "course_id": "00407780",
+    "section": "1",
+    "name": "数值天气预报",
+    "teachers": "李锜",
+    "teacher_names": [
+      "李锜"
+    ],
+    "department": "物理学院",
+    "credits": "4",
+    "schedule": "星期一(第1节-第2节)\n星期三(第1节-第2节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00407794:1:BZ2627100407794_10956",
+    "term": "2026-2027-1",
+    "course_id": "00407794",
+    "section": "1",
+    "name": "广义相对论与天体物理",
+    "teachers": "邵立晶",
+    "teacher_names": [
+      "邵立晶"
+    ],
+    "department": "物理学院",
+    "credits": "2",
+    "schedule": "星期四(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00407807:1:BZ2627100407807_10379",
+    "term": "2026-2027-1",
+    "course_id": "00407807",
+    "section": "1",
+    "name": "天文数据分析：从统计到人工智能",
+    "teachers": "李立新",
+    "teacher_names": [
+      "李立新"
+    ],
+    "department": "物理学院",
+    "credits": "3",
+    "schedule": null,
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00410340:1:BZ2627100410340_13172",
+    "term": "2026-2027-1",
+    "course_id": "00410340",
+    "section": "1",
+    "name": "高等量子力学",
+    "teachers": "尹澜",
+    "teacher_names": [
+      "尹澜"
+    ],
+    "department": "物理学院",
+    "credits": "4",
+    "schedule": "星期二(第7节-第8节)\n星期五(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00410340:2:BZ2627100410340_25216",
+    "term": "2026-2027-1",
+    "course_id": "00410340",
+    "section": "2",
+    "name": "高等量子力学",
+    "teachers": "李新征",
+    "teacher_names": [
+      "李新征"
+    ],
+    "department": "物理学院",
+    "credits": "4",
+    "schedule": "星期二(第7节-第8节)\n星期五(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00410441:1:BZ2627100410441_14282",
+    "term": "2026-2027-1",
+    "course_id": "00410441",
+    "section": "1",
+    "name": "量子统计物理",
+    "teachers": "钱志新",
+    "teacher_names": [
+      "钱志新"
+    ],
+    "department": "物理学院",
+    "credits": "4",
+    "schedule": "星期一(第1节-第2节)\n星期四(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00410640:2:BZ2627100410640_10854",
+    "term": "2026-2027-1",
+    "course_id": "00410640",
+    "section": "2",
+    "name": "量子场论",
+    "teachers": "檀时钠",
+    "teacher_names": [
+      "檀时钠"
+    ],
+    "department": "物理学院",
+    "credits": "4",
+    "schedule": "星期一(第5节-第6节)\n星期三(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00410640:1:BZ2627100410640_25673",
+    "term": "2026-2027-1",
+    "course_id": "00410640",
+    "section": "1",
+    "name": "量子场论",
+    "teachers": "朱华星",
+    "teacher_names": [
+      "朱华星"
+    ],
+    "department": "物理学院",
+    "credits": "4",
+    "schedule": "星期三(第3节-第4节)\n星期五(第1节-第2节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00411950:1:BZ2627100411950_14203",
+    "term": "2026-2027-1",
+    "course_id": "00411950",
+    "section": "1",
+    "name": "表面物理",
+    "teachers": "江颖",
+    "teacher_names": [
+      "江颖"
+    ],
+    "department": "物理学院",
+    "credits": "3",
+    "schedule": "星期三(第10节-第12节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00412150:1:BZ2627100412150_17075",
+    "term": "2026-2027-1",
+    "course_id": "00412150",
+    "section": "1",
+    "name": "粒子物理",
+    "teachers": "刘佳",
+    "teacher_names": [
+      "刘佳"
+    ],
+    "department": "物理学院",
+    "credits": "4",
+    "schedule": "星期一(第3节-第4节)\n星期三(第7节-第8节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00413252:1:BZ2627100413252_10788",
+    "term": "2026-2027-1",
+    "course_id": "00413252",
+    "section": "1",
+    "name": "等离子体物理",
+    "teachers": "肖池阶",
+    "teacher_names": [
+      "肖池阶"
+    ],
+    "department": "物理学院",
+    "credits": "4",
+    "schedule": "星期一(第7节-第8节)\n星期三(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00414980:1:BZ2627100414980_13653",
+    "term": "2026-2027-1",
+    "course_id": "00414980",
+    "section": "1",
+    "name": "实验室安全教育",
+    "teachers": "郭秋菊 周路群 杨玲 刘雪蕾",
+    "teacher_names": [
+      "郭秋菊",
+      "周路群",
+      "杨玲",
+      "刘雪蕾"
+    ],
+    "department": "物理学院",
+    "credits": "0.5",
+    "schedule": "星期五(第7节-第9节)",
+    "weeks": "1-3",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00415250:1:BZ2627100415250_15926",
+    "term": "2026-2027-1",
+    "course_id": "00415250",
+    "section": "1",
+    "name": "固体物理前沿",
+    "teachers": "王新强",
+    "teacher_names": [
+      "王新强"
+    ],
+    "department": "物理学院",
+    "credits": "2",
+    "schedule": "星期四(第7节-第9节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00415450:2:BZ2627100415450_13088",
+    "term": "2026-2027-1",
+    "course_id": "00415450",
+    "section": "2",
+    "name": "量子光学",
+    "teachers": "古英",
+    "teacher_names": [
+      "古英"
+    ],
+    "department": "物理学院",
+    "credits": "4",
+    "schedule": "星期一(第7节-第8节)\n星期四(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00415450:1:BZ2627100415450_25282",
+    "term": "2026-2027-1",
+    "course_id": "00415450",
+    "section": "1",
+    "name": "量子光学",
+    "teachers": "胡耀文",
+    "teacher_names": [
+      "胡耀文"
+    ],
+    "department": "物理学院",
+    "credits": "4",
+    "schedule": "星期二(第5节-第6节)\n星期四(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00415480:1:BZ2627100415480_15687",
+    "term": "2026-2027-1",
+    "course_id": "00415480",
+    "section": "1",
+    "name": "宽禁带半导体",
+    "teachers": "鞠光旭",
+    "teacher_names": [
+      "鞠光旭"
+    ],
+    "department": "物理学院",
+    "credits": "2",
+    "schedule": "星期三(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00415490:1:BZ2627100415490_17872",
+    "term": "2026-2027-1",
+    "course_id": "00415490",
+    "section": "1",
+    "name": "密度泛函理论及其应用",
+    "teachers": "吕劲",
+    "teacher_names": [
+      "吕劲"
+    ],
+    "department": "物理学院",
+    "credits": "3",
+    "schedule": "星期四(第10节-第12节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00415510:1:BZ2627100415510_13553",
+    "term": "2026-2027-1",
+    "course_id": "00415510",
+    "section": "1",
+    "name": "现代光学与光电子学",
+    "teachers": "许秀来",
+    "teacher_names": [
+      "许秀来"
+    ],
+    "department": "物理学院",
+    "credits": "3",
+    "schedule": "星期五(第7节-第9节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00415532:1:BZ2627100415532_12304",
+    "term": "2026-2027-1",
+    "course_id": "00415532",
+    "section": "1",
+    "name": "原子、分子光谱",
+    "teachers": "吴成印",
+    "teacher_names": [
+      "吴成印"
+    ],
+    "department": "物理学院",
+    "credits": "3",
+    "schedule": "星期四(第10节-第12节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00415532:2:BZ2627100415532_26904",
+    "term": "2026-2027-1",
+    "course_id": "00415532",
+    "section": "2",
+    "name": "原子、分子光谱",
+    "teachers": "彭湃",
+    "teacher_names": [
+      "彭湃"
+    ],
+    "department": "物理学院",
+    "credits": "3",
+    "schedule": "星期二(第7节-第9节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00415671:1:BZ2627100415671_12287",
+    "term": "2026-2027-1",
+    "course_id": "00415671",
+    "section": "1",
+    "name": "激光原理与技术",
+    "teachers": "蒋红兵",
+    "teacher_names": [
+      "蒋红兵"
+    ],
+    "department": "物理学院",
+    "credits": "3",
+    "schedule": "星期一(第5节-第6节)\n星期三(第5节-第6节)(单)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00416050:1:BZ2627100416050_17124",
+    "term": "2026-2027-1",
+    "course_id": "00416050",
+    "section": "1",
+    "name": "大气化学",
+    "teachers": "赵春生",
+    "teacher_names": [
+      "赵春生"
+    ],
+    "department": "物理学院",
+    "credits": "4",
+    "schedule": "星期四(第3节-第4节)\n星期五(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00416080:1:BZ2627100416080_16842",
+    "term": "2026-2027-1",
+    "course_id": "00416080",
+    "section": "1",
+    "name": "大气遥感",
+    "teachers": "沈路路",
+    "teacher_names": [
+      "沈路路"
+    ],
+    "department": "物理学院",
+    "credits": "4",
+    "schedule": "星期二(第3节-第4节)\n星期四(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00416550:1:BZ2627100416550_10269",
+    "term": "2026-2027-1",
+    "course_id": "00416550",
+    "section": "1",
+    "name": "恒星结构和演化",
+    "teachers": "INAYOSHI KOHEI",
+    "teacher_names": [
+      "INAYOSHI KOHEI"
+    ],
+    "department": "物理学院",
+    "credits": "3",
+    "schedule": null,
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00416800:1:BZ2627100416800_11857",
+    "term": "2026-2027-1",
+    "course_id": "00416800",
+    "section": "1",
+    "name": "宇宙学及星系形成",
+    "teachers": "彭影杰",
+    "teacher_names": [
+      "彭影杰"
+    ],
+    "department": "物理学院",
+    "credits": "3",
+    "schedule": null,
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00418090:1:BZ2627100418090_15284",
+    "term": "2026-2027-1",
+    "course_id": "00418090",
+    "section": "1",
+    "name": "粒子加速器",
+    "teachers": "王智 徐新路",
+    "teacher_names": [
+      "王智",
+      "徐新路"
+    ],
+    "department": "物理学院",
+    "credits": "3",
+    "schedule": "星期二(第7节-第9节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00418100:1:BZ2627100418100_17240",
+    "term": "2026-2027-1",
+    "course_id": "00418100",
+    "section": "1",
+    "name": "粒子物理与原子核物理",
+    "teachers": "孙小虎",
+    "teacher_names": [
+      "孙小虎"
+    ],
+    "department": "物理学院",
+    "credits": "4",
+    "schedule": "星期一(第5节-第6节)\n星期四(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00418340:1:BZ2627100418340_11671",
+    "term": "2026-2027-1",
+    "course_id": "00418340",
+    "section": "1",
+    "name": "核磁共振成像学",
+    "teachers": "高家红",
+    "teacher_names": [
+      "高家红"
+    ],
+    "department": "物理学院",
+    "credits": "3",
+    "schedule": "星期三(第3节-第5节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00418731:1:BZ2627100418731_12728",
+    "term": "2026-2027-1",
+    "course_id": "00418731",
+    "section": "1",
+    "name": "核技术及应用导论",
+    "teachers": "刘克新",
+    "teacher_names": [
+      "刘克新"
+    ],
+    "department": "物理学院",
+    "credits": "4",
+    "schedule": "星期二(第1节-第2节)\n星期四(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00418740:1:BZ2627100418740_12306",
+    "term": "2026-2027-1",
+    "course_id": "00418740",
+    "section": "1",
+    "name": "粒子束与物质相互作用",
+    "teachers": "王宇钢",
+    "teacher_names": [
+      "王宇钢"
+    ],
+    "department": "物理学院",
+    "credits": "3",
+    "schedule": "星期四(第7节-第9节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00418760:1:BZ2627100418760_16772",
+    "term": "2026-2027-1",
+    "course_id": "00418760",
+    "section": "1",
+    "name": "带电粒子束流光学",
+    "teachers": "黄森林",
+    "teacher_names": [
+      "黄森林"
+    ],
+    "department": "物理学院",
+    "credits": "4",
+    "schedule": "星期一(第3节-第4节)\n星期三(第5节-第6节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00430013:1:BZ2627100430013_17954",
+    "term": "2026-2027-1",
+    "course_id": "00430013",
+    "section": "1",
+    "name": "计算物理学习题课",
+    "teachers": "陈基",
+    "teacher_names": [
+      "陈基"
+    ],
+    "department": "物理学院",
+    "credits": "0",
+    "schedule": "星期四(第1节-第2节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00430013:2:BZ2627100430013_20368",
+    "term": "2026-2027-1",
+    "course_id": "00430013",
+    "section": "2",
+    "name": "计算物理学习题课",
+    "teachers": "李强",
+    "teacher_names": [
+      "李强"
+    ],
+    "department": "物理学院",
+    "credits": "0",
+    "schedule": "星期四(第1节-第2节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00430109:1:BZ2627100430109_15839",
+    "term": "2026-2027-1",
+    "course_id": "00430109",
+    "section": "1",
+    "name": "演示物理学",
+    "teachers": "李湘庆",
+    "teacher_names": [
+      "李湘庆"
+    ],
+    "department": "物理学院",
+    "credits": "2",
+    "schedule": "星期二(第1节-第2节)",
+    "weeks": "1-16",
+    "category": "通选课"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00430132:1:BZ2627100430132_18262",
+    "term": "2026-2027-1",
+    "course_id": "00430132",
+    "section": "1",
+    "name": "现代电子电路基础及实验 (一)",
+    "teachers": "赵捷",
+    "teacher_names": [
+      "赵捷"
+    ],
+    "department": "物理学院",
+    "credits": "3",
+    "schedule": "星期二(第1节-第2节)\n星期四(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00430133:2:BZ2627100430133_25610",
+    "term": "2026-2027-1",
+    "course_id": "00430133",
+    "section": "2",
+    "name": "现代电子电路基础及实验 (二)",
+    "teachers": "王志军 任全胜",
+    "teacher_names": [
+      "王志军",
+      "任全胜"
+    ],
+    "department": "物理学院",
+    "credits": "2",
+    "schedule": "星期一(第5节-第8节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00430133:3:BZ2627100430133_30546",
+    "term": "2026-2027-1",
+    "course_id": "00430133",
+    "section": "3",
+    "name": "现代电子电路基础及实验 (二)",
+    "teachers": "高崧 任全胜",
+    "teacher_names": [
+      "高崧",
+      "任全胜"
+    ],
+    "department": "物理学院",
+    "credits": "2",
+    "schedule": "星期一(第9节-第12节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00430151:1:BZ2627100430151_11262",
+    "term": "2026-2027-1",
+    "course_id": "00430151",
+    "section": "1",
+    "name": "现代物理前沿讲座Ⅰ",
+    "teachers": "吕国伟",
+    "teacher_names": [
+      "吕国伟"
+    ],
+    "department": "物理学院",
+    "credits": "2",
+    "schedule": "星期二(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00430191:1:BZ2627100430191_19658",
+    "term": "2026-2027-1",
+    "course_id": "00430191",
+    "section": "1",
+    "name": "大气科学导论",
+    "teachers": "俞妍",
+    "teacher_names": [
+      "俞妍"
+    ],
+    "department": "物理学院",
+    "credits": "2",
+    "schedule": "星期三(第5节-第6节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00431113:1:BZ2627100431113_17498",
+    "term": "2026-2027-1",
+    "course_id": "00431113",
+    "section": "1",
+    "name": "近现代物理导论 I",
+    "teachers": "孟策",
+    "teacher_names": [
+      "孟策"
+    ],
+    "department": "人工智能研究院",
+    "credits": "4",
+    "schedule": "星期二(第3节-第4节)\n星期四(第1节-第2节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00431115:1:BZ2627100431115_10513",
+    "term": "2026-2027-1",
+    "course_id": "00431115",
+    "section": "1",
+    "name": "近现代物理导论习题课",
+    "teachers": "孟策",
+    "teacher_names": [
+      "孟策"
+    ],
+    "department": "人工智能研究院",
+    "credits": "0",
+    "schedule": "星期四(第10节-第11节)(单)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00431133:1:BZ2627100431133_10178",
+    "term": "2026-2027-1",
+    "course_id": "00431133",
+    "section": "1",
+    "name": "普通物理 (II)",
+    "teachers": "穆良柱",
+    "teacher_names": [
+      "穆良柱"
+    ],
+    "department": "化学与分子工程学院",
+    "credits": "4",
+    "schedule": "星期二(第1节-第2节)\n星期四(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00431133:2:BZ2627100431133_22946",
+    "term": "2026-2027-1",
+    "course_id": "00431133",
+    "section": "2",
+    "name": "普通物理 (II)",
+    "teachers": "贾爽",
+    "teacher_names": [
+      "贾爽"
+    ],
+    "department": "生命科学学院",
+    "credits": "4",
+    "schedule": "星期一(第7节-第8节)\n星期四(第1节-第2节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00431133:3:BZ2627100431133_52069",
+    "term": "2026-2027-1",
+    "course_id": "00431133",
+    "section": "3",
+    "name": "普通物理 (II)",
+    "teachers": "安刘攀",
+    "teacher_names": [
+      "安刘攀"
+    ],
+    "department": "工学院",
+    "credits": "4",
+    "schedule": "星期一(第7节-第8节)\n星期三(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00431133:5:BZ2627100431133_59966",
+    "term": "2026-2027-1",
+    "course_id": "00431133",
+    "section": "5",
+    "name": "普通物理 (II)",
+    "teachers": "林峰 方哲宇",
+    "teacher_names": [
+      "林峰",
+      "方哲宇"
+    ],
+    "department": "地球与空间科学学院",
+    "credits": "4",
+    "schedule": "星期二(第10节-第11节)\n星期四(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00431133:4:BZ2627100431133_63037",
+    "term": "2026-2027-1",
+    "course_id": "00431133",
+    "section": "4",
+    "name": "普通物理 (II)",
+    "teachers": "李柯伽",
+    "teacher_names": [
+      "李柯伽"
+    ],
+    "department": "工学院",
+    "credits": "4",
+    "schedule": "星期一(第7节-第8节)\n星期三(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00431133:6:BZ2627100431133_79708",
+    "term": "2026-2027-1",
+    "course_id": "00431133",
+    "section": "6",
+    "name": "普通物理 (II)",
+    "teachers": "穆良柱",
+    "teacher_names": [
+      "穆良柱"
+    ],
+    "department": "元培学院",
+    "credits": "4",
+    "schedule": "星期二(第7节-第8节)\n星期四(第1节-第2节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00431141:1:BZ2627100431141_11076",
+    "term": "2026-2027-1",
+    "course_id": "00431141",
+    "section": "1",
+    "name": "力学",
+    "teachers": "刘树新",
+    "teacher_names": [
+      "刘树新"
+    ],
+    "department": "物理学院",
+    "credits": "3",
+    "schedule": "星期一(第1节-第2节)(单)\n星期三(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00431141:2:BZ2627100431141_20382",
+    "term": "2026-2027-1",
+    "course_id": "00431141",
+    "section": "2",
+    "name": "力学",
+    "teachers": "张国辉",
+    "teacher_names": [
+      "张国辉"
+    ],
+    "department": "物理学院",
+    "credits": "3",
+    "schedule": "星期一(第1节-第2节)(单)\n星期三(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00431141:5:BZ2627100431141_34302",
+    "term": "2026-2027-1",
+    "course_id": "00431141",
+    "section": "5",
+    "name": "力学",
+    "teachers": null,
+    "teacher_names": [],
+    "department": "物理学院",
+    "credits": "3",
+    "schedule": null,
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00431141:7:BZ2627100431141_41042",
+    "term": "2026-2027-1",
+    "course_id": "00431141",
+    "section": "7",
+    "name": "力学",
+    "teachers": "彭翔",
+    "teacher_names": [
+      "彭翔"
+    ],
+    "department": "信息科学技术学院",
+    "credits": "3",
+    "schedule": "星期一(第1节-第2节)\n星期三(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00431141:6:BZ2627100431141_50910",
+    "term": "2026-2027-1",
+    "course_id": "00431141",
+    "section": "6",
+    "name": "力学",
+    "teachers": "郭等柱 张耿民",
+    "teacher_names": [
+      "郭等柱",
+      "张耿民"
+    ],
+    "department": "信息科学技术学院",
+    "credits": "3",
+    "schedule": "星期一(第1节-第2节)\n星期三(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00431141:8:BZ2627100431141_68311",
+    "term": "2026-2027-1",
+    "course_id": "00431141",
+    "section": "8",
+    "name": "力学",
+    "teachers": "邢英杰",
+    "teacher_names": [
+      "邢英杰"
+    ],
+    "department": "信息科学技术学院",
+    "credits": "3",
+    "schedule": "星期一(第1节-第2节)\n星期三(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00431141:3:BZ2627100431141_35238",
+    "term": "2026-2027-1",
+    "course_id": "00431141",
+    "section": "3",
+    "name": "力学",
+    "teachers": "陈志坚",
+    "teacher_names": [
+      "陈志坚"
+    ],
+    "department": "物理学院",
+    "credits": "3",
+    "schedule": "星期一(第1节-第2节)(单)\n星期三(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00431141:4:BZ2627100431141_42113",
+    "term": "2026-2027-1",
+    "course_id": "00431141",
+    "section": "4",
+    "name": "力学",
+    "teachers": "刘文静",
+    "teacher_names": [
+      "刘文静"
+    ],
+    "department": "物理学院",
+    "credits": "3",
+    "schedule": "星期三(第3节-第4节)\n星期五(第3节-第4节)(单)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00431142:1:BZ2627100431142_13210",
+    "term": "2026-2027-1",
+    "course_id": "00431142",
+    "section": "1",
+    "name": "热学",
+    "teachers": "曲波",
+    "teacher_names": [
+      "曲波"
+    ],
+    "department": "物理学院",
+    "credits": "2",
+    "schedule": "星期三(第3节-第4节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00431142:2:BZ2627100431142_20963",
+    "term": "2026-2027-1",
+    "course_id": "00431142",
+    "section": "2",
+    "name": "热学",
+    "teachers": null,
+    "teacher_names": [],
+    "department": "物理学院",
+    "credits": "2",
+    "schedule": null,
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00431142:3:BZ2627100431142_38916",
+    "term": "2026-2027-1",
+    "course_id": "00431142",
+    "section": "3",
+    "name": "热学",
+    "teachers": "陈清",
+    "teacher_names": [
+      "陈清"
+    ],
+    "department": "信息科学技术学院",
+    "credits": "2",
+    "schedule": "星期四(第7节-第8节)",
+    "weeks": "1-16",
+    "category": "专业任选"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00431143:1:BZ2627100431143_13386",
+    "term": "2026-2027-1",
+    "course_id": "00431143",
+    "section": "1",
+    "name": "电磁学",
+    "teachers": null,
+    "teacher_names": [],
+    "department": "物理学院",
+    "credits": "3",
+    "schedule": null,
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00431148:1:BZ2627100431148_15297",
+    "term": "2026-2027-1",
+    "course_id": "00431148",
+    "section": "1",
+    "name": "光学习题课",
+    "teachers": "王若鹏",
+    "teacher_names": [
+      "王若鹏"
+    ],
+    "department": "物理学院",
+    "credits": "0",
+    "schedule": "星期二(第1节-第2节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00431148:2:BZ2627100431148_21454",
+    "term": "2026-2027-1",
+    "course_id": "00431148",
+    "section": "2",
+    "name": "光学习题课",
+    "teachers": "陈志坚",
+    "teacher_names": [
+      "陈志坚"
+    ],
+    "department": "物理学院",
+    "credits": "0",
+    "schedule": "星期二(第1节-第2节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00431148:3:BZ2627100431148_32700",
+    "term": "2026-2027-1",
+    "course_id": "00431148",
+    "section": "3",
+    "name": "光学习题课",
+    "teachers": "王树峰",
+    "teacher_names": [
+      "王树峰"
+    ],
+    "department": "物理学院",
+    "credits": "0",
+    "schedule": "星期二(第1节-第2节)(双)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  },
+  {
+    "ref": "pku2:2026-2027-1:00431149:2:BZ2627100431149_20946",
+    "term": "2026-2027-1",
+    "course_id": "00431149",
+    "section": "2",
+    "name": "光学讨论班",
+    "teachers": "杨起帆",
+    "teacher_names": [
+      "杨起帆"
+    ],
+    "department": "物理学院",
+    "credits": "2",
+    "schedule": "星期五(第10节-第11节)",
+    "weeks": "1-16",
+    "category": "专业必修"
+  }
+]
