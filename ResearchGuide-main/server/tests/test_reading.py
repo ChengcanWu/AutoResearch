@@ -114,8 +114,9 @@ def test_matrix_flags_conflicts_and_empty_columns():
     m = reading.matrix(u, "llm-eval")
     assert m["ready"] and len(m["rows"]) == 3
     assert "judge" in m["flags"]["empty_columns"]
-    pairs = {frozenset((c["a"], c["b"])) for c in m["flags"]["conflicts"]}
-    assert frozenset(("2310.17623", "2308.08493")) in pairs and frozenset(("2310.17623", "2306.05685")) not in pairs
+    (group,) = m["flags"]["conflicts"]  # 同一指标一组，不再逐对列出
+    assert set(group["up"]) == {"2310.17623", "2306.05685"} and group["down"] == ["2308.08493"]
+    assert (group["up_total"], group["down_total"]) == (2, 1)
 
 
 def test_matrix_needs_three_passed_cards():

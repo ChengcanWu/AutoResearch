@@ -613,11 +613,13 @@ def latest_statement(uid: str, kit_id: str) -> dict[str, Any] | None:
 
 def statement_refs(kit_id: str, before: str) -> dict[str, str]:
     """每个用户在 before 之前最新一版陈述指向的 x_ref（竞争地图的需求，滞后计）。"""
+    # 先按人取一次截止前的最大版本再连回去；原来的相关子查询对每一行都重扫这个人截止后的大量修订
     with _conn() as c:
         rows = c.execute(
-            "SELECT user_id, x_ref FROM statements s WHERE kit_id=? AND created_at < ? AND version = "
-            "(SELECT MAX(version) FROM statements s2 WHERE s2.user_id=s.user_id AND s2.kit_id=s.kit_id AND s2.created_at < ?)",
-            (kit_id, before, before)).fetchall()
+            "SELECT s.user_id, s.x_ref FROM statements s JOIN "
+            "(SELECT user_id, MAX(version) AS v FROM statements WHERE kit_id=? AND created_at < ? GROUP BY user_id) m "
+            "ON s.user_id = m.user_id AND s.version = m.v WHERE s.kit_id = ?",
+            (kit_id, before, kit_id)).fetchall()
     return {r["user_id"]: r["x_ref"] for r in rows}
 
 

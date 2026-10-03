@@ -29,6 +29,7 @@ import store
 import submission
 import workbench
 from pku_adapter import search_courses
+from limits import TTLCache
 from singleflight import AsyncFlight
 
 WEB_DIR = Path(__file__).resolve().parent.parent / "web"
@@ -524,13 +525,18 @@ def _paper_payload(aid: str) -> dict:
     return {**p, "sections": [{"name": n, "label": reading.arxiv.section_cn(n), "at": at} for n, at in reading.arxiv.sections(p["text"])]}
 
 
-def _warm_daily(kit_id: str) -> None:
-    """先把这个工具包当天的 arXiv 查询取进缓存；取不到不报错，daily 自己会如实写。"""
-    k = reading.kit(kit_id)
-    try:
-        reading.arxiv.recent(k["daily"]["categories"], k["daily"]["keywords"], max_results=25)
-    except reading.arxiv.ArxivError:
-        pass
+_DAILY_MISS = TTLCache(30, 64)  # arXiv 取不到时，三十秒内的请求直接用这个失败结果，不再去打
+
+
+def _daily_source(kit_id: str) -> tuple[list, str]:
+    """共享的那一步：候选或失败原因，作为参数交给 daily，不让每个请求在自己的线程里再取一次。"""
+    hit, miss = _DAILY_MISS.lookup(kit_id)
+    if hit:
+        return miss
+    got = reading.daily_source(kit_id)
+    if got[1]:
+        _DAILY_MISS.set(kit_id, got)
+    return got
 
 
 @app.get("/api/kits")
@@ -544,9 +550,8 @@ def kit_get(kit_id: str):
     return _reading(reading.kit, kit_id)
 
 
-def _daily_payload(uid: str, kit: str) -> dict:
-    _user_or_404(uid)
-    d = _reading(reading.daily, uid, kit)
+def _daily_payload(uid: str, kit: str, source: tuple[list, str]) -> dict:
+    d = _reading(reading.daily, uid, kit, source)
     today = [r for r in d["recent_keeps"] if r["created_at"][:10] == reading.now_iso()[:10]]
     return {**d, "tweak": _reading(positioning.daily_tweak, uid, kit, today)}
 
@@ -554,14 +559,15 @@ def _daily_payload(uid: str, kit: str) -> dict:
 @app.get("/api/daily")
 async def daily_feed(uid: str, kit: str):
     await run_in_threadpool(_user_or_404, uid)
-    await _shared(("daily", kit), _warm_daily, kit)
-    return await run_in_threadpool(_daily_payload, uid, kit)
+    source = await _shared(("daily", kit), _daily_source, kit)
+    return await run_in_threadpool(_daily_payload, uid, kit, source)
 
 
 @app.post("/api/daily/triage")
-def daily_triage(req: TriageReq):
-    _user_or_404(req.uid)
-    return _reading(reading.triage, req.uid, req.kit, req.arxiv_id, req.verdict, req.why, req.title)
+async def daily_triage(req: TriageReq):
+    await run_in_threadpool(_user_or_404, req.uid)
+    source = await _shared(("daily", req.kit), _daily_source, req.kit)
+    return await run_in_threadpool(_reading, reading.triage, req.uid, req.kit, req.arxiv_id, req.verdict, req.why, req.title, source)
 
 
 @app.get("/api/papers/{arxiv_id}")

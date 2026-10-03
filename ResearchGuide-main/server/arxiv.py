@@ -20,7 +20,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
-from limits import ReadLimitError, TTLCache, read_limited
+from limits import ReadLimitError, TTLCache, fetch
 from singleflight import SingleFlight
 
 API = "https://export.arxiv.org/api/query"
@@ -59,10 +59,8 @@ def _get(url: str, timeout: int = 20, max_bytes: int = MAX_ATOM_BYTES) -> bytes:
         if wait > 0:
             time.sleep(wait)
         req = urllib.request.Request(url, headers={"User-Agent": UA})
-        deadline = time.monotonic() + timeout
         try:
-            with urllib.request.urlopen(req, timeout=timeout) as r:
-                body = read_limited(r, max_bytes, deadline)
+            body = fetch(req, timeout=timeout, max_bytes=max_bytes)  # 总时限含响应头：拿着限速锁的请求最多占 timeout 秒
         except urllib.error.HTTPError as exc:
             raise ArxivError(f"arXiv 返回 HTTP {exc.code}") from exc
         except ReadLimitError as exc:

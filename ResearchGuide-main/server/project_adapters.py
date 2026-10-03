@@ -15,7 +15,7 @@ import urllib.parse
 import urllib.request
 from typing import Any, Callable
 
-from limits import ReadLimitError, TTLCache, read_limited
+from limits import ReadLimitError, TTLCache, fetch
 from schemas import now_iso
 from singleflight import SingleFlight
 
@@ -51,10 +51,8 @@ def _fetch(key: str, url: str, data: dict | None, headers: dict | None, timeout:
     raw = b""
     for attempt in range(2):  # 有的站 TLS 偶尔直接断开（UNEXPECTED_EOF），重试一次
         req = urllib.request.Request(url, data=body, headers=h, method="POST" if body is not None else "GET")
-        deadline = time.monotonic() + timeout  # 每次尝试的总时限：连上加收完，慢慢滴数据也不能超过
         try:
-            with urllib.request.urlopen(req, timeout=timeout) as resp:
-                raw = read_limited(resp, MAX_BYTES, deadline)
+            raw = fetch(req, timeout=timeout, max_bytes=MAX_BYTES)  # 每次尝试的总时限：连接、响应头、正文一起算
             break
         except urllib.error.HTTPError as exc:
             raise AdapterError(f"HTTP {exc.code}") from exc

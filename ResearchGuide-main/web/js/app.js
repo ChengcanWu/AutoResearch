@@ -2180,7 +2180,9 @@ async function renderMatrix(seq, kit) {
   const f = m.flags;
   const emptyCols = new Set(f.empty_columns);
   const emptyCells = new Set(f.empty_cells.map(([a, k]) => `${a}|${k}`));
-  const conflict = new Set(f.conflicts.flatMap((c) => [c.a, c.b]));
+  const conflict = new Set(f.conflicts.flatMap((c) => [...c.up, ...c.down]));
+  const titleOf = Object.fromEntries(m.rows.map((r) => [r.arxiv_id, clip(r.title, 28)]));
+  const names = (ids, total) => ids.map((id) => `《${esc(titleOf[id] || id)}》`).join("") + (total > ids.length ? ` 等 ${total} 篇` : "");
   panel.appendChild(el("p", "panel-sub", "缺口不会被告诉你，它们在表里：空格、整列空着的维度、同一指标方向相反的两篇。挑一处，问自己它被默认了什么。"));
   const wrap = el("div", "matrix-wrap");
   const table = el("table", "matrix");
@@ -2201,7 +2203,8 @@ async function renderMatrix(seq, kit) {
   wrap.appendChild(table);
   panel.appendChild(wrap);
   const notes = el("ul", "matrix-flags");
-  f.conflicts.forEach((c) => notes.appendChild(el("li", "", `⚡ 同一指标「${esc(c.metric)}」上方向相反：${esc(c.a)} 与 ${esc(c.b)}——真的冲突，还是数据或设置不同？`)));
+  // 每个指标一条：哪些说提升、哪些说下降（各列前几篇），不逐对展开
+  f.conflicts.forEach((c) => notes.appendChild(el("li", "", `⚡ 同一指标「${esc(c.metric)}」上方向相反：提升 ${c.up_total} 篇 ${names(c.up, c.up_total)}；下降 ${c.down_total} 篇 ${names(c.down, c.down_total)}——真的冲突，还是数据或设置不同？`)));
   if (f.empty_columns.length) notes.appendChild(el("li", "", `整列多半空着：${f.empty_columns.map((k) => esc((m.dimensions.find((d) => d.key === k) || {}).label || k)).join("、")}——大家都没检验，常常就是隐藏的假设。`));
   notes.appendChild(el("li", "", `空格 ${f.empty_cells.length} 个：是没人做过，还是你没读到？`));
   panel.appendChild(notes);

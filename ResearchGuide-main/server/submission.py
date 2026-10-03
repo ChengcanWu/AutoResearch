@@ -13,6 +13,7 @@ from __future__ import annotations
 import io
 import json
 import re
+import struct
 import zipfile
 from typing import Any
 
@@ -24,6 +25,8 @@ MAX_ZIP_BYTES = 20 * 1024 * 1024       # 压缩包本身
 MAX_TOTAL_BYTES = 100 * 1024 * 1024    # 解压后总量
 MAX_FILE_BYTES = 20 * 1024 * 1024      # 单个文件
 MAX_FILES = 300
+MAX_ENTRIES = 2000                     # 含目录的条目总数；在建条目对象之前就从目录尾记录里查
+MAX_CENTRAL_DIR = 512 * 1024           # 中央目录字节数上限：zipfile 按它逐条建对象，条目数可以造假，字节数不行
 MAX_RATIO = 120                        # 压缩比过高视为压缩炸弹
 TEXT_BUDGET = 14000                    # 送给模型的正文上限（字符）
 MAX_DOCX_XML = 8 * 1024 * 1024         # .docx 里 word/document.xml 解压后的上限（套娃压缩包同样要限）
@@ -89,22 +92,72 @@ def _kind(path: str) -> str:
     return "other"
 
 
+def _directory_size(data: bytes) -> tuple[int, int] | None:
+    """从目录尾记录（含 zip64）读出条目总数和中央目录字节数，不建任何条目对象。找不到就交给 zipfile 报错。"""
+    tail = data[-(65535 + 22):]
+    at = tail.rfind(b"PK\x05\x06")
+    if at < 0 or len(tail) - at < 22:
+        return None
+    entries, cd_size = struct.unpack_from("<HI", tail, at + 10)
+    if entries == 0xFFFF or cd_size == 0xFFFFFFFF:  # zip64：真正的数在 zip64 目录尾记录里
+        loc = at - 20
+        if loc < 0 or tail[loc:loc + 4] != b"PK\x06\x07":
+            return None
+        (rec,) = struct.unpack_from("<Q", tail, loc + 8)
+        if rec + 56 > len(data) or data[rec:rec + 4] != b"PK\x06\x06":
+            return None
+        entries, cd_size = struct.unpack_from("<QQ", data, rec + 32)
+    return entries, cd_size
+
+
+def _open_zip(data: bytes) -> zipfile.ZipFile:
+    """先查条目数和中央目录大小，再交给 zipfile。十万个空目录也会在打开时各建一个对象。"""
+    size = _directory_size(data)
+    if size and (size[0] > MAX_ENTRIES or size[1] > MAX_CENTRAL_DIR):
+        raise SubmissionError(f"压缩包里的条目太多（{size[0]} 个，含文件夹）。请删掉依赖目录（如 node_modules、venv）后再打包。")
+    try:
+        z = zipfile.ZipFile(io.BytesIO(data))
+    except zipfile.BadZipFile:
+        raise SubmissionError("这不是一个能打开的 .zip 文件。请用系统自带的「压缩」重新打包（不要用 .rar / .7z）。")
+    if len(z.infolist()) > MAX_ENTRIES:
+        z.close()
+        raise SubmissionError(f"压缩包里的条目太多（含文件夹超过 {MAX_ENTRIES} 个）。")
+    return z
+
+
+def _strip_xml(xml: str) -> str:
+    """去标签、段落结束换行。线性扫描：原来的 <[^>]+> 遇到大量没闭合的 < 会反复扫到结尾，而且正则不释放 GIL，
+    放在线程里也会拖住整个服务。没闭合的标签之后的内容直接丢掉。"""
+    out, i, n = [], 0, len(xml)
+    while i < n:
+        lt = xml.find("<", i)
+        if lt < 0:
+            out.append(xml[i:])
+            break
+        out.append(xml[i:lt])
+        gt = xml.find(">", lt + 1)
+        if gt < 0:
+            break
+        if xml.startswith("</w:p>", lt):
+            out.append("\n")
+        i = gt + 1
+    return "".join(out)
+
+
 def _docx_text(blob: bytes) -> str:
     """.docx 本身也是压缩包：解压前先看声明的大小和压缩比，读的时候再按上限截断（声明可以造假）。"""
     try:
-        with zipfile.ZipFile(io.BytesIO(blob)) as z:
+        with _open_zip(blob) as z:
             info = z.getinfo("word/document.xml")
             if info.file_size > MAX_DOCX_XML or info.file_size > MAX_RATIO * max(1, info.compress_size):
                 return ""
             with z.open(info) as f:
                 raw = f.read(MAX_DOCX_XML + 1)
-    except (KeyError, zipfile.BadZipFile, OSError, RuntimeError, NotImplementedError):
+    except (KeyError, zipfile.BadZipFile, OSError, RuntimeError, NotImplementedError, SubmissionError):
         return ""
     if len(raw) > MAX_DOCX_XML:
         return ""
-    xml = raw.decode("utf-8", errors="ignore")
-    xml = re.sub(r"</w:p>", "\n", xml)
-    return re.sub(r"<[^>]+>", "", xml)[:MAX_TEXT_CHARS]
+    return _strip_xml(raw.decode("utf-8", errors="ignore"))[:MAX_TEXT_CHARS]
 
 
 def _ipynb_text(blob: bytes) -> tuple[str, bool]:
@@ -134,10 +187,7 @@ def read_zip(data: bytes) -> dict[str, Any]:
     """安全读取：只在内存里读，返回文件清单和可读正文。不合格直接抛 SubmissionError。"""
     if len(data) > MAX_ZIP_BYTES:
         raise SubmissionError(f"压缩包超过 {MAX_ZIP_BYTES // 1024 // 1024} MB。大数据集请只放样例，并在 README 里写下载链接。")
-    try:
-        z = zipfile.ZipFile(io.BytesIO(data))
-    except zipfile.BadZipFile:
-        raise SubmissionError("这不是一个能打开的 .zip 文件。请用系统自带的「压缩」重新打包（不要用 .rar / .7z）。")
+    z = _open_zip(data)
     infos = [i for i in z.infolist() if not i.is_dir()]
     if len(infos) > MAX_FILES:
         raise SubmissionError(f"文件太多（{len(infos)} 个）。请删掉依赖目录（如 node_modules、venv）后再打包。")

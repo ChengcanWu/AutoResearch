@@ -51,16 +51,21 @@ def kit_paper(k: dict[str, Any], arxiv_id: str) -> dict[str, Any] | None:
 
 # ---------- 每日情报：分拣今天的新论文 ----------
 
-def daily(uid: str, kit_id: str) -> dict[str, Any]:
+def daily_source(kit_id: str) -> tuple[list[dict[str, Any]], str]:
+    """这个工具包今天的 arXiv 候选，或者取不到的原因。所有人共用同一份，失败也共用（不各自重试）。"""
+    k = kit(kit_id)
+    try:
+        return arxiv.recent(k["daily"]["categories"], k["daily"]["keywords"], max_results=25), ""
+    except arxiv.ArxivError as exc:
+        return [], str(exc)
+
+
+def daily(uid: str, kit_id: str, source: tuple[list[dict[str, Any]], str] | None = None) -> dict[str, Any]:
     k = kit(kit_id)
     seen = {r["arxiv_id"]: r for r in store.list_triage(uid, kit_id)}
     today = now_iso()[:10]
     done_today = [r for r in seen.values() if r["created_at"][:10] == today]
-    try:
-        fresh = arxiv.recent(k["daily"]["categories"], k["daily"]["keywords"], max_results=25)
-        error = ""
-    except arxiv.ArxivError as exc:
-        fresh, error = [], str(exc)
+    fresh, error = source if source is not None else daily_source(kit_id)
     items = [{"arxiv_id": p["id"], "title": p["title"], "abstract": p["summary"][:600], "published": p["published"],
               "authors": p["authors"][:4], "url": p["url"]} for p in fresh if p["id"] not in seen][:6]
     keeps = [r for r in seen.values() if r["verdict"] == "keep"]
@@ -69,7 +74,8 @@ def daily(uid: str, kit_id: str) -> dict[str, Any]:
             "recent_keeps": sorted(keeps, key=lambda r: r["created_at"], reverse=True)[:5]}
 
 
-def triage(uid: str, kit_id: str, arxiv_id: str, verdict: str, why: str, title: str = "") -> dict[str, Any]:
+def triage(uid: str, kit_id: str, arxiv_id: str, verdict: str, why: str, title: str = "",
+           source: tuple[list[dict[str, Any]], str] | None = None) -> dict[str, Any]:
     kit(kit_id)
     aid = arxiv.clean_id(arxiv_id)
     if verdict not in ("keep", "skip"):
@@ -78,7 +84,7 @@ def triage(uid: str, kit_id: str, arxiv_id: str, verdict: str, why: str, title: 
     if not 4 <= len(why) <= 80:
         raise ReadingError("用一句话写为什么（4–80 字）：留下是因为它碰到了什么，跳过是因为它离你的问题多远")
     store.save_triage(uid, kit_id, aid, verdict, why, title[:200])
-    return daily(uid, kit_id) | {"saved": aid}
+    return daily(uid, kit_id, source) | {"saved": aid}
 
 
 # ---------- 阅读卡 ----------
@@ -175,6 +181,7 @@ def submit_card(uid: str, kit_id: str, arxiv_id: str, fields: dict[str, str], di
 # ---------- 综合矩阵 ----------
 
 DIRECTION = {"up": "↑", "down": "↓", "mixed": "~", "none": "?"}
+CONFLICT_SHOW = 5  # 每组冲突每边列出几篇；总数另给
 
 
 def matrix(uid: str, kit_id: str) -> dict[str, Any]:
@@ -185,16 +192,21 @@ def matrix(uid: str, kit_id: str) -> dict[str, Any]:
               "cells": {d["key"]: c["dims"].get(d["key"], "") for d in dims}} for c in rows]
     empty_cells = [(r["arxiv_id"], d["key"]) for r in table for d in dims if not r["cells"][d["key"]].strip()]
     empty_cols = [d["key"] for d in dims if table and sum(1 for r in table if not r["cells"][d["key"]].strip()) * 2 >= len(table)]
+    # 冲突按指标分组：同一指标下有人「提升」、有人「下降」。原来逐对列出，两边各 250 篇就是六万多对
     conflicts = []
     metric_key = next((d["key"] for d in dims if d.get("role") == "metric"), None)
     dir_key = next((d["key"] for d in dims if d.get("role") == "direction"), None)
     if metric_key and dir_key:
-        for i, a in enumerate(table):
-            for b in table[i + 1:]:
-                ma, mb = a["cells"][metric_key].strip().lower(), b["cells"][metric_key].strip().lower()
-                da, db = a["cells"][dir_key], b["cells"][dir_key]
-                if ma and ma == mb and {da, db} == {"up", "down"}:
-                    conflicts.append({"a": a["arxiv_id"], "b": b["arxiv_id"], "metric": a["cells"][metric_key]})
+        groups: dict[str, dict[str, Any]] = {}
+        for r in table:
+            m = r["cells"][metric_key].strip()
+            if m and r["cells"][dir_key] in ("up", "down"):
+                g = groups.setdefault(m.lower(), {"metric": m, "up": [], "down": []})
+                g[r["cells"][dir_key]].append(r["arxiv_id"])
+        for g in groups.values():
+            if g["up"] and g["down"]:
+                conflicts.append({"metric": g["metric"], "up_total": len(g["up"]), "down_total": len(g["down"]),
+                                  "up": g["up"][:CONFLICT_SHOW], "down": g["down"][:CONFLICT_SHOW]})
     need = max(0, 3 - len(table))
     return {"kit": {"id": k["id"], "name": k["name"]}, "dimensions": dims, "rows": table,
             "flags": {"empty_cells": empty_cells, "empty_columns": empty_cols, "conflicts": conflicts},

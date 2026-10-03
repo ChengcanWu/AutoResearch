@@ -349,3 +349,115 @@ def test_ttl_cache_drops_expired_entries_and_caps_size():
     for i in range(10):
         small.set(i, [])
     assert len(small) == 3 and small.lookup(9) == (True, []) and small.lookup(0) == (False, None)
+
+
+# ---------- 第三轮 ----------
+
+def test_malformed_docx_xml_is_stripped_in_linear_time():
+    t0 = time.perf_counter()
+    assert submission._docx_text(_docx(b"<" * 66_000)) == ""
+    assert submission._strip_xml("<w:p><w:t>a</w:t></w:p>x<y") == "a\nx"
+    assert time.perf_counter() - t0 < 0.2
+
+
+def test_zip_with_too_many_entries_is_rejected_before_parsing(monkeypatch):
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w") as z:
+        for i in range(submission.MAX_ENTRIES + 500):
+            z.writestr(f"d{i}/", b"")
+        z.writestr("README.md", "# 题目")
+    data = buf.getvalue()
+    opened = []
+    real = zipfile.ZipFile
+    monkeypatch.setattr(zipfile, "ZipFile", lambda *a, **k: opened.append(1) or real(*a, **k))
+    with pytest.raises(submission.SubmissionError):
+        submission.read_zip(data)
+    assert opened == []  # 没等 zipfile 把几千个条目对象建出来就拒了
+
+
+def test_daily_failure_is_shared_not_retried_per_request(monkeypatch):
+    from limits import TTLCache as _T
+    monkeypatch.setattr(main, "_DAILY_MISS", _T(30, 8))
+    uid = store.create_user("t")["uid"]
+    calls = []
+
+    def down(*a, **k):
+        calls.append(1)
+        time.sleep(0.3)
+        raise arxiv.ArxivError("连不上 arXiv")
+
+    monkeypatch.setattr(arxiv, "recent", down)
+
+    async def go():
+        async with _asgi() as c:
+            reqs = [asyncio.create_task(c.get(f"/api/daily?uid={uid}&kit=llm-eval")) for _ in range(40)]
+            await asyncio.sleep(0.05)
+            t0 = time.perf_counter()
+            health = await c.get("/api/health")
+            waited = time.perf_counter() - t0
+            rs = await asyncio.gather(*reqs)
+            again = await c.get(f"/api/daily?uid={uid}&kit=llm-eval")  # 三十秒内直接用失败结果
+            return rs, health.status_code, waited, again
+
+    rs, health, waited, again = asyncio.run(go())
+    assert {r.status_code for r in rs} == {200} and all(r.json()["error"] for r in rs)
+    assert health == 200 and waited < 0.3 and len(calls) == 1 and again.json()["error"]
+
+
+class _SlowHead(__import__("http.server").server.BaseHTTPRequestHandler):
+    def do_GET(self):
+        for b in b"HTTP/1.0 200 OK\r\nX-Pad: " + b"a" * 200:
+            self.wfile.write(bytes([b]))
+            self.wfile.flush()
+            time.sleep(0.02)
+
+    def log_message(self, *a):
+        pass
+
+
+def test_deadline_covers_slow_response_headers(monkeypatch):
+    from http.server import ThreadingHTTPServer
+    srv = ThreadingHTTPServer(("127.0.0.1", 0), _SlowHead)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    url = f"http://127.0.0.1:{srv.server_address[1]}/h"
+    try:
+        t0 = time.perf_counter()
+        with pytest.raises(project_adapters.AdapterError):
+            project_adapters.http(url, timeout=0.2, as_json=False)
+        assert time.perf_counter() - t0 < 0.6
+        monkeypatch.setattr(arxiv, "_LAST_CALL", [0.0])
+        t0 = time.perf_counter()
+        with pytest.raises(arxiv.ArxivError):
+            arxiv._get(url, timeout=0.2)
+        assert time.perf_counter() - t0 < 0.6  # 限速锁也只被占这么久
+    finally:
+        srv.shutdown()
+
+
+def test_matrix_conflicts_are_grouped_not_paired():
+    import json as _json
+    import reading
+    now = "2026-10-03T00:00:00+00:00"
+    cards = []
+    for i in range(500):
+        aid = f"2401.{i:05d}"
+        data = {"arxiv_id": aid, "title": f"P{i}", "version": 1, "status": "pass",
+                "dims": {"metric": "准确率", "direction": "up" if i % 2 else "down", "models": "m", "task": "t", "language": "英文"}}
+        cards.append((f"c{i}", "u", "llm-eval", aid, 1, _json.dumps(data), "pass", now))
+    with sqlite3.connect(store.DB_PATH) as c:
+        c.executemany("INSERT INTO cards VALUES(?,?,?,?,?,?,?,?)", cards)
+    m = reading.matrix("u", "llm-eval")
+    (g,) = m["flags"]["conflicts"]
+    assert (g["up_total"], g["down_total"]) == (250, 250) and len(g["up"]) == reading.CONFLICT_SHOW
+    assert len(_json.dumps(m["flags"]["conflicts"])) < 2000
+
+
+def test_statement_refs_group_once():
+    import json as _json
+    rows = [(f"{u}-{v}", f"u{u}", "k", v, f"r{v}", _json.dumps({}), f"2026-09-{1 if v <= 5 else 21:02d}T00:00:00+00:00")
+            for u in range(60) for v in range(1, 301)]
+    with sqlite3.connect(store.DB_PATH) as c:
+        c.executemany("INSERT INTO statements VALUES(?,?,?,?,?,?,?)", rows)
+    t0 = time.perf_counter()
+    refs = store.statement_refs("k", "2026-09-10T00:00:00+00:00")
+    assert len(refs) == 60 and set(refs.values()) == {"r5"} and time.perf_counter() - t0 < 0.05
