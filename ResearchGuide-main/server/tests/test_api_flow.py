@@ -43,6 +43,8 @@ def test_whole_flow(client):
     assert c.get("/api/health").json()["llm"]["enabled"] is False
     assert c.get("/").status_code == 200 and "启研" in c.get("/").text
     assert c.get("/static/js/app.js").status_code == 200
+    paths = c.get("/api/paths").json()["paths"]
+    assert {"math", "ai", "psy", "econ"} <= set(paths) and all(len(p["steps"]) == 6 for p in paths.values())
 
     uid = c.post("/api/auth/login", json={"nickname": "小北"}).json()["uid"]
     first = c.post("/api/onboard/start", json={"uid": uid}).json()
