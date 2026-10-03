@@ -117,6 +117,7 @@ def _self_key(row: dict[str, Any]) -> str:
 
 
 RARITY_SHOW = 20  # 组合太多时只列最少见的这么多组，另给总数
+NORM_MEMO_MAX = 4096  # 重复的描述只规范化一次，但最多记这么多条：各不相同的描述不能全攒在内存里
 
 
 def combo_rarity(uid: str, kit_id: str) -> dict[str, Any]:
@@ -144,7 +145,9 @@ def combo_rarity(uid: str, kit_id: str) -> dict[str, Any]:
         else:
             k = norm_of.get(text)
             if k is None:
-                k = norm_of[text] = _norm(text)
+                k = _norm(text)
+                if len(norm_of) < NORM_MEMO_MAX:
+                    norm_of[text] = k
         i = bit.get(k)
         if i is not None:
             p = seat[u]

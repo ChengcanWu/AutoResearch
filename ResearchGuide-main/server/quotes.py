@@ -77,6 +77,11 @@ def _prepare(text: str) -> tuple[str, array, str]:
     return got
 
 
+def prepare(text: str) -> None:
+    """提前建好索引（交卡入口在事件循环里共等这一步）。"""
+    _prepared(text)
+
+
 def clear_prepared() -> None:
     with _PREPARED_LOCK:
         _PREPARED.clear()

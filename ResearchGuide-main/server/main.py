@@ -24,6 +24,7 @@ import onboarding
 import planner
 import positioning
 import projects
+import quotes
 import reading
 import store
 import submission
@@ -526,6 +527,13 @@ def _paper_payload(aid: str) -> dict:
     return {**p, "sections": [{"name": n, "label": reading.arxiv.section_cn(n), "at": at} for n, at in reading.arxiv.sections(p["text"])]}
 
 
+def _paper_index(aid: str) -> None:
+    """交卡之前先把这篇论文的引文索引和分节建好：并发交同一篇时，跟随者在事件循环里等，不在评阅线程里干等。"""
+    text = reading.arxiv.fulltext(aid)["text"]
+    quotes.prepare(text)
+    reading.arxiv.sections(text)
+
+
 _DAILY_MISS = TTLCache(30, 64)  # arXiv 取不到时，三十秒内的请求直接用这个失败结果，不再去打
 
 
@@ -600,6 +608,7 @@ async def card_submit(req: CardReq):
     aid = _reading(reading.arxiv.clean_id, req.arxiv_id)
     await run_in_threadpool(_user_or_404, req.uid)
     await _shared(("paper", aid), _paper_payload, aid)  # 先把原文取进缓存，并发提交同一篇只取一次
+    await _shared(("index", aid), _paper_index, aid)    # 再把引文索引建好；之后每张卡的核对都直接命中
     return await run_in_threadpool(_card_submit, req)
 
 

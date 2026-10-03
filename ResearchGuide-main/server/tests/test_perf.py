@@ -772,7 +772,15 @@ def test_notebook_outputs_are_skipped_without_building_objects():
     assert item["has_outputs"] and "print(x)" in bundle["texts"]["analysis.ipynb"]
     assert peak < 40 * 1024 * 1024  # json.loads 会把十五万个输出对象全建出来
     small = _json.dumps({"cells": [{"source": "a", "outputs": [{"t": "}"}]}, {"source": ["b", "c"]}]}).encode()
-    assert submission._ipynb_text_scan(small) == submission._ipynb_text_json(small) == ("a\n\nbc", True)
+    assert submission._ipynb_text(small) == ("a\n\nbc", True)
+
+
+def test_malformed_notebooks_are_rejected_quickly():
+    t0 = time.perf_counter()
+    assert submission._ipynb_text(b'{"cells":[{"source":"a","outputs":[{"t": nope}]}]}') == ("", False)  # 输出值不合法
+    assert submission._ipynb_text(b'{"cells":[{"source":"a","outputs":[{"t": 1}]}]') == ("", False)  # 少了最后的花括号
+    assert submission._ipynb_text(b'{"cells":[{"source":"a","outputs":[{"t":"' + b'\\"' * 40_000) == ("", False)  # 没闭合的字符串
+    assert time.perf_counter() - t0 < 0.2
 
 
 def test_concurrent_reviews_build_the_quote_index_once(monkeypatch):
@@ -786,3 +794,50 @@ def test_concurrent_reviews_build_the_quote_index_once(monkeypatch):
     [t.start() for t in ts]
     [t.join() for t in ts]
     assert calls == [1]
+
+
+# ---------- 第八轮 ----------
+
+def test_concurrent_card_submissions_wait_for_the_index_off_the_workers(monkeypatch):
+    import quotes
+    quotes.clear_prepared()
+    uid = store.create_user("t")["uid"]
+    paper = {"id": "2310.17623", "title": "T", "source": "html", "url": "u",
+             "text": "Abstract\n" + "We study things. " * 20_000 + "\n6 Limitations\nIt is limited."}
+    monkeypatch.setattr(arxiv, "fulltext", lambda aid: paper)
+    built = []
+    real = quotes._index
+    monkeypatch.setattr(quotes, "_index", lambda text: built.append(1) or time.sleep(0.4) or real(text))
+    body = {"uid": uid, "kit": "llm-eval", "arxiv_id": "2310.17623", "fields": {"claim_quote": "We study things. We study"}, "dims": {}}
+
+    async def go():
+        async with _asgi() as c:
+            subs = [asyncio.create_task(c.post("/api/cards", json=body)) for _ in range(40)]
+            await asyncio.sleep(0.1)
+            t0 = time.perf_counter()
+            health = await c.get("/api/health")
+            waited = time.perf_counter() - t0
+            return [r.status_code for r in await asyncio.gather(*subs)], health.status_code, waited
+
+    codes, health, waited = asyncio.run(go())
+    assert set(codes) == {200} and health == 200 and waited < 0.3 and built == [1]
+
+
+def test_rarity_memo_is_bounded_for_distinct_descriptions():
+    import tracemalloc
+    import positioning
+    now = "2026-10-03T00:00:00+00:00"
+    me = store.create_user("me")["uid"]
+    store.add_edge(me, "language", "粤语母语")
+    store.add_edge(me, "course", "修过《数理统计》")
+    with sqlite3.connect(store.DB_PATH) as c:
+        c.executemany("INSERT INTO cards VALUES(?,?,?,?,?,?,?,?)",
+                      [(f"c{u}", f"u{u}", "llm-eval", "2310.17623", 1, "{}", "pass", now) for u in range(5000)])
+        c.executemany("INSERT INTO edges(id, user_id, kind, text, evidence_url, ref, created_at) VALUES(?,?,?,?,?,?,?)",
+                      [(f"p{u}-{j}", f"u{u}", "background", f"同学{u}的第{j}条经历：在某个具体的地方做过某件具体的事", "", "", now)
+                       for u in range(5000) for j in range(60)])
+    tracemalloc.start()
+    r = positioning.combo_rarity(me, "llm-eval")
+    peak = tracemalloc.get_traced_memory()[1]
+    tracemalloc.stop()
+    assert r["status"] == "ok" and peak < 15 * 1024 * 1024, peak  # 三十万条各不相同的描述不再全记在缓存里
