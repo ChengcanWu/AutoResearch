@@ -331,7 +331,7 @@ def test_quote_checks_prepare_each_paper_once(monkeypatch):
     import quotes
     import reading
     from test_reading import DIMS, GOOD, PAPER
-    quotes._prepared.cache_clear()
+    quotes.clear_prepared()
     calls = []
     real = quotes._index
     monkeypatch.setattr(quotes, "_index", lambda text: calls.append(1) or real(text))
@@ -721,17 +721,68 @@ def test_expired_abstract_refresh_keeps_cache_and_backs_off(tmp_path, monkeypatc
     assert first["retry_after"] - time.time() > arxiv.RETRY_TRANSIENT - 5
 
 
-def test_rarity_stays_fast_with_dense_varied_histories(monkeypatch):
+def test_rarity_stays_fast_with_dense_varied_histories():
+    """真实的数据库路径：5000 人、每人 60 条和我重合的边、位图各不相同。"""
     import random
+    import tracemalloc
     import positioning
     rng = random.Random(7)
-    keys = [f"k{i}" for i in range(120)]
-    pool = [f"u{i}" for i in range(5000)]
-    peers = [set(rng.sample(keys, 60)) for _ in pool]  # 每人 60 条重合边，位图几乎各不相同
-    monkeypatch.setattr(store, "kit_pool", lambda kit: pool)
-    monkeypatch.setattr(positioning, "_peer_keys", lambda uids: peers)
-    monkeypatch.setattr(positioning, "edges", lambda uid: {"edges": [{"key": k, "text": k} for k in keys]})
+    texts = [f"边{i:03d}" for i in range(120)]
+    now = "2026-10-03T00:00:00+00:00"
+    me = store.create_user("me")["uid"]
+    with sqlite3.connect(store.DB_PATH) as c:
+        c.executemany("INSERT INTO edges(id, user_id, kind, text, evidence_url, ref, created_at) VALUES(?,?,?,?,?,?,?)",
+                      [(f"m{i}", me, "background", t, "", "", now) for i, t in enumerate(texts)])
+        c.executemany("INSERT INTO cards VALUES(?,?,?,?,?,?,?,?)",
+                      [(f"c{u}", f"u{u}", "llm-eval", "2310.17623", 1, "{}", "pass", now) for u in range(5000)])
+        c.executemany("INSERT INTO edges(id, user_id, kind, text, evidence_url, ref, created_at) VALUES(?,?,?,?,?,?,?)",
+                      [(f"p{u}-{j}", f"u{u}", "background", t, "", "", now)
+                       for u in range(5000) for j, t in enumerate(rng.sample(texts, 60))])
     t0 = time.perf_counter()
-    r = positioning.combo_rarity("me", "llm-eval")
-    assert time.perf_counter() - t0 < 0.5 and r["total"] == 7140
-    assert all(p["band"] == "常见" for p in r["pairs"])  # 每对约 1240 人都有
+    r = positioning.combo_rarity(me, "llm-eval")
+    took = time.perf_counter() - t0
+    tracemalloc.start()
+    positioning.combo_rarity(me, "llm-eval")
+    peak = tracemalloc.get_traced_memory()[1]
+    tracemalloc.stop()
+    assert r["total"] == 7140 and all(p["band"] == "常见" for p in r["pairs"])  # 每对约 1240 人都有
+    assert took < 0.8 and peak < 30 * 1024 * 1024, (took, peak)
+
+
+# ---------- 第七轮 ----------
+
+def test_notebook_outputs_are_skipped_without_building_objects():
+    import json as _json
+    import random
+    import tracemalloc
+    rng = random.Random(3)
+    nb = {"cells": [{"cell_type": "markdown", "source": ['# 说明 "引号" {[}]']},
+                    {"cell_type": "code", "source": ["print(x)"],
+                     "outputs": [{"output_type": "execute_result", "data": {"v": rng.randrange(10 ** 6)}} for _ in range(150_000)]}]}
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
+        z.writestr("README.md", "# 题目\n")
+        z.writestr("analysis.ipynb", _json.dumps(nb, ensure_ascii=False))
+    data = buf.getvalue()
+    tracemalloc.start()
+    bundle = submission.read_zip(data)
+    peak = tracemalloc.get_traced_memory()[1]
+    tracemalloc.stop()
+    item = next(i for i in bundle["inventory"] if i["path"] == "analysis.ipynb")
+    assert item["has_outputs"] and "print(x)" in bundle["texts"]["analysis.ipynb"]
+    assert peak < 40 * 1024 * 1024  # json.loads 会把十五万个输出对象全建出来
+    small = _json.dumps({"cells": [{"source": "a", "outputs": [{"t": "}"}]}, {"source": ["b", "c"]}]}).encode()
+    assert submission._ipynb_text_scan(small) == submission._ipynb_text_json(small) == ("a\n\nbc", True)
+
+
+def test_concurrent_reviews_build_the_quote_index_once(monkeypatch):
+    import quotes
+    quotes.clear_prepared()
+    calls = []
+    real = quotes._index
+    monkeypatch.setattr(quotes, "_index", lambda text: calls.append(1) or time.sleep(0.2) or real(text))
+    text = "Limitations\n" + "word " * 200_000
+    ts = [threading.Thread(target=quotes._prepared, args=(text,)) for _ in range(24)]
+    [t.start() for t in ts]
+    [t.join() for t in ts]
+    assert calls == [1]

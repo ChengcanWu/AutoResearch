@@ -7,12 +7,14 @@
 from __future__ import annotations
 
 import re
+import threading
 import unicodedata
 from array import array
-from functools import lru_cache
+from collections import OrderedDict
 from typing import Any
 
 import arxiv
+from singleflight import SingleFlight
 
 _LIG = {"ﬀ": "ff", "ﬁ": "fi", "ﬂ": "fl", "ﬃ": "ffi", "ﬄ": "ffl"}
 _PUNCT = {"‘": "'", "’": "'", "“": '"', "”": '"', "–": "-", "—": "-", "−": "-",
@@ -44,12 +46,40 @@ def _index(text: str) -> tuple[str, array]:
     return "".join(out), pos
 
 
-@lru_cache(maxsize=4)
+PREPARED_KEEP = 4
+_PREPARED: OrderedDict[str, tuple[str, array, str]] = OrderedDict()
+_PREPARED_LOCK = threading.Lock()
+_PREPARING = SingleFlight()  # 二十几张卡同时交同一篇论文：只建一次，其余等它（lru_cache 只缓存建好的，不合并正在建的）
+
+
 def _prepared(text: str) -> tuple[str, array, str]:
     """一篇论文只规范化一次：一张卡要定位六七句，原来每句都把全文重做一遍。
     以全文字符串为键（Python 会缓存字符串的哈希）；只留最近 4 篇，长论文的位置表也不会堆在内存里。"""
+    with _PREPARED_LOCK:
+        hit = _PREPARED.get(text)
+        if hit is not None:
+            _PREPARED.move_to_end(text)
+            return hit
+    return _PREPARING.do(text, lambda: _prepare(text))
+
+
+def _prepare(text: str) -> tuple[str, array, str]:
+    with _PREPARED_LOCK:
+        hit = _PREPARED.get(text)
+    if hit is not None:  # 排在前面的那一个刚建好
+        return hit
     hay, pos = _index(text)
-    return hay, pos, re.sub(r"(\w)- (\w)", r"\1\2", hay)
+    got = (hay, pos, re.sub(r"(\w)- (\w)", r"\1\2", hay))
+    with _PREPARED_LOCK:
+        _PREPARED[text] = got
+        while len(_PREPARED) > PREPARED_KEEP:
+            _PREPARED.popitem(last=False)
+    return got
+
+
+def clear_prepared() -> None:
+    with _PREPARED_LOCK:
+        _PREPARED.clear()
 
 
 def locate(quote: str, paper: dict[str, Any]) -> dict[str, Any]:

@@ -162,17 +162,134 @@ def _docx_text(blob: bytes) -> str:
     return _strip_xml(raw.decode("utf-8", errors="ignore"))[:MAX_TEXT_CHARS]
 
 
+# ---------- notebook：只取每个单元的 source，outputs 只看有没有，不建对象 ----------
+# json.loads 会把输出里的每个数字、每个小字典都建成对象：7 MB 的压缩包能吃掉近 200 MB 内存。
+# 这里按结构字符线性扫描：跳过一个值只找配对的括号和字符串结尾，不解析里面的内容。
+
+# 一个记号要么是整个字符串（在 C 里一次跳过，含转义），要么是一个括号；只在括号上做深度计数
+_TOKEN = re.compile(r'"[^"\\]*(?:\\.[^"\\]*)*"|[\[\]{}]')
+_SCALAR_END = re.compile(r"[,\]}\s]")
+_WS = re.compile(r"\s*")
+MAX_CELLS = 5000
+JSON_SIMPLE = 50_000  # 逗号和左花括号加起来不超过这个数，json.loads 建出的对象有限，直接用它更快
+
+
+def _string_end(s: str, i: int) -> int:
+    """s[i] 是开引号，返回闭引号之后的位置（前面有奇数个反斜杠的引号是转义的）。"""
+    j = i + 1
+    while True:
+        j = s.find('"', j)
+        if j < 0:
+            raise ValueError("字符串没闭合")
+        k = j - 1
+        while s[k] == "\\":
+            k -= 1
+        if (j - 1 - k) % 2 == 0:
+            return j + 1
+        j += 1
+
+
+def _skip_value(s: str, i: int) -> int:
+    c = s[i]
+    if c == '"':
+        return _string_end(s, i)
+    if c in "[{":
+        depth = 0
+        for m in _TOKEN.finditer(s, i):
+            ch = s[m.start()]
+            if ch == '"':
+                continue
+            depth += 1 if ch in "[{" else -1
+            if depth == 0:
+                return m.end()
+        raise ValueError("括号没配对")
+    m = _SCALAR_END.search(s, i)
+    return m.start() if m else len(s)
+
+
+def _members(s: str, i: int):
+    """对象 s[i]=='{' 的每个成员：产出 (键, 值起点, 值终点)。"""
+    j = _WS.match(s, i + 1).end()
+    if s[j] == "}":
+        return
+    while True:
+        end = _string_end(s, j)
+        key = json.loads(s[j:end])
+        j = _WS.match(s, end).end()
+        if s[j] != ":":
+            raise ValueError("缺冒号")
+        start = _WS.match(s, j + 1).end()
+        stop = _skip_value(s, start)
+        yield key, start, stop
+        j = _WS.match(s, stop).end()
+        if s[j] == "}":
+            return
+        if s[j] != ",":
+            raise ValueError("缺逗号")
+        j = _WS.match(s, j + 1).end()
+
+
+def _elements(s: str, i: int):
+    """数组 s[i]=='[' 的每个元素：产出 (起点, 终点)。"""
+    j = _WS.match(s, i + 1).end()
+    if s[j] == "]":
+        return
+    while True:
+        stop = _skip_value(s, j)
+        yield j, stop
+        j = _WS.match(s, stop).end()
+        if s[j] == "]":
+            return
+        if s[j] != ",":
+            raise ValueError("缺逗号")
+        j = _WS.match(s, j + 1).end()
+
+
 def _ipynb_text(blob: bytes) -> tuple[str, bool]:
+    if blob.count(b",") + blob.count(b"{") <= JSON_SIMPLE:
+        return _ipynb_text_json(blob)
+    return _ipynb_text_scan(blob)
+
+
+def _ipynb_text_json(blob: bytes) -> tuple[str, bool]:
     try:
         nb = json.loads(blob.decode("utf-8", errors="ignore"))
     except json.JSONDecodeError:
         return "", False
     parts, has_out = [], False
-    for cell in nb.get("cells", []):
+    for cell in (nb.get("cells") or [] if isinstance(nb, dict) else [])[:MAX_CELLS]:
+        if not isinstance(cell, dict):
+            break
         src = cell.get("source", "")
-        parts.append("".join(src) if isinstance(src, list) else str(src))
+        parts.append("".join(map(str, src)) if isinstance(src, list) else str(src))
         if cell.get("outputs"):
             has_out = True
+    return "\n\n".join(parts), has_out
+
+
+def _ipynb_text_scan(blob: bytes) -> tuple[str, bool]:
+    s = blob.decode("utf-8", errors="ignore")
+    parts, has_out, size = [], False, 0
+    try:
+        top = _WS.match(s).end()
+        if s[top] != "{":
+            return "", False
+        cells = next(((a, b) for k, a, b in _members(s, top) if k == "cells" and s[a] == "["), None)
+        if not cells:
+            return "", False
+        for n, (a, _b) in enumerate(_elements(s, cells[0])):
+            if n >= MAX_CELLS or s[a] != "{":
+                break
+            for key, va, vb in _members(s, a):
+                if key == "source" and size < MAX_TEXT_CHARS:
+                    src = json.loads(s[va:vb])  # 只解析源码这一小段
+                    text = "".join(map(str, src)) if isinstance(src, list) else str(src)
+                    parts.append(text)
+                    size += len(text)
+                elif key == "outputs" and s[va] == "[" and s[_WS.match(s, va + 1).end()] != "]":
+                    has_out = True
+    except (ValueError, IndexError, json.JSONDecodeError):
+        return "", False
     return "\n\n".join(parts), has_out
 
 

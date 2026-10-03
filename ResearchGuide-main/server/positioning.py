@@ -50,7 +50,7 @@ class PositionError(Exception):
 
 
 def _norm(s: str) -> str:
-    return re.sub(r"\s+", "", (s or "").lower())
+    return "".join((s or "").lower().split())  # 去掉所有空白；比正则快，算稀有度时要对几十万条边各做一次
 
 
 def is_generic(text: str) -> bool:
@@ -114,10 +114,6 @@ def _self_key(row: dict[str, Any]) -> str:
     return f"channel:{row['ref']}" if row.get("ref") else _norm(row["text"])
 
 
-def _peer_keys(uids: list[str]) -> list[set[str]]:
-    """池子里每个人的边键，两条批量查询拿全（原来每人 edges() 一次、两个连接，一千人两千次）。"""
-    proofs, rows = store.proof_keys_for(uids), store.edges_for(uids)
-    return [proofs[u] | {_self_key(r) for r in rows[u]} for u in uids]
 
 
 RARITY_SHOW = 20  # 组合太多时只列最少见的这么多组，另给总数
@@ -136,13 +132,23 @@ def combo_rarity(uid: str, kit_id: str) -> dict[str, Any]:
         text_of.setdefault(e["key"], e["text"])
     keys = list(text_of)
     bit = {k: i for i, k in enumerate(keys)}
+    # 逐行读、逐行置位：只选需要的列，不先把几十万条边攒成字典和集合（原来五千人时要一秒、一百七十多 MB）
+    seat = {u: i for i, u in enumerate(pool)}
     cols = [bytearray((len(pool) + 7) // 8) for _ in keys]
-    for p, peer in enumerate(_peer_keys(pool)):
-        byte, flag = p >> 3, 1 << (p & 7)
-        for k in peer:
-            i = bit.get(k)
-            if i is not None:
-                cols[i][byte] |= flag
+    norm_of: dict[str, str] = {}
+    for u, proof, ref, text in store.iter_peer_key_parts(pool):
+        if proof is not None:
+            k = proof
+        elif ref:
+            k = f"channel:{ref}"
+        else:
+            k = norm_of.get(text)
+            if k is None:
+                k = norm_of[text] = _norm(text)
+        i = bit.get(k)
+        if i is not None:
+            p = seat[u]
+            cols[i][p >> 3] |= 1 << (p & 7)
     have = [int.from_bytes(c, "little") for c in cols]
     pairs = []
     for a, b in combinations(range(len(keys)), 2):

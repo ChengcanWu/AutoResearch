@@ -536,25 +536,17 @@ def _in_chunks(uids: list[str], size: int = 500):
         yield uids[i:i + size]
 
 
-def proof_keys_for(uids: list[str]) -> dict[str, set[str]]:
-    """一批用户账本里已证明条目（behavior、active）的 key：一次查询，不按人逐个开连接。"""
-    out: dict[str, set[str]] = {u: set() for u in uids}
+def iter_peer_key_parts(uids: list[str]):
+    """逐行产出 (user_id, 账本 key 或 None, 边的 ref, 边的文字)：只选这几列、用元组、不在内存里攒整张表。
+    账本行 → (uid, key, None, None)；自述边 → (uid, None, ref, text)。"""
     with _conn() as c:
+        cur = c.cursor()
+        cur.row_factory = None
         for part in _in_chunks(uids):
-            q = f"SELECT id, user_id, key FROM facts WHERE source='behavior' AND status='active' AND user_id IN ({','.join('?' * len(part))})"
-            for r in c.execute(q, part):
-                out[r["user_id"]].add(r["key"] or r["id"])
-    return out
-
-
-def edges_for(uids: list[str]) -> dict[str, list[dict[str, Any]]]:
-    out: dict[str, list[dict[str, Any]]] = {u: [] for u in uids}
-    with _conn() as c:
-        for part in _in_chunks(uids):
-            q = f"SELECT * FROM edges WHERE user_id IN ({','.join('?' * len(part))}) ORDER BY created_at, rowid"
-            for r in c.execute(q, part):
-                out[r["user_id"]].append(dict(r))
-    return out
+            marks = ",".join("?" * len(part))
+            yield from cur.execute(f"SELECT user_id, COALESCE(NULLIF(key, ''), id), NULL, NULL FROM facts "
+                                   f"WHERE source='behavior' AND status='active' AND user_id IN ({marks})", part)
+            yield from cur.execute(f"SELECT user_id, NULL, ref, text FROM edges WHERE user_id IN ({marks})", part)
 
 
 def kit_pool(kit_id: str) -> list[str]:
