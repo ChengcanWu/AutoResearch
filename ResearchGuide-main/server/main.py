@@ -19,6 +19,7 @@ from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
+import catalog
 import llm
 import onboarding
 import planner
@@ -368,6 +369,13 @@ async def explore_courses(query: str, limit: int = 5, term: str = ""):
         raise HTTPException(400, "query is required")
     key = ("courses", query.strip(), min(10, max(1, limit)), term.strip())
     return await _shared(key, search_courses, query, limit, term)
+
+
+@app.get("/api/explore/teachers")
+def explore_teacher(name: str):
+    if not name.strip():
+        raise HTTPException(400, "name is required")
+    return catalog.teacher_payload(name.strip())
 
 
 # ---------- 边学边练：项目检索 / 选定 / 交成果（任务 3） ----------

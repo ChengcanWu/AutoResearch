@@ -42,6 +42,12 @@
 - 决策来源：陈浩文（依据设计提案 v2）
 - 登记人：助手
 
+## [2026-10-03] [BUILD] 当前学期公开课快照：每个节点本地检索，老师可点
+- 变更内容：把 2026-2027-1 全院系公开课翻进 `knowledge/catalog/`（`courses.json` / `teachers.json` / `meta.json`）。检索先读这份快照，不再每次打教务。方向树上每个节点都用节点名做关键词查课，对不上就空着。老师名可点，看到本学期教了哪些课；简介只在 OpenAlex 对上北京大学任职时才写。生成脚本：`server/catalog_build.py`。
+- 影响模块：server/catalog.py、server/catalog_build.py、server/pku_adapter.py、server/main.py、web/js/app.js、web/css/styles.css、knowledge/catalog/、docs/ARCHITECTURE.md
+- 决策来源：邬程灿
+- 登记人：助手
+
 ## [2026-10-02] [BUILD] 方向树画成「6 步主干 + 原有节点」（任务 4 路径进树）
 - 变更内容：新增 `GET /api/paths`；前端启动时读路径，把数学、人工智能、认知、经济四棵树组成「6 步主干 + 原有节点」：主干竖排成一条粗线、带序号，原有概念节点按 `docs/paths/改树建议.md` §3/§4/§7/§8 的改动清单挂到对应步骤右侧（`web/js/app.js` 的 `CHAIN_ATTACH`），`FIELD_TREES` 原文不动；统计、系统不变。点主干看「先弄懂什么 / 做完怎样算过了」，并能直接「找能交出这一步的项目」；任务页标出当前节点属于第几步、这一步要交什么；「项目」页按树上的位置预选步骤。修复：第一次在方向区接过服务端已选方向时没有按已交任务对齐进度。
 - 影响模块：server/main.py、web/js/app.js、web/css/styles.css、server/tests/、docs/DESIGN_SPEC.md、docs/TASK3_PROJECTS.md、docs/paths/README.md（一行）

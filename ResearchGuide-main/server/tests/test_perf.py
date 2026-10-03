@@ -163,6 +163,7 @@ def test_concurrent_identical_arxiv_and_course_lookups_hit_upstream_once(monkeyp
     assert len(got) == 1
 
     monkeypatch.setattr(pku_adapter, "_SEARCH_CACHE", TTLCache(60, 16))
+    monkeypatch.setattr(pku_adapter.catalog, "available", lambda: False)  # 不走本机学期快照，测实时检索那条路
     monkeypatch.setattr(pku_adapter, "_default_term", lambda: "25-26-1")
     runs = []
     monkeypatch.setattr(pku_adapter, "_run_pku", lambda args, timeout=60: runs.append(args) or time.sleep(0.2) or (0, {"items": []}, ""))
