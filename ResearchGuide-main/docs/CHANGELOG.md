@@ -6,6 +6,12 @@
 
 ---
 
+## [2026-10-03] [FIX] 模型设置只许管理员改；DeepSeek 默认关思考、输出封顶
+- 变更内容：`POST /api/llm/connect` 原来任何访客都能调用，可以换掉服务器的密钥，或把所有模型请求转到任意 https 地址；现在设了 `ADMIN_TOKEN` 就要带 `X-Admin-Token`，没设只许服务器本机。「连接模型」弹窗多一个可选的管理员口令。写 `.env` 改为只改三行，不再冲掉别的配置。默认模型改为 `deepseek-flash`（DeepSeek 的 /models 只剩它和 `deepseek-v4-pro`，`deepseek-chat` 已列入停用，目前仍被路由到 flash 非思考）；flash 默认开思考，对 DeepSeek 显式关掉（设了 `LLM_REASONING_EFFORT` 则不关）；每次请求 `max_tokens` 默认封顶 2000。
+- 影响模块：server/main.py、server/llm.py、web/js/app.js、.env.example、server/tests/test_llm_guard.py
+- 决策来源：陈浩文
+- 登记人：助手
+
 ## [2026-10-03] [BUILD] 当前学期公开课快照：每个节点本地检索，老师可点
 - 变更内容：把 2026-2027-1 全院系公开课翻进 `knowledge/catalog/`（`courses.json` / `teachers.json` / `meta.json`）。检索先读这份快照，不再每次打教务。方向树上每个节点都用节点名做关键词查课，对不上就空着。老师名可点，看到本学期教了哪些课；简介只在 OpenAlex 对上北京大学任职时才写。生成脚本：`server/catalog_build.py`。
 - 影响模块：server/catalog.py、server/catalog_build.py、server/pku_adapter.py、server/main.py、web/js/app.js、web/css/styles.css、knowledge/catalog/、docs/ARCHITECTURE.md
