@@ -629,7 +629,7 @@ def test_rarity_counts_pairs_from_peer_bitmasks(monkeypatch):
 def test_abstract_fallback_is_retried_after_transient_failures(tmp_path, monkeypatch):
     monkeypatch.setattr(arxiv, "CACHE_DIR", tmp_path / "papers")
     monkeypatch.setattr(arxiv, "papers", lambda ids: [{"title": "T", "summary": "abstract only", "url": "u"}])
-    html = "<article><p>" + "Full text sentence. " * 200 + "</p></article>"
+    html = "<html><body><article><p>" + "Full text sentence. " * 200 + "</p></article></body></html>"  # 真实页面以 </html> 结尾
     state = {"err": arxiv.ArxivError("连不上 arXiv")}
 
     def get(url, timeout=20, max_bytes=0):
@@ -646,3 +646,92 @@ def test_abstract_fallback_is_retried_after_transient_failures(tmp_path, monkeyp
     state["err"] = arxiv.ArxivError("arXiv 返回 HTTP 404", 404)  # 确实没有 HTML 版：隔一周再试
     got = arxiv._fetch_fulltext("2401.00001")
     assert got["source"] == "abstract" and got["retry_after"] - arxiv.time.time() > 6 * 24 * 3600
+
+
+# ---------- 第六轮 ----------
+
+def test_expired_queued_dns_lookups_are_cancelled(monkeypatch):
+    import socket
+    import limits
+
+    def fake(host, *a, **k):
+        if host != "fresh.invalid":
+            time.sleep(0.5)
+        return [(socket.AF_INET, socket.SOCK_STREAM, 6, "", ("127.0.0.1", 9))]
+
+    monkeypatch.setattr(socket, "getaddrinfo", fake)
+    for host in ["r1", "r2", "r3", "r4"]:  # 占满四个解析线程，已经开始跑，取消不了
+        with pytest.raises(limits.ReadLimitError):
+            limits._Watch(time.monotonic() + 0.02).resolve(host, 80)
+    for host in ["q1", "q2", "q3", "q4"]:  # 排在队里，等的人超时走了：应当被取消
+        with pytest.raises(limits.ReadLimitError):
+            limits._Watch(time.monotonic() + 0.02).resolve(host, 80)
+    assert limits._Watch(time.monotonic() + 0.8).resolve("fresh.invalid", 80)  # 不用等四个过期的慢解析先跑完
+    time.sleep(0.5)
+
+
+class _ShortBody(__import__("http.server").server.BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header("Content-Length", "1000")
+        self.end_headers()
+        self.wfile.write(b"x" * 100)  # 声明 1000 字节，只给 100 就断开
+
+    def log_message(self, *a):
+        pass
+
+
+def test_truncated_bodies_are_not_accepted_as_complete(tmp_path, monkeypatch):
+    import urllib.request
+    import limits
+    from http.server import ThreadingHTTPServer
+    srv = ThreadingHTTPServer(("127.0.0.1", 0), _ShortBody)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    try:
+        with pytest.raises(OSError) as exc:
+            limits.fetch(urllib.request.Request(f"http://127.0.0.1:{srv.server_address[1]}/"), timeout=2, max_bytes=10_000)
+        assert not isinstance(exc.value, limits.ReadLimitError)
+    finally:
+        srv.shutdown()
+    # 没声明长度、提前断开的正文页：看页尾没有 </html>，当临时失败，只给摘要并很快重试
+    monkeypatch.setattr(arxiv, "CACHE_DIR", tmp_path / "papers")
+    monkeypatch.setattr(arxiv, "papers", lambda ids: [{"title": "T", "summary": "abstract", "url": "u"}])
+    monkeypatch.setattr(arxiv, "_get", lambda url, timeout=20, max_bytes=0: b"<html><article>" + b"half " * 1000)
+    got = arxiv.fulltext("2310.17623")
+    assert got["source"] == "abstract" and got["retry_after"] - time.time() < arxiv.RETRY_TRANSIENT + 5
+
+
+def test_expired_abstract_refresh_keeps_cache_and_backs_off(tmp_path, monkeypatch):
+    import json as _json
+    monkeypatch.setattr(arxiv, "CACHE_DIR", tmp_path)
+    (tmp_path / "2310.17623.json").write_text(_json.dumps(
+        {"id": "2310.17623", "title": "T", "source": "abstract", "text": "cached abstract", "url": "u", "retry_after": 0}), encoding="utf-8")
+    meta_calls, html_calls = [], []
+    monkeypatch.setattr(arxiv, "papers", lambda ids: meta_calls.append(1) or (_ for _ in ()).throw(arxiv.ArxivError("连不上 arXiv")))
+
+    def down(url, timeout=20, max_bytes=0):
+        html_calls.append(1)
+        raise arxiv.ArxivError("连不上 arXiv")
+
+    monkeypatch.setattr(arxiv, "_get", down)
+    first = arxiv.fulltext("2310.17623")
+    second = arxiv.fulltext("2310.17623")
+    assert first["text"] == second["text"] == "cached abstract"  # 没有因为刷新失败而报错
+    assert meta_calls == [] and html_calls == [1]  # 不再取元数据；失败后十分钟内不重试
+    assert first["retry_after"] - time.time() > arxiv.RETRY_TRANSIENT - 5
+
+
+def test_rarity_stays_fast_with_dense_varied_histories(monkeypatch):
+    import random
+    import positioning
+    rng = random.Random(7)
+    keys = [f"k{i}" for i in range(120)]
+    pool = [f"u{i}" for i in range(5000)]
+    peers = [set(rng.sample(keys, 60)) for _ in pool]  # 每人 60 条重合边，位图几乎各不相同
+    monkeypatch.setattr(store, "kit_pool", lambda kit: pool)
+    monkeypatch.setattr(positioning, "_peer_keys", lambda uids: peers)
+    monkeypatch.setattr(positioning, "edges", lambda uid: {"edges": [{"key": k, "text": k} for k in keys]})
+    t0 = time.perf_counter()
+    r = positioning.combo_rarity("me", "llm-eval")
+    assert time.perf_counter() - t0 < 0.5 and r["total"] == 7140
+    assert all(p["band"] == "常见" for p in r["pairs"])  # 每对约 1240 人都有

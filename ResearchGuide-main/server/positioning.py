@@ -125,8 +125,8 @@ RARITY_SHOW = 20  # 组合太多时只列最少见的这么多组，另给总数
 
 def combo_rarity(uid: str, kit_id: str) -> dict[str, Any]:
     """两两组合在同一工具包的池子里有多少人也有；k ≥ K_MIN 才计数，按档显示。
-    先把每个同学的边压成「我的哪些边他也有」的位图，相同位图合并计数，再只在位图内部数组合：
-    不再「我的每一对 × 每个同学」逐一检查（120 条边、5000 人时约一秒）。"""
+    每条边建一个「哪些同学有它」的位集（每人一位），一对边的人数 = 两个位集按位与后数 1 的个数：
+    计算量只和「我的边数的平方 × 人数/64」有关，不再逐人展开组合（每人 60 条重合边时要八百多万次计数）。"""
     pool = [u for u in store.kit_pool(kit_id) if u != uid]
     mine = edges(uid)["edges"]
     if len(pool) + 1 < POOL_MIN:
@@ -136,21 +136,17 @@ def combo_rarity(uid: str, kit_id: str) -> dict[str, Any]:
         text_of.setdefault(e["key"], e["text"])
     keys = list(text_of)
     bit = {k: i for i, k in enumerate(keys)}
-    masks: Counter = Counter()
-    for peer in _peer_keys(pool):
-        m = 0
+    cols = [bytearray((len(pool) + 7) // 8) for _ in keys]
+    for p, peer in enumerate(_peer_keys(pool)):
+        byte, flag = p >> 3, 1 << (p & 7)
         for k in peer:
-            if k in bit:
-                m |= 1 << bit[k]
-        if m & (m - 1):  # 至少两条和我重合才可能贡献组合
-            masks[m] += 1
-    together: Counter = Counter()
-    for m, n in masks.items():
-        for a, b in combinations([i for i in range(len(keys)) if m >> i & 1], 2):
-            together[(a, b)] += n
+            i = bit.get(k)
+            if i is not None:
+                cols[i][byte] |= flag
+    have = [int.from_bytes(c, "little") for c in cols]
     pairs = []
     for a, b in combinations(range(len(keys)), 2):
-        n = together[(a, b)]
+        n = (have[a] & have[b]).bit_count()
         band = "罕见" if n < K_MIN else "少见" if n < 0.15 * len(pool) else "常见"
         pairs.append((n, {"a": text_of[keys[a]], "b": text_of[keys[b]], "band": band}))
     pairs.sort(key=lambda x: x[0])

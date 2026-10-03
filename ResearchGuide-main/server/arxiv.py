@@ -168,13 +168,15 @@ RETRY_NO_HTML = 7 * 24 * 3600
 RETRY_TRANSIENT = 10 * 60
 
 
+def _on_disk(aid: str) -> dict[str, Any] | None:
+    path = CACHE_DIR / f"{aid}.json"
+    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else None
+
+
 def _cached(aid: str) -> dict[str, Any] | None:
     """磁盘缓存：正文版一直有效；只有摘要的到了重试时间就当没有（旧缓存没有重试时间，也当到期）。"""
-    path = CACHE_DIR / f"{aid}.json"
-    if not path.exists():
-        return None
-    got = json.loads(path.read_text(encoding="utf-8"))
-    if got.get("source") == "abstract" and time.time() >= got.get("retry_after", 0):
+    got = _on_disk(aid)
+    if got and got.get("source") == "abstract" and time.time() >= got.get("retry_after", 0):
         return None
     return got
 
@@ -194,14 +196,20 @@ def _fetch_fulltext(aid: str) -> dict[str, Any]:
     got = _cached(aid)
     if got is not None:  # 排在前面的那一个刚写好
         return got
-    meta = papers([aid])
-    if not meta:
-        raise ArxivError(f"arXiv 上没有 {aid}")
-    m = meta[0]
-    result = {"id": aid, "title": m["title"], "source": "abstract", "text": m["summary"], "url": m["url"]}
+    stale = _on_disk(aid)  # 到期的摘要版：标题、摘要已经有了，只重试正文，不再去取元数据
+    if stale:
+        result = {k: stale[k] for k in ("id", "title", "source", "text", "url")}
+    else:
+        meta = papers([aid])
+        if not meta:
+            raise ArxivError(f"arXiv 上没有 {aid}")
+        m = meta[0]
+        result = {"id": aid, "title": m["title"], "source": "abstract", "text": m["summary"], "url": m["url"]}
     retry = RETRY_NO_HTML
     try:
         page = _get(f"https://arxiv.org/html/{aid}", timeout=30, max_bytes=MAX_HTML_BYTES).decode("utf-8", errors="replace")
+        if "</html>" not in page[-4096:].lower():
+            raise ArxivError("arXiv 正文页不完整")  # 没有声明长度的响应提前断开时，只能从页尾看出来；当临时失败处理
         text = _html_to_text(page)
         if len(text) > 2000:
             result.update(source="html", text=text)

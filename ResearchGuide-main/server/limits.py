@@ -14,7 +14,7 @@ import threading
 import time
 import urllib.error
 import urllib.request
-from concurrent.futures import Future, ThreadPoolExecutor
+from concurrent.futures import CancelledError, Future, ThreadPoolExecutor
 from concurrent.futures import TimeoutError as FutureTimeout
 from collections import OrderedDict
 from typing import Any, Hashable
@@ -52,6 +52,9 @@ def read_limited(resp: Any, max_bytes: int, deadline: float) -> bytes:
         except TimeoutError as exc:
             raise ReadLimitError("超过总时限") from exc
         if not chunk:
+            declared = (getattr(resp, "headers", None) or {}).get("Content-Length", "")
+            if (declared.isdigit() and len(buf) < int(declared)) or (getattr(resp, "length", None) or 0) > 0:
+                raise OSError("响应不完整：连接提前断开")  # 当作网络错误，调用方不会把半份内容当成完整结果缓存
             return bytes(buf)
         buf += chunk
         if len(buf) > max_bytes:
@@ -59,28 +62,47 @@ def read_limited(resp: Any, max_bytes: int, deadline: float) -> bytes:
 
 
 _DNS_POOL = ThreadPoolExecutor(max_workers=4, thread_name_prefix="dns")
-# 同一主机正在解析就共用那一次：一个解析很慢的主机最多占一个解析线程，不会把四个都占满、连累别的主机
-_DNS_INFLIGHT: dict[tuple[str, int], Future] = {}
-_DNS_LOCK = threading.Lock()
 
 
-def _resolve_shared(host: str, port: int) -> Future:
+# 同一主机正在解析就共用那一次：一个解析很慢的主机最多占一个解析线程，不会把四个都占满、连累别的主机。
+# 记着有几个请求在等；最后一个等的人超时走了，还在排队没开始的解析就取消，不让过期的活占住线程。
+class _Lookup:
+    __slots__ = ("fut", "waiters")
+
+    def __init__(self, fut: Future) -> None:
+        self.fut = fut
+        self.waiters = 0
+
+
+_DNS_INFLIGHT: dict[tuple[str, int], _Lookup] = {}
+_DNS_LOCK = threading.RLock()  # 取消会在本线程里立刻触发完成回调，回调要拿同一把锁
+
+
+def _forget_dns(key: tuple[str, int], lk: _Lookup) -> None:
+    with _DNS_LOCK:
+        if _DNS_INFLIGHT.get(key) is lk:
+            del _DNS_INFLIGHT[key]
+
+
+def _resolve(host: str, port: int, left: float) -> list:
     key = (host, port)
     with _DNS_LOCK:
-        fut = _DNS_INFLIGHT.get(key)
-        created = fut is None
+        lk = _DNS_INFLIGHT.get(key)
+        created = lk is None
         if created:
-            fut = _DNS_POOL.submit(socket.getaddrinfo, host, port, 0, socket.SOCK_STREAM)
-            _DNS_INFLIGHT[key] = fut
-    if created:  # 在锁外加回调：已完成的 future 会立刻在本线程回调，回调里要拿同一把锁
-        fut.add_done_callback(lambda done, k=key: _forget_dns(k, done))
-    return fut
-
-
-def _forget_dns(key: tuple[str, int], done: Future) -> None:
-    with _DNS_LOCK:
-        if _DNS_INFLIGHT.get(key) is done:
-            del _DNS_INFLIGHT[key]
+            lk = _DNS_INFLIGHT[key] = _Lookup(_DNS_POOL.submit(socket.getaddrinfo, host, port, 0, socket.SOCK_STREAM))
+        lk.waiters += 1
+    if created:
+        lk.fut.add_done_callback(lambda _done, k=key, me=lk: _forget_dns(k, me))
+    try:
+        return lk.fut.result(timeout=left)
+    except (FutureTimeout, CancelledError) as exc:
+        raise ReadLimitError("超过总时限（域名解析）") from exc
+    finally:
+        with _DNS_LOCK:
+            lk.waiters -= 1
+            if lk.waiters == 0 and not lk.fut.done():
+                lk.fut.cancel()  # 已经开始跑的取消不了（getaddrinfo 打断不了），排队中的就此作罢
 
 
 class _Watch:
@@ -101,12 +123,7 @@ class _Watch:
         left = self.left()
         if left <= 0:
             raise ReadLimitError("超过总时限")
-        fut = _resolve_shared(host, port)
-        try:
-            return fut.result(timeout=left)
-        except FutureTimeout as exc:
-            # 不取消：别的请求可能也在等这一次解析；它完成后自动从共享表里移除
-            raise ReadLimitError("超过总时限（域名解析）") from exc
+        return _resolve(host, port, left)
 
     def adopt(self, sock: socket.socket) -> None:
         """登记 socket 的副本：TLS 包装会摘走原对象，副本指向同一条连接，到点 shutdown 照样有效。"""
