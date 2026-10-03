@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """演示版存储层：SQLite（标准库 sqlite3），单文件零运维。
 
-表：users / facts / tasks / submissions / messages。
+表：users / facts / tasks / submissions / messages / portraits / projects，
+研读层 triage / cards，定位层 edges / statements / bets。
 正式版将迁移到 SQLModel + Alembic（见 docs/ARCHITECTURE.md），
 但表结构与本文件的字段一一对应，迁移成本可控。
 """
@@ -75,6 +76,56 @@ CREATE TABLE IF NOT EXISTS projects (
   created_at TEXT NOT NULL,
   updated_at TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS triage (
+  user_id TEXT NOT NULL,
+  kit_id TEXT NOT NULL,
+  arxiv_id TEXT NOT NULL,
+  verdict TEXT NOT NULL,
+  why TEXT NOT NULL,
+  title TEXT NOT NULL DEFAULT '',
+  created_at TEXT NOT NULL,
+  PRIMARY KEY (user_id, kit_id, arxiv_id)
+);
+CREATE TABLE IF NOT EXISTS cards (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  kit_id TEXT NOT NULL,
+  arxiv_id TEXT NOT NULL,
+  version INTEGER NOT NULL,
+  data TEXT NOT NULL,
+  status TEXT NOT NULL,
+  created_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_cards_user ON cards(user_id, kit_id, arxiv_id);
+CREATE TABLE IF NOT EXISTS edges (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  kind TEXT NOT NULL,
+  text TEXT NOT NULL,
+  evidence_url TEXT NOT NULL DEFAULT '',
+  ref TEXT NOT NULL DEFAULT '',
+  created_at TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS statements (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  kit_id TEXT NOT NULL,
+  version INTEGER NOT NULL,
+  x_ref TEXT NOT NULL,
+  data TEXT NOT NULL,
+  created_at TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS bets (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  data TEXT NOT NULL,
+  status TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_edges_user ON edges(user_id);
+CREATE INDEX IF NOT EXISTS idx_statements_user ON statements(user_id, kit_id);
+CREATE INDEX IF NOT EXISTS idx_bets_user ON bets(user_id);
 CREATE INDEX IF NOT EXISTS idx_facts_user ON facts(user_id);
 CREATE INDEX IF NOT EXISTS idx_projects_user ON projects(user_id);
 CREATE INDEX IF NOT EXISTS idx_tasks_user ON tasks(user_id);
@@ -100,6 +151,9 @@ def init_db() -> None:
     with _LOCK, _conn() as c:
         c.execute("PRAGMA journal_mode=WAL")  # 读写不互相阻塞，演示时多开几个页面也不锁库
         c.executescript(_SCHEMA)
+        cols = {r["name"] for r in c.execute("PRAGMA table_info(edges)")}
+        if "ref" not in cols:  # 早期本地库没有 ref 列（信息源边指向 knowledge/channels.json 的 id）
+            c.execute("ALTER TABLE edges ADD COLUMN ref TEXT NOT NULL DEFAULT ''")
 
 
 # ---------- users ----------
@@ -418,3 +472,137 @@ def list_projects(uid: str) -> list[dict[str, Any]]:
         rows = c.execute("SELECT * FROM projects WHERE user_id=? ORDER BY updated_at DESC", (uid,)).fetchall()
     return [{**json.loads(r["data"]), "id": r["id"], "status": r["status"],
              "created_at": r["created_at"], "updated_at": r["updated_at"]} for r in rows]
+
+
+# ---------- 研读：每日分拣与阅读卡 ----------
+
+def save_triage(uid: str, kit_id: str, arxiv_id: str, verdict: str, why: str, title: str = "") -> None:
+    with _LOCK, _conn() as c:
+        c.execute(
+            "INSERT OR REPLACE INTO triage(user_id, kit_id, arxiv_id, verdict, why, title, created_at) VALUES(?,?,?,?,?,?,?)",
+            (uid, kit_id, arxiv_id, verdict, why, title, now_iso()),
+        )
+
+
+def list_triage(uid: str, kit_id: str) -> list[dict[str, Any]]:
+    with _conn() as c:
+        rows = c.execute("SELECT * FROM triage WHERE user_id=? AND kit_id=? ORDER BY created_at DESC", (uid, kit_id)).fetchall()
+    return [dict(r) for r in rows]
+
+
+def save_card(card: dict[str, Any]) -> None:
+    card.setdefault("created_at", now_iso())
+    with _LOCK, _conn() as c:
+        c.execute(
+            "INSERT INTO cards(id, user_id, kit_id, arxiv_id, version, data, status, created_at) VALUES(?,?,?,?,?,?,?,?)",
+            (card["id"], card["uid"], card["kit_id"], card["arxiv_id"], card["version"],
+             json.dumps(card, ensure_ascii=False), card["status"], card["created_at"]),
+        )
+
+
+def _card_rows(rows: list[sqlite3.Row]) -> list[dict[str, Any]]:
+    return [json.loads(r["data"]) for r in rows]
+
+
+def latest_card(uid: str, kit_id: str, arxiv_id: str) -> dict[str, Any] | None:
+    with _conn() as c:
+        row = c.execute("SELECT data FROM cards WHERE user_id=? AND kit_id=? AND arxiv_id=? ORDER BY version DESC LIMIT 1",
+                        (uid, kit_id, arxiv_id)).fetchone()
+    return json.loads(row["data"]) if row else None
+
+
+def card_history(uid: str, kit_id: str, arxiv_id: str) -> list[dict[str, Any]]:
+    with _conn() as c:
+        rows = c.execute("SELECT data FROM cards WHERE user_id=? AND kit_id=? AND arxiv_id=? ORDER BY version DESC",
+                         (uid, kit_id, arxiv_id)).fetchall()
+    return _card_rows(rows)
+
+
+def latest_cards(uid: str, kit_id: str) -> list[dict[str, Any]]:
+    """每篇论文只取最新一版。"""
+    with _conn() as c:
+        rows = c.execute(
+            "SELECT data FROM cards c WHERE user_id=? AND kit_id=? AND version = "
+            "(SELECT MAX(version) FROM cards c2 WHERE c2.user_id=c.user_id AND c2.kit_id=c.kit_id AND c2.arxiv_id=c.arxiv_id) "
+            "ORDER BY created_at, rowid", (uid, kit_id)).fetchall()
+    return _card_rows(rows)
+
+
+def kit_pool(kit_id: str) -> list[str]:
+    """在这个工具包里至少有一张过线阅读卡的用户：竞争地图只数有投入的人。"""
+    with _conn() as c:
+        rows = c.execute("SELECT DISTINCT user_id FROM cards WHERE kit_id=? AND status='pass'", (kit_id,)).fetchall()
+    return [r["user_id"] for r in rows]
+
+
+# ---------- 定位：边、定位陈述、下注组合 ----------
+
+def add_edge(uid: str, kind: str, text: str, evidence_url: str = "", ref: str = "") -> dict[str, Any]:
+    row = {"id": new_id(), "user_id": uid, "kind": kind, "text": text, "evidence_url": evidence_url, "ref": ref, "created_at": now_iso()}
+    with _LOCK, _conn() as c:
+        c.execute("INSERT INTO edges(id, user_id, kind, text, evidence_url, ref, created_at) "
+                  "VALUES(:id,:user_id,:kind,:text,:evidence_url,:ref,:created_at)", row)
+    return row
+
+
+def channel_readers() -> dict[str, set[str]]:
+    """每个信息源有哪些用户标了「我常看」。"""
+    with _conn() as c:
+        rows = c.execute("SELECT user_id, ref FROM edges WHERE kind='source' AND ref != ''").fetchall()
+    out: dict[str, set[str]] = {}
+    for r in rows:
+        out.setdefault(r["ref"], set()).add(r["user_id"])
+    return out
+
+
+def list_edges(uid: str) -> list[dict[str, Any]]:
+    with _conn() as c:
+        rows = c.execute("SELECT * FROM edges WHERE user_id=? ORDER BY created_at, rowid", (uid,)).fetchall()
+    return [dict(r) for r in rows]
+
+
+def delete_edge(uid: str, edge_id: str) -> bool:
+    with _LOCK, _conn() as c:
+        return c.execute("DELETE FROM edges WHERE id=? AND user_id=?", (edge_id, uid)).rowcount > 0
+
+
+def save_statement(uid: str, kit_id: str, x_ref: str, data: dict[str, Any]) -> dict[str, Any]:
+    with _LOCK, _conn() as c:
+        row = c.execute("SELECT MAX(version) AS v FROM statements WHERE user_id=? AND kit_id=?", (uid, kit_id)).fetchone()
+        version = (row["v"] or 0) + 1
+        rec = {**data, "id": new_id(), "version": version, "kit_id": kit_id, "x_ref": x_ref, "created_at": now_iso()}
+        c.execute("INSERT INTO statements(id, user_id, kit_id, version, x_ref, data, created_at) VALUES(?,?,?,?,?,?,?)",
+                  (rec["id"], uid, kit_id, version, x_ref, json.dumps(rec, ensure_ascii=False), rec["created_at"]))
+    return rec
+
+
+def latest_statement(uid: str, kit_id: str) -> dict[str, Any] | None:
+    with _conn() as c:
+        row = c.execute("SELECT data FROM statements WHERE user_id=? AND kit_id=? ORDER BY version DESC LIMIT 1", (uid, kit_id)).fetchone()
+    return json.loads(row["data"]) if row else None
+
+
+def statement_refs(kit_id: str, before: str) -> dict[str, str]:
+    """每个用户在 before 之前最新一版陈述指向的 x_ref（竞争地图的需求，滞后计）。"""
+    with _conn() as c:
+        rows = c.execute(
+            "SELECT user_id, x_ref FROM statements s WHERE kit_id=? AND created_at < ? AND version = "
+            "(SELECT MAX(version) FROM statements s2 WHERE s2.user_id=s.user_id AND s2.kit_id=s.kit_id AND s2.created_at < ?)",
+            (kit_id, before, before)).fetchall()
+    return {r["user_id"]: r["x_ref"] for r in rows}
+
+
+def save_bet(uid: str, bet: dict[str, Any]) -> dict[str, Any]:
+    bet = {**bet, "updated_at": now_iso()}
+    bet.setdefault("id", new_id())
+    bet.setdefault("created_at", bet["updated_at"])
+    with _LOCK, _conn() as c:
+        c.execute("INSERT OR REPLACE INTO bets(id, user_id, data, status, created_at, updated_at) VALUES(?,?,?,?,?,?)",
+                  (bet["id"], uid, json.dumps(bet, ensure_ascii=False), bet["status"], bet["created_at"], bet["updated_at"]))
+    return bet
+
+
+def list_bets(uid: str) -> list[dict[str, Any]]:
+    with _conn() as c:
+        rows = c.execute("SELECT data FROM bets WHERE user_id=? ORDER BY created_at, rowid", (uid,)).fetchall()
+    return [json.loads(r["data"]) for r in rows]

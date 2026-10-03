@@ -20,7 +20,9 @@ import catalog
 import llm
 import onboarding
 import planner
+import positioning
 import projects
+import reading
 import store
 import submission
 import workbench
@@ -94,6 +96,62 @@ class ProjectSearchReq(BaseModel):
 class ProjectPickReq(BaseModel):
     uid: str
     id: str
+
+
+class TriageReq(BaseModel):
+    uid: str
+    kit: str
+    arxiv_id: str
+    verdict: str
+    why: str
+    title: str = ""
+
+
+class CardReq(BaseModel):
+    uid: str
+    kit: str
+    arxiv_id: str
+    fields: dict[str, str] = {}
+    dims: dict[str, str] = {}
+    decision_log: list[dict[str, str]] = []
+
+
+class EdgeReq(BaseModel):
+    uid: str
+    kind: str
+    text: str
+    evidence_url: str = ""
+
+
+class StatementReq(BaseModel):
+    uid: str
+    kit: str
+    x_ref: str = ""
+    x_text: str = ""
+    y: list[str] = []
+    dry_run: bool = False
+
+
+class ChannelReq(BaseModel):
+    uid: str
+    id: str
+    on: bool
+    direction: str
+
+
+class BetReq(BaseModel):
+    uid: str
+    name: str
+    kind: str
+    tier: str
+    kit: str = ""
+    niche: str = ""
+
+
+class BetCloseReq(BaseModel):
+    uid: str
+    outcome: str
+    reason: str
 
 
 class PortraitReq(BaseModel):
@@ -400,6 +458,152 @@ async def project_submit(pid: str, uid: str, request: Request):
         raise HTTPException(400, str(exc)) from exc
     result["fact"] = projects.record_review(uid, p, result)
     return result
+
+
+# ---------- 研读：领域工具包 / 每日情报 / 阅读卡 / 矩阵 ----------
+
+def _reading(fn, *args):
+    try:
+        return fn(*args)
+    except (reading.ReadingError, positioning.PositionError) as exc:
+        raise HTTPException(400, str(exc)) from exc
+    except reading.arxiv.ArxivError as exc:
+        raise HTTPException(502, str(exc)) from exc
+
+
+@app.get("/api/kits")
+def kits_list():
+    return {"kits": [{k: v for k, v in kit.items() if k in ("id", "name", "version", "direction", "goal", "status")}
+                     for kit in reading.kits().values()]}
+
+
+@app.get("/api/kits/{kit_id}")
+def kit_get(kit_id: str):
+    return _reading(reading.kit, kit_id)
+
+
+@app.get("/api/daily")
+def daily_feed(uid: str, kit: str):
+    _user_or_404(uid)
+    d = _reading(reading.daily, uid, kit)
+    today = [r for r in d["recent_keeps"] if r["created_at"][:10] == reading.now_iso()[:10]]
+    return {**d, "tweak": _reading(positioning.daily_tweak, uid, kit, today)}
+
+
+@app.post("/api/daily/triage")
+def daily_triage(req: TriageReq):
+    _user_or_404(req.uid)
+    return _reading(reading.triage, req.uid, req.kit, req.arxiv_id, req.verdict, req.why, req.title)
+
+
+@app.get("/api/papers/{arxiv_id}")
+def paper_text(arxiv_id: str):
+    """论文正文（arXiv HTML 版，取不到则只有摘要）。只读、缓存。"""
+    p = _reading(reading.arxiv.fulltext, arxiv_id)
+    return {**p, "sections": [{"name": n, "label": reading.arxiv.section_cn(n), "at": at} for n, at in reading.arxiv.sections(p["text"])]}
+
+
+@app.get("/api/cards")
+def cards_list(uid: str, kit: str):
+    _user_or_404(uid)
+    return {"cards": store.latest_cards(uid, kit), "fields": reading.CARD_FIELDS}
+
+
+@app.get("/api/cards/{arxiv_id}/history")
+def card_history(arxiv_id: str, uid: str, kit: str):
+    _user_or_404(uid)
+    return {"versions": store.card_history(uid, kit, arxiv_id)}
+
+
+@app.post("/api/cards")
+def card_submit(req: CardReq):
+    _user_or_404(req.uid)
+    return _reading(reading.submit_card, req.uid, req.kit, req.arxiv_id, req.fields, req.dims, req.decision_log)
+
+
+@app.get("/api/matrix")
+def matrix_get(uid: str, kit: str):
+    _user_or_404(uid)
+    return _reading(reading.matrix, uid, kit)
+
+
+@app.get("/api/brief")
+def agent_brief(kit: str, arxiv_id: str):
+    text = _reading(reading.brief, kit, arxiv_id)
+    return Response(text, media_type="text/markdown; charset=utf-8",
+                    headers={"Content-Disposition": f"attachment; filename=AGENTS.md"})
+
+
+# ---------- 定位：边清单、竞争地图、定位陈述、下注组合 ----------
+
+@app.get("/api/edges")
+def edges_list(uid: str):
+    _user_or_404(uid)
+    return positioning.edges(uid)
+
+
+@app.post("/api/edges")
+def edges_add(req: EdgeReq):
+    _user_or_404(req.uid)
+    return _reading(positioning.add_edge, req.uid, req.kind, req.text, req.evidence_url)
+
+
+@app.delete("/api/edges/{edge_id}")
+def edges_delete(edge_id: str, uid: str):
+    _user_or_404(uid)
+    return _reading(positioning.delete_edge, uid, edge_id)
+
+
+@app.get("/api/channels")
+def channels_map(uid: str, direction: str):
+    """这个方向的人在哪说话：信息源地图（knowledge/channels.json），标出学生常看的和盲区。"""
+    _user_or_404(uid)
+    return positioning.channel_map(uid, direction)
+
+
+@app.post("/api/channels/toggle")
+def channels_toggle(req: ChannelReq):
+    _user_or_404(req.uid)
+    return _reading(positioning.toggle_channel, req.uid, req.id, req.on, req.direction)
+
+
+@app.get("/api/map")
+def competition_map(uid: str, kit: str):
+    _user_or_404(uid)
+    return _reading(positioning.competition_map, uid, kit)
+
+
+@app.get("/api/statement")
+def statement_get(uid: str, kit: str):
+    _user_or_404(uid)
+    return _reading(positioning.statement, uid, kit)
+
+
+@app.post("/api/statement")
+def statement_save(req: StatementReq):
+    """dry_run=true 只跑检查不保存，给编辑时实时提示用。"""
+    _user_or_404(req.uid)
+    if req.dry_run:
+        return _reading(positioning.review_statement, req.uid, req.kit, req.x_ref, req.x_text, req.y)
+    return _reading(positioning.save_statement, req.uid, req.kit, req.x_ref, req.x_text, req.y)
+
+
+@app.get("/api/bets")
+def bets_list(uid: str):
+    _user_or_404(uid)
+    return positioning.bets(uid)
+
+
+@app.post("/api/bets")
+def bets_add(req: BetReq):
+    _user_or_404(req.uid)
+    return _reading(positioning.add_bet, req.uid, req.name, req.kind, req.tier, req.kit, req.niche)
+
+
+@app.post("/api/bets/{bet_id}/close")
+def bets_close(bet_id: str, req: BetCloseReq):
+    _user_or_404(req.uid)
+    return _reading(positioning.close_bet, req.uid, bet_id, req.outcome, req.reason)
 
 
 @app.post("/api/llm/connect")
