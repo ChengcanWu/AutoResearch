@@ -19,6 +19,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from singleflight import SingleFlight
+
 ROOT = Path(__file__).resolve().parent.parent
 SKILL_DIR = (ROOT / "skills" / "pku-course").resolve()
 PKU_PY = SKILL_DIR / "scripts" / "pku.py"
@@ -27,6 +29,7 @@ TERM_MAX_AGE = 3 * 24 * 3600   # 学期缓存三天后重查，避免换学期�
 SEARCH_TTL = 10 * 60           # 同一查询十分钟内复用上次的真实结果（每次都起 uv 子进程要 1–3 秒）
 _SEARCH_CACHE: dict[tuple[str, int, str], tuple[float, dict[str, Any]]] = {}
 _CACHE_LOCK = threading.Lock()
+_FLIGHT = SingleFlight()  # 同一查询并发时只起一个 uv 子进程
 
 
 def _run_pku(args: list[str], timeout: int = 60) -> tuple[int, Any, str]:
@@ -69,7 +72,7 @@ def _default_term() -> str | None:
         cached = DEFAULT_TERM_FILE.read_text(encoding="utf-8").strip()
         if cached:
             return cached
-    code, data, _err = _run_pku(["options", "--limit", "1"])
+    code, data, _err = _FLIGHT.do(("options",), lambda: _run_pku(["options", "--limit", "1"]))
     if code == 0 and isinstance(data, dict) and data.get("items"):
         term = data["items"][0]["value"]
         try:
@@ -94,6 +97,15 @@ def search_courses(query: str, limit: int = 5, term: str = "") -> dict[str, Any]
     with _CACHE_LOCK:
         hit = _SEARCH_CACHE.get(key)
     if hit and time.time() - hit[0] < SEARCH_TTL:
+        return {**hit[1], "cached": True}
+    return _FLIGHT.do(("search",) + key, lambda: _search_live(key))
+
+
+def _search_live(key: tuple[str, int, str]) -> dict[str, Any]:
+    query, limit, term = key
+    with _CACHE_LOCK:
+        hit = _SEARCH_CACHE.get(key)
+    if hit and time.time() - hit[0] < SEARCH_TTL:  # 排在前面的那一个刚查完
         return {**hit[1], "cached": True}
     args = ["search", "--term", term, "--offset", "0", "--limit", str(limit), "--query", query]
     code, data, err = _run_pku(args, timeout=90)

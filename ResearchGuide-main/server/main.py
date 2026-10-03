@@ -6,12 +6,15 @@
 """
 from __future__ import annotations
 
+import asyncio
 import sys
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from fastapi import FastAPI, HTTPException, Request
+from starlette.concurrency import run_in_threadpool
 from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -437,19 +440,52 @@ def project_sample(pid: str, uid: str):
                     headers={"Content-Disposition": "attachment; filename=sample.zip"})
 
 
-@app.post("/api/projects/{pid}/submit")
-async def project_submit(pid: str, uid: str, request: Request):
-    """请求体就是 .zip 本身（Content-Type: application/zip），不需要 multipart 依赖。"""
-    p = _project_or_404(uid, pid)
-    data = await request.body()
-    if not data:
-        raise HTTPException(400, "没有收到文件")
+# 评阅（解压、规则检查、模型调用、写库）都是阻塞的：放进有上限的线程池，不占事件循环。
+# 同时在等的评阅也有上限：每个都可能握着 20 MB 的上传，排队太长就直接请人稍后再交。
+REVIEW_WORKERS = 2
+REVIEW_PENDING_MAX = 6
+_REVIEW_POOL = ThreadPoolExecutor(max_workers=REVIEW_WORKERS, thread_name_prefix="review")
+_review_pending = 0  # 只在事件循环线程里改，不用锁
+
+
+async def _read_capped(request: Request, limit: int) -> bytes:
+    """边收边数，超过上限立刻停（原来先把整个请求体读进内存再判断大小）。"""
+    too_big = f"压缩包超过 {limit // 1024 // 1024} MB。大数据集请只放样例，并在 README 里写下载链接。"
+    declared = request.headers.get("content-length", "")
+    if declared.isdigit() and int(declared) > limit:
+        raise HTTPException(413, too_big)
+    buf = bytearray()
+    async for chunk in request.stream():
+        buf += chunk
+        if len(buf) > limit:
+            raise HTTPException(413, too_big)
+    return bytes(buf)
+
+
+def _review_and_record(uid: str, p: dict, data: bytes) -> dict:
     try:
         result = submission.review(data, p)
     except submission.SubmissionError as exc:
         raise HTTPException(400, str(exc)) from exc
     result["fact"] = projects.record_review(uid, p, result)
     return result
+
+
+@app.post("/api/projects/{pid}/submit")
+async def project_submit(pid: str, uid: str, request: Request):
+    """请求体就是 .zip 本身（Content-Type: application/zip），不需要 multipart 依赖。"""
+    global _review_pending
+    p = await run_in_threadpool(_project_or_404, uid, pid)
+    if _review_pending >= REVIEW_PENDING_MAX:
+        raise HTTPException(503, "现在交的人太多，评阅在排队。请过一两分钟再交。")
+    _review_pending += 1
+    try:
+        data = await _read_capped(request, submission.MAX_ZIP_BYTES)
+        if not data:
+            raise HTTPException(400, "没有收到文件")
+        return await asyncio.get_running_loop().run_in_executor(_REVIEW_POOL, _review_and_record, uid, p, data)
+    finally:
+        _review_pending -= 1
 
 
 # ---------- 研读：领域工具包 / 每日情报 / 阅读卡 / 矩阵 ----------

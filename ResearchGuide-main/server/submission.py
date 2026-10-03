@@ -26,6 +26,8 @@ MAX_FILE_BYTES = 20 * 1024 * 1024      # 单个文件
 MAX_FILES = 300
 MAX_RATIO = 120                        # 压缩比过高视为压缩炸弹
 TEXT_BUDGET = 14000                    # 送给模型的正文上限（字符）
+MAX_DOCX_XML = 8 * 1024 * 1024         # .docx 里 word/document.xml 解压后的上限（套娃压缩包同样要限）
+MAX_TEXT_CHARS = 400_000               # 每个文件解码后最多留这么多字符，规则检查只看这么多
 
 IGNORED = ("__MACOSX/", ".DS_Store", "Thumbs.db", ".git/", ".ipynb_checkpoints/", "__pycache__/")
 CODE_EXT = {".py", ".ipynb", ".r", ".m", ".jl", ".cpp", ".c", ".h", ".java", ".js", ".ts", ".go", ".rs", ".sql", ".sh", ".do", ".stata", ".sas", ".tex"}
@@ -88,13 +90,21 @@ def _kind(path: str) -> str:
 
 
 def _docx_text(blob: bytes) -> str:
+    """.docx 本身也是压缩包：解压前先看声明的大小和压缩比，读的时候再按上限截断（声明可以造假）。"""
     try:
         with zipfile.ZipFile(io.BytesIO(blob)) as z:
-            xml = z.read("word/document.xml").decode("utf-8", errors="ignore")
-    except (KeyError, zipfile.BadZipFile, OSError):
+            info = z.getinfo("word/document.xml")
+            if info.file_size > MAX_DOCX_XML or info.file_size > MAX_RATIO * max(1, info.compress_size):
+                return ""
+            with z.open(info) as f:
+                raw = f.read(MAX_DOCX_XML + 1)
+    except (KeyError, zipfile.BadZipFile, OSError, RuntimeError, NotImplementedError):
         return ""
+    if len(raw) > MAX_DOCX_XML:
+        return ""
+    xml = raw.decode("utf-8", errors="ignore")
     xml = re.sub(r"</w:p>", "\n", xml)
-    return re.sub(r"<[^>]+>", "", xml)
+    return re.sub(r"<[^>]+>", "", xml)[:MAX_TEXT_CHARS]
 
 
 def _ipynb_text(blob: bytes) -> tuple[str, bool]:
@@ -163,6 +173,8 @@ def read_zip(data: bytes) -> dict[str, Any]:
         if blob is not None:
             if low.endswith(".docx"):
                 texts[path] = _docx_text(blob)
+                if not texts[path]:
+                    notes.append(f"「{path}」读不出正文（文件损坏或解压后过大），关键内容请写进 README。")
             elif low.endswith(".ipynb"):
                 txt, has_out = _ipynb_text(blob)
                 texts[path] = txt
@@ -178,7 +190,7 @@ def read_zip(data: bytes) -> dict[str, Any]:
         item["empty"] = info.file_size == 0
         inventory.append(item)
     inventory.sort(key=lambda x: (x["kind"] != "readme", x["path"]))
-    return {"inventory": inventory, "texts": texts, "notes": notes}
+    return {"inventory": inventory, "texts": {k: v[:MAX_TEXT_CHARS] for k, v in texts.items()}, "notes": notes}
 
 
 # ---------- 规则检查（确定的事） ----------
@@ -199,11 +211,28 @@ def _sections(text: str) -> dict[str, bool]:
     return {k: any(m in hay for m in marks) for k, marks in SECTION_MARKS.items()}
 
 
+_PATH_RUN = re.compile(r"[\w\-./一-鿿]+")
+_PATH_EXT = re.compile(r"\.(?:png|jpg|jpeg|svg|csv|xlsx|pdf|ipynb|py|txt|md|json|docx|r|m)", re.I)
+
+
+def _path_tokens(text: str) -> set[str]:
+    """README 里像文件路径的词：一段连续的路径字符，截到最后一个已知扩展名为止。
+    线性扫描。原来的「字符类+ 扩展名」写法遇到很长、又不带扩展名的词会反复回溯（16 KB 要一秒）。"""
+    out = set()
+    for run in _PATH_RUN.findall(text):
+        last = None
+        for last in _PATH_EXT.finditer(run):
+            pass
+        if last is not None:
+            out.add(run[:last.end()])
+    return out
+
+
 def _referenced_paths(text: str, inventory: list[dict[str, Any]]) -> tuple[list[str], list[str]]:
     paths = {i["path"] for i in inventory}
     names = {p.rsplit("/", 1)[-1]: p for p in paths}
     found, missing = [], []
-    for tok in set(re.findall(r"[\w\-./一-鿿]+\.(?:png|jpg|jpeg|svg|csv|xlsx|pdf|ipynb|py|txt|md|json|docx|r|m)", text, flags=re.I)):
+    for tok in _path_tokens(text):
         tok = tok.lstrip("./")
         if tok in paths:
             found.append(tok)

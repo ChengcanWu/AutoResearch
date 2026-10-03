@@ -17,11 +17,13 @@ import urllib.request
 from typing import Any, Callable
 
 from schemas import now_iso
+from singleflight import SingleFlight
 
 UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Safari/537.36 QiyanResearchMentor/0.2"
 CACHE_TTL = 6 * 3600
 _CACHE: dict[str, tuple[float, Any]] = {}
 _LOCK = threading.Lock()
+_FLIGHT = SingleFlight()
 
 
 class AdapterError(Exception):
@@ -30,7 +32,15 @@ class AdapterError(Exception):
 
 def http(url: str, *, data: dict | None = None, headers: dict | None = None, timeout: int = 12, as_json: bool = True) -> Any:
     """GET（或带 JSON 体的 POST），结果缓存 6 小时。"""
-    key = url + "|" + json.dumps(data or {}, sort_keys=True, ensure_ascii=False)
+    key = url + "|" + json.dumps(data or {}, sort_keys=True, ensure_ascii=False) + f"|{as_json}"
+    with _LOCK:
+        hit = _CACHE.get(key)
+    if hit and time.time() - hit[0] < CACHE_TTL:
+        return hit[1]
+    return _FLIGHT.do(key, lambda: _fetch(key, url, data, headers, timeout, as_json))
+
+
+def _fetch(key: str, url: str, data: dict | None, headers: dict | None, timeout: int, as_json: bool) -> Any:
     with _LOCK:
         hit = _CACHE.get(key)
     if hit and time.time() - hit[0] < CACHE_TTL:

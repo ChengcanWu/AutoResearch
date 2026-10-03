@@ -19,6 +19,8 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any
 
+from singleflight import SingleFlight
+
 API = "https://export.arxiv.org/api/query"
 ATOM = {"a": "http://www.w3.org/2005/Atom", "arxiv": "http://arxiv.org/schemas/atom"}
 UA = "QiyanResearchMentor/0.3 (education; contact via repo)"
@@ -27,6 +29,7 @@ META_TTL = 6 * 3600
 _LOCK = threading.Lock()
 _LAST_CALL = [0.0]
 _META: dict[str, tuple[float, Any]] = {}
+_FLIGHT = SingleFlight()  # 同一 URL / 同一篇论文并发只取一次（限速锁下，重复请求每个都要排 3 秒）
 ID_RE = re.compile(r"^\d{4}\.\d{4,5}$")
 
 
@@ -86,15 +89,22 @@ def _entries(xml_bytes: bytes) -> list[dict[str, Any]]:
 
 def query(params: dict[str, Any]) -> list[dict[str, Any]]:
     url = API + "?" + urllib.parse.urlencode(params)
+
+    def fetch() -> list[dict[str, Any]]:
+        hit = _META.get(url)
+        if hit and time.time() - hit[0] < META_TTL:
+            return hit[1]
+        try:
+            data = _entries(_get(url))
+        except ET.ParseError as exc:
+            raise ArxivError("arXiv 返回的不是 Atom") from exc
+        _META[url] = (time.time(), data)
+        return data
+
     hit = _META.get(url)
     if hit and time.time() - hit[0] < META_TTL:
         return hit[1]
-    try:
-        data = _entries(_get(url))
-    except ET.ParseError as exc:
-        raise ArxivError("arXiv 返回的不是 Atom") from exc
-    _META[url] = (time.time(), data)
-    return data
+    return _FLIGHT.do(("query", url), fetch)
 
 
 def count(search_query: str) -> int:
@@ -102,7 +112,7 @@ def count(search_query: str) -> int:
     # max_results=0 会让 arXiv 返回 500，取 1 条
     url = API + "?" + urllib.parse.urlencode({"search_query": search_query, "max_results": 1})
     try:
-        root = ET.fromstring(_get(url))
+        root = ET.fromstring(_FLIGHT.do(("count", url), lambda: _get(url)))
     except ET.ParseError as exc:
         raise ArxivError("arXiv 返回的不是 Atom") from exc
     total = root.findtext("{http://a9.com/-/spec/opensearch/1.1/}totalResults")
@@ -148,9 +158,16 @@ def _html_to_text(page: str) -> str:
 def fulltext(arxiv_id: str) -> dict[str, Any]:
     """{id, source: 'html' | 'abstract', text, title}；全文落盘缓存。"""
     aid = clean_id(arxiv_id)
-    CACHE_DIR.mkdir(parents=True, exist_ok=True)
     cached = CACHE_DIR / f"{aid}.json"
     if cached.exists():
+        return json.loads(cached.read_text(encoding="utf-8"))
+    return _FLIGHT.do(("fulltext", aid), lambda: _fetch_fulltext(aid))
+
+
+def _fetch_fulltext(aid: str) -> dict[str, Any]:
+    CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    cached = CACHE_DIR / f"{aid}.json"
+    if cached.exists():  # 排在前面的那一个刚写好
         return json.loads(cached.read_text(encoding="utf-8"))
     meta = papers([aid])
     if not meta:

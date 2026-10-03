@@ -96,7 +96,9 @@ CREATE TABLE IF NOT EXISTS cards (
   status TEXT NOT NULL,
   created_at TEXT NOT NULL
 );
-CREATE INDEX IF NOT EXISTS idx_cards_user ON cards(user_id, kit_id, arxiv_id);
+DROP INDEX IF EXISTS idx_cards_user;
+-- 「每篇最新一版」是按 (用户, 工具包, 论文) 取 MAX(version)；索引带上 version，否则每次都扫全部历史
+CREATE INDEX IF NOT EXISTS idx_cards_ver ON cards(user_id, kit_id, arxiv_id, version);
 CREATE TABLE IF NOT EXISTS edges (
   id TEXT PRIMARY KEY,
   user_id TEXT NOT NULL,
@@ -124,7 +126,8 @@ CREATE TABLE IF NOT EXISTS bets (
   updated_at TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_edges_user ON edges(user_id);
-CREATE INDEX IF NOT EXISTS idx_statements_user ON statements(user_id, kit_id);
+DROP INDEX IF EXISTS idx_statements_user;
+CREATE INDEX IF NOT EXISTS idx_statements_ver ON statements(user_id, kit_id, version);
 CREATE INDEX IF NOT EXISTS idx_bets_user ON bets(user_id);
 CREATE INDEX IF NOT EXISTS idx_facts_user ON facts(user_id);
 CREATE INDEX IF NOT EXISTS idx_projects_user ON projects(user_id);
