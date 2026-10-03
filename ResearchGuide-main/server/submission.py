@@ -13,6 +13,7 @@ from __future__ import annotations
 import io
 import json
 import re
+import struct
 import zipfile
 from typing import Any
 
@@ -24,8 +25,13 @@ MAX_ZIP_BYTES = 20 * 1024 * 1024       # 压缩包本身
 MAX_TOTAL_BYTES = 100 * 1024 * 1024    # 解压后总量
 MAX_FILE_BYTES = 20 * 1024 * 1024      # 单个文件
 MAX_FILES = 300
+MAX_ENTRIES = 2000                     # 含目录的条目总数；在建条目对象之前就从目录尾记录里查
+MAX_CENTRAL_DIR = 1024 * 1024          # 中央目录字节数上限：zipfile 按它逐条建对象，条目数可以造假，字节数不行；
+                                       # 两千个条目、每个带很长的中文路径也在 1 MB 以内
 MAX_RATIO = 120                        # 压缩比过高视为压缩炸弹
 TEXT_BUDGET = 14000                    # 送给模型的正文上限（字符）
+MAX_DOCX_XML = 8 * 1024 * 1024         # .docx 里 word/document.xml 解压后的上限（套娃压缩包同样要限）
+MAX_TEXT_CHARS = 400_000               # 每个文件解码后最多留这么多字符，规则检查只看这么多
 
 IGNORED = ("__MACOSX/", ".DS_Store", "Thumbs.db", ".git/", ".ipynb_checkpoints/", "__pycache__/")
 CODE_EXT = {".py", ".ipynb", ".r", ".m", ".jl", ".cpp", ".c", ".h", ".java", ".js", ".ts", ".go", ".rs", ".sql", ".sh", ".do", ".stata", ".sas", ".tex"}
@@ -87,47 +93,147 @@ def _kind(path: str) -> str:
     return "other"
 
 
-def _docx_text(blob: bytes) -> str:
+def _directory_size(data: bytes) -> tuple[int, int] | None:
+    """从目录尾记录（含 zip64）读出条目总数和中央目录字节数，不建任何条目对象。
+    返回 None 表示根本没有目录尾记录（不是 zip，交给 zipfile 报错，它也不会建条目）。
+    zip64 记录和 zipfile 一样按「紧挨在定位记录前面」找，所以前面加了别的数据也能对上；
+    有目录尾却核对不了 zip64 记录的，直接拒收，不让 zipfile 去按它的理解逐条建对象。"""
+    tail = data[-(65535 + 22):]
+    at = tail.rfind(b"PK\x05\x06")
+    if at < 0 or len(tail) - at < 22:
+        return None
+    entries, cd_size = struct.unpack_from("<HI", tail, at + 10)
+    eocd = len(data) - len(tail) + at  # 换回整个文件里的位置
+    loc, rec = eocd - 20, eocd - 76
+    has_loc = loc >= 0 and data[loc:loc + 4] == b"PK\x06\x07"
+    if entries != 0xFFFF and cd_size != 0xFFFFFFFF and not has_loc:
+        return entries, cd_size
+    if not has_loc or rec < 0 or data[rec:rec + 4] != b"PK\x06\x06":
+        raise SubmissionError("压缩包的目录记录核对不上（可能是 zip64 格式异常或前面拼接了别的数据）。请用系统自带的「压缩」重新打包。")
+    return struct.unpack_from("<QQ", data, rec + 32)
+
+
+def _open_zip(data: bytes) -> zipfile.ZipFile:
+    """先查条目数和中央目录大小，再交给 zipfile。十万个空目录也会在打开时各建一个对象。"""
+    size = _directory_size(data)
+    if size and size[0] > MAX_ENTRIES:
+        raise SubmissionError(f"压缩包里的条目太多（{size[0]} 个，含文件夹）。请删掉依赖目录（如 node_modules、venv）后再打包。")
+    if size and size[1] > MAX_CENTRAL_DIR:
+        raise SubmissionError(f"压缩包的文件名和附加信息太大（目录记录超过 {MAX_CENTRAL_DIR // 1024} KB）。"
+                              "请缩短文件夹层级和文件名，或去掉依赖目录后再打包。")
     try:
-        with zipfile.ZipFile(io.BytesIO(blob)) as z:
-            xml = z.read("word/document.xml").decode("utf-8", errors="ignore")
-    except (KeyError, zipfile.BadZipFile, OSError):
+        z = zipfile.ZipFile(io.BytesIO(data))
+    except zipfile.BadZipFile:
+        raise SubmissionError("这不是一个能打开的 .zip 文件。请用系统自带的「压缩」重新打包（不要用 .rar / .7z）。")
+    if len(z.infolist()) > MAX_ENTRIES:
+        z.close()
+        raise SubmissionError(f"压缩包里的条目太多（含文件夹超过 {MAX_ENTRIES} 个）。")
+    return z
+
+
+def _strip_xml(xml: str) -> str:
+    """去标签、段落结束换行。线性扫描：原来的 <[^>]+> 遇到大量没闭合的 < 会反复扫到结尾，而且正则不释放 GIL，
+    放在线程里也会拖住整个服务。没闭合的标签之后的内容直接丢掉。"""
+    out, i, n = [], 0, len(xml)
+    while i < n:
+        lt = xml.find("<", i)
+        if lt < 0:
+            out.append(xml[i:])
+            break
+        out.append(xml[i:lt])
+        gt = xml.find(">", lt + 1)
+        if gt < 0:
+            break
+        if xml.startswith("</w:p>", lt):
+            out.append("\n")
+        i = gt + 1
+    return "".join(out)
+
+
+def _docx_text(blob: bytes) -> str:
+    """.docx 本身也是压缩包：解压前先看声明的大小和压缩比，读的时候再按上限截断（声明可以造假）。"""
+    try:
+        with _open_zip(blob) as z:
+            info = z.getinfo("word/document.xml")
+            if info.file_size > MAX_DOCX_XML or info.file_size > MAX_RATIO * max(1, info.compress_size):
+                return ""
+            with z.open(info) as f:
+                raw = f.read(MAX_DOCX_XML + 1)
+    except (KeyError, zipfile.BadZipFile, OSError, RuntimeError, NotImplementedError, SubmissionError):
         return ""
-    xml = re.sub(r"</w:p>", "\n", xml)
-    return re.sub(r"<[^>]+>", "", xml)
+    if len(raw) > MAX_DOCX_XML:
+        return ""
+    return _strip_xml(raw.decode("utf-8", errors="ignore"))[:MAX_TEXT_CHARS]
+
+
+# ---------- notebook：只取每个单元的 source，outputs 只看有没有 ----------
+# 直接 json.loads 会把输出里的每个数字、每个小字典都建成对象：7 MB 的压缩包能吃掉近 200 MB 内存。
+# 仍用标准库的 json（C 实现、线性、完整校验语法，坏文件照旧判不合格），但：
+# - 不是单元、也不是顶层的对象，解析完立刻换成占位的 1，里面的内容随即释放；
+# - 数字一律解析成 0（小整数是共享的，不新建对象）。
+# 钩子只在对象解析完才被调用，对象里面的数组、字符串那时已经建好了；所以解析前先按字节数结构限额：
+# 逗号和括号的个数近似 JSON 值的个数（字符串里的逗号也算，只会高估），超了就不解析，只提示清空输出再交。
+
+MAX_CELLS = 5000
+NB_MAX_BYTES = 8 * 1024 * 1024    # 限额以内最坏的情况（一个输出里十几万个长字符串）峰值约 30 MB
+NB_MAX_VALUES = 150_000
+
+
+def _nb_too_big(blob: bytes) -> bool:
+    return len(blob) > NB_MAX_BYTES or blob.count(b",") + blob.count(b"[") + blob.count(b"{") > NB_MAX_VALUES
+
+
+def _nb_object(pairs: list) -> Any:
+    """只留顶层（有 cells）和单元（有 cell_type）；输出、元数据一律换成占位，哪怕它碰巧也有 source 键。"""
+    return dict(pairs) if any(k == "cells" or k == "cell_type" for k, _ in pairs) else 1
 
 
 def _ipynb_text(blob: bytes) -> tuple[str, bool]:
     try:
-        nb = json.loads(blob.decode("utf-8", errors="ignore"))
-    except json.JSONDecodeError:
+        nb = json.loads(blob.decode("utf-8", errors="ignore"), object_pairs_hook=_nb_object,
+                        parse_int=lambda _s: 0, parse_float=lambda _s: 0, parse_constant=lambda _s: 0)
+    except (json.JSONDecodeError, RecursionError):
         return "", False
-    parts, has_out = [], False
-    for cell in nb.get("cells", []):
+    cells = nb.get("cells") if isinstance(nb, dict) else None
+    if not isinstance(cells, list):
+        return "", False
+    parts, has_out, size = [], False, 0
+    for cell in cells[:MAX_CELLS]:
+        if not isinstance(cell, dict):
+            continue
         src = cell.get("source", "")
-        parts.append("".join(src) if isinstance(src, list) else str(src))
+        if size < MAX_TEXT_CHARS:
+            text = "".join(map(str, src)) if isinstance(src, list) else str(src)
+            parts.append(text)
+            size += len(text)
         if cell.get("outputs"):
             has_out = True
     return "\n\n".join(parts), has_out
 
 
-def _text(blob: bytes) -> str:
-    for enc in ("utf-8", "gbk"):
-        try:
-            return blob.decode(enc)
-        except UnicodeDecodeError:
-            continue
+def _text(blob: bytes, cut: bool = False) -> str:
+    """cut=True 表示只读了文件开头：末尾可能截断在一个多字节字符中间，先去掉这半个字再判断编码。"""
+    for enc, tail in (("utf-8", 3), ("gbk", 1)):
+        for k in range(tail + 1 if cut else 1):
+            try:
+                return (blob[:len(blob) - k] if k else blob).decode(enc)
+            except UnicodeDecodeError:
+                continue
     return blob.decode("utf-8", errors="replace")
+
+
+def _head(z: zipfile.ZipFile, info: zipfile.ZipInfo, limit: int) -> tuple[bytes, bool]:
+    """只读文件开头 limit 字节：纯文本最后只留 MAX_TEXT_CHARS 个字符，没必要整份解压进内存。"""
+    with z.open(info) as f:
+        blob = f.read(limit)
+    return blob, info.file_size > limit
 
 
 def read_zip(data: bytes) -> dict[str, Any]:
     """安全读取：只在内存里读，返回文件清单和可读正文。不合格直接抛 SubmissionError。"""
     if len(data) > MAX_ZIP_BYTES:
         raise SubmissionError(f"压缩包超过 {MAX_ZIP_BYTES // 1024 // 1024} MB。大数据集请只放样例，并在 README 里写下载链接。")
-    try:
-        z = zipfile.ZipFile(io.BytesIO(data))
-    except zipfile.BadZipFile:
-        raise SubmissionError("这不是一个能打开的 .zip 文件。请用系统自带的「压缩」重新打包（不要用 .rar / .7z）。")
+    z = _open_zip(data)
     infos = [i for i in z.infolist() if not i.is_dir()]
     if len(infos) > MAX_FILES:
         raise SubmissionError(f"文件太多（{len(infos)} 个）。请删掉依赖目录（如 node_modules、venv）后再打包。")
@@ -157,28 +263,38 @@ def read_zip(data: bytes) -> dict[str, Any]:
         kind = _kind(path)
         item = {"path": path, "size": info.file_size, "kind": kind}
         low = path.lower()
-        blob = None
+        # 每个文件读完就截到上限再存，不把几十 MB 的完整正文攒到最后才截
         if kind in ("readme", "doc", "code", "notebook") or low.endswith((".csv", ".tsv", ".json")):
-            blob = z.read(info)
-        if blob is not None:
-            if low.endswith(".docx"):
-                texts[path] = _docx_text(blob)
-            elif low.endswith(".ipynb"):
-                txt, has_out = _ipynb_text(blob)
-                texts[path] = txt
-                item["has_outputs"] = has_out
-            elif low.endswith((".doc", ".pptx")):
+            if low.endswith((".doc", ".pptx")):
                 notes.append(f"「{path}」是 {low.rsplit('.', 1)[-1]} 格式，没有读取正文；关键内容请写进 README。")
-            elif low.endswith((".csv", ".tsv")):
-                texts[path] = "\n".join(_text(blob).splitlines()[:12])
+            elif low.endswith(".docx"):  # 本身是压缩包，要整份；单个文件已限 20 MB
+                texts[path] = _docx_text(z.read(info))
+                if not texts[path]:
+                    notes.append(f"「{path}」读不出正文（文件损坏或解压后过大），关键内容请写进 README。")
+            elif low.endswith(".ipynb"):  # JSON 要整份才能解析
+                blob = z.read(info)
+                if _nb_too_big(blob):
+                    texts[path] = ""
+                    item["has_outputs"] = False  # 没解析就不算「有输出」：猜出来的证据不能给分
+                    notes.append(f"「{path}」太大或输出太多，没有读取，也不计入「有输出」。请清空输出（Kernel → Restart & Clear Output）后再交，"
+                                 "并把结果导出到 results/、在 README 里写明。")
+                else:
+                    txt, has_out = _ipynb_text(blob)
+                    texts[path] = txt[:MAX_TEXT_CHARS]
+                    item["has_outputs"] = has_out
+                del blob
+            elif low.endswith((".csv", ".tsv")):  # 只看前 12 行
+                blob, cut = _head(z, info, 64 * 1024)
+                texts[path] = "\n".join(_text(blob, cut).splitlines()[:12])
             else:
-                texts[path] = _text(blob)
+                blob, cut = _head(z, info, MAX_TEXT_CHARS * 4)  # UTF-8 一个字最多 4 字节
+                texts[path] = _text(blob, cut)[:MAX_TEXT_CHARS]
         if low.endswith(".pdf"):
             notes.append(f"「{path}」是 PDF，没有读取正文，只算作一个结果文件。")
         item["empty"] = info.file_size == 0
         inventory.append(item)
     inventory.sort(key=lambda x: (x["kind"] != "readme", x["path"]))
-    return {"inventory": inventory, "texts": texts, "notes": notes}
+    return {"inventory": inventory, "texts": {k: v[:MAX_TEXT_CHARS] for k, v in texts.items()}, "notes": notes}
 
 
 # ---------- 规则检查（确定的事） ----------
@@ -199,11 +315,28 @@ def _sections(text: str) -> dict[str, bool]:
     return {k: any(m in hay for m in marks) for k, marks in SECTION_MARKS.items()}
 
 
+_PATH_RUN = re.compile(r"[\w\-./一-鿿]+")
+_PATH_EXT = re.compile(r"\.(?:png|jpg|jpeg|svg|csv|xlsx|pdf|ipynb|py|txt|md|json|docx|r|m)", re.I)
+
+
+def _path_tokens(text: str) -> set[str]:
+    """README 里像文件路径的词：一段连续的路径字符，截到最后一个已知扩展名为止。
+    线性扫描。原来的「字符类+ 扩展名」写法遇到很长、又不带扩展名的词会反复回溯（16 KB 要一秒）。"""
+    out = set()
+    for run in _PATH_RUN.findall(text):
+        last = None
+        for last in _PATH_EXT.finditer(run):
+            pass
+        if last is not None:
+            out.add(run[:last.end()])
+    return out
+
+
 def _referenced_paths(text: str, inventory: list[dict[str, Any]]) -> tuple[list[str], list[str]]:
     paths = {i["path"] for i in inventory}
     names = {p.rsplit("/", 1)[-1]: p for p in paths}
     found, missing = [], []
-    for tok in set(re.findall(r"[\w\-./一-鿿]+\.(?:png|jpg|jpeg|svg|csv|xlsx|pdf|ipynb|py|txt|md|json|docx|r|m)", text, flags=re.I)):
+    for tok in _path_tokens(text):
         tok = tok.lstrip("./")
         if tok in paths:
             found.append(tok)

@@ -6,6 +6,8 @@ import json
 import os
 import subprocess
 import sys
+import threading
+import time
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -65,6 +67,45 @@ def run_pku(args: list[str], timeout: int = 60) -> tuple[int, dict | list | None
     return proc.returncode, data, stderr
 
 
+CACHE_TTL = 10 * 60   # 同样的参数十分钟内复用上次的完整结果（每次起 uv 子进程要 1–3 秒）
+CACHE_MAX = 512
+_cache: dict[tuple[str, ...], tuple[float, tuple]] = {}
+_inflight: dict[tuple[str, ...], list] = {}
+_lock = threading.Lock()
+
+
+def run_pku_cached(args: list[str], timeout: int = 60) -> tuple[int, dict | list | None, str]:
+    """缓存 + 并发去重：相同参数同时到的请求只起一个子进程，其余等它的结果。只缓存完整成功的结果。"""
+    key = tuple(args)
+    with _lock:
+        hit = _cache.get(key)
+        if hit and time.time() - hit[0] < CACHE_TTL:
+            return hit[1]
+        call = _inflight.get(key)
+        leader = call is None
+        if leader:
+            call = _inflight[key] = [threading.Event(), (2, None, "course search failed")]
+    if not leader:
+        call[0].wait()
+        return call[1]
+    try:
+        call[1] = run_pku(args, timeout)
+        if call[1][0] == 0:
+            with _lock:
+                now = time.time()
+                if len(_cache) >= CACHE_MAX:
+                    for k in [k for k, (t, _) in _cache.items() if now - t >= CACHE_TTL]:
+                        del _cache[k]
+                    while len(_cache) >= CACHE_MAX:
+                        del _cache[min(_cache, key=lambda k: _cache[k][0])]
+                _cache[key] = (now, call[1])
+        return call[1]
+    finally:
+        with _lock:
+            _inflight.pop(key, None)
+        call[0].set()
+
+
 class Handler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(ROOT), **kwargs)
@@ -102,7 +143,7 @@ class Handler(SimpleHTTPRequestHandler):
         self.wfile.write(body)
 
     def _api_terms(self):
-        code, data, err = run_pku(["options", "--limit", "10"])
+        code, data, err = run_pku_cached(["options", "--limit", "10"])
         if code != 0 or not isinstance(data, dict):
             self._json(502, {"error": err or "failed to list terms", "code": code})
             return
@@ -124,7 +165,7 @@ class Handler(SimpleHTTPRequestHandler):
             return
         if not term:
             # 默认取 options 的第一条学期
-            tcode, tdata, terr = run_pku(["options", "--limit", "1"])
+            tcode, tdata, terr = run_pku_cached(["options", "--limit", "1"])
             if tcode != 0 or not isinstance(tdata, dict) or not tdata.get("items"):
                 self._json(502, {"error": terr or "cannot resolve default term"})
                 return
@@ -138,7 +179,7 @@ class Handler(SimpleHTTPRequestHandler):
         if department and department != "0":
             args.extend(["--department", department])
 
-        code, data, err = run_pku(args, timeout=90)
+        code, data, err = run_pku_cached(args, timeout=90)
         if not isinstance(data, dict):
             self._json(502, {"error": err or "invalid search response", "code": code})
             return

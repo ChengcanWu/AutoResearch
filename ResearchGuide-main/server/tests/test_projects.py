@@ -130,7 +130,7 @@ def test_pick_only_accepts_ids_from_last_search():
     with pytest.raises(KeyError):
         projects.pick(uid, "deadbeefdeadbeef")
     cand = {"id": "abc123", "name": "某项目", "url": "https://example.org", "source_name": "来源"}
-    projects._LAST[uid] = (projects.time.time(), {"abc123": cand})
+    projects._LAST.set(uid, {"abc123": cand})
     saved = projects.pick(uid, "abc123")
     assert saved["name"] == "某项目" and projects.pick(uid, "abc123")["id"] == saved["id"]
 
@@ -224,7 +224,7 @@ def test_slow_source_falls_back_to_snapshot_within_budget(monkeypatch):
 
 def test_project_is_done_only_when_all_criteria_pass():
     uid = store.create_user("t")["uid"]
-    projects._LAST[uid] = (projects.time.time(), {"c9": {"id": "c9", "name": "某项目", "url": "https://example.org", "source_name": "来源"}})
+    projects._LAST.set(uid, {"c9": {"id": "c9", "name": "某项目", "url": "https://example.org", "source_name": "来源"}})
     p = projects.pick(uid, "c9")
     review = {"passed": 4, "total": 5, "criteria": [], "summary": "", "next_step": "先改一处", "inventory": []}
     projects.record_review(uid, p, review)

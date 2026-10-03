@@ -19,7 +19,7 @@ import json
 import threading
 import time
 import zipfile
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import Future, ThreadPoolExecutor, as_completed
 from concurrent.futures import TimeoutError as FutureTimeout
 from datetime import datetime
 from pathlib import Path
@@ -30,6 +30,7 @@ import planner
 import project_adapters
 import skills
 import store
+from limits import TTLCache
 from schemas import now_iso
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -55,10 +56,16 @@ DIR_TERMS: dict[str, list[str]] = {
 _REG_CACHE: tuple[float, dict[str, Any]] | None = None
 _PATHS_CACHE: tuple[float, dict[str, Any]] | None = None
 DEFAULT_STEP = {0: 1, 1: 2, 2: 3, 3: 5}  # 没有路径进度时，由项目阶段推一个默认的路径步骤
-_LAST: dict[str, tuple[float, dict[str, dict[str, Any]]]] = {}
-_LAST_LOCK = threading.Lock()
 LAST_TTL = 2 * 3600
+# 每人最近一次检索的结果（选项目时只认这里面的）：两小时过期即删、最多记这么多人，不再无限攒着
+_LAST = TTLCache(LAST_TTL, 2048)
 SEARCH_BUDGET = 12  # 秒。慢的来源不等：先用它的快照，后台继续跑完并写进缓存，下一次就快了
+# 所有检索共用一个有上限的线程池（原来每次检索新开 8 个，超时的还在后台跑，六次检索就能留下 48 个线程）
+SOURCE_WORKERS = 8
+_SOURCE_POOL = ThreadPoolExecutor(max_workers=SOURCE_WORKERS, thread_name_prefix="source")
+# 提交前合并：同一来源、同一组条件正在跑的任务直接共用，不再提交一个只会干等的任务去占线程
+_SOURCE_JOBS: dict[tuple, tuple[Future, list[float]]] = {}  # 任务，以及所有在等它的检索里最晚的截止时间
+_SOURCE_JOBS_LOCK = threading.RLock()  # 已完成的任务加回调会立刻在本线程回调，所以要可重入
 
 
 def registry() -> dict[str, Any]:
@@ -189,6 +196,41 @@ def _collect(src: dict[str, Any], direction: str, stage: int, keywords: str) -> 
                   "error": "" if snap else "没有公开接口，也没有快照"}
 
 
+def _snapshot(src: dict[str, Any], error: str) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    got = [_norm(src, x, True) for x in src.get("samples") or []]
+    return got, {"id": src["id"], "name": src["name"], "ok": bool(got), "count": len(got), "snapshot": True,
+                 "error": (error + "，这次先用快照") if got else error}
+
+
+def _collect_before(src: dict[str, Any], direction: str, stage: int, keywords: str,
+                    deadline: list[float]) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """在共享池里跑。排队排到所有等它的检索都过了截止时间才轮到的，不再打上游，直接用快照。
+    deadline 是可变的一格：后来加入的检索会把它往后推，不按最早那个检索的截止时间算。"""
+    if time.time() >= deadline[0]:
+        return _snapshot(src, f"排队超过 {SEARCH_BUDGET} 秒")
+    return _collect(src, direction, stage, keywords)
+
+
+def _source_job(src: dict[str, Any], direction: str, stage: int, keywords: str, deadline: float) -> Future:
+    key = (src["id"], direction, stage, keywords)
+    with _SOURCE_JOBS_LOCK:
+        entry = _SOURCE_JOBS.get(key)
+        if entry is not None:
+            entry[1][0] = max(entry[1][0], deadline)
+            return entry[0]
+        box = [deadline]
+        job = _SOURCE_POOL.submit(_collect_before, src, direction, stage, keywords, box)
+        _SOURCE_JOBS[key] = (job, box)
+
+        def forget(done: Future, k: tuple = key) -> None:
+            with _SOURCE_JOBS_LOCK:
+                if k in _SOURCE_JOBS and _SOURCE_JOBS[k][0] is done:
+                    del _SOURCE_JOBS[k]
+
+        job.add_done_callback(forget)
+    return job
+
+
 def _score(item: dict[str, Any], direction: str, stage: int, keywords: str) -> float:
     hay = f"{item['name']} {item['excerpt']} {item['practices']} {item['todo']}"
     s = 0.0
@@ -288,11 +330,11 @@ def search(uid: str, direction: str, stage: int, keywords: str = "", node: str =
     status: list[dict[str, Any]] = []
     # 既没有接口也没有快照的来源只出现在「去哪找」里，不算一次检索
     sources = [s for s in sources if s.get("adapter") or s.get("samples")]
-    pool = ThreadPoolExecutor(max_workers=8)
-    futs = {pool.submit(_collect, s, direction, stage, keywords): s for s in sources}
+    deadline = time.time() + SEARCH_BUDGET
+    futs = {_source_job(s, direction, stage, keywords, deadline): s for s in sources}
     done: set = set()
     try:
-        for fut in as_completed(futs, timeout=SEARCH_BUDGET):
+        for fut in as_completed(futs, timeout=max(0.0, deadline - time.time())):
             got, st = fut.result()
             cands.extend(got)
             status.append(st)
@@ -304,13 +346,11 @@ def search(uid: str, direction: str, stage: int, keywords: str = "", node: str =
             if fut.done():
                 got, st = fut.result()
             else:
-                got = [_norm(src, x, True) for x in src.get("samples") or []]
-                st = {"id": src["id"], "name": src["name"], "ok": bool(got), "count": len(got), "snapshot": True,
-                      "error": f"超过 {SEARCH_BUDGET} 秒没返回，这次先用快照" if got else f"超过 {SEARCH_BUDGET} 秒没返回"}
+                # 任务可能和别的检索共用，不取消：还在排队的轮到时已过截止时间，会直接用快照；
+                # 已经在跑的跑完把结果留在适配器缓存里，且受请求的总时限约束
+                got, st = _snapshot(src, f"超过 {SEARCH_BUDGET} 秒没返回")
             cands.extend(got)
             status.append(st)
-    finally:
-        pool.shutdown(wait=False)  # 不等慢来源；它们跑完会把结果留在适配器缓存里
     status.sort(key=lambda s: (not s["ok"], s["name"]))
     uniq: dict[str, dict[str, Any]] = {}
     for c in cands:
@@ -331,8 +371,7 @@ def search(uid: str, direction: str, stage: int, keywords: str = "", node: str =
     picked_ids = {p.get("source_ref") for p in store.list_projects(uid)}
     for c in chosen:
         c["picked"] = c["id"] in picked_ids
-    with _LAST_LOCK:
-        _LAST[uid] = (time.time(), {c["id"]: c for c in ranked + chosen})
+    _LAST.set(uid, {c["id"]: c for c in ranked + chosen})
     used = {c["source_id"] for c in chosen}
     empty_reason = ""
     if not chosen:
@@ -355,11 +394,10 @@ PUBLIC_KEYS = ("name", "url", "source_id", "source_name", "source_url", "practic
 
 
 def pick(uid: str, cid: str) -> dict[str, Any]:
-    with _LAST_LOCK:
-        hit = _LAST.get(uid)
-    if not hit or time.time() - hit[0] > LAST_TTL or cid not in hit[1]:
+    hit, last = _LAST.lookup(uid)
+    if not hit or cid not in last:
         raise KeyError("这个项目不在最近一次检索结果里，请重新检索后再选。")
-    c = hit[1][cid]
+    c = last[cid]
     existing = next((p for p in store.list_projects(uid) if p.get("source_ref") == cid), None)
     if existing:
         return existing
