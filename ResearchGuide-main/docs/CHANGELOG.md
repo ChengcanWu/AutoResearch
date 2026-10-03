@@ -28,7 +28,8 @@
   - 一个看门狗线程管所有请求的截止时间（不再每个请求一个 Timer 线程），并加测试守住依赖的 http.client 内部细节；
   - 压缩包中央目录上限提到 1 MB，超了单独说「文件名太大」。
   - 另修一处：看门狗到点关掉 socket 后，没声明长度的响应会被当成正常读完，现在判为超时。
-- 影响模块：server/main.py、server/submission.py、server/arxiv.py、server/project_adapters.py、server/pku_adapter.py、server/projects.py、server/store.py、server/singleflight.py（新增）、server/tests/test_perf.py（新增）、discipline-map/server.py、server/limits.py（新增）、server/quotes.py、server/positioning.py、server/reading.py、server/llm.py、web/js/app.js
+- 第九轮（Codex 九审三处）：①notebook 解析前按字节数限额（8 MB、约 15 万个 JSON 值），超了不解析、提示清空输出再交；钩子只留顶层和单元，带 source 键的输出也丢掉（限额以内最坏情况峰值约 30 MB）；②引文定位按「一个字加组合符号」逐段规范化并记原文位置，连字、全角字符不再让位置错开、把引言报成局限段；③每人最近一次检索结果改用两小时过期、最多 2048 人的缓存。
+- 影响模块：server/main.py、server/submission.py、server/arxiv.py、server/project_adapters.py、server/pku_adapter.py、server/projects.py、server/store.py、server/singleflight.py（新增）、server/tests/test_perf.py（新增）、discipline-map/server.py、server/limits.py（新增）、server/quotes.py、server/positioning.py、server/reading.py、server/llm.py、web/js/app.js、server/tests/test_projects.py
 - 决策来源：陈浩文（Codex 审查）
 - 登记人：助手
 

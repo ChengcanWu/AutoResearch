@@ -28,21 +28,30 @@ def norm(s: str) -> str:
         s = s.replace(a, b)
     s = re.sub(r"(\w)-\s*\n\s*(\w)", r"\1\2", s)  # 断行连字符
     s = re.sub(r"\s+", " ", s)
-    return s.strip().lower()
+    return "".join(c.lower() for c in s.strip())  # 逐字转小写，和 _index 的做法一致（整串转小写对希腊字母词尾 σ 有特例）
 
 
 def _index(text: str) -> tuple[str, array]:
-    """规范化全文，同时记下规范化后每个字符对应原文的位置，用来报告章节。"""
+    """规范化全文，同时记下规范化后每个字符对应「原文」的位置，用来报告章节。
+    原来先把整篇做 NFKC 再数位置：连字（ﬁ → fi）、全角字符会改变长度，位置整体错开，引言里的句子可能被报成局限段。
+    现在按「一个字加上它后面的组合符号」一段段规范化，每段产出的字都记这段在原文里的起点。"""
     out, pos = [], array("I")
-    for i, ch in enumerate(unicodedata.normalize("NFKC", text)):
-        ch = _LIG.get(ch, _PUNCT.get(ch, ch))
-        for c in ch:
-            if c.isspace():
-                if out and out[-1] == " ":
-                    continue
-                c = " "
-            out.append(c.lower())
-            pos.append(i)
+    n, i = len(text), 0
+    while i < n:
+        j = i + 1
+        while j < n and not text[j].isascii() and unicodedata.combining(text[j]):
+            j += 1
+        chunk = text[i:j]
+        for ch in (chunk if chunk.isascii() else unicodedata.normalize("NFKC", chunk)):
+            ch = _LIG.get(ch, _PUNCT.get(ch, ch))
+            for c in ch:
+                if c.isspace():
+                    if out and out[-1] == " ":
+                        continue
+                    c = " "
+                out.append(c.lower())
+                pos.append(i)
+        i = j
     return "".join(out), pos
 
 

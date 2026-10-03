@@ -779,30 +779,40 @@ def test_notebook_outputs_are_skipped_without_building_objects():
     import random
     import tracemalloc
     rng = random.Random(3)
-    nb = {"cells": [{"cell_type": "markdown", "source": ['# 说明 "引号" {[}]']},
-                    {"cell_type": "code", "source": ["print(x)"],
-                     "outputs": [{"output_type": "execute_result", "data": {"v": rng.randrange(10 ** 6)}} for _ in range(150_000)]}]}
-    buf = io.BytesIO()
-    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
-        z.writestr("README.md", "# 题目\n")
-        z.writestr("analysis.ipynb", _json.dumps(nb, ensure_ascii=False))
-    data = buf.getvalue()
+
+    def zipped(nb):
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
+            z.writestr("README.md", "# 题目\n")
+            z.writestr("analysis.ipynb", _json.dumps(nb, ensure_ascii=False))
+        return buf.getvalue()
+
+    # 结构超限（十五万个输出对象）：不解析，只提示清空输出；仍能看出有输出
+    heavy = {"cells": [{"cell_type": "code", "source": ["print(x)"],
+                        "outputs": [{"output_type": "execute_result", "data": {"v": rng.randrange(10 ** 6)}} for _ in range(150_000)]}]}
+    data = zipped(heavy)
     tracemalloc.start()
     bundle = submission.read_zip(data)
     peak = tracemalloc.get_traced_memory()[1]
     tracemalloc.stop()
     item = next(i for i in bundle["inventory"] if i["path"] == "analysis.ipynb")
-    assert item["has_outputs"] and "print(x)" in bundle["texts"]["analysis.ipynb"]
-    assert peak < 40 * 1024 * 1024  # json.loads 会把十五万个输出对象全建出来
-    small = _json.dumps({"cells": [{"source": "a", "outputs": [{"t": "}"}]}, {"source": ["b", "c"]}]}).encode()
+    assert item["has_outputs"] and bundle["texts"]["analysis.ipynb"] == ""
+    assert any("清空输出" in n for n in bundle["notes"]) and peak < 40 * 1024 * 1024
+    # 限额以内：照常读源码，输出对象（哪怕带 source 键）解析完就丢
+    ok = {"cells": [{"cell_type": "markdown", "source": ['# 说明 "引号" {[}]']},
+                    {"cell_type": "code", "source": ["print(x)"], "outputs": [{"text": ["1"]}, {"source": ["不是单元"]}]}]}
+    bundle = submission.read_zip(zipped(ok))
+    assert bundle["texts"]["analysis.ipynb"] == '# 说明 "引号" {[}]\n\nprint(x)'
+    assert submission._nb_object([("source", "x")]) == 1 and submission._nb_object([("cell_type", "code")]) == {"cell_type": "code"}
+    small = _json.dumps({"cells": [{"cell_type": "code", "source": "a", "outputs": [{"t": "}"}]}, {"cell_type": "markdown", "source": ["b", "c"]}]}).encode()
     assert submission._ipynb_text(small) == ("a\n\nbc", True)
 
 
 def test_malformed_notebooks_are_rejected_quickly():
     t0 = time.perf_counter()
-    assert submission._ipynb_text(b'{"cells":[{"source":"a","outputs":[{"t": nope}]}]}') == ("", False)  # 输出值不合法
-    assert submission._ipynb_text(b'{"cells":[{"source":"a","outputs":[{"t": 1}]}]') == ("", False)  # 少了最后的花括号
-    assert submission._ipynb_text(b'{"cells":[{"source":"a","outputs":[{"t":"' + b'\\"' * 40_000) == ("", False)  # 没闭合的字符串
+    assert submission._ipynb_text(b'{"cells":[{"cell_type":"code","source":"a","outputs":[{"t": nope}]}]}') == ("", False)  # 输出值不合法
+    assert submission._ipynb_text(b'{"cells":[{"cell_type":"code","source":"a","outputs":[{"t": 1}]}]') == ("", False)  # 少了最后的花括号
+    assert submission._ipynb_text(b'{"cells":[{"cell_type":"code","source":"a","outputs":[{"t":"' + b'\\"' * 40_000) == ("", False)  # 没闭合的字符串
     assert time.perf_counter() - t0 < 1.0
 
 
@@ -971,3 +981,27 @@ def test_large_zip_directory_gets_its_own_message():
     with pytest.raises(submission.SubmissionError) as exc:
         submission.read_zip(buf.getvalue())
     assert "文件名" in str(exc.value) and "条目太多" not in str(exc.value)
+
+
+def test_quote_sections_use_original_offsets():
+    import quotes
+    quotes.clear_prepared()
+    # 引言里有很多连字：整篇先做 NFKC 再数位置会整体错开，把引言的句子报成局限段
+    text = "Abstract\nshort.\n1 Introduction\n" + "ﬁ" * 400 + " the intro sentence that we quote here.\n" + "x" * 50 + "\n6 Limitations\nThe real limitation sentence is here.\n"
+    paper = {"text": text, "source": "html"}
+    assert quotes.locate("the intro sentence that we quote here", paper)["section"] == "introduction"
+    assert quotes.locate("The real limitation sentence is here", paper)["section"] == "limitations"
+    assert quotes.locate("fififi the intro sentence", paper)["found"]  # 连字照样能对上
+
+
+def test_last_search_results_expire_and_are_bounded(monkeypatch):
+    from limits import TTLCache as _T
+    monkeypatch.setattr(projects, "_LAST", _T(0.05, 100))
+    for i in range(1000):
+        projects._LAST.set(f"u{i}", {"c": {"id": "c"}})
+    assert len(projects._LAST) == 100  # 有条数上限
+    time.sleep(0.06)
+    projects._LAST.set("someone", {"c": {"id": "c"}})
+    assert len(projects._LAST) == 1  # 过期的随下一次写入一起清掉
+    with pytest.raises(KeyError):
+        projects.pick("u1", "c")

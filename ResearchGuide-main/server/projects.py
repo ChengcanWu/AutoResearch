@@ -30,6 +30,7 @@ import planner
 import project_adapters
 import skills
 import store
+from limits import TTLCache
 from schemas import now_iso
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -55,9 +56,9 @@ DIR_TERMS: dict[str, list[str]] = {
 _REG_CACHE: tuple[float, dict[str, Any]] | None = None
 _PATHS_CACHE: tuple[float, dict[str, Any]] | None = None
 DEFAULT_STEP = {0: 1, 1: 2, 2: 3, 3: 5}  # 没有路径进度时，由项目阶段推一个默认的路径步骤
-_LAST: dict[str, tuple[float, dict[str, dict[str, Any]]]] = {}
-_LAST_LOCK = threading.Lock()
 LAST_TTL = 2 * 3600
+# 每人最近一次检索的结果（选项目时只认这里面的）：两小时过期即删、最多记这么多人，不再无限攒着
+_LAST = TTLCache(LAST_TTL, 2048)
 SEARCH_BUDGET = 12  # 秒。慢的来源不等：先用它的快照，后台继续跑完并写进缓存，下一次就快了
 # 所有检索共用一个有上限的线程池（原来每次检索新开 8 个，超时的还在后台跑，六次检索就能留下 48 个线程）
 SOURCE_WORKERS = 8
@@ -370,8 +371,7 @@ def search(uid: str, direction: str, stage: int, keywords: str = "", node: str =
     picked_ids = {p.get("source_ref") for p in store.list_projects(uid)}
     for c in chosen:
         c["picked"] = c["id"] in picked_ids
-    with _LAST_LOCK:
-        _LAST[uid] = (time.time(), {c["id"]: c for c in ranked + chosen})
+    _LAST.set(uid, {c["id"]: c for c in ranked + chosen})
     used = {c["source_id"] for c in chosen}
     empty_reason = ""
     if not chosen:
@@ -394,11 +394,10 @@ PUBLIC_KEYS = ("name", "url", "source_id", "source_name", "source_url", "practic
 
 
 def pick(uid: str, cid: str) -> dict[str, Any]:
-    with _LAST_LOCK:
-        hit = _LAST.get(uid)
-    if not hit or time.time() - hit[0] > LAST_TTL or cid not in hit[1]:
+    hit, last = _LAST.lookup(uid)
+    if not hit or cid not in last:
         raise KeyError("这个项目不在最近一次检索结果里，请重新检索后再选。")
-    c = hit[1][cid]
+    c = last[cid]
     existing = next((p for p in store.list_projects(uid) if p.get("source_ref") == cid), None)
     if existing:
         return existing

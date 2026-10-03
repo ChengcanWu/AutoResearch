@@ -171,14 +171,22 @@ def _docx_text(blob: bytes) -> str:
 # 仍用标准库的 json（C 实现、线性、完整校验语法，坏文件照旧判不合格），但：
 # - 不是单元、也不是顶层的对象，解析完立刻换成占位的 1，里面的内容随即释放；
 # - 数字一律解析成 0（小整数是共享的，不新建对象）。
-# 峰值只和「最大的单个输出」有关，不再和整份 notebook 的对象总数有关。
+# 钩子只在对象解析完才被调用，对象里面的数组、字符串那时已经建好了；所以解析前先按字节数结构限额：
+# 逗号和括号的个数近似 JSON 值的个数（字符串里的逗号也算，只会高估），超了就不解析，只提示清空输出再交。
 
 MAX_CELLS = 5000
-_NB_KEYS = {"cells", "cell_type", "source", "outputs"}
+NB_MAX_BYTES = 8 * 1024 * 1024    # 限额以内最坏的情况（一个输出里十几万个长字符串）峰值约 30 MB
+NB_MAX_VALUES = 150_000
+_NB_HAS_OUTPUTS = re.compile(rb'"outputs"\s*:\s*\[\s*[^\]\s]')
+
+
+def _nb_too_big(blob: bytes) -> bool:
+    return len(blob) > NB_MAX_BYTES or blob.count(b",") + blob.count(b"[") + blob.count(b"{") > NB_MAX_VALUES
 
 
 def _nb_object(pairs: list) -> Any:
-    return dict(pairs) if any(k in _NB_KEYS for k, _ in pairs) else 1
+    """只留顶层（有 cells）和单元（有 cell_type）；输出、元数据一律换成占位，哪怕它碰巧也有 source 键。"""
+    return dict(pairs) if any(k == "cells" or k == "cell_type" for k, _ in pairs) else 1
 
 
 def _ipynb_text(blob: bytes) -> tuple[str, bool]:
@@ -265,9 +273,16 @@ def read_zip(data: bytes) -> dict[str, Any]:
                 if not texts[path]:
                     notes.append(f"「{path}」读不出正文（文件损坏或解压后过大），关键内容请写进 README。")
             elif low.endswith(".ipynb"):  # JSON 要整份才能解析
-                txt, has_out = _ipynb_text(z.read(info))
-                texts[path] = txt[:MAX_TEXT_CHARS]
-                item["has_outputs"] = has_out
+                blob = z.read(info)
+                if _nb_too_big(blob):
+                    texts[path] = ""
+                    item["has_outputs"] = bool(_NB_HAS_OUTPUTS.search(blob))
+                    notes.append(f"「{path}」太大或输出太多，没有读取源码；请清空输出（Kernel → Restart & Clear Output）后再交，或把关键内容写进 README。")
+                else:
+                    txt, has_out = _ipynb_text(blob)
+                    texts[path] = txt[:MAX_TEXT_CHARS]
+                    item["has_outputs"] = has_out
+                del blob
             elif low.endswith((".csv", ".tsv")):  # 只看前 12 行
                 blob, cut = _head(z, info, 64 * 1024)
                 texts[path] = "\n".join(_text(blob, cut).splitlines()[:12])
