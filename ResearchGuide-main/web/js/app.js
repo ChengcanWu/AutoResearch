@@ -1081,6 +1081,71 @@ const FIELD_TREES = {
   },
 };
 
+Object.entries(FIELD_TREES).forEach(([code, f]) => { f.code = code; });
+
+/* 任务 4 的方向路径（docs/paths/）：有路径的方向画成「6 步主干 + 原有节点」。
+   主干讲「这一学期走到哪」，原有节点讲「二十分钟能做什么」，两种尺度分开画。
+   原有节点挂到哪一步，照 docs/paths/改树建议.md §3、§4、§7、§8 的改动清单。 */
+const CHAIN_ATTACH = {
+  math: { 1: ["定义", "证明"], 3: ["结构"] },
+  ai: { 2: ["数据", "模型怎么学/评价"], 3: ["模型怎么学/损失"], 6: ["用起来"] },
+  psy: { 1: ["知觉/错觉"], 2: ["知觉/注意", "记忆", "决策"] },
+  econ: { 1: ["约束"], 2: ["激励"], 3: ["市场"] },
+};
+
+function findTwig(root, labelPath) {
+  let node = root;
+  for (const label of labelPath.split("/")) {
+    node = (node.children || []).find((c) => c.label === label);
+    if (!node) return null;
+  }
+  return node;
+}
+
+function cloneTwig(node) {
+  return { label: node.label, intro: node.intro, children: (node.children || []).map(cloneTwig) };
+}
+
+function applyPaths(paths) {
+  Object.entries(CHAIN_ATTACH).forEach(([code, attach]) => {
+    const field = FIELD_TREES[code];
+    const path = paths && paths[code];
+    if (!field || !path || field.chain || !(path.steps || []).length) return;
+    const old = field.root;
+    const steps = path.steps.map((st) => ({
+      label: st.name,
+      intro: `先弄懂：${st.focus}`,
+      done_when: st.done_when,
+      stage: st.step,
+      main: true,
+      // 挂上来的整支和这一步同名（如经济第 2 步「激励」挂「激励」）时，直接挂它的子节点，免得出现「激励 — 激励」
+      children: (attach[st.step] || []).map((lp) => findTwig(old, lp)).filter(Boolean).map(cloneTwig)
+        .flatMap((tw) => (tw.label === st.name.split("：")[0] && tw.children.length ? tw.children : [tw])),
+    }));
+    field.root = stampTree({ label: path.name, intro: path.goal, virtual: true, children: steps }, code);
+    field.chain = true;
+    field.sourceDoc = path.source_doc;
+  });
+}
+
+function entryNode(field) {
+  return pathNodes(field)[0];
+}
+
+function stepOf(field, nodeId) {
+  // 节点所在的主干步骤：主干步骤的 id 是「方向.序号」，往下的节点都以它为前缀
+  if (!field.chain || !nodeId) return null;
+  const parts = nodeId.split(".");
+  return flattenField(field.root).byId[parts.slice(0, 2).join(".")] || null;
+}
+
+function findProjectsForStep(code, step) {
+  S.projectForm = { direction: code, stage: { 1: 0, 2: 1, 3: 2, 4: 2, 5: 3, 6: 3 }[step] || 0, pathStep: step, keywords: "" };
+  S.projectResult = null;
+  S.projectTab = "find";
+  setView("projects");
+}
+
 function flattenField(root) {
   const levels = [];
   const byId = {};
@@ -1198,7 +1263,7 @@ function adoptDirection(facts) {
 function pathNodes(field) {
   const out = [];
   const walk = (node) => {
-    out.push(node);
+    if (!node.virtual) out.push(node);  // 主干的虚拟根只用来挂六步，不算一个节点
     (node.children || []).forEach(walk);
   };
   walk(field.root);
@@ -1217,8 +1282,16 @@ function drawFieldTree(field, picked, onPick, progress, animate) {
   const COL = narrow ? 128 : 168;
   const ROW = narrow ? 42 : 50;
   const NODE_W = narrow ? 104 : 128;
+  const MAIN_W = narrow ? 140 : 212;
   const NODE_H = 34;
   const PAD = narrow ? 24 : 30;
+  const shift = field.root.virtual ? 1 : 0;
+  const colX = (depth) => {
+    const d = depth - shift;
+    if (!field.chain) return d * COL;
+    return d === 0 ? 0 : MAIN_W + (COL - NODE_W) + (d - 1) * COL;
+  };
+  const wOf = (node) => (node.main ? MAIN_W : NODE_W);
   const pos = {};
   let row = 0;
   let depthMax = 0;
@@ -1226,17 +1299,18 @@ function drawFieldTree(field, picked, onPick, progress, animate) {
     depthMax = Math.max(depthMax, depth);
     const kids = node.children || [];
     if (!kids.length) {
-      pos[node.id] = { x: depth * COL, y: row * ROW };
+      pos[node.id] = { x: colX(depth), y: row * ROW };
       row += 1;
       return;
     }
     kids.forEach((k) => place(k, depth + 1));
     const first = pos[kids[0].id].y;
     const last = pos[kids[kids.length - 1].id].y;
-    pos[node.id] = { x: depth * COL, y: (first + last) / 2 };
+    // 主干步骤放在它那组节点的第一行，六步从上到下排成一条线
+    pos[node.id] = { x: colX(depth), y: node.main ? first : (first + last) / 2 };
   };
   place(field.root, 0);
-  const width = depthMax * COL + NODE_W + PAD * 2;
+  const width = colX(depthMax) + (depthMax - shift === 0 ? MAIN_W : NODE_W) + PAD * 2;
   const height = (row - 1) * ROW + NODE_H + PAD * 2;
 
   const box = el("div", "frontier");
@@ -1252,11 +1326,26 @@ function drawFieldTree(field, picked, onPick, progress, animate) {
   const here = progress && progress.here;
   const onPickPath = (id) => picked && (picked === id || picked.startsWith(id + "."));
 
+  if (field.chain) {
+    // 主干：六步之间一条粗线，走过的部分用主色
+    const mains = Object.values(byId).filter((n) => n.main).sort((m, n) => m.stage - n.stage);
+    mains.slice(1).forEach((node, i) => {
+      const a = pos[mains[i].id];
+      const b = pos[node.id];
+      const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      line.setAttribute("x1", String(PAD + 18)); line.setAttribute("x2", String(PAD + 18));
+      line.setAttribute("y1", String(PAD + a.y + NODE_H)); line.setAttribute("y2", String(PAD + b.y));
+      const passed = done.has(mains[i].id) && (done.has(node.id) || here === node.id || (here || "").startsWith(node.id + "."));
+      line.setAttribute("class", "frontier-trunk" + (passed ? " is-past" : ""));
+      svg.appendChild(line);
+    });
+  }
+
   Object.values(byId).forEach((node) => {
-    if (!node.parent) return;
+    if (!node.parent || byId[node.parent].virtual) return;
     const a = pos[node.parent];
     const b = pos[node.id];
-    const x1 = PAD + a.x + NODE_W;
+    const x1 = PAD + a.x + wOf(byId[node.parent]);
     const y1 = PAD + a.y + NODE_H / 2;
     const x2 = PAD + b.x;
     const y2 = PAD + b.y + NODE_H / 2;
@@ -1272,20 +1361,23 @@ function drawFieldTree(field, picked, onPick, progress, animate) {
   });
 
   Object.values(byId).forEach((node) => {
+    if (node.virtual) return;
     const flags = [
       "frontier-node",
+      node.main ? "is-main" : "",
       node.id === picked ? "is-pick" : "",
       onPickPath(node.id) && node.id !== picked ? "is-path" : "",
       done.has(node.id) ? "is-past" : "",
       here === node.id ? "is-now" : "",
       animate ? "reveal" : "",
     ].filter(Boolean).join(" ");
-    const btn = el("button", flags, esc(node.label));
+    const short = node.main ? node.label.split("：")[0] : node.label;
+    const btn = el("button", flags, node.main ? `<b class="step-no">${node.stage}</b><span>${esc(short)}</span>` : esc(node.label));
     btn.type = "button";
-    btn.title = node.label;
+    btn.title = node.main ? `第 ${node.stage} 步 · ${node.label}` : node.label;
     btn.style.left = PAD + pos[node.id].x + "px";
     btn.style.top = PAD + pos[node.id].y + "px";
-    btn.style.width = NODE_W + "px";
+    btn.style.width = wOf(node) + "px";
     if (animate) btn.style.setProperty("--d", String(node.depth));
     if (here === node.id) btn.setAttribute("aria-current", "step");
     btn.onclick = () => onPick(byId[node.id]);
@@ -1310,9 +1402,18 @@ function openNodeSheet(field, node, ctx) {
   x.onclick = () => sheet.remove();
   head.append(el("p", "sheet-kicker", esc(field.name)), x);
   sheet.appendChild(head);
+  const entry = entryNode(field);
+  if (node.main) sheet.appendChild(el("p", "sheet-label", `主干 · 第 ${node.stage} 步（这一学期走到哪）`));
   sheet.appendChild(el("h3", "", esc(node.label)));
   sheet.appendChild(el("p", "sheet-intro", esc(node.intro || "")));
-  if (node.id === field.root.id && ctx.why) {
+  if (node.main && node.done_when) {
+    sheet.appendChild(el("div", "why-box", `<b>做完怎样算过了　</b>${esc(node.done_when)}`));
+    const find = el("button", "btn secondary", "找能交出这一步的项目");
+    find.type = "button";
+    find.onclick = () => { document.getElementById("nodeSheet")?.remove(); findProjectsForStep(field.code, node.stage); };
+    sheet.appendChild(find);
+  }
+  if (node.id === entry.id && ctx.why) {
     sheet.appendChild(el("p", "sheet-why", esc(ctx.why)));
   }
   if (node.children && node.children.length) {
@@ -1332,18 +1433,16 @@ function openNodeSheet(field, node, ctx) {
     go.onclick = () => setView("workbench");
     sheet.appendChild(go);
   }
-  if (node.id === field.root.id) {
-    const courses = el("div", "course-block");
-    courses.appendChild(el("h4", "", "课程"));
-    courses.appendChild(el("div", "course-status", "检索中"));
-    sheet.appendChild(courses);
-    loadCourses(courses, field.query);
-    if (!ctx.chosen) {
-      const choose = el("button", "btn", ctx.hasCurrent ? "确认切换方向" : "确认这个方向");
-      choose.type = "button";
-      choose.onclick = () => ctx.onChoose();
-      sheet.appendChild(choose);
-    }
+  const courses = el("div", "course-block");
+  courses.appendChild(el("h4", "", "课程"));
+  courses.appendChild(el("div", "course-status", "检索中"));
+  sheet.appendChild(courses);
+  loadCourses(courses, node.label || field.query);
+  if (node.id === entry.id && !ctx.chosen) {
+    const choose = el("button", "btn", ctx.hasCurrent ? "确认切换方向" : "确认这个方向");
+    choose.type = "button";
+    choose.onclick = () => ctx.onChoose();
+    sheet.appendChild(choose);
   }
   sheet.querySelector(".sheet-x").focus({ preventScroll: true });
 }
@@ -1353,9 +1452,11 @@ async function renderCards() {
   await ensurePortrait();
   if (stale(seq)) return;
   let saved = trail();
+  let serverTasks = [];
   try {
     const taskRes = await api("GET", `/api/tasks?uid=${S.uid}`);
     if (stale(seq)) return;
+    serverTasks = taskRes.tasks || [];
     if (saved.code) {
       const merged = mergeTrail(saved.code, taskRes.tasks || []);
       if (merged.done.join(",") !== saved.done.join(",")) saveTrail(merged);
@@ -1378,11 +1479,14 @@ async function renderCards() {
   const recLine = el("div", "rec-line");
   const confirmBar = el("div", "switch-bar");
   const stage = el("div", "forest-stage");
-  const legend = el("div", "tree-legend",
-    '<span class="now"><i></i>你在这里</span><span class="past"><i></i>已走过</span><span><i></i>还可以去</span><span>点任一节点看说明</span>');
+  const legend = el("div", "tree-legend");
   $app.append(switcher, recLine, confirmBar, stage, legend);
 
   const paint = () => {
+    const chain = FIELD_TREES[current].chain;
+    legend.innerHTML = (chain ? '<span class="main"><i>1</i>主干：这一学期走到哪（任务 4 的路径）</span>' : "")
+      + '<span class="now"><i></i>你在这里</span><span class="past"><i></i>已走过</span><span><i></i>还可以去</span>'
+      + `<span>${chain ? "节点：二十分钟一件事；点主干看过关标准" : "点任一节点看说明"}</span>`;
     switcher.innerHTML = "";
     Object.entries(FIELD_TREES).forEach(([code, field]) => {
       const b = el("button", "field-chip" + (code === current ? " on" : ""));
@@ -1437,8 +1541,8 @@ async function renderCards() {
       saveTrail({ code: current, done: [], tasks: {} }, true);
       chosenCode = current;
       toast(switching
-        ? `已切换到「${field.name}」，从「${field.root.label}」重新开始`
-        : `已确认「${field.name}」，从「${field.root.label}」开始`);
+        ? `已切换到「${field.name}」，从「${entryNode(field).label}」重新开始`
+        : `已确认「${field.name}」，从「${entryNode(field).label}」开始`);
       document.getElementById("nodeSheet")?.remove();
       picked = null;
       paint();
@@ -1472,7 +1576,8 @@ async function renderCards() {
     const chosen = dirs[dirs.length - 1];
     const code = chosen ? chosen.key.split(":")[1] : "";
     if (code && FIELD_TREES[code] && !trail().code) {
-      saveTrail({ code, done: [], tasks: {} });
+      // 第一次在方向区接过服务端已选的方向时，顺手按已交的任务把进度对上
+      saveTrail(mergeTrail(code, serverTasks));
       chosenCode = code;
       current = code;
       touched = true;
@@ -1510,22 +1615,58 @@ async function renderCards() {
 async function loadCourses(box, query) {
   const status = box.querySelector(".course-status");
   try {
-    const r = await api("GET", `/api/explore/courses?query=${encodeURIComponent(query)}&limit=4`);
+    const r = await api("GET", `/api/explore/courses?query=${encodeURIComponent(query)}&limit=6`);
     if (!r.ok) { status.textContent = `检索失败（如实说明）：${r.error || "未知错误"}`; return; }
     status.remove();
+    const mark = r.source === "catalog" ? "快照" : "实时";
+    const head = box.querySelector("h4");
+    if (head) head.dataset.source = mark;
     if (!r.items || !r.items.length) {
-      box.appendChild(el("div", "course-status", `本轮「${query}」没有查到课程——真实检索，查不到就说查不到。`));
+      box.appendChild(el("div", "course-status", `「${query}」没有对上的课。查的是本学期公开课快照，对不上就空着。`));
       return;
     }
     r.items.forEach((it) => {
       const name = it.name || it.courseName || "(未命名课程)";
-      const teacher = it.teacher || it.teachers || "";
+      const names = it.teacher_names && it.teacher_names.length ? it.teacher_names : [];
+      const teacher = names.length ? names.map((n) => `<button type="button" class="teacher-link" data-teacher="${esc(n)}">${esc(n)}</button>`).join(" ") : esc(it.teacher || it.teachers || "");
       const dept = it.department || it.dept || "";
-      box.appendChild(el("div", "course-item",
-        `${esc(name)}<br><span class="meta">${esc([teacher, dept, r.term].filter(Boolean).join(" · "))}</span>`));
+      const row = el("div", "course-item",
+        `${esc(name)}<br><span class="meta">${teacher}${teacher && dept ? " · " : ""}${esc(dept)}${r.term ? " · " + esc(r.term) : ""}</span>`);
+      row.querySelectorAll(".teacher-link").forEach((b) => {
+        b.onclick = () => showTeacher(b.dataset.teacher);
+      });
+      box.appendChild(row);
     });
   } catch (e) {
     status.textContent = `检索失败（如实说明）：${e.message}`;
+  }
+}
+
+async function showTeacher(name) {
+  document.getElementById("teacherSheet")?.remove();
+  const sheet = el("div", "node-sheet teacher-sheet");
+  sheet.id = "teacherSheet";
+  sheet.innerHTML = `<div class="sheet-head"><span class="sheet-kicker">授课老师</span><button class="sheet-x" type="button">关闭</button></div>`;
+  sheet.querySelector(".sheet-x").onclick = () => sheet.remove();
+  sheet.appendChild(el("h3", "", esc(name)));
+  const status = el("p", "sheet-intro", "正在读本学期快照…");
+  sheet.appendChild(status);
+  document.body.appendChild(sheet);
+  try {
+    const r = await api("GET", `/api/explore/teachers?name=${encodeURIComponent(name)}`);
+    if (!r.ok) { status.textContent = r.error || "快照里没有这位老师。"; return; }
+    status.remove();
+    if (r.departments && r.departments.length) {
+      sheet.appendChild(el("p", "sheet-kicker", esc(r.departments.join(" · "))));
+    }
+    if (r.bio) sheet.appendChild(el("p", "sheet-intro", esc(r.bio)));
+    else sheet.appendChild(el("p", "sheet-intro", "没有对上北京大学的公开学者简介，这里只列出本学期教的课。"));
+    sheet.appendChild(el("p", "sheet-label", `本学期课程 · ${r.term || ""}`));
+    (r.courses || []).forEach((c) => {
+      sheet.appendChild(el("div", "course-item", `${esc(c.name || "")}<br><span class="meta">${esc([c.department, c.credits].filter(Boolean).join(" · "))}</span>`));
+    });
+  } catch (e) {
+    status.textContent = e.message;
   }
 }
 
@@ -1632,10 +1773,24 @@ async function renderWorkbench() {
     p.appendChild(head);
   };
 
+  const stepNote = () => {
+    const step = stepOf(field, node.id);
+    if (!step) return;
+    // 主干步骤要交的是一学期尺度的东西；二十分钟任务只是入门，过关材料去「项目」里找
+    const note = el("div", "note-box step-note");
+    note.innerHTML = `${node.main ? "这是" : "这一节点属于"}路径第 ${step.stage} 步「${esc(step.label)}」。这一步做完要交：${esc(step.done_when)}`;
+    const find = el("button", "linkish", "找能交出它的项目");
+    find.type = "button";
+    find.onclick = () => findProjectsForStep(code, step.stage);
+    note.appendChild(find);
+    p.appendChild(note);
+  };
+
   const showFinished = () => {
     p.innerHTML = "";
     paintHead();
     if (S.lastFeedback && S.lastFeedbackTaskId === task.id) renderFeedbackInto(p);
+    if (node.main) stepNote();
     const next = currentOnPath(field, t.done.concat(node.id));
     p.appendChild(el("div", "note-box finished-note", next
       ? `这一节点已完成。下一节点是「${esc(next.label)}」，进入之后才会安排那一步的任务。`
@@ -1668,6 +1823,14 @@ async function renderWorkbench() {
       };
       acts.appendChild(go);
     }
+    const doneHere = listed.filter((tk) => tk.status === "done" && tk.direction === code && tk.id !== task.id).length + 1;
+    if (doneHere >= PROJECT_AFTER_TASKS || !next) {
+      const proj = el("button", next ? "btn secondary" : "btn", "学完一块了，找个项目练手");
+      proj.type = "button";
+      proj.title = `在「${field.name}」交过 ${doneHere} 次小任务`;
+      proj.onclick = () => goFindProjects();
+      acts.appendChild(proj);
+    }
     const me = el("button", "btn ghost", "看它记下了什么");
     me.type = "button";
     me.onclick = () => setView("me");
@@ -1681,6 +1844,7 @@ async function renderWorkbench() {
   }
 
   paintHead();
+  stepNote();
 
   p.appendChild(el("h3", "section-label", "步骤"));
   const steps = el("div", "step-list");
@@ -1776,13 +1940,30 @@ function renderFeedbackInto(p) {
 
 /* ---------- 今日 / ⑨ NBA ---------- */
 
+function goFindProjects(keywords) {
+  // 进「项目 · 找项目」，方向和阶段交给服务端按记录预选（/api/projects/context）
+  S.projectForm = null;
+  S.projectResult = null;
+  S.projectTab = "find";
+  if (keywords) S.projectKeywords = keywords;
+  setView("projects");
+}
+
+function openProject(pid) {
+  S.projectId = pid;
+  setView("project");
+}
+
+const PROJECT_AFTER_TASKS = 3; // 在一个方向交过几次小任务之后，开始建议找项目练手
+
 async function renderToday() {
   const seq = S.renderSeq;
   await ensurePortrait();
   if (stale(seq)) return;
-  const [taskRes, onboard] = await Promise.all([
+  const [taskRes, onboard, mine] = await Promise.all([
     api("GET", `/api/tasks?uid=${S.uid}`).catch(() => null),
     api("GET", `/api/onboard/result?uid=${S.uid}`).catch(() => null),
+    api("GET", `/api/projects/mine?uid=${S.uid}`).catch(() => ({ projects: [] })),
   ]);
   if (stale(seq)) return;
   adoptDirection((onboard && onboard.facts) || []);
@@ -1799,28 +1980,54 @@ async function renderToday() {
   const facts = (onboard && onboard.facts) || [];
   const talked = onboard && onboard.state && onboard.state.phase === "done";
   const drafts = facts.filter((f) => f.status === "draft").length;
+  const doneTasks = ((taskRes && taskRes.tasks) || []).filter((t) => t.status === "done" && t.direction === saved.code).length;
+  const projects = (mine && mine.projects) || [];
+  const toFix = projects.find((p) => p.status === "reviewed" && p.reviews[0] && p.reviews[0].passed < p.reviews[0].total);
+  const toSubmit = projects.find((p) => p.status === "picked");
 
-  let title; let why; let label; let view;
+  // 每条建议：一个主动作 + 至多一个备选，落到一件具体的事
+  let title; let why; let primary; let alt = null;
+  const goView = (label, view) => ({ label, run: () => setView(view) });
   if (!field && !talked) {
     title = "先聊五个问题";
     why = "它还不认识你。五个问题，大约五分钟：年级、基础、好奇什么、习惯怎么学。每一问都可以选「不知道」。";
-    label = "去画像"; view = "onboarding";
+    primary = goView("去画像", "onboarding");
   } else if (!field && drafts) {
     title = `核对它记下的 ${drafts} 条`;
     why = "对话里记下的内容还是草稿。改掉不对的、划掉不属实的，方向建议才会按你来。";
-    label = "去核对"; view = "confirm";
+    primary = goView("去核对", "confirm");
   } else if (!field) {
     title = "选定一个方向";
     why = "方向区有六棵树，已经按你的画像标出建议。确认其中一棵，任务会从它的起点开始。";
-    label = "去方向区"; view = "cards";
+    primary = goView("去方向区", "cards");
+  } else if (toFix) {
+    let detail = null;
+    try { detail = await api("GET", `/api/projects/${toFix.id}?uid=${S.uid}`); } catch (_) { /* 拿不到详情就用概要 */ }
+    if (stale(seq)) return;
+    const last = (detail && detail.reviews && detail.reviews[0]) || toFix.reviews[0];
+    title = `把《${toFix.name}》再改一处`;
+    why = `上次评阅 ${last.passed} / ${last.total} 条做到。${last.next_step || "按评阅里第一条没做到的标准补一处，再交一版。"}`;
+    primary = { label: "去改这一处", run: () => openProject(toFix.id) };
+    if (node) alt = { label: `先继续「${node.label}」`, run: () => setView("workbench") };
+  } else if (toSubmit) {
+    title = `交《${toSubmit.name}》的成果`;
+    why = "这个项目已经选定，还没交。按项目页的要求打成一个 .zip：README、results/、代码或方法。没做完也可以先交一版，评阅会指出先补哪里。";
+    primary = { label: "去交成果", run: () => openProject(toSubmit.id) };
+    if (node) alt = { label: `先继续「${node.label}」`, run: () => setView("workbench") };
+  } else if (doneTasks >= PROJECT_AFTER_TASKS) {
+    title = "找一个项目练手";
+    why = `你在「${field.name}」已经交过 ${doneTasks} 次小任务。二十分钟的任务练的是一个点，项目练的是把点连起来：从公开来源找一个真题，做完交一个压缩包。`;
+    primary = { label: "去找项目", run: () => goFindProjects() };
+    if (node) alt = { label: `先继续「${node.label}」`, run: () => setView("workbench") };
   } else if (node) {
     title = `继续「${node.label}」`;
     why = node.intro;
-    label = "去做这一步"; view = "workbench";
+    primary = goView("去做这一步", "workbench");
   } else {
     title = `「${field.name}」这条路已经走到头`;
-    why = "可以回方向区换一棵树，或者到记录里回看这一路留下的证据。";
-    label = "去方向区"; view = "cards";
+    why = "可以找一个项目把这一路学的用起来，或者回方向区换一棵树。";
+    primary = { label: "去找项目", run: () => goFindProjects() };
+    alt = { label: "回方向区", run: () => setView("cards") };
   }
 
   $app.innerHTML = "";
@@ -1829,17 +2036,23 @@ async function renderToday() {
   const status = el("div", "ws-status");
   status.appendChild(el("span", "", field ? esc(field.name) : "还没有方向"));
   if (node) status.appendChild(el("span", "", `正在「${esc(node.label)}」`));
-  const behavior = facts.filter((f) => f.source === "behavior" && f.status !== "deleted").length;
-  if (behavior) status.appendChild(el("span", "", `已交 ${behavior} 次任务`));
+  if (doneTasks) status.appendChild(el("span", "", `交过 ${doneTasks} 次小任务`));
+  if (projects.length) status.appendChild(el("span", "", `${projects.length} 个项目`));
   wrap.appendChild(status);
   const card = el("div", "nba-card");
   card.appendChild(el("h3", "nba-title", esc(title)));
   card.appendChild(el("p", "nba-why", esc(why)));
   const act = el("div", "submit-actions");
-  const go = el("button", "btn", label);
+  const go = el("button", "btn", esc(primary.label));
   go.type = "button";
-  go.onclick = () => setView(view);
+  go.onclick = primary.run;
   act.appendChild(go);
+  if (alt) {
+    const other = el("button", "btn ghost", esc(alt.label));
+    other.type = "button";
+    other.onclick = alt.run;
+    act.appendChild(other);
+  }
   card.appendChild(act);
   wrap.appendChild(card);
   $app.appendChild(wrap);
@@ -1940,11 +2153,17 @@ async function renderProjects() {
   const form = S.projectForm || {
     direction: (ctx && ctx.direction) || t.code || "ai",
     stage: ctx ? ctx.stage : 0,
-    keywords: "",
+    keywords: S.projectKeywords || "",
   };
+  S.projectKeywords = "";
   // 任务 4 的路径：有路径的方向按「第几步」选，没有的按四个阶段选
   const defaultStep = (stage) => ({ 0: 1, 1: 2, 2: 3, 3: 5 }[stage] || 1);
-  if (!form.pathStep) form.pathStep = (ctx && ctx.path_step) || defaultStep(form.stage);
+  // 优先按方向树上的位置（当前节点属于路径第几步），其次按服务端记录推
+  const treeStep = field && field.chain && node && t.code === form.direction ? stepOf(field, node.id) : null;
+  if (!form.pathStep) {
+    form.pathStep = treeStep ? treeStep.stage : ((ctx && ctx.path_step) || defaultStep(form.stage));
+    form.fromTree = !!treeStep;
+  }
   S.projectForm = form;
 
   const panel = el("div", "panel project-form");
@@ -1982,7 +2201,10 @@ async function renderProjects() {
       });
       const cur = path.steps.find((st) => st.step === form.pathStep);
       if (cur) form.stage = cur.project_stage;
-      stageNote.textContent = `六步来自任务 4 的「${path.name}」路径（${path.source_doc}）。按你选的这一步找能交出它过关材料的项目。${ctx && ctx.reason ? `按你的记录预选：${ctx.reason}，不对就改。` : ""}`;
+      const why = form.fromTree && form.pathStep === (treeStep && treeStep.stage)
+        ? `按你在方向树上的位置预选：第 ${form.pathStep} 步，不对就改。`
+        : (ctx && ctx.reason ? `按你的记录预选：${ctx.reason}，不对就改。` : "");
+      stageNote.textContent = `六步来自任务 4 的「${path.name}」路径（${path.source_doc}）。按你选的这一步找能交出它过关材料的项目。${why}`;
     } else {
       stageLabel.textContent = "你现在走到哪";
       STAGES.forEach((st) => {
@@ -2125,7 +2347,8 @@ function renderMine(list) {
     const last = (p.reviews || [])[0];
     const row = el("button", "mine-row");
     row.type = "button";
-    row.innerHTML = `<span class="mine-name">${esc(p.name)}</span><span class="mine-meta">${esc(p.source_name || "")} · ${last ? `最近一次 ${last.passed}/${last.total} 条做到` : "还没交"}</span>`;
+    const state = p.status === "done" ? `做完了 · ${last.passed}/${last.total} 条做到` : (last ? `最近一次 ${last.passed}/${last.total} 条做到，还可以再改` : "还没交");
+    row.innerHTML = `<span class="mine-name">${esc(p.name)}</span><span class="mine-meta">${esc(p.source_name || "")} · ${state}</span>`;
     row.onclick = () => { S.projectId = p.id; setView("project"); };
     rows.appendChild(row);
   });
@@ -2213,7 +2436,8 @@ async function renderProject() {
       });
       const data = await res.json().catch(() => null);
       if (!res.ok) throw new Error((data && data.detail) || `提交失败 (${res.status})`);
-      paintReview(result, data);
+      paintReview(result, data, false, (p.reviews || [])[0]);
+      p.reviews = [data].concat(p.reviews || []);
       result.scrollIntoView({ behavior: "smooth", block: "start" });
     } catch (e) {
       result.innerHTML = "";
@@ -2228,12 +2452,17 @@ async function renderProject() {
   drop.addEventListener("dragleave", () => drop.classList.remove("over"));
   drop.addEventListener("drop", (e) => { e.preventDefault(); drop.classList.remove("over"); send(e.dataTransfer.files[0]); });
 
-  if (p.reviews && p.reviews.length) paintReview(result, p.reviews[0], true);
+  if (p.reviews && p.reviews.length) paintReview(result, p.reviews[0], true, p.reviews[1]);
 }
 
-function paintReview(box, r, old) {
+function paintReview(box, r, old, prev) {
   box.innerHTML = "";
   const sec = el("section", "feedback");
+  if (prev && typeof prev.passed === "number") {
+    const d = r.passed - prev.passed;
+    sec.appendChild(el("p", `review-delta ${d > 0 ? "up" : d < 0 ? "down" : ""}`,
+      d > 0 ? `比上一版多做到 ${d} 条（${prev.passed} → ${r.passed}）` : d < 0 ? `比上一版少了 ${-d} 条（${prev.passed} → ${r.passed}），看看是不是漏交了文件` : `和上一版一样是 ${r.passed} 条，看下面「下一步」改的那一处有没有落到文件里`));
+  }
   const head = el("div", "feedback-head");
   const hl = el("div");
   hl.appendChild(el("h3", "", old ? "上一次的评阅" : "评阅"));
@@ -2250,6 +2479,21 @@ function paintReview(box, r, old) {
   });
   sec.appendChild(list);
   if (r.next_step) sec.appendChild(el("div", "why-box", `<b>下一步　</b>${esc(r.next_step)}`));
+  if (r.passed === r.total) {
+    const acts = el("div", "submit-actions");
+    const nextOne = el("button", "btn", "找下一个项目（难一档）");
+    nextOne.type = "button";
+    nextOne.onclick = () => {
+      const f = S.projectForm || {};
+      S.projectForm = f.direction ? { ...f, stage: Math.min(3, (f.stage || 0) + 1), pathStep: Math.min(6, (f.pathStep || 1) + 1) } : null;
+      S.projectResult = null; S.projectTab = "find"; setView("projects");
+    };
+    const today = el("button", "btn ghost", "回今日");
+    today.type = "button";
+    today.onclick = () => setView("today");
+    acts.append(nextOne, today);
+    sec.appendChild(acts);
+  }
   const files = el("details", "inventory");
   if (!(r.inventory || []).length) files.hidden = true;
   files.appendChild(el("summary", "", `压缩包里的 ${(r.inventory || []).length} 个文件`));
@@ -2337,8 +2581,9 @@ document.getElementById("brandHome").addEventListener("click", () => setView("ho
 (async function boot() {
   const t0 = performance.now();
   try {
-    const h = await api("GET", "/api/health");
+    const [h, paths] = await Promise.all([api("GET", "/api/health"), api("GET", "/api/paths").catch(() => null)]);
     applyLlmPill(h.llm);
+    if (paths) applyPaths(paths.paths);
   } catch (_) { /* 健康检查失败不挡页面 */ }
   if (S.uid) {
     try {

@@ -20,6 +20,7 @@ import threading
 import time
 import zipfile
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import TimeoutError as FutureTimeout
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -57,6 +58,7 @@ DEFAULT_STEP = {0: 1, 1: 2, 2: 3, 3: 5}  # 没有路径进度时，由项目阶�
 _LAST: dict[str, tuple[float, dict[str, dict[str, Any]]]] = {}
 _LAST_LOCK = threading.Lock()
 LAST_TTL = 2 * 3600
+SEARCH_BUDGET = 12  # 秒。慢的来源不等：先用它的快照，后台继续跑完并写进缓存，下一次就快了
 
 
 def registry() -> dict[str, Any]:
@@ -217,7 +219,7 @@ def _pick_llm(cands: list[dict[str, Any]], direction: str, stage: int, keywords:
     data = llm.chat_json(
         skills.load("project-scout"),
         f"学生：方向={direction_name(direction)}；阶段={stage}（{STAGE_LABELS[stage]}）；关键词={keywords or '无'}；当前节点={node or '无'}\n"
-        + (f"路径步骤：第 {step['step']} 步「{step['name']}」；这一步做完要交：{step['done_when']}；任务 4 建议的项目形态（参考）：{step.get('project_form', '')}\n" if step else "路径步骤：无\n")
+        + (f"路径步骤：第 {step['step']} 步「{step['name']}」；这一步做完要交：{step['done_when']}" + (f"；任务 4 建议的项目形态（参考）：{step['project_form']}" if step.get('project_form') else "") + "\n" if step else "路径步骤：无\n")
         + "候选（id | 来源 | 标题 | 难度 | 截止 | 原文摘录）：\n" + "\n".join(lines),
         timeout=40, tag="project-scout",
     )
@@ -286,12 +288,29 @@ def search(uid: str, direction: str, stage: int, keywords: str = "", node: str =
     status: list[dict[str, Any]] = []
     # 既没有接口也没有快照的来源只出现在「去哪找」里，不算一次检索
     sources = [s for s in sources if s.get("adapter") or s.get("samples")]
-    with ThreadPoolExecutor(max_workers=8) as pool:
-        futs = {pool.submit(_collect, s, direction, stage, keywords): s for s in sources}
-        for fut in as_completed(futs):
+    pool = ThreadPoolExecutor(max_workers=8)
+    futs = {pool.submit(_collect, s, direction, stage, keywords): s for s in sources}
+    done: set = set()
+    try:
+        for fut in as_completed(futs, timeout=SEARCH_BUDGET):
             got, st = fut.result()
             cands.extend(got)
             status.append(st)
+            done.add(fut)
+    except FutureTimeout:
+        for fut, src in futs.items():
+            if fut in done:
+                continue
+            if fut.done():
+                got, st = fut.result()
+            else:
+                got = [_norm(src, x, True) for x in src.get("samples") or []]
+                st = {"id": src["id"], "name": src["name"], "ok": bool(got), "count": len(got), "snapshot": True,
+                      "error": f"超过 {SEARCH_BUDGET} 秒没返回，这次先用快照" if got else f"超过 {SEARCH_BUDGET} 秒没返回"}
+            cands.extend(got)
+            status.append(st)
+    finally:
+        pool.shutdown(wait=False)  # 不等慢来源；它们跑完会把结果留在适配器缓存里
     status.sort(key=lambda s: (not s["ok"], s["name"]))
     uniq: dict[str, dict[str, Any]] = {}
     for c in cands:
@@ -435,5 +454,6 @@ def record_review(uid: str, p: dict[str, Any], review: dict[str, Any]) -> dict[s
     store.add_fact(fact)
     data = {k: v for k, v in p.items() if k not in ("id", "status", "created_at", "updated_at")}
     data["reviews"] = reviews[:10]
-    store.save_project(uid, p["id"], data, status="reviewed")
+    # 五条都做到算这个项目做完了；否则留在「已评阅」，今日会提醒按评阅再改一处
+    store.save_project(uid, p["id"], data, status="done" if review["passed"] == review["total"] else "reviewed")
     return fact.to_dict()

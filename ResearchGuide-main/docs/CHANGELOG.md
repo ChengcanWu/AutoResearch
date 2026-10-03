@@ -9,6 +9,35 @@
 ## [2026-10-03] [DOC] 产品设计提案 v2（HCI）
 - 变更内容：新增 `docs/DESIGN_PROPOSAL.md`。判断：学东西越来越便宜，技能和知识不再是瓶颈，学生要赢靠的是用自己的边去差异化。所以主价值是定位与博弈层（§1D：边清单 → 竞争地图（需求 / 供给 / 势头，k≥5、按档、滞后）→ 生态位与定位陈述「我是能做 X 的人，因为 Y」→ 信号表 → 时机 → 冲 / 稳 / 保下注组合，并防羊群）；研究思维层（阅读卡 → 综合矩阵 → 问题阶梯 → 提案画布 → 最小测试）是降成本的引擎、也是边的原材料。节奏分层：每日 ≤10 分钟（arXiv 新论文分拣、雷达变化、一次定位微调），重活按周。双窗口：学生自己的 Agent 是手，启研是地图、标准和账本。IA 五标签：今日 / 定位 / 研读 / 机会 / 作品。按天排期，含验证计划（「Agent 单独 vs Agent + 启研」对照）。是提案，不改代码与契约；采纳哪些在群里定。
 - 影响文档：docs/DESIGN_PROPOSAL.md（新增）、docs/README.md
+- 登记人：助手
+
+## [2026-10-03] [BUILD] 当前学期公开课快照：每个节点本地检索，老师可点
+- 变更内容：把 2026-2027-1 全院系公开课翻进 `knowledge/catalog/`（`courses.json` / `teachers.json` / `meta.json`）。检索先读这份快照，不再每次打教务。方向树上每个节点都用节点名做关键词查课，对不上就空着。老师名可点，看到本学期教了哪些课；简介只在 OpenAlex 对上北京大学任职时才写。生成脚本：`server/catalog_build.py`。
+- 影响模块：server/catalog.py、server/catalog_build.py、server/pku_adapter.py、server/main.py、web/js/app.js、web/css/styles.css、knowledge/catalog/、docs/ARCHITECTURE.md
+- 决策来源：邬程灿
+- 登记人：助手
+
+## [2026-10-02] [BUILD] 方向树画成「6 步主干 + 原有节点」（任务 4 路径进树）
+- 变更内容：新增 `GET /api/paths`；前端启动时读路径，把数学、人工智能、认知、经济四棵树组成「6 步主干 + 原有节点」：主干竖排成一条粗线、带序号，原有概念节点按 `docs/paths/改树建议.md` §3/§4/§7/§8 的改动清单挂到对应步骤右侧（`web/js/app.js` 的 `CHAIN_ATTACH`），`FIELD_TREES` 原文不动；统计、系统不变。点主干看「先弄懂什么 / 做完怎样算过了」，并能直接「找能交出这一步的项目」；任务页标出当前节点属于第几步、这一步要交什么；「项目」页按树上的位置预选步骤。修复：第一次在方向区接过服务端已选方向时没有按已交任务对齐进度。
+- 影响模块：server/main.py、web/js/app.js、web/css/styles.css、server/tests/、docs/DESIGN_SPEC.md、docs/TASK3_PROJECTS.md、docs/paths/README.md（一行）
+- 决策来源：陈浩文（依据任务 4 改树建议）
+- 登记人：助手
+
+## [2026-10-02] [BUILD] 做完之后怎么接：今日、任务完成、项目评阅都落到下一件事
+- 变更内容：今日的建议按「有项目没改完 → 选了项目没交 → 交过 3 次小任务该找项目 → 继续当前节点」排，每条一个主动作加一个备选；改项目时直接引用上次评阅的「下一步」。任务完成页在交够 3 次（或走完方向）后多一个「学完一块了，找个项目练手」。项目页每次评阅和上一版比多了几条；五条全做到标为「做完了」，给「找下一个项目（难一档）」。规则表见 TASK3_PROJECTS §8。
+- 影响模块：web/js/app.js、web/css/styles.css、server/projects.py（五条全做到时状态记为 done）、server/tests/、docs/TASK3_PROJECTS.md
+- 决策来源：陈浩文
+- 登记人：助手
+
+## [2026-10-02] [BUILD] 整条链路的接口测试 + GitHub Actions
+- 变更内容：新增 `server/tests/test_api_flow.py`：用真实 FastAPI 应用走一遍 登录 → 五问 → 核对（改一条、划一条）→ 选方向 → 节点任务 → 提交反馈 → 找项目（实时来源全部「连不上」，走快照）→ 交压缩包 → 记录 → 软删，外加未知用户 / 方向的拒绝。数据库放临时目录、不联网、不调模型。仓库根目录新增 `.github/workflows/tests.yml`：每个 PR 和 main 上的提交跑后端测试、`node --check` 前端、并检查 `knowledge/paths.json` 和 `docs/paths/` 是否一致。
+- 影响模块：server/tests/、.github/workflows/、README.md
+- 决策来源：陈浩文
+- 登记人：助手
+
+## [2026-10-02] [FIX] paths.json 接上认知、经济路径；清掉 CHANGELOG 里残留的合并冲突标记
+- 变更内容：#5 加了 `docs/paths/认知.md`、`经济.md`，但没有重新生成 `knowledge/paths.json`，main 上 `server/tests` 有一条测试失败。现在跑过 `knowledge/build_paths.py`，四个方向都有 6 步路径，「项目」页的认知、经济也按路径步骤选。`改树建议.md` §5 的项目形态是为数学、人工智能写的，生成时只给这两个方向带上。另外删掉本文件里 #3 合并时留下的一行 `=======`。检索加 12 秒总时限：慢来源（今天产业命题要 20–35 秒）先用快照、后台跑完写缓存，冷启动从 40 多秒降到约 17 秒，缓存热了约 5 秒。
+- 影响模块：knowledge/paths.json、knowledge/build_paths.py、server/projects.py、server/project_adapters.py、server/tests/test_projects.py、docs/TASK3_PROJECTS.md、docs/CHANGELOG.md
 - 决策来源：陈浩文
 - 登记人：助手
 
@@ -23,7 +52,7 @@
 - 影响文档：`docs/paths/`（新增）；甲的两个方向（认知、经济）待补
 - 影响模块：暂无代码改动；`web/js/app.js` 的 `FIELD_TREES` 改不改、怎么改，等两人路径合并后再定（建议见 `docs/paths/改树建议.md`）
 - 决策来源：陈旭 依据任务表（任务 4乙）
-=======
+
 ## [2026-09-30] [BUILD] 任务 3 边学边练：公开来源检索项目、交压缩包、五条标准评阅
 - 变更内容：新增侧栏「项目」。来源清单 `knowledge/project_sources.json`（24 个来源、72 条逐字核对过原文的样例）；7 个来源实时检索（和鲸、飞桨学习赛、天池学习赛、北大开放数据、科学数据银行、创新大赛产业命题、欧拉计划中文站），其余给快照和「去哪找」路线；查不到就空着。成果以 `.zip` 提交，只在内存里读、不执行，按五条标准评阅，规则判定是上限，模型引文必须在文件里逐字找得到；每次提交写回一条行为事实。模型的工作说明写在 `skills/project-scout/`、`skills/project-review/`，代码与 skill 分工见 `skills/README.md`。新增接口只加不改，见 ARCHITECTURE §5。
 - 影响模块：server/projects.py、server/project_adapters.py、server/submission.py、server/skills.py、server/store.py（新增 projects 表）、server/main.py、web/、knowledge/、skills/、docs/TASK3_PROJECTS.md
