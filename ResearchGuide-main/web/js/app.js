@@ -1445,18 +1445,16 @@ function openNodeSheet(field, node, ctx) {
     go.onclick = () => setView("workbench");
     sheet.appendChild(go);
   }
-  if (node.id === entry.id) {
-    const courses = el("div", "course-block");
-    courses.appendChild(el("h4", "", "课程"));
-    courses.appendChild(el("div", "course-status", "检索中"));
-    sheet.appendChild(courses);
-    loadCourses(courses, field.query);
-    if (!ctx.chosen) {
-      const choose = el("button", "btn", ctx.hasCurrent ? "确认切换方向" : "确认这个方向");
-      choose.type = "button";
-      choose.onclick = () => ctx.onChoose();
-      sheet.appendChild(choose);
-    }
+  const courses = el("div", "course-block");
+  courses.appendChild(el("h4", "", "课程"));
+  courses.appendChild(el("div", "course-status", "检索中"));
+  sheet.appendChild(courses);
+  loadCourses(courses, node.label || field.query);
+  if (node.id === entry.id && !ctx.chosen) {
+    const choose = el("button", "btn", ctx.hasCurrent ? "确认切换方向" : "确认这个方向");
+    choose.type = "button";
+    choose.onclick = () => ctx.onChoose();
+    sheet.appendChild(choose);
   }
   sheet.querySelector(".sheet-x").focus({ preventScroll: true });
 }
@@ -1629,22 +1627,58 @@ async function renderCards() {
 async function loadCourses(box, query) {
   const status = box.querySelector(".course-status");
   try {
-    const r = await api("GET", `/api/explore/courses?query=${encodeURIComponent(query)}&limit=4`);
+    const r = await api("GET", `/api/explore/courses?query=${encodeURIComponent(query)}&limit=6`);
     if (!r.ok) { status.textContent = `检索失败（如实说明）：${r.error || "未知错误"}`; return; }
     status.remove();
+    const mark = r.source === "catalog" ? "快照" : "实时";
+    const head = box.querySelector("h4");
+    if (head) head.dataset.source = mark;
     if (!r.items || !r.items.length) {
-      box.appendChild(el("div", "course-status", `本轮「${query}」没有查到课程——真实检索，查不到就说查不到。`));
+      box.appendChild(el("div", "course-status", `「${query}」没有对上的课。查的是本学期公开课快照，对不上就空着。`));
       return;
     }
     r.items.forEach((it) => {
       const name = it.name || it.courseName || "(未命名课程)";
-      const teacher = it.teacher || it.teachers || "";
+      const names = it.teacher_names && it.teacher_names.length ? it.teacher_names : [];
+      const teacher = names.length ? names.map((n) => `<button type="button" class="teacher-link" data-teacher="${esc(n)}">${esc(n)}</button>`).join(" ") : esc(it.teacher || it.teachers || "");
       const dept = it.department || it.dept || "";
-      box.appendChild(el("div", "course-item",
-        `${esc(name)}<br><span class="meta">${esc([teacher, dept, r.term].filter(Boolean).join(" · "))}</span>`));
+      const row = el("div", "course-item",
+        `${esc(name)}<br><span class="meta">${teacher}${teacher && dept ? " · " : ""}${esc(dept)}${r.term ? " · " + esc(r.term) : ""}</span>`);
+      row.querySelectorAll(".teacher-link").forEach((b) => {
+        b.onclick = () => showTeacher(b.dataset.teacher);
+      });
+      box.appendChild(row);
     });
   } catch (e) {
     status.textContent = `检索失败（如实说明）：${e.message}`;
+  }
+}
+
+async function showTeacher(name) {
+  document.getElementById("teacherSheet")?.remove();
+  const sheet = el("div", "node-sheet teacher-sheet");
+  sheet.id = "teacherSheet";
+  sheet.innerHTML = `<div class="sheet-head"><span class="sheet-kicker">授课老师</span><button class="sheet-x" type="button">关闭</button></div>`;
+  sheet.querySelector(".sheet-x").onclick = () => sheet.remove();
+  sheet.appendChild(el("h3", "", esc(name)));
+  const status = el("p", "sheet-intro", "正在读本学期快照…");
+  sheet.appendChild(status);
+  document.body.appendChild(sheet);
+  try {
+    const r = await api("GET", `/api/explore/teachers?name=${encodeURIComponent(name)}`);
+    if (!r.ok) { status.textContent = r.error || "快照里没有这位老师。"; return; }
+    status.remove();
+    if (r.departments && r.departments.length) {
+      sheet.appendChild(el("p", "sheet-kicker", esc(r.departments.join(" · "))));
+    }
+    if (r.bio) sheet.appendChild(el("p", "sheet-intro", esc(r.bio)));
+    else sheet.appendChild(el("p", "sheet-intro", "没有对上北京大学的公开学者简介，这里只列出本学期教的课。"));
+    sheet.appendChild(el("p", "sheet-label", `本学期课程 · ${r.term || ""}`));
+    (r.courses || []).forEach((c) => {
+      sheet.appendChild(el("div", "course-item", `${esc(c.name || "")}<br><span class="meta">${esc([c.department, c.credits].filter(Boolean).join(" · "))}</span>`));
+    });
+  } catch (e) {
+    status.textContent = e.message;
   }
 }
 
