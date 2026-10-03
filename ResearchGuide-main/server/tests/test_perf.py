@@ -32,6 +32,7 @@ from singleflight import SingleFlight  # noqa: E402
 @pytest.fixture(autouse=True)
 def offline(tmp_path, monkeypatch):
     monkeypatch.setattr(store, "DB_PATH", tmp_path / "perf.db")
+    monkeypatch.setattr(arxiv, "CACHE_DIR", tmp_path / "papers")  # 不读本机真实的论文缓存
     store.init_db()
     monkeypatch.setattr(llm, "chat", lambda *a, **k: None)
     monkeypatch.setattr(llm, "chat_json", lambda *a, **k: None)
@@ -395,7 +396,9 @@ def test_daily_failure_is_shared_not_retried_per_request(monkeypatch):
     uid = store.create_user("t")["uid"]
     calls = []
 
-    def down(*a, **k):
+    def down(*a, cached_only=False, **k):
+        if cached_only:
+            return None  # 缓存里没有
         calls.append(1)
         time.sleep(BLOCK)
         raise arxiv.ArxivError("连不上 arXiv")
@@ -796,7 +799,7 @@ def test_notebook_outputs_are_skipped_without_building_objects():
     peak = tracemalloc.get_traced_memory()[1]
     tracemalloc.stop()
     item = next(i for i in bundle["inventory"] if i["path"] == "analysis.ipynb")
-    assert item["has_outputs"] and bundle["texts"]["analysis.ipynb"] == ""
+    assert item["has_outputs"] is False and bundle["texts"]["analysis.ipynb"] == ""  # 没解析就不给「有输出」
     assert any("清空输出" in n for n in bundle["notes"]) and peak < 40 * 1024 * 1024
     # 限额以内：照常读源码，输出对象（哪怕带 source 键）解析完就丢
     ok = {"cells": [{"cell_type": "markdown", "source": ['# 说明 "引号" {[}]']},
@@ -1005,3 +1008,52 @@ def test_last_search_results_expire_and_are_bounded(monkeypatch):
     assert len(projects._LAST) == 1  # 过期的随下一次写入一起清掉
     with pytest.raises(KeyError):
         projects.pick("u1", "c")
+
+
+# ---------- 第十轮 ----------
+
+def test_cached_papers_do_not_queue_behind_slow_fetches(tmp_path, monkeypatch):
+    import json as _json
+    monkeypatch.setattr(arxiv, "CACHE_DIR", tmp_path)
+    (tmp_path / "2310.17623.json").write_text(_json.dumps(
+        {"id": "2310.17623", "title": "T", "source": "html", "text": "Abstract\\nx", "url": "u"}), encoding="utf-8")
+    gate = threading.Event()
+    monkeypatch.setattr(arxiv, "papers", lambda ids: gate.wait(10) and [])  # 没缓存的论文：卡在取元数据上
+
+    async def go():
+        async with _asgi() as c:
+            slow = [asyncio.create_task(c.get(f"/api/papers/2401.{i:05d}")) for i in range(6)]  # 占满 arXiv 线程池
+            await asyncio.sleep(0.1)
+            t0 = time.perf_counter()
+            hit = await c.get("/api/papers/2310.17623")
+            waited = time.perf_counter() - t0
+            gate.set()
+            await asyncio.gather(*slow)
+            return hit.status_code, hit.json()["title"], waited
+
+    code, title, waited = asyncio.run(go())
+    assert code == 200 and title == "T" and waited < QUICK
+
+
+def test_unparsed_notebooks_get_no_output_credit():
+    import json as _json
+    nb = {"cells": [], "metadata": {"pad": [{"outputs": [1]}] + [{"k": i} for i in range(80_000)]}}  # 零个单元，只靠元数据撑过限额
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
+        z.writestr("README.md", "# 题目\\n")
+        z.writestr("a.ipynb", _json.dumps(nb))
+    bundle = submission.read_zip(buf.getvalue())
+    item = next(i for i in bundle["inventory"] if i["path"] == "a.ipynb")
+    assert item["has_outputs"] is False and any("不计入" in n for n in bundle["notes"])
+
+
+def test_quote_normalization_is_consistent_with_expanding_and_composed_characters():
+    import unicodedata
+    import quotes
+    quotes.clear_prepared()
+    text = "Abstract\nshort.\n1 Introduction\n" + "\u0130" * 70 + " the intro sentence that we quote here.\n" + "x" * 30 + "\n6 Limitations\nThe real limitation sentence is here.\n"
+    paper = {"text": text, "source": "html"}
+    assert quotes.locate("the intro sentence that we quote here", paper)["section"] == "introduction"  # İ 转小写是两个字
+    han = "한국어 문장을 인용합니다 정말로"
+    assert quotes.locate(han, {"text": "1 Introduction\n" + unicodedata.normalize("NFD", han), "source": "html"})["found"]
+    assert quotes.locate(unicodedata.normalize("NFD", han), {"text": "1 Introduction\n" + han, "source": "html"})["found"]

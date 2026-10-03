@@ -51,9 +51,16 @@ def kit_paper(k: dict[str, Any], arxiv_id: str) -> dict[str, Any] | None:
 
 # ---------- 每日情报：分拣今天的新论文 ----------
 
-def daily_source(kit_id: str) -> tuple[list[dict[str, Any]], str]:
-    """这个工具包今天的 arXiv 候选，或者取不到的原因。所有人共用同一份，失败也共用（不各自重试）。"""
+def daily_source(kit_id: str, cached_only: bool = False) -> tuple[list[dict[str, Any]], str] | None:
+    """这个工具包今天的 arXiv 候选，或者取不到的原因。所有人共用同一份，失败也共用（不各自重试）。
+    cached_only=True 时只看缓存，没有就返回 None。"""
     k = kit(kit_id)
+    if cached_only:
+        try:
+            got = arxiv.recent(k["daily"]["categories"], k["daily"]["keywords"], max_results=25, cached_only=True)
+        except arxiv.ArxivError:
+            got = None  # 只看缓存这一步出任何错，都当作没命中，交给共享的取数那一步
+        return None if got is None else (got, "")
     try:
         return arxiv.recent(k["daily"]["categories"], k["daily"]["keywords"], max_results=25), ""
     except arxiv.ArxivError as exc:

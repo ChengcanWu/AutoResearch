@@ -22,36 +22,39 @@ _PUNCT = {"‘": "'", "’": "'", "“": '"', "”": '"', "–": "-", "—": "-"
 MIN_LEN = 12
 
 
-def norm(s: str) -> str:
-    s = unicodedata.normalize("NFKC", s or "")
-    for a, b in {**_LIG, **_PUNCT}.items():
-        s = s.replace(a, b)
-    s = re.sub(r"(\w)-\s*\n\s*(\w)", r"\1\2", s)  # 断行连字符
-    s = re.sub(r"\s+", " ", s)
-    return "".join(c.lower() for c in s.strip())  # 逐字转小写，和 _index 的做法一致（整串转小写对希腊字母词尾 σ 有特例）
-
-
-def _index(text: str) -> tuple[str, array]:
-    """规范化全文，同时记下规范化后每个字符对应「原文」的位置，用来报告章节。
-    原来先把整篇做 NFKC 再数位置：连字（ﬁ → fi）、全角字符会改变长度，位置整体错开，引言里的句子可能被报成局限段。
-    现在按「一个字加上它后面的组合符号」一段段规范化，每段产出的字都记这段在原文里的起点。"""
-    out, pos = [], array("I")
+def _units(text: str):
+    """逐段产出 (规范化后的一个字, 它在原文里的位置)。引文和论文都走这一条路，两边规范化结果一致。
+    一段 = 一个字 + 后面跟着的组合符号（以及韩文的中声、终声字母），整段做 NFKC，才能把分开写的字合起来；
+    转小写也逐字做：「İ」转小写是两个字，每个字都要有位置，否则后面的位置全部错开。"""
     n, i = len(text), 0
     while i < n:
         j = i + 1
-        while j < n and not text[j].isascii() and unicodedata.combining(text[j]):
+        while j < n and not text[j].isascii() and (unicodedata.combining(text[j]) or "\u1160" <= text[j] <= "\u11ff"):
             j += 1
         chunk = text[i:j]
         for ch in (chunk if chunk.isascii() else unicodedata.normalize("NFKC", chunk)):
-            ch = _LIG.get(ch, _PUNCT.get(ch, ch))
-            for c in ch:
-                if c.isspace():
-                    if out and out[-1] == " ":
-                        continue
-                    c = " "
-                out.append(c.lower())
-                pos.append(i)
+            for c in _LIG.get(ch, _PUNCT.get(ch, ch)):
+                for low in c.lower():
+                    yield low, i
         i = j
+
+
+def norm(s: str) -> str:
+    s = re.sub(r"(\w)-\s*\n\s*(\w)", r"\1\2", s or "")  # 断行连字符
+    s = "".join(c for c, _ in _units(s))
+    return re.sub(r"\s+", " ", s).strip()
+
+
+def _index(text: str) -> tuple[str, array]:
+    """规范化全文，同时记下规范化后每个字符对应「原文」的位置，用来报告章节。规范化和 norm() 走同一条路。"""
+    out, pos = [], array("I")
+    for c, i in _units(text):
+        if c.isspace():
+            if out and out[-1] == " ":
+                continue
+            c = " "
+        out.append(c)
+        pos.append(i)
     return "".join(out), pos
 
 

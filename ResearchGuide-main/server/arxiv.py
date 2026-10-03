@@ -96,10 +96,11 @@ def _entries(xml_bytes: bytes) -> list[dict[str, Any]]:
     return out
 
 
-def query(params: dict[str, Any]) -> list[dict[str, Any]]:
+def query(params: dict[str, Any], cached_only: bool = False) -> list[dict[str, Any]] | None:
+    """cached_only=True：只看缓存，没有就返回 None，绝不打 arXiv（给「缓存命中不排队」的快路径用）。"""
     url = API + "?" + urllib.parse.urlencode(params)
 
-    def fetch() -> list[dict[str, Any]]:
+    def load() -> list[dict[str, Any]]:
         hit, data = _META.lookup(url)
         if hit:
             return data
@@ -113,7 +114,9 @@ def query(params: dict[str, Any]) -> list[dict[str, Any]]:
     hit, data = _META.lookup(url)
     if hit:
         return data
-    return _FLIGHT.do(("query", url), fetch)
+    if cached_only:
+        return None
+    return _FLIGHT.do(("query", url), load)
 
 
 def count(search_query: str) -> int:
@@ -135,12 +138,12 @@ def papers(ids: list[str]) -> list[dict[str, Any]]:
     return query({"id_list": ",".join(ids), "max_results": len(ids)}) if ids else []
 
 
-def recent(categories: list[str], keywords: list[str], max_results: int = 30) -> list[dict[str, Any]]:
+def recent(categories: list[str], keywords: list[str], max_results: int = 30, cached_only: bool = False) -> list[dict[str, Any]] | None:
     """某些分类下最近提交、标题或摘要命中关键词的论文，按提交时间倒序。"""
     cats = " OR ".join(f"cat:{c}" for c in categories)
     kws = " OR ".join(f'abs:"{k}"' if " " in k else f"abs:{k}" for k in keywords)
     q = f"({cats}) AND ({kws})" if kws else cats
-    return query({"search_query": q, "sortBy": "submittedDate", "sortOrder": "descending", "max_results": max_results})
+    return query({"search_query": q, "sortBy": "submittedDate", "sortOrder": "descending", "max_results": max_results}, cached_only)
 
 
 # ---------- 全文 ----------
@@ -202,6 +205,11 @@ def _cached(aid: str) -> dict[str, Any] | None:
     if got and got.get("source") == "abstract" and time.time() >= got.get("retry_after", 0):
         return None
     return got
+
+
+def cached(arxiv_id: str) -> dict[str, Any] | None:
+    """只看缓存（内存或磁盘），没有或已到重试时间就返回 None，绝不打 arXiv。"""
+    return _cached(clean_id(arxiv_id))
 
 
 def fulltext(arxiv_id: str) -> dict[str, Any]:

@@ -539,9 +539,17 @@ async def _shared(key: tuple, fn, *args):
     return await _FLIGHTS[_FLIGHT_OF[key[0]]].do(key, _reading, fn, *args)
 
 
-def _paper_payload(aid: str) -> dict:
-    p = reading.arxiv.fulltext(aid)
+def _payload_of(p: dict) -> dict:
     return {**p, "sections": [{"name": n, "label": reading.arxiv.section_cn(n), "at": at} for n, at in reading.arxiv.sections(p["text"])]}
+
+
+def _paper_payload(aid: str) -> dict:
+    return _payload_of(reading.arxiv.fulltext(aid))
+
+
+def _paper_cached(aid: str) -> dict | None:
+    p = reading.arxiv.cached(aid)
+    return None if p is None else _payload_of(p)
 
 
 def _paper_index(aid: str) -> None:
@@ -552,6 +560,18 @@ def _paper_index(aid: str) -> None:
 
 
 _DAILY_MISS = TTLCache(30, 64)  # arXiv 取不到时，三十秒内的请求直接用这个失败结果，不再去打
+
+
+def _daily_cached(kit_id: str) -> tuple[list, str] | None:
+    hit, miss = _DAILY_MISS.lookup(kit_id)
+    return miss if hit else reading.daily_source(kit_id, cached_only=True)
+
+
+async def _daily_source_for(kit: str) -> tuple[list, str]:
+    """缓存里有就直接给（普通线程池里读一下内存，几毫秒）；没有才进 arXiv 线程池排队去取。
+    原来所有请求都先进 arXiv 线程池再查缓存：四个慢的取数占满线程时，缓存命中的也得等。"""
+    got = await run_in_threadpool(_reading, _daily_cached, kit)
+    return got if got is not None else await _shared(("daily", kit), _daily_source, kit)
 
 
 def _daily_source(kit_id: str) -> tuple[list, str]:
@@ -585,14 +605,14 @@ def _daily_payload(uid: str, kit: str, source: tuple[list, str]) -> dict:
 @app.get("/api/daily")
 async def daily_feed(uid: str, kit: str):
     await run_in_threadpool(_user_or_404, uid)
-    source = await _shared(("daily", kit), _daily_source, kit)
+    source = await _daily_source_for(kit)
     return await run_in_threadpool(_daily_payload, uid, kit, source)
 
 
 @app.post("/api/daily/triage")
 async def daily_triage(req: TriageReq):
     await run_in_threadpool(_user_or_404, req.uid)
-    source = await _shared(("daily", req.kit), _daily_source, req.kit)
+    source = await _daily_source_for(req.kit)
     return await run_in_threadpool(_reading, reading.triage, req.uid, req.kit, req.arxiv_id, req.verdict, req.why, req.title, source)
 
 
@@ -600,7 +620,8 @@ async def daily_triage(req: TriageReq):
 async def paper_text(arxiv_id: str):
     """论文正文（arXiv HTML 版，取不到则只有摘要）。只读、缓存。"""
     aid = _reading(reading.arxiv.clean_id, arxiv_id)
-    return await _shared(("paper", aid), _paper_payload, aid)
+    got = await run_in_threadpool(_reading, _paper_cached, aid)  # 缓存命中不进 arXiv 线程池排队
+    return got if got is not None else await _shared(("paper", aid), _paper_payload, aid)
 
 
 @app.get("/api/cards")
@@ -624,7 +645,8 @@ def _card_submit(req: CardReq) -> dict:
 async def card_submit(req: CardReq):
     aid = _reading(reading.arxiv.clean_id, req.arxiv_id)
     await run_in_threadpool(_user_or_404, req.uid)
-    await _shared(("paper", aid), _paper_payload, aid)  # 先把原文取进缓存，并发提交同一篇只取一次
+    if await run_in_threadpool(_reading, reading.arxiv.cached, aid) is None:
+        await _shared(("paper", aid), _paper_payload, aid)  # 缓存里没有才去取；并发提交同一篇只取一次
     await _shared(("index", aid), _paper_index, aid)    # 再把引文索引建好；之后每张卡的核对都直接命中
     return await run_in_threadpool(_card_submit, req)
 

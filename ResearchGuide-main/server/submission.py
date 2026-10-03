@@ -177,7 +177,6 @@ def _docx_text(blob: bytes) -> str:
 MAX_CELLS = 5000
 NB_MAX_BYTES = 8 * 1024 * 1024    # 限额以内最坏的情况（一个输出里十几万个长字符串）峰值约 30 MB
 NB_MAX_VALUES = 150_000
-_NB_HAS_OUTPUTS = re.compile(rb'"outputs"\s*:\s*\[\s*[^\]\s]')
 
 
 def _nb_too_big(blob: bytes) -> bool:
@@ -276,8 +275,9 @@ def read_zip(data: bytes) -> dict[str, Any]:
                 blob = z.read(info)
                 if _nb_too_big(blob):
                     texts[path] = ""
-                    item["has_outputs"] = bool(_NB_HAS_OUTPUTS.search(blob))
-                    notes.append(f"「{path}」太大或输出太多，没有读取源码；请清空输出（Kernel → Restart & Clear Output）后再交，或把关键内容写进 README。")
+                    item["has_outputs"] = False  # 没解析就不算「有输出」：猜出来的证据不能给分
+                    notes.append(f"「{path}」太大或输出太多，没有读取，也不计入「有输出」。请清空输出（Kernel → Restart & Clear Output）后再交，"
+                                 "并把结果导出到 results/、在 README 里写明。")
                 else:
                     txt, has_out = _ipynb_text(blob)
                     texts[path] = txt[:MAX_TEXT_CHARS]
