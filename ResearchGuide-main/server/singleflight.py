@@ -5,6 +5,7 @@
 """
 from __future__ import annotations
 
+import asyncio
 import threading
 from typing import Any, Callable, Hashable
 
@@ -48,3 +49,29 @@ class SingleFlight:
     def in_flight(self) -> int:
         with self._lock:
             return len(self._calls)
+
+
+class AsyncFlight:
+    """事件循环里的版本：相同 key 的并发请求 await 同一个任务，阻塞的活只在线程里跑一次。
+    线程版的跟随者会各占一个线程干等，四十个相同请求就能占满服务器的四十个工作线程。"""
+
+    def __init__(self) -> None:
+        self._tasks: dict[Hashable, asyncio.Future] = {}
+
+    async def do(self, key: Hashable, fn: Callable[..., Any], *args: Any) -> Any:
+        task = self._tasks.get(key)
+        if task is None:
+            task = asyncio.ensure_future(asyncio.to_thread(fn, *args))
+            self._tasks[key] = task
+
+            def forget(done: asyncio.Future, k: Hashable = key) -> None:
+                if self._tasks.get(k) is done:
+                    del self._tasks[k]
+                if not done.cancelled():
+                    done.exception()  # 标记已取走，等的人都走了也不报「异常没人取」
+
+            task.add_done_callback(forget)
+        return await asyncio.shield(task)  # 一个请求断开，不连累其他在等的请求
+
+    def in_flight(self) -> int:
+        return len(self._tasks)

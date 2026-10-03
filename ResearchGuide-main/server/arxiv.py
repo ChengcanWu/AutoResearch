@@ -16,9 +16,11 @@ import urllib.error
 import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
+from limits import ReadLimitError, TTLCache, read_limited
 from singleflight import SingleFlight
 
 API = "https://export.arxiv.org/api/query"
@@ -28,7 +30,9 @@ CACHE_DIR = Path(__file__).resolve().parent / "data" / "papers"
 META_TTL = 6 * 3600
 _LOCK = threading.Lock()
 _LAST_CALL = [0.0]
-_META: dict[str, tuple[float, Any]] = {}
+_META = TTLCache(META_TTL, 512)
+MAX_ATOM_BYTES = 5 * 1024 * 1024
+MAX_HTML_BYTES = 40 * 1024 * 1024  # 最长的 HTML 版论文（如 HELM）也在这个量级以内
 _FLIGHT = SingleFlight()  # 同一 URL / 同一篇论文并发只取一次（限速锁下，重复请求每个都要排 3 秒）
 ID_RE = re.compile(r"^\d{4}\.\d{4,5}$")
 
@@ -48,17 +52,21 @@ def clean_id(raw: str) -> str:
     return s
 
 
-def _get(url: str, timeout: int = 20) -> bytes:
+def _get(url: str, timeout: int = 20, max_bytes: int = MAX_ATOM_BYTES) -> bytes:
+    """timeout 是总时限（连上、收完一起算），不只是两次收到数据之间的间隔；拿着限速锁的请求不能被慢速响应无限拖住。"""
     with _LOCK:  # 官方要求慢一点：同一时间只发一个请求，间隔 ≥3 秒
         wait = 3.0 - (time.time() - _LAST_CALL[0])
         if wait > 0:
             time.sleep(wait)
         req = urllib.request.Request(url, headers={"User-Agent": UA})
+        deadline = time.monotonic() + timeout
         try:
             with urllib.request.urlopen(req, timeout=timeout) as r:
-                body = r.read()
+                body = read_limited(r, max_bytes, deadline)
         except urllib.error.HTTPError as exc:
             raise ArxivError(f"arXiv 返回 HTTP {exc.code}") from exc
+        except ReadLimitError as exc:
+            raise ArxivError(f"arXiv 响应{exc}") from exc
         except (urllib.error.URLError, TimeoutError, OSError) as exc:
             raise ArxivError("连不上 arXiv") from exc
         finally:
@@ -91,19 +99,19 @@ def query(params: dict[str, Any]) -> list[dict[str, Any]]:
     url = API + "?" + urllib.parse.urlencode(params)
 
     def fetch() -> list[dict[str, Any]]:
-        hit = _META.get(url)
-        if hit and time.time() - hit[0] < META_TTL:
-            return hit[1]
+        hit, data = _META.lookup(url)
+        if hit:
+            return data
         try:
             data = _entries(_get(url))
         except ET.ParseError as exc:
             raise ArxivError("arXiv 返回的不是 Atom") from exc
-        _META[url] = (time.time(), data)
+        _META.set(url, data)
         return data
 
-    hit = _META.get(url)
-    if hit and time.time() - hit[0] < META_TTL:
-        return hit[1]
+    hit, data = _META.lookup(url)
+    if hit:
+        return data
     return _FLIGHT.do(("query", url), fetch)
 
 
@@ -175,7 +183,7 @@ def _fetch_fulltext(aid: str) -> dict[str, Any]:
     m = meta[0]
     result = {"id": aid, "title": m["title"], "source": "abstract", "text": m["summary"], "url": m["url"]}
     try:
-        page = _get(f"https://arxiv.org/html/{aid}", timeout=30).decode("utf-8", errors="replace")
+        page = _get(f"https://arxiv.org/html/{aid}", timeout=30, max_bytes=MAX_HTML_BYTES).decode("utf-8", errors="replace")
         text = _html_to_text(page)
         if len(text) > 2000:
             result.update(source="html", text=text)
@@ -187,10 +195,16 @@ def _fetch_fulltext(aid: str) -> dict[str, Any]:
 
 def sections(text: str) -> list[tuple[str, int]]:
     """粗分节：返回 [(标题, 起始位置)]。用来判断一句引文在不在 Limitations / Future work 里。"""
+    return list(_sections(text))
+
+
+@lru_cache(maxsize=8)
+def _sections(text: str) -> tuple[tuple[str, int], ...]:
+    """同一篇全文每张卡要分好几次节（每句引文一次），只算一次。"""
     out = []
     for m in re.finditer(r"^(?:\d+(?:\.\d+)*\s+)?(Abstract|Introduction|Related Work|Background|Method[s]?|Approach|Experiments?|Results?|Discussion|Analysis|Limitations?|Future Work|Conclusions?|Broader Impact|Ethics Statement|Acknowledg(?:e)?ments?|References|Appendix)\b.*$", text, re.M | re.I):
         out.append((m.group(1).lower(), m.start()))
-    return out
+    return tuple(out)
 
 
 SECTION_CN = {"abstract": "摘要", "introduction": "引言", "related work": "相关工作", "background": "背景",

@@ -74,7 +74,7 @@ def edges(uid: str) -> dict[str, Any]:
     mine = store.list_edges(uid)
     for e in mine:
         out.append({"id": e["id"], "kind": e["kind"], "text": e["text"], "status": "declared", "source": "self",
-                    "key": f"channel:{e['ref']}" if e.get("ref") else _norm(e["text"]), "ref": e.get("ref", ""),
+                    "key": _self_key(e), "ref": e.get("ref", ""),
                     "evidence_url": e["evidence_url"], "created_at": e["created_at"]})
     for e in out:
         e["generic"] = is_generic(e["text"])
@@ -108,8 +108,15 @@ def delete_edge(uid: str, edge_id: str) -> dict[str, Any]:
     return edges(uid)
 
 
-def _edge_keys(uid: str) -> set[str]:
-    return {e["key"] for e in edges(uid)["edges"]}
+def _self_key(row: dict[str, Any]) -> str:
+    """自述边的比较键：信息源用 id（跨用户可比），其余用规范化文字。账本条目用它的 fact key。"""
+    return f"channel:{row['ref']}" if row.get("ref") else _norm(row["text"])
+
+
+def _peer_keys(uids: list[str]) -> list[set[str]]:
+    """池子里每个人的边键，两条批量查询拿全（原来每人 edges() 一次、两个连接，一千人两千次）。"""
+    proofs, rows = store.proof_keys_for(uids), store.edges_for(uids)
+    return [proofs[u] | {_self_key(r) for r in rows[u]} for u in uids]
 
 
 def combo_rarity(uid: str, kit_id: str) -> dict[str, Any]:
@@ -118,7 +125,7 @@ def combo_rarity(uid: str, kit_id: str) -> dict[str, Any]:
     mine = edges(uid)["edges"]
     if len(pool) + 1 < POOL_MIN:
         return {"status": "数据不足", "why": f"这个工具包里有过线阅读卡的同学还不到 {POOL_MIN} 人，组合稀有度先不算"}
-    others = [_edge_keys(u) for u in pool]
+    others = _peer_keys(pool)
     pairs = []
     for a, b in combinations(mine, 2):
         n = sum(1 for keys in others if a["key"] in keys and b["key"] in keys)

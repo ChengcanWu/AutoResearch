@@ -9,7 +9,8 @@
 
 ## [2026-10-03] [FIX] 性能与资源上限（Codex 审出的七处）
 - 变更内容：①交成果的评阅（解压、规则、模型、写库）移出事件循环，进 2 个线程的评阅池，同时排队最多 6 个，满了回 503；②上传边收边数，超过 20 MB 立刻 413，不再先整包读进内存；③.docx 里的 word/document.xml 先看大小和压缩比、读时再截断（8 MB），每个文件解码后最多留 40 万字符；④README 里找文件路径改成线性扫描（64 KB 不到 1 毫秒，原来 16 KB 要一秒），结果与原正则一致；⑤并发的相同请求只打一次上游：arXiv 元数据 / 计数 / 全文、项目来源的 HTTP、北大课程检索（新增 `server/singleflight.py`），`discipline-map/server.py` 也加了十分钟缓存和并发去重，不再每次都起 uv；⑥项目检索改用全站共用的 8 线程池，排队排过截止时间的不再打上游、直接用快照，超时时还没开始的任务取消；⑦阅读卡、定位陈述的「最新一版」查询加带 version 的索引（2 万行从约 0.9 秒到约 20 毫秒）。
-- 影响模块：server/main.py、server/submission.py、server/arxiv.py、server/project_adapters.py、server/pku_adapter.py、server/projects.py、server/store.py、server/singleflight.py（新增）、server/tests/test_perf.py（新增）、discipline-map/server.py
+- 第二轮（Codex 复审又找出七处）：①相同的论文请求不再各占一个工作线程干等：论文正文、每日情报、交阅读卡改为在事件循环里共等同一个结果（`AsyncFlight`），四十个相同请求时 `/api/health` 照常返回；项目检索在提交任务前就合并相同来源，不再提交只会干等的任务，快来源不会被挤到超时；②外部请求有总时限和字节上限（arXiv、项目来源；新增 `server/limits.py`），慢慢滴数据的服务器拖不住；③上传和评阅分开计数，上传有 60 秒总时限，卡住的上传不再占光评阅名额；④竞争地图的组合稀有度改为两条批量查询（一千人从两千次查询到几次）；⑤一张卡里的引文定位和分节对同一篇论文只预处理一次；⑥arXiv、项目来源、课程检索的内存缓存过期即删、有条数上限；⑦「找项目」按回车不再绕过忙碌状态重复检索。
+- 影响模块：server/main.py、server/submission.py、server/arxiv.py、server/project_adapters.py、server/pku_adapter.py、server/projects.py、server/store.py、server/singleflight.py（新增）、server/tests/test_perf.py（新增）、discipline-map/server.py、server/limits.py（新增）、server/quotes.py、server/positioning.py、web/js/app.js
 - 决策来源：陈浩文（Codex 审查）
 - 登记人：助手
 

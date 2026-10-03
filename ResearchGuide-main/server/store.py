@@ -531,6 +531,32 @@ def latest_cards(uid: str, kit_id: str) -> list[dict[str, Any]]:
     return _card_rows(rows)
 
 
+def _in_chunks(uids: list[str], size: int = 500):
+    for i in range(0, len(uids), size):
+        yield uids[i:i + size]
+
+
+def proof_keys_for(uids: list[str]) -> dict[str, set[str]]:
+    """一批用户账本里已证明条目（behavior、active）的 key：一次查询，不按人逐个开连接。"""
+    out: dict[str, set[str]] = {u: set() for u in uids}
+    with _conn() as c:
+        for part in _in_chunks(uids):
+            q = f"SELECT id, user_id, key FROM facts WHERE source='behavior' AND status='active' AND user_id IN ({','.join('?' * len(part))})"
+            for r in c.execute(q, part):
+                out[r["user_id"]].add(r["key"] or r["id"])
+    return out
+
+
+def edges_for(uids: list[str]) -> dict[str, list[dict[str, Any]]]:
+    out: dict[str, list[dict[str, Any]]] = {u: [] for u in uids}
+    with _conn() as c:
+        for part in _in_chunks(uids):
+            q = f"SELECT * FROM edges WHERE user_id IN ({','.join('?' * len(part))}) ORDER BY created_at, rowid"
+            for r in c.execute(q, part):
+                out[r["user_id"]].append(dict(r))
+    return out
+
+
 def kit_pool(kit_id: str) -> list[str]:
     """在这个工具包里至少有一张过线阅读卡的用户：竞争地图只数有投入的人。"""
     with _conn() as c:

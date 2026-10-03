@@ -19,7 +19,7 @@ import json
 import threading
 import time
 import zipfile
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import Future, ThreadPoolExecutor, as_completed
 from concurrent.futures import TimeoutError as FutureTimeout
 from datetime import datetime
 from pathlib import Path
@@ -31,7 +31,6 @@ import project_adapters
 import skills
 import store
 from schemas import now_iso
-from singleflight import SingleFlight
 
 ROOT = Path(__file__).resolve().parent.parent
 REGISTRY = ROOT / "knowledge" / "project_sources.json"
@@ -63,7 +62,9 @@ SEARCH_BUDGET = 12  # 秒。慢的来源不等：先用它的快照，后台继�
 # 所有检索共用一个有上限的线程池（原来每次检索新开 8 个，超时的还在后台跑，六次检索就能留下 48 个线程）
 SOURCE_WORKERS = 8
 _SOURCE_POOL = ThreadPoolExecutor(max_workers=SOURCE_WORKERS, thread_name_prefix="source")
-_SOURCE_FLIGHT = SingleFlight()  # 同一来源、同一组条件，并发检索只打一次上游
+# 提交前合并：同一来源、同一组条件正在跑的任务直接共用，不再提交一个只会干等的任务去占线程
+_SOURCE_JOBS: dict[tuple, Future] = {}
+_SOURCE_JOBS_LOCK = threading.RLock()  # 已完成的任务加回调会立刻在本线程回调，所以要可重入
 
 
 def registry() -> dict[str, Any]:
@@ -205,8 +206,24 @@ def _collect_before(src: dict[str, Any], direction: str, stage: int, keywords: s
     """在共享池里跑。排队排到截止时间之后才轮到的，不再打上游，直接用快照。"""
     if time.time() >= deadline:
         return _snapshot(src, f"排队超过 {SEARCH_BUDGET} 秒")
-    return _SOURCE_FLIGHT.do((src["id"], direction, stage, keywords),
-                             lambda: _collect(src, direction, stage, keywords))
+    return _collect(src, direction, stage, keywords)
+
+
+def _source_job(src: dict[str, Any], direction: str, stage: int, keywords: str, deadline: float) -> Future:
+    key = (src["id"], direction, stage, keywords)
+    with _SOURCE_JOBS_LOCK:
+        job = _SOURCE_JOBS.get(key)
+        if job is None:
+            job = _SOURCE_POOL.submit(_collect_before, src, direction, stage, keywords, deadline)
+            _SOURCE_JOBS[key] = job
+
+            def forget(done: Future, k: tuple = key) -> None:
+                with _SOURCE_JOBS_LOCK:
+                    if _SOURCE_JOBS.get(k) is done:
+                        del _SOURCE_JOBS[k]
+
+            job.add_done_callback(forget)
+    return job
 
 
 def _score(item: dict[str, Any], direction: str, stage: int, keywords: str) -> float:
@@ -309,7 +326,7 @@ def search(uid: str, direction: str, stage: int, keywords: str = "", node: str =
     # 既没有接口也没有快照的来源只出现在「去哪找」里，不算一次检索
     sources = [s for s in sources if s.get("adapter") or s.get("samples")]
     deadline = time.time() + SEARCH_BUDGET
-    futs = {_SOURCE_POOL.submit(_collect_before, s, direction, stage, keywords, deadline): s for s in sources}
+    futs = {_source_job(s, direction, stage, keywords, deadline): s for s in sources}
     done: set = set()
     try:
         for fut in as_completed(futs, timeout=max(0.0, deadline - time.time())):
@@ -324,8 +341,8 @@ def search(uid: str, direction: str, stage: int, keywords: str = "", node: str =
             if fut.done():
                 got, st = fut.result()
             else:
-                # 还没轮到的直接取消；已经在跑的不等，跑完会把结果留在适配器缓存里，且受各自的请求超时约束
-                fut.cancel()
+                # 任务可能和别的检索共用，不取消：还在排队的轮到时已过截止时间，会直接用快照；
+                # 已经在跑的跑完把结果留在适配器缓存里，且受请求的总时限约束
                 got, st = _snapshot(src, f"超过 {SEARCH_BUDGET} 秒没返回")
             cands.extend(got)
             status.append(st)

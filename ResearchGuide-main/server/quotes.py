@@ -8,6 +8,8 @@ from __future__ import annotations
 
 import re
 import unicodedata
+from array import array
+from functools import lru_cache
 from typing import Any
 
 import arxiv
@@ -27,9 +29,9 @@ def norm(s: str) -> str:
     return s.strip().lower()
 
 
-def _index(text: str) -> tuple[str, list[int]]:
+def _index(text: str) -> tuple[str, array]:
     """规范化全文，同时记下规范化后每个字符对应原文的位置，用来报告章节。"""
-    out, pos = [], []
+    out, pos = [], array("I")
     for i, ch in enumerate(unicodedata.normalize("NFKC", text)):
         ch = _LIG.get(ch, _PUNCT.get(ch, ch))
         for c in ch:
@@ -42,13 +44,20 @@ def _index(text: str) -> tuple[str, list[int]]:
     return "".join(out), pos
 
 
+@lru_cache(maxsize=4)
+def _prepared(text: str) -> tuple[str, array, str]:
+    """一篇论文只规范化一次：一张卡要定位六七句，原来每句都把全文重做一遍。
+    以全文字符串为键（Python 会缓存字符串的哈希）；只留最近 4 篇，长论文的位置表也不会堆在内存里。"""
+    hay, pos = _index(text)
+    return hay, pos, re.sub(r"(\w)- (\w)", r"\1\2", hay)
+
+
 def locate(quote: str, paper: dict[str, Any]) -> dict[str, Any]:
     """返回 {found, section, where, reason}。paper 是 arxiv.fulltext() 的结果。"""
     q = norm(quote).strip(' "\'')
     if len(q) < MIN_LEN:
         return {"found": False, "reason": f"引文太短（至少 {MIN_LEN} 个字符），没法当证据"}
-    hay, pos = _index(paper.get("text") or "")
-    hay2 = re.sub(r"(\w)- (\w)", r"\1\2", hay)
+    hay, pos, hay2 = _prepared(paper.get("text") or "")
     i = hay.find(q)
     if i < 0 and hay2 != hay and q in hay2:
         i = -2

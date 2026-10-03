@@ -3048,7 +3048,11 @@ async function renderProjects() {
   const out = el("div", "project-results");
   $app.appendChild(out);
 
+  // 回车不经过按钮，按钮禁用挡不住：在 run() 自己身上防重入，免得连按几次就发几次检索（每次都可能调模型排序）
+  let busy = false;
   const run = async () => {
+    if (busy) return;
+    busy = true;
     go.disabled = true; go.textContent = "正在查…";
     out.innerHTML = "";
     const wait = el("div", "panel");
@@ -3065,8 +3069,10 @@ async function renderProjects() {
     } catch (e) {
       out.innerHTML = "";
       out.appendChild(el("div", "note-box", `检索失败（如实说明）：${esc(e.message)}`));
+    } finally {
+      busy = false;
+      go.disabled = false; go.textContent = "找项目";
     }
-    go.disabled = false; go.textContent = "找项目";
   };
   go.onclick = run;
   kw.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.isComposing) run(); });

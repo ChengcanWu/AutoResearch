@@ -29,6 +29,7 @@ import store
 import submission
 import workbench
 from pku_adapter import search_courses
+from singleflight import AsyncFlight
 
 WEB_DIR = Path(__file__).resolve().parent.parent / "web"
 
@@ -441,11 +442,14 @@ def project_sample(pid: str, uid: str):
 
 
 # 评阅（解压、规则检查、模型调用、写库）都是阻塞的：放进有上限的线程池，不占事件循环。
-# 同时在等的评阅也有上限：每个都可能握着 20 MB 的上传，排队太长就直接请人稍后再交。
+# 上传和评阅分开计数：传到一半卡住的连接只占上传名额，而且有总时限，不会把评阅名额占光。
 REVIEW_WORKERS = 2
-REVIEW_PENDING_MAX = 6
+REVIEW_PENDING_MAX = 6      # 已收完、在排队或在评阅的；每个握着最多 20 MB
+UPLOADS_MAX = 8             # 同时在上传的
+UPLOAD_SECONDS = 60         # 一次上传的总时限：20 MB 在 1 MB/s 下也只要 20 秒
 _REVIEW_POOL = ThreadPoolExecutor(max_workers=REVIEW_WORKERS, thread_name_prefix="review")
-_review_pending = 0  # 只在事件循环线程里改，不用锁
+_review_pending = 0  # 这两个计数只在事件循环线程里改，不用锁
+_uploads = 0
 
 
 async def _read_capped(request: Request, limit: int) -> bytes:
@@ -474,15 +478,23 @@ def _review_and_record(uid: str, p: dict, data: bytes) -> dict:
 @app.post("/api/projects/{pid}/submit")
 async def project_submit(pid: str, uid: str, request: Request):
     """请求体就是 .zip 本身（Content-Type: application/zip），不需要 multipart 依赖。"""
-    global _review_pending
+    global _review_pending, _uploads
     p = await run_in_threadpool(_project_or_404, uid, pid)
+    if _uploads >= UPLOADS_MAX or _review_pending >= REVIEW_PENDING_MAX:
+        raise HTTPException(503, "现在交的人太多，评阅在排队。请过一两分钟再交。")
+    _uploads += 1
+    try:
+        data = await asyncio.wait_for(_read_capped(request, submission.MAX_ZIP_BYTES), UPLOAD_SECONDS)
+    except asyncio.TimeoutError as exc:
+        raise HTTPException(408, f"上传超过 {UPLOAD_SECONDS} 秒还没传完，已断开。请换个网络再交，或把压缩包弄小一点。") from exc
+    finally:
+        _uploads -= 1
+    if not data:
+        raise HTTPException(400, "没有收到文件")
     if _review_pending >= REVIEW_PENDING_MAX:
         raise HTTPException(503, "现在交的人太多，评阅在排队。请过一两分钟再交。")
     _review_pending += 1
     try:
-        data = await _read_capped(request, submission.MAX_ZIP_BYTES)
-        if not data:
-            raise HTTPException(400, "没有收到文件")
         return await asyncio.get_running_loop().run_in_executor(_REVIEW_POOL, _review_and_record, uid, p, data)
     finally:
         _review_pending -= 1
@@ -499,6 +511,28 @@ def _reading(fn, *args):
         raise HTTPException(502, str(exc)) from exc
 
 
+_SHARED = AsyncFlight()
+
+
+async def _shared(key: tuple, fn, *args):
+    """多人同时要同一份 arXiv 数据：只有一个线程去取，其余在事件循环里等结果，不各占一个工作线程。"""
+    return await _SHARED.do(key, _reading, fn, *args)
+
+
+def _paper_payload(aid: str) -> dict:
+    p = reading.arxiv.fulltext(aid)
+    return {**p, "sections": [{"name": n, "label": reading.arxiv.section_cn(n), "at": at} for n, at in reading.arxiv.sections(p["text"])]}
+
+
+def _warm_daily(kit_id: str) -> None:
+    """先把这个工具包当天的 arXiv 查询取进缓存；取不到不报错，daily 自己会如实写。"""
+    k = reading.kit(kit_id)
+    try:
+        reading.arxiv.recent(k["daily"]["categories"], k["daily"]["keywords"], max_results=25)
+    except reading.arxiv.ArxivError:
+        pass
+
+
 @app.get("/api/kits")
 def kits_list():
     return {"kits": [{k: v for k, v in kit.items() if k in ("id", "name", "version", "direction", "goal", "status")}
@@ -510,12 +544,18 @@ def kit_get(kit_id: str):
     return _reading(reading.kit, kit_id)
 
 
-@app.get("/api/daily")
-def daily_feed(uid: str, kit: str):
+def _daily_payload(uid: str, kit: str) -> dict:
     _user_or_404(uid)
     d = _reading(reading.daily, uid, kit)
     today = [r for r in d["recent_keeps"] if r["created_at"][:10] == reading.now_iso()[:10]]
     return {**d, "tweak": _reading(positioning.daily_tweak, uid, kit, today)}
+
+
+@app.get("/api/daily")
+async def daily_feed(uid: str, kit: str):
+    await run_in_threadpool(_user_or_404, uid)
+    await _shared(("daily", kit), _warm_daily, kit)
+    return await run_in_threadpool(_daily_payload, uid, kit)
 
 
 @app.post("/api/daily/triage")
@@ -525,10 +565,10 @@ def daily_triage(req: TriageReq):
 
 
 @app.get("/api/papers/{arxiv_id}")
-def paper_text(arxiv_id: str):
+async def paper_text(arxiv_id: str):
     """论文正文（arXiv HTML 版，取不到则只有摘要）。只读、缓存。"""
-    p = _reading(reading.arxiv.fulltext, arxiv_id)
-    return {**p, "sections": [{"name": n, "label": reading.arxiv.section_cn(n), "at": at} for n, at in reading.arxiv.sections(p["text"])]}
+    aid = _reading(reading.arxiv.clean_id, arxiv_id)
+    return await _shared(("paper", aid), _paper_payload, aid)
 
 
 @app.get("/api/cards")
@@ -543,10 +583,17 @@ def card_history(arxiv_id: str, uid: str, kit: str):
     return {"versions": store.card_history(uid, kit, arxiv_id)}
 
 
-@app.post("/api/cards")
-def card_submit(req: CardReq):
+def _card_submit(req: CardReq) -> dict:
     _user_or_404(req.uid)
     return _reading(reading.submit_card, req.uid, req.kit, req.arxiv_id, req.fields, req.dims, req.decision_log)
+
+
+@app.post("/api/cards")
+async def card_submit(req: CardReq):
+    aid = _reading(reading.arxiv.clean_id, req.arxiv_id)
+    await run_in_threadpool(_user_or_404, req.uid)
+    await _shared(("paper", aid), _paper_payload, aid)  # 先把原文取进缓存，并发提交同一篇只取一次
+    return await run_in_threadpool(_card_submit, req)
 
 
 @app.get("/api/matrix")

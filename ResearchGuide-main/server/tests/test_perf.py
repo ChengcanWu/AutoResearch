@@ -25,6 +25,7 @@ import project_adapters  # noqa: E402
 import projects  # noqa: E402
 import store  # noqa: E402
 import submission  # noqa: E402
+from limits import TTLCache  # noqa: E402
 from singleflight import SingleFlight  # noqa: E402
 
 
@@ -137,7 +138,7 @@ def test_singleflight_shares_one_call():
 
 
 def test_concurrent_identical_arxiv_and_course_lookups_hit_upstream_once(monkeypatch):
-    monkeypatch.setattr(arxiv, "_META", {})
+    monkeypatch.setattr(arxiv, "_META", TTLCache(60, 16))
     got = []
     feed = b'<feed xmlns="http://www.w3.org/2005/Atom"></feed>'
     monkeypatch.setattr(arxiv, "_get", lambda url, timeout=20: got.append(url) or time.sleep(0.2) or feed)
@@ -146,7 +147,7 @@ def test_concurrent_identical_arxiv_and_course_lookups_hit_upstream_once(monkeyp
     [t.join() for t in ts]
     assert len(got) == 1
 
-    monkeypatch.setattr(pku_adapter, "_SEARCH_CACHE", {})
+    monkeypatch.setattr(pku_adapter, "_SEARCH_CACHE", TTLCache(60, 16))
     monkeypatch.setattr(pku_adapter, "_default_term", lambda: "25-26-1")
     runs = []
     monkeypatch.setattr(pku_adapter, "_run_pku", lambda args, timeout=60: runs.append(args) or time.sleep(0.2) or (0, {"items": []}, ""))
@@ -190,3 +191,161 @@ def test_latest_cards_uses_the_version_index():
             "EXPLAIN QUERY PLAN SELECT data FROM cards c WHERE user_id='u' AND kit_id='k' AND version = "
             "(SELECT MAX(version) FROM cards c2 WHERE c2.user_id=c.user_id AND c2.kit_id=c.kit_id AND c2.arxiv_id=c.arxiv_id)").fetchall()
     assert any("idx_cards_ver" in row[-1] for row in plan)
+
+
+# ---------- 第二轮 ----------
+
+def test_many_identical_paper_requests_share_one_fetch_without_holding_threads(monkeypatch):
+    calls = []
+    paper = {"id": "2310.17623", "title": "T", "source": "html", "url": "u", "text": "Abstract\nx\n6 Limitations\ny"}
+    monkeypatch.setattr(arxiv, "fulltext", lambda aid: calls.append(aid) or time.sleep(0.4) or paper)
+
+    async def go():
+        async with _asgi() as c:
+            papers = [asyncio.create_task(c.get("/api/papers/2310.17623")) for _ in range(40)]
+            await asyncio.sleep(0.05)
+            t0 = time.perf_counter()
+            health = await c.get("/api/health")
+            waited = time.perf_counter() - t0
+            return [r.status_code for r in await asyncio.gather(*papers)], health.status_code, waited
+
+    codes, health, waited = asyncio.run(go())
+    assert set(codes) == {200} and health == 200 and len(calls) == 1 and waited < 0.3
+
+
+def test_identical_searches_do_not_starve_other_sources(monkeypatch):
+    slow_calls = []
+
+    def slow(src, direction, stage, terms):
+        slow_calls.append(1)
+        time.sleep(0.8)
+        return [{"title": "神经网络 慢", "url": "https://x/slow"}]
+
+    def fast(src, direction, stage, terms):
+        return [{"title": "神经网络 快", "url": "https://x/fast"}]
+
+    sources = [{"id": "slow", "name": "慢", "directions": ["ai"], "adapter": "slow", "samples": []},
+               {"id": "fast", "name": "快", "directions": ["ai"], "adapter": "fast", "samples": []}]
+    monkeypatch.setattr(projects, "registry", lambda: {"sources": sources})
+    monkeypatch.setattr(project_adapters, "ADAPTERS", {"slow": slow, "fast": fast})
+    monkeypatch.setattr(projects, "SEARCH_BUDGET", 0.4)
+    monkeypatch.setattr(store, "list_projects", lambda uid: [])
+    results = []
+    ts = [threading.Thread(target=lambda: results.append(projects.search("u", "ai", 1))) for _ in range(8)]
+    [t.start() for t in ts]
+    [t.join() for t in ts]
+    for r in results:
+        st = {s["id"]: s for s in r["sources"]}
+        assert st["fast"].get("live")  # 快来源没被八个相同的慢任务挤到超时
+    assert len(slow_calls) == 1
+    time.sleep(0.9)
+
+
+class _Trickle(__import__("http.server").server.BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.end_headers()
+        size = 4096 if self.path == "/big" else 200
+        for _ in range(size):
+            self.wfile.write(b"x" * (256 if self.path == "/big" else 1))
+            self.wfile.flush()
+            if self.path != "/big":
+                time.sleep(0.02)
+
+    def log_message(self, *a):
+        pass
+
+
+@pytest.fixture()
+def trickle():
+    from http.server import ThreadingHTTPServer
+    srv = ThreadingHTTPServer(("127.0.0.1", 0), _Trickle)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    yield f"http://127.0.0.1:{srv.server_address[1]}"
+    srv.shutdown()
+
+
+def test_external_reads_have_a_total_deadline_and_byte_cap(trickle, monkeypatch):
+    t0 = time.perf_counter()
+    with pytest.raises(project_adapters.AdapterError):
+        project_adapters.http(trickle + "/slow", timeout=0.2, as_json=False)
+    assert time.perf_counter() - t0 < 0.6  # 每 20 毫秒滴一个字节，单看 socket 超时永远不会触发
+
+    monkeypatch.setattr(project_adapters, "MAX_BYTES", 10_000)
+    with pytest.raises(project_adapters.AdapterError):
+        project_adapters.http(trickle + "/big", timeout=5, as_json=False)
+
+    monkeypatch.setattr(arxiv, "_LAST_CALL", [0.0])
+    t0 = time.perf_counter()
+    with pytest.raises(arxiv.ArxivError):
+        arxiv._get(trickle + "/slow", timeout=0.2)
+    assert time.perf_counter() - t0 < 0.6
+
+
+def test_stalled_uploads_time_out_and_do_not_block_ready_ones(monkeypatch):
+    monkeypatch.setattr(main, "_project_or_404", lambda uid, pid: {"id": pid})
+    monkeypatch.setattr(main, "UPLOAD_SECONDS", 0.3)
+    monkeypatch.setattr(submission, "review", lambda data, p: {"passed": 1})
+    monkeypatch.setattr(projects, "record_review", lambda uid, p, r: None)
+
+    async def stalled():
+        yield b"PK"
+        await asyncio.sleep(5)
+        yield b"never"
+
+    async def go():
+        async with _asgi() as c:
+            stuck = [asyncio.create_task(c.post("/api/projects/p/submit?uid=u", content=stalled())) for _ in range(6)]
+            await asyncio.sleep(0.05)
+            ready = await c.post("/api/projects/p/submit?uid=u", content=b"PK\x03\x04zip")
+            return ready.status_code, [r.status_code for r in await asyncio.gather(*stuck)]
+
+    t0 = time.perf_counter()
+    ready, stuck = asyncio.run(go())
+    assert ready == 200 and set(stuck) == {408} and time.perf_counter() - t0 < 2
+
+
+def test_rarity_reads_peers_in_batches(monkeypatch):
+    import json as _json
+    now = "2026-10-03T00:00:00+00:00"
+    with sqlite3.connect(store.DB_PATH) as c:
+        c.executemany("INSERT INTO cards VALUES(?,?,?,?,?,?,?,?)",
+                      [(f"c{i}", f"u{i}", "llm-eval", "2310.17623", 1, _json.dumps({}), "pass", now) for i in range(1000)])
+        c.executemany("INSERT INTO facts VALUES(?,?,?,?,?,?,?,?,?,?,?)",
+                      [(f"f{i}", f"u{i}", "capability", "card:llm-eval:2310.17623", "v", 0.8, "behavior", "[]", "active", now, now) for i in range(1000)])
+        c.executemany("INSERT INTO edges(id, user_id, kind, text, evidence_url, ref, created_at) VALUES(?,?,?,?,?,?,?)",
+                      [(f"e{i}", f"u{i}", "language", "粤语母语", "", "", now) for i in range(0, 1000, 3)])
+    me = store.create_user("me")["uid"]
+    store.add_edge(me, "language", "粤语母语")
+    store.add_edge(me, "course", "修过《数理统计》")
+    opened = []
+    real = store._conn
+    monkeypatch.setattr(store, "_conn", lambda: opened.append(1) or real())
+    import positioning
+    t0 = time.perf_counter()
+    r = positioning.combo_rarity(me, "llm-eval")
+    assert r["status"] == "ok" and len(opened) < 20 and time.perf_counter() - t0 < 0.5
+
+
+def test_quote_checks_prepare_each_paper_once(monkeypatch):
+    import quotes
+    import reading
+    from test_reading import DIMS, GOOD, PAPER
+    quotes._prepared.cache_clear()
+    calls = []
+    real = quotes._index
+    monkeypatch.setattr(quotes, "_index", lambda text: calls.append(1) or real(text))
+    review = reading.review_card(reading.kit("llm-eval"), PAPER, GOOD, DIMS, [])
+    assert review["pass"] and len(calls) == 1
+
+
+def test_ttl_cache_drops_expired_entries_and_caps_size():
+    c = TTLCache(0.05, 1000)
+    for i in range(200):
+        c.set(i, i)
+    time.sleep(0.06)
+    assert c.lookup("other") == (False, None) and len(c) == 0
+    small = TTLCache(60, 3)
+    for i in range(10):
+        small.set(i, [])
+    assert len(small) == 3 and small.lookup(9) == (True, []) and small.lookup(0) == (False, None)
