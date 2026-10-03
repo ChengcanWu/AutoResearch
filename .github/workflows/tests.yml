@@ -1,0 +1,30 @@
+# 每个 PR 和 main 上的提交都跑一遍：后端离线测试 + 前端语法检查。
+# 测试不联网、不调模型（见 ResearchGuide-main/server/tests），不需要任何密钥。
+name: tests
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: ResearchGuide-main
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Server tests
+        run: uv run --no-project --python 3.12 --with pytest --with fastapi --with pydantic --with httpx pytest server/tests -q
+      - name: Frontend syntax
+        run: node --check web/js/app.js
+      - name: Path data in sync with docs/paths
+        run: |
+          uv run --no-project --python 3.12 python knowledge/build_paths.py
+          git diff --exit-code -- knowledge/paths.json

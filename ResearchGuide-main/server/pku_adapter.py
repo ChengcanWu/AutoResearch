@@ -19,6 +19,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+import catalog
+
 ROOT = Path(__file__).resolve().parent.parent
 SKILL_DIR = (ROOT / "skills" / "pku-course").resolve()
 PKU_PY = SKILL_DIR / "scripts" / "pku.py"
@@ -82,10 +84,12 @@ def _default_term() -> str | None:
 
 
 def search_courses(query: str, limit: int = 5, term: str = "") -> dict[str, Any]:
-    """course.search：真实检索北大公开课。返回 {ok, items, term} 或 {ok: False, error}。"""
+    """先查本机学期快照；没有快照时再走教务实时检索。"""
     query = (query or "").strip()
     if not query:
         return {"ok": False, "error": "query is required"}
+    if catalog.available():
+        return catalog.search_courses(query, limit)
     term = term.strip() or (_default_term() or "")
     if not term:
         return {"ok": False, "error": "cannot resolve current term（教务接口不可达）"}

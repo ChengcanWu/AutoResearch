@@ -18,6 +18,7 @@ from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
+import catalog
 import llm
 import onboarding
 import planner
@@ -307,6 +308,13 @@ def explore_courses(query: str, limit: int = 5, term: str = ""):
     return res
 
 
+@app.get("/api/explore/teachers")
+def explore_teacher(name: str):
+    if not name.strip():
+        raise HTTPException(400, "name is required")
+    return catalog.teacher_payload(name.strip())
+
+
 # ---------- 边学边练：项目检索 / 选定 / 交成果（任务 3） ----------
 
 @app.get("/api/projects/sources")
@@ -315,6 +323,12 @@ def project_sources():
     return {"generated_at": reg.get("generated_at"), "sources": [
         {k: s.get(k) for k in ("id", "name", "home_url", "kind", "directions", "stage_fit", "access", "cadence", "manual_route", "search_terms")}
         for s in reg["sources"]]}
+
+
+@app.get("/api/paths")
+def direction_paths():
+    """任务 4 的方向路径（knowledge/paths.json），前端用它把方向树画成「6 步主干 + 原有节点」。"""
+    return {"paths": projects.paths()}
 
 
 @app.get("/api/projects/context")

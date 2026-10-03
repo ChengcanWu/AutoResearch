@@ -454,5 +454,6 @@ def record_review(uid: str, p: dict[str, Any], review: dict[str, Any]) -> dict[s
     store.add_fact(fact)
     data = {k: v for k, v in p.items() if k not in ("id", "status", "created_at", "updated_at")}
     data["reviews"] = reviews[:10]
-    store.save_project(uid, p["id"], data, status="reviewed")
+    # 五条都做到算这个项目做完了；否则留在「已评阅」，今日会提醒按评阅再改一处
+    store.save_project(uid, p["id"], data, status="done" if review["passed"] == review["total"] else "reviewed")
     return fact.to_dict()

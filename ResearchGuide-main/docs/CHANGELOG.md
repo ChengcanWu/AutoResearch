@@ -9,6 +9,29 @@
 ## [2026-10-03] [FIX] 模型设置只许管理员改；DeepSeek 默认关思考、输出封顶
 - 变更内容：`POST /api/llm/connect` 原来任何访客都能调用，可以换掉服务器的密钥，或把所有模型请求转到任意 https 地址；现在设了 `ADMIN_TOKEN` 就要带 `X-Admin-Token`，没设只许服务器本机。「连接模型」弹窗多一个可选的管理员口令。写 `.env` 改为只改三行，不再冲掉别的配置。默认模型改为 `deepseek-flash`（DeepSeek 的 /models 只剩它和 `deepseek-v4-pro`，`deepseek-chat` 已列入停用，目前仍被路由到 flash 非思考）；flash 默认开思考，对 DeepSeek 显式关掉（设了 `LLM_REASONING_EFFORT` 则不关）；每次请求 `max_tokens` 默认封顶 2000。
 - 影响模块：server/main.py、server/llm.py、web/js/app.js、.env.example、server/tests/test_llm_guard.py
+- 登记人：助手
+
+## [2026-10-03] [BUILD] 当前学期公开课快照：每个节点本地检索，老师可点
+- 变更内容：把 2026-2027-1 全院系公开课翻进 `knowledge/catalog/`（`courses.json` / `teachers.json` / `meta.json`）。检索先读这份快照，不再每次打教务。方向树上每个节点都用节点名做关键词查课，对不上就空着。老师名可点，看到本学期教了哪些课；简介只在 OpenAlex 对上北京大学任职时才写。生成脚本：`server/catalog_build.py`。
+- 影响模块：server/catalog.py、server/catalog_build.py、server/pku_adapter.py、server/main.py、web/js/app.js、web/css/styles.css、knowledge/catalog/、docs/ARCHITECTURE.md
+- 决策来源：邬程灿
+- 登记人：助手
+
+## [2026-10-02] [BUILD] 方向树画成「6 步主干 + 原有节点」（任务 4 路径进树）
+- 变更内容：新增 `GET /api/paths`；前端启动时读路径，把数学、人工智能、认知、经济四棵树组成「6 步主干 + 原有节点」：主干竖排成一条粗线、带序号，原有概念节点按 `docs/paths/改树建议.md` §3/§4/§7/§8 的改动清单挂到对应步骤右侧（`web/js/app.js` 的 `CHAIN_ATTACH`），`FIELD_TREES` 原文不动；统计、系统不变。点主干看「先弄懂什么 / 做完怎样算过了」，并能直接「找能交出这一步的项目」；任务页标出当前节点属于第几步、这一步要交什么；「项目」页按树上的位置预选步骤。修复：第一次在方向区接过服务端已选方向时没有按已交任务对齐进度。
+- 影响模块：server/main.py、web/js/app.js、web/css/styles.css、server/tests/、docs/DESIGN_SPEC.md、docs/TASK3_PROJECTS.md、docs/paths/README.md（一行）
+- 决策来源：陈浩文（依据任务 4 改树建议）
+- 登记人：助手
+
+## [2026-10-02] [BUILD] 做完之后怎么接：今日、任务完成、项目评阅都落到下一件事
+- 变更内容：今日的建议按「有项目没改完 → 选了项目没交 → 交过 3 次小任务该找项目 → 继续当前节点」排，每条一个主动作加一个备选；改项目时直接引用上次评阅的「下一步」。任务完成页在交够 3 次（或走完方向）后多一个「学完一块了，找个项目练手」。项目页每次评阅和上一版比多了几条；五条全做到标为「做完了」，给「找下一个项目（难一档）」。规则表见 TASK3_PROJECTS §8。
+- 影响模块：web/js/app.js、web/css/styles.css、server/projects.py（五条全做到时状态记为 done）、server/tests/、docs/TASK3_PROJECTS.md
+- 决策来源：陈浩文
+- 登记人：助手
+
+## [2026-10-02] [BUILD] 整条链路的接口测试 + GitHub Actions
+- 变更内容：新增 `server/tests/test_api_flow.py`：用真实 FastAPI 应用走一遍 登录 → 五问 → 核对（改一条、划一条）→ 选方向 → 节点任务 → 提交反馈 → 找项目（实时来源全部「连不上」，走快照）→ 交压缩包 → 记录 → 软删，外加未知用户 / 方向的拒绝。数据库放临时目录、不联网、不调模型。仓库根目录新增 `.github/workflows/tests.yml`：每个 PR 和 main 上的提交跑后端测试、`node --check` 前端、并检查 `knowledge/paths.json` 和 `docs/paths/` 是否一致。
+- 影响模块：server/tests/、.github/workflows/、README.md
 - 决策来源：陈浩文
 - 登记人：助手
 

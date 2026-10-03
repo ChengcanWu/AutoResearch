@@ -1,0 +1,10 @@
+{
+  "term": "2026-2027-1",
+  "source": "https://dean.pku.edu.cn/service/web/courseSearch.php",
+  "retrieved_at": "2026-10-03T07:08:13+00:00",
+  "course_count": 3097,
+  "teacher_count": 2091,
+  "teacher_bio_count": 0,
+  "complete": true,
+  "note": "当前学期全院系公开课快照。老师简介只写对上北京大学的 OpenAlex 记录，对不上就空着。"
+}

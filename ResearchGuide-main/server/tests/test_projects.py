@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """边学边练的离线测试：不联网、不调模型。
 
-运行：uv run --no-project --with pytest --with fastapi --with pydantic pytest server/tests
+运行：uv run --no-project --with pytest --with fastapi --with pydantic --with httpx pytest server/tests
 """
 from __future__ import annotations
 
@@ -220,3 +220,15 @@ def test_slow_source_falls_back_to_snapshot_within_budget(monkeypatch):
     assert projects.time.time() - t0 < 3
     slow = [s for s in r["sources"] if "没返回" in (s.get("error") or "")]
     assert slow and all(s.get("snapshot") for s in slow)
+
+
+def test_project_is_done_only_when_all_criteria_pass():
+    uid = store.create_user("t")["uid"]
+    projects._LAST[uid] = (projects.time.time(), {"c9": {"id": "c9", "name": "某项目", "url": "https://example.org", "source_name": "来源"}})
+    p = projects.pick(uid, "c9")
+    review = {"passed": 4, "total": 5, "criteria": [], "summary": "", "next_step": "先改一处", "inventory": []}
+    projects.record_review(uid, p, review)
+    assert store.get_project(uid, p["id"])["status"] == "reviewed"
+    projects.record_review(uid, store.get_project(uid, p["id"]), dict(review, passed=5))
+    again = store.get_project(uid, p["id"])
+    assert again["status"] == "done" and [r["passed"] for r in again["reviews"]] == [5, 4]
