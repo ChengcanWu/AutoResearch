@@ -1668,6 +1668,14 @@ async function renderWorkbench() {
       };
       acts.appendChild(go);
     }
+    const doneHere = listed.filter((tk) => tk.status === "done" && tk.direction === code && tk.id !== task.id).length + 1;
+    if (doneHere >= PROJECT_AFTER_TASKS || !next) {
+      const proj = el("button", next ? "btn secondary" : "btn", "学完一块了，找个项目练手");
+      proj.type = "button";
+      proj.title = `在「${field.name}」交过 ${doneHere} 次小任务`;
+      proj.onclick = () => goFindProjects();
+      acts.appendChild(proj);
+    }
     const me = el("button", "btn ghost", "看它记下了什么");
     me.type = "button";
     me.onclick = () => setView("me");
@@ -1776,13 +1784,30 @@ function renderFeedbackInto(p) {
 
 /* ---------- 今日 / ⑨ NBA ---------- */
 
+function goFindProjects(keywords) {
+  // 进「项目 · 找项目」，方向和阶段交给服务端按记录预选（/api/projects/context）
+  S.projectForm = null;
+  S.projectResult = null;
+  S.projectTab = "find";
+  if (keywords) S.projectKeywords = keywords;
+  setView("projects");
+}
+
+function openProject(pid) {
+  S.projectId = pid;
+  setView("project");
+}
+
+const PROJECT_AFTER_TASKS = 3; // 在一个方向交过几次小任务之后，开始建议找项目练手
+
 async function renderToday() {
   const seq = S.renderSeq;
   await ensurePortrait();
   if (stale(seq)) return;
-  const [taskRes, onboard] = await Promise.all([
+  const [taskRes, onboard, mine] = await Promise.all([
     api("GET", `/api/tasks?uid=${S.uid}`).catch(() => null),
     api("GET", `/api/onboard/result?uid=${S.uid}`).catch(() => null),
+    api("GET", `/api/projects/mine?uid=${S.uid}`).catch(() => ({ projects: [] })),
   ]);
   if (stale(seq)) return;
   adoptDirection((onboard && onboard.facts) || []);
@@ -1799,28 +1824,54 @@ async function renderToday() {
   const facts = (onboard && onboard.facts) || [];
   const talked = onboard && onboard.state && onboard.state.phase === "done";
   const drafts = facts.filter((f) => f.status === "draft").length;
+  const doneTasks = ((taskRes && taskRes.tasks) || []).filter((t) => t.status === "done" && t.direction === saved.code).length;
+  const projects = (mine && mine.projects) || [];
+  const toFix = projects.find((p) => p.status === "reviewed" && p.reviews[0] && p.reviews[0].passed < p.reviews[0].total);
+  const toSubmit = projects.find((p) => p.status === "picked");
 
-  let title; let why; let label; let view;
+  // 每条建议：一个主动作 + 至多一个备选，落到一件具体的事
+  let title; let why; let primary; let alt = null;
+  const goView = (label, view) => ({ label, run: () => setView(view) });
   if (!field && !talked) {
     title = "先聊五个问题";
     why = "它还不认识你。五个问题，大约五分钟：年级、基础、好奇什么、习惯怎么学。每一问都可以选「不知道」。";
-    label = "去画像"; view = "onboarding";
+    primary = goView("去画像", "onboarding");
   } else if (!field && drafts) {
     title = `核对它记下的 ${drafts} 条`;
     why = "对话里记下的内容还是草稿。改掉不对的、划掉不属实的，方向建议才会按你来。";
-    label = "去核对"; view = "confirm";
+    primary = goView("去核对", "confirm");
   } else if (!field) {
     title = "选定一个方向";
     why = "方向区有六棵树，已经按你的画像标出建议。确认其中一棵，任务会从它的起点开始。";
-    label = "去方向区"; view = "cards";
+    primary = goView("去方向区", "cards");
+  } else if (toFix) {
+    let detail = null;
+    try { detail = await api("GET", `/api/projects/${toFix.id}?uid=${S.uid}`); } catch (_) { /* 拿不到详情就用概要 */ }
+    if (stale(seq)) return;
+    const last = (detail && detail.reviews && detail.reviews[0]) || toFix.reviews[0];
+    title = `把《${toFix.name}》再改一处`;
+    why = `上次评阅 ${last.passed} / ${last.total} 条做到。${last.next_step || "按评阅里第一条没做到的标准补一处，再交一版。"}`;
+    primary = { label: "去改这一处", run: () => openProject(toFix.id) };
+    if (node) alt = { label: `先继续「${node.label}」`, run: () => setView("workbench") };
+  } else if (toSubmit) {
+    title = `交《${toSubmit.name}》的成果`;
+    why = "这个项目已经选定，还没交。按项目页的要求打成一个 .zip：README、results/、代码或方法。没做完也可以先交一版，评阅会指出先补哪里。";
+    primary = { label: "去交成果", run: () => openProject(toSubmit.id) };
+    if (node) alt = { label: `先继续「${node.label}」`, run: () => setView("workbench") };
+  } else if (doneTasks >= PROJECT_AFTER_TASKS) {
+    title = "找一个项目练手";
+    why = `你在「${field.name}」已经交过 ${doneTasks} 次小任务。二十分钟的任务练的是一个点，项目练的是把点连起来：从公开来源找一个真题，做完交一个压缩包。`;
+    primary = { label: "去找项目", run: () => goFindProjects() };
+    if (node) alt = { label: `先继续「${node.label}」`, run: () => setView("workbench") };
   } else if (node) {
     title = `继续「${node.label}」`;
     why = node.intro;
-    label = "去做这一步"; view = "workbench";
+    primary = goView("去做这一步", "workbench");
   } else {
     title = `「${field.name}」这条路已经走到头`;
-    why = "可以回方向区换一棵树，或者到记录里回看这一路留下的证据。";
-    label = "去方向区"; view = "cards";
+    why = "可以找一个项目把这一路学的用起来，或者回方向区换一棵树。";
+    primary = { label: "去找项目", run: () => goFindProjects() };
+    alt = { label: "回方向区", run: () => setView("cards") };
   }
 
   $app.innerHTML = "";
@@ -1829,17 +1880,23 @@ async function renderToday() {
   const status = el("div", "ws-status");
   status.appendChild(el("span", "", field ? esc(field.name) : "还没有方向"));
   if (node) status.appendChild(el("span", "", `正在「${esc(node.label)}」`));
-  const behavior = facts.filter((f) => f.source === "behavior" && f.status !== "deleted").length;
-  if (behavior) status.appendChild(el("span", "", `已交 ${behavior} 次任务`));
+  if (doneTasks) status.appendChild(el("span", "", `交过 ${doneTasks} 次小任务`));
+  if (projects.length) status.appendChild(el("span", "", `${projects.length} 个项目`));
   wrap.appendChild(status);
   const card = el("div", "nba-card");
   card.appendChild(el("h3", "nba-title", esc(title)));
   card.appendChild(el("p", "nba-why", esc(why)));
   const act = el("div", "submit-actions");
-  const go = el("button", "btn", label);
+  const go = el("button", "btn", esc(primary.label));
   go.type = "button";
-  go.onclick = () => setView(view);
+  go.onclick = primary.run;
   act.appendChild(go);
+  if (alt) {
+    const other = el("button", "btn ghost", esc(alt.label));
+    other.type = "button";
+    other.onclick = alt.run;
+    act.appendChild(other);
+  }
   card.appendChild(act);
   wrap.appendChild(card);
   $app.appendChild(wrap);
@@ -1940,8 +1997,9 @@ async function renderProjects() {
   const form = S.projectForm || {
     direction: (ctx && ctx.direction) || t.code || "ai",
     stage: ctx ? ctx.stage : 0,
-    keywords: "",
+    keywords: S.projectKeywords || "",
   };
+  S.projectKeywords = "";
   // 任务 4 的路径：有路径的方向按「第几步」选，没有的按四个阶段选
   const defaultStep = (stage) => ({ 0: 1, 1: 2, 2: 3, 3: 5 }[stage] || 1);
   if (!form.pathStep) form.pathStep = (ctx && ctx.path_step) || defaultStep(form.stage);
@@ -2125,7 +2183,8 @@ function renderMine(list) {
     const last = (p.reviews || [])[0];
     const row = el("button", "mine-row");
     row.type = "button";
-    row.innerHTML = `<span class="mine-name">${esc(p.name)}</span><span class="mine-meta">${esc(p.source_name || "")} · ${last ? `最近一次 ${last.passed}/${last.total} 条做到` : "还没交"}</span>`;
+    const state = p.status === "done" ? `做完了 · ${last.passed}/${last.total} 条做到` : (last ? `最近一次 ${last.passed}/${last.total} 条做到，还可以再改` : "还没交");
+    row.innerHTML = `<span class="mine-name">${esc(p.name)}</span><span class="mine-meta">${esc(p.source_name || "")} · ${state}</span>`;
     row.onclick = () => { S.projectId = p.id; setView("project"); };
     rows.appendChild(row);
   });
@@ -2213,7 +2272,8 @@ async function renderProject() {
       });
       const data = await res.json().catch(() => null);
       if (!res.ok) throw new Error((data && data.detail) || `提交失败 (${res.status})`);
-      paintReview(result, data);
+      paintReview(result, data, false, (p.reviews || [])[0]);
+      p.reviews = [data].concat(p.reviews || []);
       result.scrollIntoView({ behavior: "smooth", block: "start" });
     } catch (e) {
       result.innerHTML = "";
@@ -2228,12 +2288,17 @@ async function renderProject() {
   drop.addEventListener("dragleave", () => drop.classList.remove("over"));
   drop.addEventListener("drop", (e) => { e.preventDefault(); drop.classList.remove("over"); send(e.dataTransfer.files[0]); });
 
-  if (p.reviews && p.reviews.length) paintReview(result, p.reviews[0], true);
+  if (p.reviews && p.reviews.length) paintReview(result, p.reviews[0], true, p.reviews[1]);
 }
 
-function paintReview(box, r, old) {
+function paintReview(box, r, old, prev) {
   box.innerHTML = "";
   const sec = el("section", "feedback");
+  if (prev && typeof prev.passed === "number") {
+    const d = r.passed - prev.passed;
+    sec.appendChild(el("p", `review-delta ${d > 0 ? "up" : d < 0 ? "down" : ""}`,
+      d > 0 ? `比上一版多做到 ${d} 条（${prev.passed} → ${r.passed}）` : d < 0 ? `比上一版少了 ${-d} 条（${prev.passed} → ${r.passed}），看看是不是漏交了文件` : `和上一版一样是 ${r.passed} 条，看下面「下一步」改的那一处有没有落到文件里`));
+  }
   const head = el("div", "feedback-head");
   const hl = el("div");
   hl.appendChild(el("h3", "", old ? "上一次的评阅" : "评阅"));
@@ -2250,6 +2315,21 @@ function paintReview(box, r, old) {
   });
   sec.appendChild(list);
   if (r.next_step) sec.appendChild(el("div", "why-box", `<b>下一步　</b>${esc(r.next_step)}`));
+  if (r.passed === r.total) {
+    const acts = el("div", "submit-actions");
+    const nextOne = el("button", "btn", "找下一个项目（难一档）");
+    nextOne.type = "button";
+    nextOne.onclick = () => {
+      const f = S.projectForm || {};
+      S.projectForm = f.direction ? { ...f, stage: Math.min(3, (f.stage || 0) + 1), pathStep: Math.min(6, (f.pathStep || 1) + 1) } : null;
+      S.projectResult = null; S.projectTab = "find"; setView("projects");
+    };
+    const today = el("button", "btn ghost", "回今日");
+    today.type = "button";
+    today.onclick = () => setView("today");
+    acts.append(nextOne, today);
+    sec.appendChild(acts);
+  }
   const files = el("details", "inventory");
   if (!(r.inventory || []).length) files.hidden = true;
   files.appendChild(el("summary", "", `压缩包里的 ${(r.inventory || []).length} 个文件`));
