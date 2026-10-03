@@ -461,3 +461,93 @@ def test_statement_refs_group_once():
     t0 = time.perf_counter()
     refs = store.statement_refs("k", "2026-09-10T00:00:00+00:00")
     assert len(refs) == 60 and set(refs.values()) == {"r5"} and time.perf_counter() - t0 < 0.05
+
+
+# ---------- 第四轮 ----------
+
+class _SlowReply(__import__("http.server").server.BaseHTTPRequestHandler):
+    def do_POST(self):
+        self.rfile.read(int(self.headers.get("Content-Length") or 0))
+        self.send_response(200)
+        self.end_headers()
+        for _ in range(100):
+            self.wfile.write(b" ")
+            self.wfile.flush()
+            time.sleep(0.02)
+
+    def log_message(self, *a):
+        pass
+
+
+def test_model_calls_have_a_total_deadline():
+    from http.server import ThreadingHTTPServer
+    srv = ThreadingHTTPServer(("127.0.0.1", 0), _SlowReply)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    try:
+        t0 = time.perf_counter()
+        data, err = llm._post(f"http://127.0.0.1:{srv.server_address[1]}/chat/completions", "k", {"m": 1}, 0.2)
+        assert data is None and err.startswith("limit") and time.perf_counter() - t0 < 0.6
+    finally:
+        srv.shutdown()
+
+
+def test_slow_dns_counts_against_the_deadline(monkeypatch):
+    import socket
+    import urllib.request
+    import limits
+    real = socket.getaddrinfo
+    monkeypatch.setattr(socket, "getaddrinfo", lambda *a, **k: time.sleep(0.4) or real(*a, **k))
+    t0 = time.perf_counter()
+    with pytest.raises(limits.ReadLimitError):
+        limits.fetch(urllib.request.Request("http://example.invalid/"), timeout=0.08, max_bytes=1000)
+    assert time.perf_counter() - t0 < 0.3
+
+
+def test_prefixed_zip64_is_checked_before_parsing(monkeypatch):
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", allowZip64=True) as z:
+        for i in range(70_000):  # 超过 65535 条，写成 zip64
+            z.writestr(f"d{i}/", b"")
+    data = b"JUNK" * 100 + buf.getvalue()
+    opened = []
+    real = zipfile.ZipFile
+    monkeypatch.setattr(zipfile, "ZipFile", lambda *a, **k: opened.append(1) or real(*a, **k))
+    with pytest.raises(submission.SubmissionError):
+        submission.read_zip(data)
+    assert opened == []
+    with pytest.raises(submission.SubmissionError):  # 有目录尾、zip64 记录对不上的，不交给 zipfile 猜
+        submission._directory_size(data[:-22 - 20 - 56] + b"\0" * 56 + data[-22 - 20:])
+
+
+def test_competition_map_counts_demand_with_a_set(monkeypatch):
+    import json as _json
+    import positioning
+    monkeypatch.setattr(positioning, "_cutoff", lambda: "9999")
+    old = "2026-09-01T00:00:00+00:00"
+    with sqlite3.connect(store.DB_PATH) as c:
+        c.executemany("INSERT INTO cards VALUES(?,?,?,?,?,?,?,?)",
+                      [(f"c{i}", f"u{i}", "llm-eval", "2310.17623", 1, _json.dumps({}), "pass", old) for i in range(10_000)])
+        c.executemany("INSERT INTO statements VALUES(?,?,?,?,?,?,?)",
+                      [(f"s{i}", f"u{i}", "llm-eval", 1, "multi-test" if i % 2 else "single-dup", _json.dumps({}), old) for i in range(10_000)])
+    me = store.create_user("me")["uid"]
+    t0 = time.perf_counter()
+    rows = {r["id"]: r for r in positioning.competition_map(me, "llm-eval")["rows"]}
+    assert rows["multi-test"]["demand"]["band"] == "热" and rows["shuffle"]["demand"]["band"] == "冷"
+    assert time.perf_counter() - t0 < 1.5
+
+
+def test_matrix_highlights_every_conflicting_row():
+    import json as _json
+    import reading
+    now = "2026-10-03T00:00:00+00:00"
+    with sqlite3.connect(store.DB_PATH) as c:
+        c.executemany("INSERT INTO cards VALUES(?,?,?,?,?,?,?,?)", [
+            (f"c{i}", "u", "llm-eval", f"2402.{i:05d}", 1,
+             _json.dumps({"arxiv_id": f"2402.{i:05d}", "title": f"P{i}", "version": 1, "status": "pass",
+                          "dims": {"metric": "胜率", "direction": "up" if i < 15 else "down"}}), "pass", now)
+            for i in range(30)] + [
+            ("c99", "u", "llm-eval", "2402.00099", 1,
+             _json.dumps({"arxiv_id": "2402.00099", "title": "无关", "version": 1, "status": "pass",
+                          "dims": {"metric": "准确率", "direction": "up"}}), "pass", now)])
+    m = reading.matrix("u", "llm-eval")
+    assert sum(r["conflict"] for r in m["rows"]) == 30 and len(m["flags"]["conflicts"][0]["up"]) == reading.CONFLICT_SHOW

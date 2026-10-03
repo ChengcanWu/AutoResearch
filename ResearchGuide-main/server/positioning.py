@@ -15,6 +15,7 @@ from __future__ import annotations
 import datetime as dt
 import json
 import re
+from collections import Counter
 from itertools import combinations
 from typing import Any
 
@@ -207,11 +208,13 @@ def competition_map(uid: str, kit_id: str) -> dict[str, Any]:
     pool = store.kit_pool(kit_id)
     enough = len(pool) >= POOL_MIN
     refs = store.statement_refs(kit_id, _cutoff()) if enough else {}
+    members = set(pool)  # 原来在列表里逐个找，一万人时每行都要扫一遍
+    demand_by_ref = Counter(ref for u, ref in refs.items() if u in members)
     passed = {c["arxiv_id"] for c in store.latest_cards(uid, kit_id) if c["status"] == "pass"}
     rows = []
     for i, o in enumerate(k["open_problems"]):
         if enough:
-            n = sum(1 for u, ref in refs.items() if ref == o["id"] and u in pool)
+            n = demand_by_ref[o["id"]]
             demand = {"band": "冷" if n < K_MIN else "温" if n < 0.2 * len(pool) else "热", "why": "滞后一周；只数有过线卡、陈述指向这里的人"}
         else:
             demand = {"band": "数据不足", "why": f"这个工具包里有过线阅读卡的同学还不到 {POOL_MIN} 人，不能把「人少」读成「冷门」"}

@@ -2180,7 +2180,7 @@ async function renderMatrix(seq, kit) {
   const f = m.flags;
   const emptyCols = new Set(f.empty_columns);
   const emptyCells = new Set(f.empty_cells.map(([a, k]) => `${a}|${k}`));
-  const conflict = new Set(f.conflicts.flatMap((c) => [...c.up, ...c.down]));
+  const conflict = new Set(m.rows.filter((r) => r.conflict).map((r) => r.arxiv_id));  // 完整成员；c.up / c.down 只是预览
   const titleOf = Object.fromEntries(m.rows.map((r) => [r.arxiv_id, clip(r.title, 28)]));
   const names = (ids, total) => ids.map((id) => `《${esc(titleOf[id] || id)}》`).join("") + (total > ids.length ? ` 等 ${total} 篇` : "");
   panel.appendChild(el("p", "panel-sub", "缺口不会被告诉你，它们在表里：空格、整列空着的维度、同一指标方向相反的两篇。挑一处，问自己它被默认了什么。"));

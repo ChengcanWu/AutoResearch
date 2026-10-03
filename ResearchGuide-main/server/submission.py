@@ -93,21 +93,23 @@ def _kind(path: str) -> str:
 
 
 def _directory_size(data: bytes) -> tuple[int, int] | None:
-    """从目录尾记录（含 zip64）读出条目总数和中央目录字节数，不建任何条目对象。找不到就交给 zipfile 报错。"""
+    """从目录尾记录（含 zip64）读出条目总数和中央目录字节数，不建任何条目对象。
+    返回 None 表示根本没有目录尾记录（不是 zip，交给 zipfile 报错，它也不会建条目）。
+    zip64 记录和 zipfile 一样按「紧挨在定位记录前面」找，所以前面加了别的数据也能对上；
+    有目录尾却核对不了 zip64 记录的，直接拒收，不让 zipfile 去按它的理解逐条建对象。"""
     tail = data[-(65535 + 22):]
     at = tail.rfind(b"PK\x05\x06")
     if at < 0 or len(tail) - at < 22:
         return None
     entries, cd_size = struct.unpack_from("<HI", tail, at + 10)
-    if entries == 0xFFFF or cd_size == 0xFFFFFFFF:  # zip64：真正的数在 zip64 目录尾记录里
-        loc = at - 20
-        if loc < 0 or tail[loc:loc + 4] != b"PK\x06\x07":
-            return None
-        (rec,) = struct.unpack_from("<Q", tail, loc + 8)
-        if rec + 56 > len(data) or data[rec:rec + 4] != b"PK\x06\x06":
-            return None
-        entries, cd_size = struct.unpack_from("<QQ", data, rec + 32)
-    return entries, cd_size
+    eocd = len(data) - len(tail) + at  # 换回整个文件里的位置
+    loc, rec = eocd - 20, eocd - 76
+    has_loc = loc >= 0 and data[loc:loc + 4] == b"PK\x06\x07"
+    if entries != 0xFFFF and cd_size != 0xFFFFFFFF and not has_loc:
+        return entries, cd_size
+    if not has_loc or rec < 0 or data[rec:rec + 4] != b"PK\x06\x06":
+        raise SubmissionError("压缩包的目录记录核对不上（可能是 zip64 格式异常或前面拼接了别的数据）。请用系统自带的「压缩」重新打包。")
+    return struct.unpack_from("<QQ", data, rec + 32)
 
 
 def _open_zip(data: bytes) -> zipfile.ZipFile:

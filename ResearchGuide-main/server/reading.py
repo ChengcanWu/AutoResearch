@@ -203,10 +203,14 @@ def matrix(uid: str, kit_id: str) -> dict[str, Any]:
             if m and r["cells"][dir_key] in ("up", "down"):
                 g = groups.setdefault(m.lower(), {"metric": m, "up": [], "down": []})
                 g[r["cells"][dir_key]].append(r["arxiv_id"])
+        in_conflict: set[str] = set()
         for g in groups.values():
             if g["up"] and g["down"]:
                 conflicts.append({"metric": g["metric"], "up_total": len(g["up"]), "down_total": len(g["down"]),
                                   "up": g["up"][:CONFLICT_SHOW], "down": g["down"][:CONFLICT_SHOW]})
+                in_conflict.update(g["up"] + g["down"])
+        for r in table:  # 行高亮用完整成员，不用截断后的预览
+            r["conflict"] = r["arxiv_id"] in in_conflict
     need = max(0, 3 - len(table))
     return {"kit": {"id": k["id"], "name": k["name"]}, "dimensions": dims, "rows": table,
             "flags": {"empty_cells": empty_cells, "empty_columns": empty_cols, "conflicts": conflicts},

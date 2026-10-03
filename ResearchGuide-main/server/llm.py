@@ -16,6 +16,8 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
+from limits import ReadLimitError, fetch
+
 _ROOT = Path(__file__).resolve().parent.parent
 
 
@@ -92,17 +94,22 @@ def probe() -> dict:
     return {"ok": True, "model": cfg["model"], "base_url": cfg["base_url"], "sample": text[:40]}
 
 
+MAX_RESPONSE_BYTES = 2 * 1024 * 1024  # 一次回复远小于这个；卡住或乱发的服务不能无限占着评阅线程
+
+
 def _post(url: str, key: str, payload: dict, timeout: int) -> tuple[dict | None, str]:
+    """timeout 是总时限：域名解析、连接、等首字、收完回复一起算（原来只限两次收到数据之间的间隔）。"""
     body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
     req = urllib.request.Request(
         url, data=body, method="POST",
         headers={"Content-Type": "application/json", "Authorization": f"Bearer {key}"},
     )
     try:
-        with urllib.request.urlopen(req, timeout=timeout) as resp:
-            return json.loads(resp.read().decode("utf-8")), ""
+        return json.loads(fetch(req, timeout=timeout, max_bytes=MAX_RESPONSE_BYTES).decode("utf-8")), ""
     except urllib.error.HTTPError as exc:
         return None, f"http {exc.code}"
+    except ReadLimitError as exc:
+        return None, f"limit {exc}"  # 超时或超大：不重试，重试只会再等一遍
     except (urllib.error.URLError, TimeoutError, OSError) as exc:
         return None, f"network {type(exc).__name__}"
     except json.JSONDecodeError:
