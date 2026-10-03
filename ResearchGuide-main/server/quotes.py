@@ -46,7 +46,9 @@ def _index(text: str) -> tuple[str, array]:
     return "".join(out), pos
 
 
-PREPARED_KEEP = 4
+# 按总字数留，不按篇数：几篇不同的论文同时交卡时，提前建好的索引不能在评阅前就被挤掉；
+# 每个字约占 6 字节（规范化文本两份加位置表），八百万字约 50 MB 封顶，最近用过的那篇总会留下
+PREPARED_BUDGET = 8_000_000
 _PREPARED: OrderedDict[str, tuple[str, array, str]] = OrderedDict()
 _PREPARED_LOCK = threading.Lock()
 _PREPARING = SingleFlight()  # 二十几张卡同时交同一篇论文：只建一次，其余等它（lru_cache 只缓存建好的，不合并正在建的）
@@ -54,7 +56,7 @@ _PREPARING = SingleFlight()  # 二十几张卡同时交同一篇论文：只建�
 
 def _prepared(text: str) -> tuple[str, array, str]:
     """一篇论文只规范化一次：一张卡要定位六七句，原来每句都把全文重做一遍。
-    以全文字符串为键（Python 会缓存字符串的哈希）；只留最近 4 篇，长论文的位置表也不会堆在内存里。"""
+    以全文字符串为键（Python 会缓存字符串的哈希）；总字数超过预算时先丢最久没用的。"""
     with _PREPARED_LOCK:
         hit = _PREPARED.get(text)
         if hit is not None:
@@ -72,7 +74,7 @@ def _prepare(text: str) -> tuple[str, array, str]:
     got = (hay, pos, re.sub(r"(\w)- (\w)", r"\1\2", hay))
     with _PREPARED_LOCK:
         _PREPARED[text] = got
-        while len(_PREPARED) > PREPARED_KEEP:
+        while len(_PREPARED) > 1 and sum(len(k) for k in _PREPARED) > PREPARED_BUDGET:
             _PREPARED.popitem(last=False)
     return got
 

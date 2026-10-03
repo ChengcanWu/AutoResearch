@@ -26,7 +26,8 @@ MAX_TOTAL_BYTES = 100 * 1024 * 1024    # 解压后总量
 MAX_FILE_BYTES = 20 * 1024 * 1024      # 单个文件
 MAX_FILES = 300
 MAX_ENTRIES = 2000                     # 含目录的条目总数；在建条目对象之前就从目录尾记录里查
-MAX_CENTRAL_DIR = 512 * 1024           # 中央目录字节数上限：zipfile 按它逐条建对象，条目数可以造假，字节数不行
+MAX_CENTRAL_DIR = 1024 * 1024          # 中央目录字节数上限：zipfile 按它逐条建对象，条目数可以造假，字节数不行；
+                                       # 两千个条目、每个带很长的中文路径也在 1 MB 以内
 MAX_RATIO = 120                        # 压缩比过高视为压缩炸弹
 TEXT_BUDGET = 14000                    # 送给模型的正文上限（字符）
 MAX_DOCX_XML = 8 * 1024 * 1024         # .docx 里 word/document.xml 解压后的上限（套娃压缩包同样要限）
@@ -115,8 +116,11 @@ def _directory_size(data: bytes) -> tuple[int, int] | None:
 def _open_zip(data: bytes) -> zipfile.ZipFile:
     """先查条目数和中央目录大小，再交给 zipfile。十万个空目录也会在打开时各建一个对象。"""
     size = _directory_size(data)
-    if size and (size[0] > MAX_ENTRIES or size[1] > MAX_CENTRAL_DIR):
+    if size and size[0] > MAX_ENTRIES:
         raise SubmissionError(f"压缩包里的条目太多（{size[0]} 个，含文件夹）。请删掉依赖目录（如 node_modules、venv）后再打包。")
+    if size and size[1] > MAX_CENTRAL_DIR:
+        raise SubmissionError(f"压缩包的文件名和附加信息太大（目录记录超过 {MAX_CENTRAL_DIR // 1024} KB）。"
+                              "请缩短文件夹层级和文件名，或去掉依赖目录后再打包。")
     try:
         z = zipfile.ZipFile(io.BytesIO(data))
     except zipfile.BadZipFile:

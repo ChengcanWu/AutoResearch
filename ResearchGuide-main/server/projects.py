@@ -63,7 +63,7 @@ SEARCH_BUDGET = 12  # 秒。慢的来源不等：先用它的快照，后台继�
 SOURCE_WORKERS = 8
 _SOURCE_POOL = ThreadPoolExecutor(max_workers=SOURCE_WORKERS, thread_name_prefix="source")
 # 提交前合并：同一来源、同一组条件正在跑的任务直接共用，不再提交一个只会干等的任务去占线程
-_SOURCE_JOBS: dict[tuple, Future] = {}
+_SOURCE_JOBS: dict[tuple, tuple[Future, list[float]]] = {}  # 任务，以及所有在等它的检索里最晚的截止时间
 _SOURCE_JOBS_LOCK = threading.RLock()  # 已完成的任务加回调会立刻在本线程回调，所以要可重入
 
 
@@ -202,9 +202,10 @@ def _snapshot(src: dict[str, Any], error: str) -> tuple[list[dict[str, Any]], di
 
 
 def _collect_before(src: dict[str, Any], direction: str, stage: int, keywords: str,
-                    deadline: float) -> tuple[list[dict[str, Any]], dict[str, Any]]:
-    """在共享池里跑。排队排到截止时间之后才轮到的，不再打上游，直接用快照。"""
-    if time.time() >= deadline:
+                    deadline: list[float]) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """在共享池里跑。排队排到所有等它的检索都过了截止时间才轮到的，不再打上游，直接用快照。
+    deadline 是可变的一格：后来加入的检索会把它往后推，不按最早那个检索的截止时间算。"""
+    if time.time() >= deadline[0]:
         return _snapshot(src, f"排队超过 {SEARCH_BUDGET} 秒")
     return _collect(src, direction, stage, keywords)
 
@@ -212,17 +213,20 @@ def _collect_before(src: dict[str, Any], direction: str, stage: int, keywords: s
 def _source_job(src: dict[str, Any], direction: str, stage: int, keywords: str, deadline: float) -> Future:
     key = (src["id"], direction, stage, keywords)
     with _SOURCE_JOBS_LOCK:
-        job = _SOURCE_JOBS.get(key)
-        if job is None:
-            job = _SOURCE_POOL.submit(_collect_before, src, direction, stage, keywords, deadline)
-            _SOURCE_JOBS[key] = job
+        entry = _SOURCE_JOBS.get(key)
+        if entry is not None:
+            entry[1][0] = max(entry[1][0], deadline)
+            return entry[0]
+        box = [deadline]
+        job = _SOURCE_POOL.submit(_collect_before, src, direction, stage, keywords, box)
+        _SOURCE_JOBS[key] = (job, box)
 
-            def forget(done: Future, k: tuple = key) -> None:
-                with _SOURCE_JOBS_LOCK:
-                    if _SOURCE_JOBS.get(k) is done:
-                        del _SOURCE_JOBS[k]
+        def forget(done: Future, k: tuple = key) -> None:
+            with _SOURCE_JOBS_LOCK:
+                if k in _SOURCE_JOBS and _SOURCE_JOBS[k][0] is done:
+                    del _SOURCE_JOBS[k]
 
-            job.add_done_callback(forget)
+        job.add_done_callback(forget)
     return job
 
 

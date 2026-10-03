@@ -95,17 +95,21 @@ def probe() -> dict:
 
 
 MAX_RESPONSE_BYTES = 2 * 1024 * 1024  # 一次回复远小于这个；卡住或乱发的服务不能无限占着评阅线程
+# DeepSeek 排队时会不断发空行保持连接：timeout 管「多久没有数据」（发空行就不算卡住），
+# 另有总时限封顶，卡住或一直吊着的服务最多占一个线程这么久
+LLM_TOTAL_SECONDS = 150
 
 
 def _post(url: str, key: str, payload: dict, timeout: int) -> tuple[dict | None, str]:
-    """timeout 是总时限：域名解析、连接、等首字、收完回复一起算（原来只限两次收到数据之间的间隔）。"""
+    """timeout 是「最多这么久没有数据」；整个请求另有 LLM_TOTAL_SECONDS 总时限。"""
     body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
     req = urllib.request.Request(
         url, data=body, method="POST",
         headers={"Content-Type": "application/json", "Authorization": f"Bearer {key}"},
     )
     try:
-        return json.loads(fetch(req, timeout=timeout, max_bytes=MAX_RESPONSE_BYTES).decode("utf-8")), ""
+        raw = fetch(req, timeout=max(timeout, LLM_TOTAL_SECONDS), idle=timeout, max_bytes=MAX_RESPONSE_BYTES)
+        return json.loads(raw.decode("utf-8")), ""
     except urllib.error.HTTPError as exc:
         return None, f"http {exc.code}"
     except ReadLimitError as exc:

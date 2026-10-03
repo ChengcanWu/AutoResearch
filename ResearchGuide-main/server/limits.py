@@ -8,7 +8,9 @@
 """
 from __future__ import annotations
 
+import heapq
 import http.client
+import itertools
 import socket
 import threading
 import time
@@ -33,8 +35,9 @@ def _socket_of(resp: Any) -> Any:
         return None
 
 
-def read_limited(resp: Any, max_bytes: int, deadline: float) -> bytes:
-    """deadline 是 time.monotonic() 的绝对时刻。每次读之前把 socket 超时收紧到剩余时间。"""
+def read_limited(resp: Any, max_bytes: int, deadline: float, idle: float | None = None) -> bytes:
+    """deadline 是 time.monotonic() 的绝对时刻。每次读之前把 socket 超时收紧到剩余时间；
+    给了 idle 时，再收紧到「最多这么久没有数据」。"""
     buf = bytearray()
     sock = _socket_of(resp)
     read = getattr(resp, "read1", None) or resp.read
@@ -44,13 +47,13 @@ def read_limited(resp: Any, max_bytes: int, deadline: float) -> bytes:
             raise ReadLimitError("超过总时限")
         if sock is not None:
             try:
-                sock.settimeout(left)
+                sock.settimeout(min(left, idle) if idle else left)
             except OSError:
                 pass
         try:
             chunk = read(CHUNK)
         except TimeoutError as exc:
-            raise ReadLimitError("超过总时限") from exc
+            raise ReadLimitError("超过总时限" if not idle or deadline - time.monotonic() <= 0 else f"{idle:g} 秒没有收到数据") from exc
         if not chunk:
             declared = (getattr(resp, "headers", None) or {}).get("Content-Length", "")
             if (declared.isdigit() and len(buf) < int(declared)) or (getattr(resp, "length", None) or 0) > 0:
@@ -109,9 +112,11 @@ class _Watch:
     """这次请求的截止时间和它用到的连接。DNS 解析在小线程池里限时等；socket 在连接之前就登记，
     到点 shutdown，卡在连接、TLS 握手、响应头、正文任何一步的线程都会立刻出错返回。"""
 
-    def __init__(self, deadline: float) -> None:
+    def __init__(self, deadline: float, idle: float | None = None) -> None:
         self.deadline = deadline
+        self.idle = idle
         self.killed = False
+        self.done = False
         self._dups: list[socket.socket] = []
         self._lock = threading.Lock()
 
@@ -123,7 +128,7 @@ class _Watch:
         left = self.left()
         if left <= 0:
             raise ReadLimitError("超过总时限")
-        return _resolve(host, port, left)
+        return _resolve(host, port, min(left, self.idle) if self.idle else left)
 
     def adopt(self, sock: socket.socket) -> None:
         """登记 socket 的副本：TLS 包装会摘走原对象，副本指向同一条连接，到点 shutdown 照样有效。"""
@@ -133,7 +138,8 @@ class _Watch:
             killed = self.killed
         if killed:
             _shut(dup)
-        sock.settimeout(max(0.01, self.left()))
+        left = max(0.01, self.left())
+        sock.settimeout(min(left, self.idle) if self.idle else left)  # 每次收发最多等这么久；总时限由看门狗管
 
     def kill(self) -> None:
         with self._lock:
@@ -204,17 +210,55 @@ class _HTTPS(urllib.request.HTTPSHandler):
         return self.do_open(_watched(http.client.HTTPSConnection, self.watch), req, context=self._context)
 
 
-def fetch(req: urllib.request.Request, *, timeout: float, max_bytes: int) -> bytes:
-    """整个请求的总时限是 timeout 秒。HTTPError 原样抛出；超时或超大抛 ReadLimitError；其他网络错误抛 OSError。"""
+class _Watchdog:
+    """一个线程看所有请求的截止时间，到点关掉还没结束的请求（原来每个请求单开一个 Timer 线程）。"""
+
+    def __init__(self) -> None:
+        self._heap: list[tuple[float, int, _Watch]] = []
+        self._cv = threading.Condition()
+        self._seq = itertools.count()
+        self._thread: threading.Thread | None = None
+
+    def add(self, watch: _Watch) -> None:
+        with self._cv:
+            heapq.heappush(self._heap, (watch.deadline, next(self._seq), watch))
+            if self._thread is None:
+                self._thread = threading.Thread(target=self._run, name="fetch-watchdog", daemon=True)
+                self._thread.start()
+            self._cv.notify()
+
+    def _run(self) -> None:
+        while True:
+            with self._cv:
+                while not self._heap:
+                    self._cv.wait()
+                deadline, _, watch = self._heap[0]
+                left = deadline - time.monotonic()
+                if left > 0:
+                    self._cv.wait(left)
+                    continue
+                heapq.heappop(self._heap)
+            if not watch.done:
+                watch.kill()
+
+
+_WATCHDOG = _Watchdog()
+
+
+def fetch(req: urllib.request.Request, *, timeout: float, max_bytes: int, idle: float | None = None) -> bytes:
+    """整个请求的总时限是 timeout 秒；给了 idle 时，任何一步最多 idle 秒没有数据就放弃。
+    HTTPError 原样抛出；超时或超大抛 ReadLimitError；其他网络错误抛 OSError。"""
     deadline = time.monotonic() + timeout
-    watch = _Watch(deadline)
+    watch = _Watch(deadline, idle)
     opener = urllib.request.build_opener(_HTTP(watch), _HTTPS(watch))
-    timer = threading.Timer(timeout, watch.kill)
-    timer.daemon = True
-    timer.start()
+    _WATCHDOG.add(watch)
     try:
-        with opener.open(req, timeout=timeout) as resp:
-            return read_limited(resp, max_bytes, deadline)
+        with opener.open(req, timeout=min(timeout, idle) if idle else timeout) as resp:
+            body = read_limited(resp, max_bytes, deadline, idle)
+        if watch.killed:
+            # 看门狗关掉 socket 后，读的一方看到的是正常的「连接结束」；没声明长度的响应会像是读完了，其实只是半份
+            raise ReadLimitError("超过总时限")
+        return body
     except (urllib.error.HTTPError, ReadLimitError):
         raise
     except (OSError, http.client.HTTPException) as exc:
@@ -226,7 +270,7 @@ def fetch(req: urllib.request.Request, *, timeout: float, max_bytes: int) -> byt
             raise
         raise OSError(f"响应不完整（{type(exc).__name__}）") from exc
     finally:
-        timer.cancel()
+        watch.done = True
         watch.close()
 
 

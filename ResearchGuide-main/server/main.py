@@ -449,24 +449,36 @@ def project_sample(pid: str, uid: str):
 REVIEW_WORKERS = 2
 REVIEW_PENDING_MAX = 6      # 已收完、在排队或在评阅的；每个握着最多 20 MB
 UPLOADS_MAX = 8             # 同时在上传的
-UPLOAD_SECONDS = 60         # 一次上传的总时限：20 MB 在 1 MB/s 下也只要 20 秒
+UPLOAD_IDLE_SECONDS = 20    # 这么久一个字节都没收到，就当连接卡住了
+UPLOAD_TOTAL_SECONDS = 300  # 总时限：20 MB 在 70 KB/s 的慢网上也传得完；只防一直吊着不传完的连接
 _REVIEW_POOL = ThreadPoolExecutor(max_workers=REVIEW_WORKERS, thread_name_prefix="review")
 _review_pending = 0  # 这两个计数只在事件循环线程里改，不用锁
 _uploads = 0
 
 
 async def _read_capped(request: Request, limit: int) -> bytes:
-    """边收边数，超过上限立刻停（原来先把整个请求体读进内存再判断大小）。"""
+    """边收边数，超过上限立刻停（原来先把整个请求体读进内存再判断大小）。
+    慢网照样能传完：只在「很久没收到数据」或「总时间太长」时断开，不按固定的几十秒一刀切。"""
     too_big = f"压缩包超过 {limit // 1024 // 1024} MB。大数据集请只放样例，并在 README 里写下载链接。"
     declared = request.headers.get("content-length", "")
     if declared.isdigit() and int(declared) > limit:
         raise HTTPException(413, too_big)
     buf = bytearray()
-    async for chunk in request.stream():
+    chunks = request.stream().__aiter__()
+    deadline = asyncio.get_running_loop().time() + UPLOAD_TOTAL_SECONDS
+    while True:
+        left = deadline - asyncio.get_running_loop().time()
+        if left <= 0:
+            raise HTTPException(408, f"上传超过 {UPLOAD_TOTAL_SECONDS // 60} 分钟还没传完，已断开。请换个网络再交，或把压缩包弄小一点。")
+        try:
+            chunk = await asyncio.wait_for(chunks.__anext__(), min(UPLOAD_IDLE_SECONDS, left))
+        except StopAsyncIteration:
+            return bytes(buf)
+        except asyncio.TimeoutError as exc:
+            raise HTTPException(408, f"上传中断：{UPLOAD_IDLE_SECONDS} 秒没有收到数据。请检查网络后再交。") from exc
         buf += chunk
         if len(buf) > limit:
             raise HTTPException(413, too_big)
-    return bytes(buf)
 
 
 def _review_and_record(uid: str, p: dict, data: bytes) -> dict:
@@ -487,9 +499,7 @@ async def project_submit(pid: str, uid: str, request: Request):
         raise HTTPException(503, "现在交的人太多，评阅在排队。请过一两分钟再交。")
     _uploads += 1
     try:
-        data = await asyncio.wait_for(_read_capped(request, submission.MAX_ZIP_BYTES), UPLOAD_SECONDS)
-    except asyncio.TimeoutError as exc:
-        raise HTTPException(408, f"上传超过 {UPLOAD_SECONDS} 秒还没传完，已断开。请换个网络再交，或把压缩包弄小一点。") from exc
+        data = await _read_capped(request, submission.MAX_ZIP_BYTES)
     finally:
         _uploads -= 1
     if not data:
@@ -514,12 +524,19 @@ def _reading(fn, *args):
         raise HTTPException(502, str(exc)) from exc
 
 
-_SHARED = AsyncFlight()
+# 共享的活按种类分开线程池：arXiv 要排限速锁（每次至少隔 3 秒），几篇不同的论文就能把线程全占在等锁上；
+# 分开以后，等 arXiv 的不会拖住课程检索和建引文索引
+_FLIGHTS = {
+    "arxiv": AsyncFlight(ThreadPoolExecutor(max_workers=4, thread_name_prefix="arxiv")),
+    "index": AsyncFlight(ThreadPoolExecutor(max_workers=2, thread_name_prefix="index")),
+    "courses": AsyncFlight(ThreadPoolExecutor(max_workers=4, thread_name_prefix="courses")),
+}
+_FLIGHT_OF = {"paper": "arxiv", "daily": "arxiv", "index": "index", "courses": "courses"}
 
 
 async def _shared(key: tuple, fn, *args):
-    """多人同时要同一份 arXiv 数据：只有一个线程去取，其余在事件循环里等结果，不各占一个工作线程。"""
-    return await _SHARED.do(key, _reading, fn, *args)
+    """多人同时要同一份数据：只有一个线程去做，其余在事件循环里等结果，不各占一个工作线程。"""
+    return await _FLIGHTS[_FLIGHT_OF[key[0]]].do(key, _reading, fn, *args)
 
 
 def _paper_payload(aid: str) -> dict:

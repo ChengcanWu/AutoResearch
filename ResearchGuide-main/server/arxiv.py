@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import html
 import json
+import os
 import re
 import threading
 import time
@@ -168,9 +169,31 @@ RETRY_NO_HTML = 7 * 24 * 3600
 RETRY_TRANSIENT = 10 * 60
 
 
+_RECENT = TTLCache(60, 16)  # 刚读过的几篇：一次交卡要取三次原文，不必每次都从磁盘读、解析几百 KB 的 JSON
+
+
 def _on_disk(aid: str) -> dict[str, Any] | None:
     path = CACHE_DIR / f"{aid}.json"
-    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else None
+    hit, got = _RECENT.lookup(str(path))  # 按文件路径记，换了缓存目录（测试里常换）就不会串
+    if hit:
+        return got
+    try:
+        got = json.loads(path.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        return None
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return None  # 坏文件（比如写到一半进程被杀）当作没有缓存，重新取一次会覆盖它
+    _RECENT.set(str(path), got)
+    return got
+
+
+def _save(aid: str, result: dict[str, Any]) -> None:
+    """先写临时文件再原子替换：别的请求读到的要么是旧版、要么是新版，不会是写了一半的。"""
+    path = CACHE_DIR / f"{aid}.json"
+    tmp = path.with_name(f".{path.name}.{os.getpid()}.{threading.get_ident()}.tmp")
+    tmp.write_text(json.dumps(result, ensure_ascii=False), encoding="utf-8")
+    os.replace(tmp, path)
+    _RECENT.set(str(path), result)
 
 
 def _cached(aid: str) -> dict[str, Any] | None:
@@ -192,7 +215,6 @@ def fulltext(arxiv_id: str) -> dict[str, Any]:
 
 def _fetch_fulltext(aid: str) -> dict[str, Any]:
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
-    cached = CACHE_DIR / f"{aid}.json"
     got = _cached(aid)
     if got is not None:  # 排在前面的那一个刚写好
         return got
@@ -219,7 +241,7 @@ def _fetch_fulltext(aid: str) -> dict[str, Any]:
             retry = RETRY_TRANSIENT
     if result["source"] == "abstract":
         result["retry_after"] = time.time() + retry
-    cached.write_text(json.dumps(result, ensure_ascii=False), encoding="utf-8")
+    _save(aid, result)
     return result
 
 
