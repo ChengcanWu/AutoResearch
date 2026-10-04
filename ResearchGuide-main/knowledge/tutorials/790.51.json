@@ -1,0 +1,322 @@
+{
+  "id": "790.51",
+  "name": "环境经济",
+  "format": "tutorial-tree-v2",
+  "status": "ok",
+  "goal": "能画出污染的私人/社会成本图，能用边际收益=边际成本判断一项削减做到哪一档，并能对照命令控制、排污税与可交易许可交一套可核对习题。不承诺新的政策评估或气候模拟。",
+  "sources": [
+    {
+      "title": "Syllabus | Environmental Policy and Economics | 14.42 (MIT OCW, Spring 2011)",
+      "url": "https://ocw.mit.edu/courses/14-42-environmental-policy-and-economics-spring-2011/pages/syllabus/",
+      "kind": "ocw",
+      "used_for": "本科课目标：估计环境规制的成本与收益并评价政策问题；教材 Kolstad；7 次 problem sets（含一次 STATA）；课上排放市场模拟"
+    },
+    {
+      "title": "Lecture Notes | Environmental Policy and Economics | 14.42 (MIT OCW, Spring 2011)",
+      "url": "https://ocw.mit.edu/courses/14-42-environmental-policy-and-economics-spring-2011/pages/lecture-notes/",
+      "kind": "ocw",
+      "used_for": "主干讲次顺序：Efficiency and markets → Cost-benefit analysis and public goods → Regulation and Pigouvian taxes → Coase and cap-and-trade → 其后 Valuation and hedonics、Natural resource economics、Climate change policy"
+    },
+    {
+      "title": "Readings | Environmental Policy and Economics | 14.42 (MIT OCW, Spring 2011)",
+      "url": "https://ocw.mit.edu/courses/14-42-environmental-policy-and-economics-spring-2011/pages/readings/",
+      "kind": "ocw",
+      "used_for": "阅读块顺序：efficiency and BCA → public goods and externalities → optimal regulation of pollution → 其后才是 measurements of benefits（hedonic / household production / contingent valuation）与自然资源、气候应用"
+    },
+    {
+      "title": "Assignments | Environmental Policy and Economics | 14.42 (MIT OCW, Spring 2011)",
+      "url": "https://ocw.mit.edu/courses/14-42-environmental-policy-and-economics-spring-2011/pages/assignments/",
+      "kind": "ocw",
+      "used_for": "过关形态：5 份 problem sets + midterm；PS4 带住房与公园访问数据做特征价格 / 离散选择"
+    },
+    {
+      "title": "14.42 Lecture 3 slides: Efficiency and markets (MIT OCW)",
+      "url": "https://ocw.mit.edu/courses/14-42-environmental-policy-and-economics-spring-2011/f5f264dbd4f56f32921b616007470344_MIT14_42S11_lec03.pdf",
+      "kind": "lecture_notes",
+      "used_for": "节点 externality：竞争市场到帕累托最优；环境物品（公共物品与外部性）下市场失败；BCA 被写成经济学对干预的主要贡献"
+    },
+    {
+      "title": "14.42 Problem Set 4 (MIT OCW, Spring 2011)",
+      "url": "https://ocw.mit.edu/courses/14-42-environmental-policy-and-economics-spring-2011/9e6212b817a549b8bb69b00a5fb606f8_MIT14_42S11_hw4.pdf",
+      "kind": "ocw",
+      "used_for": "节点 valuation 的备选交卷：Hedonic Regression + 公园访问离散选择；要求交 do/log"
+    },
+    {
+      "title": "14.42 Lecture 16 slides: Natural resource economics (MIT OCW)",
+      "url": "https://ocw.mit.edu/courses/14-42-environmental-policy-and-economics-spring-2011/89104e478be8f1d7cf9e76a22e50bdc2_MIT14_42S11_lec16.pdf",
+      "kind": "lecture_notes",
+      "used_for": "节点 climate：现在 vs 以后开采、市场路径 vs 社会最优、价格随利率上升；短缺几乎只在限价时出现"
+    },
+    {
+      "title": "RES-ECON 262: Environmental Economics (UMass Amherst, example syllabus)",
+      "url": "https://www.umass.edu/resource-economics/resources/res-econ-262-environmental-economics",
+      "kind": "syllabus",
+      "used_for": "无先修的本科导论周历：效率与市场 → 环境质量 → 估计政策收益 → 再进入命令控制与排放税/排放市场，最后国际环境挑战；8 次 problem sets"
+    },
+    {
+      "title": "Ch. 12 Introduction to Environmental Protection and Negative Externalities — Principles of Economics 3e (OpenStax)",
+      "url": "https://openstax.org/books/principles-economics-3e/pages/12-introduction-to-environmental-protection-and-negative-externalities",
+      "kind": "open_textbook",
+      "used_for": "公开教材本章目标顺序：污染经济学 → 命令控制 → 市场导向工具 → 美国环境法的收益与成本 → 国际问题 → 产出与环境保护的权衡"
+    },
+    {
+      "title": "12.1 The Economics of Pollution — Principles of Economics 3e (OpenStax)",
+      "url": "https://openstax.org/books/principles-economics-3e/pages/12-1-the-economics-of-pollution",
+      "kind": "open_textbook",
+      "used_for": "节点 externality：负外部性、私人成本 vs 社会成本、供给上移、Work It Out 找均衡"
+    },
+    {
+      "title": "12.2 Command-and-Control Regulation — Principles of Economics 3e (OpenStax)",
+      "url": "https://openstax.org/books/principles-economics-3e/pages/12-2-command-and-control-regulation",
+      "kind": "open_textbook",
+      "used_for": "节点 instruments：命令控制定义与三个难点（无超额激励、不灵活、政治漏洞）"
+    },
+    {
+      "title": "12.3 Market-Oriented Environmental Tools — Principles of Economics 3e (OpenStax)",
+      "url": "https://openstax.org/books/principles-economics-3e/pages/12-3-market-oriented-environmental-tools",
+      "kind": "open_textbook",
+      "used_for": "节点 instruments：排污费、可交易许可、科斯产权；Table 12.4 买卖许可例子"
+    },
+    {
+      "title": "12.4 The Benefits and Costs of U.S. Environmental Laws — Principles of Economics 3e (OpenStax)",
+      "url": "https://openstax.org/books/principles-economics-3e/pages/12-4-the-benefits-and-costs-of-u-s-environmental-laws",
+      "kind": "open_textbook",
+      "used_for": "节点 valuation：边际成本上升、边际收益下降；用 MB=MC 找保护水平；统计生命价值"
+    },
+    {
+      "title": "12.5 International Environmental Issues — Principles of Economics 3e (OpenStax)",
+      "url": "https://openstax.org/books/principles-economics-3e/pages/12-5-international-environmental-issues",
+      "kind": "open_textbook",
+      "used_for": "节点 climate：气候与生物多样性作为国际外部性；高低收入国家谈判与巴黎协定"
+    },
+    {
+      "title": "12.6 The Tradeoff between Economic Output and Environmental Protection — Principles of Economics 3e (OpenStax)",
+      "url": "https://openstax.org/books/principles-economics-3e/pages/12-6-the-tradeoff-between-economic-output-and-environmental-protection",
+      "kind": "open_textbook",
+      "used_for": "节点 climate：产出–环境 PPF；命令控制可能落在边界内，市场工具把选择推回边界"
+    },
+    {
+      "title": "Ch. 12 Self-Check Questions — Principles of Economics 3e (OpenStax)",
+      "url": "https://openstax.org/books/principles-economics-3e/pages/12-self-check-questions",
+      "kind": "open_textbook",
+      "used_for": "各节点可交卷习题：1–4 外部性与 Table 12.5；5–9 工具分类与 Table 12.6–12.7；10–11 污水/土地恢复的 MC/MB；12–13 囚徒困境与 PPF"
+    },
+    {
+      "title": "中国社会科学院大学《环境经济学》课程大纲",
+      "url": "https://jw.ucass.edu.cn/kcdg/zyk/yyjj/huanjingjingjixue.pdf",
+      "kind": "syllabus",
+      "used_for": "经济学本科选修周历：微观基础 → 市场失灵 → 环境价值评估/经济评价 → 环境污染管制（庇古税、排污许可证）→ 自然资源与全球环境问题；重点是外部性与市场失灵"
+    },
+    {
+      "title": "Social Cost of Carbon 101 (Resources for the Future)",
+      "url": "https://www.rff.org/publications/explainers/social-cost-carbon-101/",
+      "kind": "other",
+      "used_for": "UMass 262 Unit 3 指定阅读；节点 valuation 备选：SCC 定义、四步计算、贴现率与全球/国内口径"
+    }
+  ],
+  "trunk": ["externality", "valuation", "instruments", "climate"],
+  "forks": [],
+  "join": null,
+  "nodes": {
+    "externality": {
+      "name": "外部性与市场失灵",
+      "why": "MIT Lecture 3 先证竞争市场到帕累托最优，再写环境物品（公共物品与外部性）下市场到不了最优点。UMass 262 前四周是导论→供需→效率与市场→环境质量。OpenStax 12.1 把污染写成负外部性并画出私人成本 vs 社会成本。社科大第四周专讲市场失灵，并写明重点是外部性。",
+      "learn": [
+        "负外部性与正外部性",
+        "私人成本 / 社会成本与供给曲线上移",
+        "市场均衡产量高于社会最优",
+        "帕累托效率与竞争市场（MIT Lecture 3）",
+        "环境质量的公共物品属性（社科大第四周）"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "对照 OpenStax Self-Check 1–4：标出正/负外部性；判断供给曲线左移/右移及均衡价格升降；用 Table 12.5 写出计入污染社会成本前后的均衡价格与数量。每题注明用了 12.1 哪一张图或表。",
+        "from": "OpenStax Principles of Economics 3e 12.1 + Self-Check 1–4；对照 MIT 14.42 Lecture 3",
+        "alternatives": [
+          {
+            "kind": "reading",
+            "prompt": "读 MIT 14.42 Lecture 3 slides 的 Efficiency and Markets 与 Benefit-Cost Analysis 导入段，交一页对照笔记：一边写竞争市场如何到帕累托最优，一边写外部性下市场失败；每条旁注 slide 小节标题。",
+            "from": "MIT 14.42 Lecture 3 slides"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://openstax.org/books/principles-economics-3e/pages/12-1-the-economics-of-pollution",
+          "title": "12.1 The Economics of Pollution",
+          "use": "先读外部性定义、Figure 12.2 / Table 12.2，再做 Work It Out 找均衡"
+        },
+        {
+          "url": "https://openstax.org/books/principles-economics-3e/pages/12-self-check-questions",
+          "title": "Ch. 12 Self-Check Questions",
+          "use": "做 Self-Check 1–4，答案写在一页上并标题号"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/14-42-environmental-policy-and-economics-spring-2011/f5f264dbd4f56f32921b616007470344_MIT14_42S11_lec03.pdf",
+          "title": "14.42 Lecture 3: Efficiency and markets",
+          "use": "对照 slides 核对自己画的市场失败图"
+        },
+        {
+          "url": "https://www.umass.edu/resource-economics/resources/res-econ-262-environmental-economics",
+          "title": "RES-ECON 262 syllabus",
+          "use": "看 Units 1–4 把效率与市场放在政策工具之前"
+        }
+      ]
+    },
+    "valuation": {
+      "name": "收益成本与环境价值",
+      "why": "MIT 大纲写明本课要发展估计环境规制成本与收益的工具；Lecture 3 末把 BCA 写成对干预的主要贡献，Readings 把 efficiency and BCA 放在管制之前。UMass Unit 6 在政策工具之前估计政策收益。社科大第5–6周是环境价值评估与环境经济评价。OpenStax 12.4 用 MB=MC 找最优削减。",
+      "learn": [
+        "费用-效益分析 / benefit-cost analysis",
+        "边际削减成本上升、边际收益下降",
+        "最优保护水平在 MB=MC",
+        "统计生命价值（OpenStax 12.4）",
+        "社会碳成本（SCC）如何进入 BCA（RFF 101；UMass Unit 3）",
+        "显示性偏好与陈述性偏好框架（社科大第五周）"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "做 OpenStax Self-Check 10：用 Table 12.8 算出各档污水削减的边际成本与边际收益，写出最优污水排放量，并回答「为何不立法要求零排放」。再用 Self-Check 11 的 Table 12.9 算出最优恢复亩数。",
+        "from": "OpenStax 12.4 + Self-Check 10–11",
+        "alternatives": [
+          {
+            "kind": "problem_set",
+            "prompt": "若有 Stata，对照 MIT 14.42 Problem Set 4：用 house.dta 做特征价格回归，用 parkvisitors.dta 构造 lnsj_lns0 并估计公园访问方程；交 do/log，并写一页解释 TravelCost 与 Acres 系数如何进入扩建公园的成本-收益比较。",
+            "from": "MIT 14.42 Problem Set 4"
+          },
+          {
+            "kind": "writeup",
+            "prompt": "读 RFF Social Cost of Carbon 101，用半页写出 SCC 的定义、四步计算，以及贴现率、全球 vs 国内口径如何改变数字；文中出现的中央估计（如 $185 / EPA $190）必须抄下来源句。",
+            "from": "RFF Social Cost of Carbon 101；UMass 262 Unit 3 指定阅读"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://openstax.org/books/principles-economics-3e/pages/12-4-the-benefits-and-costs-of-u-s-environmental-laws",
+          "title": "12.4 The Benefits and Costs of U.S. Environmental Laws",
+          "use": "读 Figure 12.4 的 MB/MC 与「What's a life worth?」再做表算"
+        },
+        {
+          "url": "https://openstax.org/books/principles-economics-3e/pages/12-self-check-questions",
+          "title": "Ch. 12 Self-Check Questions",
+          "use": "做 Self-Check 10–11（Table 12.8、12.9）"
+        },
+        {
+          "url": "https://www.rff.org/publications/explainers/social-cost-carbon-101/",
+          "title": "Social Cost of Carbon 101",
+          "use": "读 SCC 如何乘到排放变化上，以及四步模型"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/14-42-environmental-policy-and-economics-spring-2011/9e6212b817a549b8bb69b00a5fb606f8_MIT14_42S11_hw4.pdf",
+          "title": "14.42 Problem Set 4",
+          "use": "有软件时按这页做 hedonic / 公园访问，作为同一关的另一交卷"
+        },
+        {
+          "url": "https://jw.ucass.edu.cn/kcdg/zyk/yyjj/huanjingjingjixue.pdf",
+          "title": "社科大《环境经济学》大纲",
+          "use": "核对该校把价值评估放在污染管制之前"
+        }
+      ]
+    },
+    "instruments": {
+      "name": "命令控制、庇古税与排污权",
+      "why": "MIT Lectures 5–8 连续讲 Regulation and Pigouvian taxes、Coase and cap-and-trade，大纲还安排课上排放市场模拟。UMass Units 8–12：政策理论→分散化政策→命令控制→排放税与排放市场。OpenStax 12.2–12.3 先写 CAC 三难点，再写排污费、可交易许可与产权。社科大第七周：庇古税、排污许可证。",
+      "learn": [
+        "command-and-control：限量或指定技术",
+        "CAC 三难点：达标后无超额激励、标准整齐划一、政治漏洞",
+        "排污费 / 庇古税：比较边际减排成本与税率",
+        "可交易许可 / cap-and-trade",
+        "科斯：先界定产权再谈谁来减排"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "完成 OpenStax Self-Check 5–9：标出哪条是命令控制；把 6a–e 分成命令控制或市场激励；解释排放税为何不是命令控制；用 Table 12.6 比较「每家减四分之一」与可交易许可；填 Table 12.7（三种市场工具如何回应 CAC 的三点批评）。",
+        "from": "OpenStax 12.2–12.3 + Self-Check 5–9；对照 MIT 14.42 Lectures 5–8 标题"
+      },
+      "resources": [
+        {
+          "url": "https://openstax.org/books/principles-economics-3e/pages/12-2-command-and-control-regulation",
+          "title": "12.2 Command-and-Control Regulation",
+          "use": "先记下 CAC 定义和三个难点"
+        },
+        {
+          "url": "https://openstax.org/books/principles-economics-3e/pages/12-3-market-oriented-environmental-tools",
+          "title": "12.3 Market-Oriented Environmental Tools",
+          "use": "读排污费 Figure 12.3、Table 12.4 许可买卖、科斯铁路–农田例子"
+        },
+        {
+          "url": "https://openstax.org/books/principles-economics-3e/pages/12-self-check-questions",
+          "title": "Ch. 12 Self-Check Questions",
+          "use": "做 Self-Check 5–9（含 Table 12.6、12.7）"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/14-42-environmental-policy-and-economics-spring-2011/pages/lecture-notes/",
+          "title": "14.42 Lecture Notes",
+          "use": "对照 Lec 5–8 标题：Pigouvian taxes、Coase and cap-and-trade"
+        },
+        {
+          "url": "https://www.umass.edu/resource-economics/resources/res-econ-262-environmental-economics",
+          "title": "RES-ECON 262 syllabus",
+          "use": "看 Units 8–12 把命令控制与排放税/市场排在估值之后"
+        }
+      ]
+    },
+    "climate": {
+      "name": "气候、国际外部性与资源",
+      "why": "来源把这块放在工具之后收束，不是并行选修轨。MIT Lectures 16–18 是自然资源与气候政策；Readings 末段是 climate change 应用。UMass Unit 13 是国际环境挑战。OpenStax 12.5–12.6 写国际外部性与产出–环境权衡。社科大第10–12周是自然资源、全球环境问题与协议。",
+      "learn": [
+        "国际外部性：气候与生物多样性",
+        "高低收入国家谈判与巴黎协定（OpenStax 12.5）",
+        "产出与环境保护的生产可能性边界",
+        "现在 vs 以后开采、市场路径 vs 社会最优（MIT Lecture 16）",
+        "不可再生资源与霍特林思路（社科大第十周；MIT Lecture 16）"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "做 OpenStax Self-Check 12：按两国「保护 / 不保护」填 Table 12.10 的成本、收益与总支付，写清无协议时为何双方都不保护。再做 Self-Check 13：用 Table 12.11 画出产出–树木 PPF，标出生产效率点，并说明 Q 与 S 哪个更像命令控制。",
+        "from": "OpenStax 12.5–12.6 + Self-Check 12–13",
+        "alternatives": [
+          {
+            "kind": "writeup",
+            "prompt": "对照 MIT 14.42 Lecture 16 slides，用一页回答上面的三个经济问题（现在 vs 以后采多少；市场开采率 vs 社会最优；价格路径），并写清 slides 对「石油会用完吗」的结论：短缺几乎只在限价时出现；气候比实物耗尽更可能结束石油。",
+            "from": "MIT 14.42 Lecture 16 slides"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://openstax.org/books/principles-economics-3e/pages/12-5-international-environmental-issues",
+          "title": "12.5 International Environmental Issues",
+          "use": "读国际外部性与巴黎协定段落，再做囚徒困境题"
+        },
+        {
+          "url": "https://openstax.org/books/principles-economics-3e/pages/12-6-the-tradeoff-between-economic-output-and-environmental-protection",
+          "title": "12.6 The Tradeoff between Economic Output and Environmental Protection",
+          "use": "对照 Figure 12.5 画 Self-Check 13 的 PPF"
+        },
+        {
+          "url": "https://openstax.org/books/principles-economics-3e/pages/12-self-check-questions",
+          "title": "Ch. 12 Self-Check Questions",
+          "use": "做 Self-Check 12–13"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/14-42-environmental-policy-and-economics-spring-2011/89104e478be8f1d7cf9e76a22e50bdc2_MIT14_42S11_lec16.pdf",
+          "title": "14.42 Lecture 16: Natural resource economics",
+          "use": "读开采路径与「短缺 / 可持续」那几页，作为备选短评"
+        },
+        {
+          "url": "https://jw.ucass.edu.cn/kcdg/zyk/yyjj/huanjingjingjixue.pdf",
+          "title": "社科大《环境经济学》大纲",
+          "use": "看第10–12周把自然资源与全球协议放在管制之后"
+        }
+      ]
+    }
+  },
+  "conflicts": [
+    "MIT 14.42（2011 讲义与 Readings）把详细的效益测量（hedonic / household production / contingent valuation，Lectures 14–15、Kolstad ch.7–10）放在污染管制之后；UMass 262 Unit 6 与社科大第5–6周把效益估计/价值评估放在管制之前。取更靠前：先做概念性 BCA 与 MB=MC，再做工具。MIT PS4 的 Stata 估值作为 valuation 节点的备选交卷，不另开节点。",
+    "OpenStax 把 12.4（美国环境法的收益成本）排在 12.2–12.3 工具之后；UMass 与社科大相反。同一冲突，取更靠前的估值→工具。"
+  ],
+  "missing": "",
+  "checked_at": "2026-10-04"
+}

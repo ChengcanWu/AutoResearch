@@ -1,0 +1,475 @@
+{
+  "id": "790.15",
+  "name": "微观",
+  "format": "tutorial-tree-v2",
+  "status": "ok",
+  "goal": "能用供求、预算约束和成本曲线求出均衡价格与产量，能比较完全竞争与垄断/寡头的剩余，并能画出负外部性或公共物品造成的无谓损失。对照 MIT 14.01 Problem Sets 或 OpenStax Problems 交图与计算。不承诺政策评估或新研究。",
+  "sources": [
+    {
+      "title": "Principles of Microeconomics | 14.01 Fall 2023 (MIT OCW) — Course Description",
+      "url": "https://ocw.mit.edu/courses/14-01-principles-of-microeconomics-fall-2023/",
+      "kind": "ocw",
+      "used_for": "课程目标：供求与均衡、消费者理论、生产与厂商、垄断、寡头、福利、公共物品与外部性"
+    },
+    {
+      "title": "Syllabus | Principles of Microeconomics | 14.01 Fall 2023 (MIT OCW)",
+      "url": "https://ocw.mit.edu/courses/14-01-principles-of-microeconomics-fall-2023/pages/syllabus/",
+      "kind": "ocw",
+      "used_for": "先修：单变量微积分（18.01 水平）；过关形态是 8 次 mandatory problem sets + midterm + cumulative final；作业须各自独立写答案"
+    },
+    {
+      "title": "Calendar | Principles of Microeconomics | 14.01 Fall 2023 (MIT OCW)",
+      "url": "https://ocw.mit.edu/courses/14-01-principles-of-microeconomics-fall-2023/pages/calendar/",
+      "kind": "ocw",
+      "used_for": "主干顺序：L1 供求 → L2–4 偏好/预算/需求与收入替代效应 → L5–6 生产与成本 → L7–8 竞争 → L9–10 剩余与福利 → L11–14 垄断与寡头 → L24 外部性"
+    },
+    {
+      "title": "Lecture Notes | Principles of Microeconomics | 14.01 Fall 2023 (MIT OCW)",
+      "url": "https://ocw.mit.edu/courses/14-01-principles-of-microeconomics-fall-2023/pages/lecture-notes/",
+      "kind": "ocw",
+      "used_for": "各讲 Handout / Lecture Summary：L01 导论与供求，L02–04 偏好与需求，L05–06 生产与成本，L07 竞争，L11–14 垄断与寡头，L09 剩余"
+    },
+    {
+      "title": "Problem Sets | Principles of Microeconomics | 14.01 Fall 2023 (MIT OCW)",
+      "url": "https://ocw.mit.edu/courses/14-01-principles-of-microeconomics-fall-2023/lists/problem-sets/",
+      "kind": "ocw",
+      "used_for": "作业入口：Problem Set 01–08 及解答 PDF"
+    },
+    {
+      "title": "14.01 F23 Problem Set 1",
+      "url": "https://ocw.mit.edu/courses/14-01-principles-of-microeconomics-fall-2023/mit14_01_f23_pset1.pdf",
+      "kind": "ocw",
+      "used_for": "节点 sd：Q4 Market for Gas（均衡、移动、价格上限）；节点 consumer：Q2–3、Q5–6（无差异曲线、效用最大化、收入与替代效应）"
+    },
+    {
+      "title": "14.01 F23 Problem Set 2",
+      "url": "https://ocw.mit.edu/courses/14-01-principles-of-microeconomics-fall-2023/mit14_01_f23_pset2.pdf",
+      "kind": "ocw",
+      "used_for": "节点 firm：Q3 Returns to scale、Q4 Short Run and Long Run Cost、Q5 生产率变化与等产量线"
+    },
+    {
+      "title": "14.01 F23 Problem Set 3",
+      "url": "https://ocw.mit.edu/courses/14-01-principles-of-microeconomics-fall-2023/mit14_01_f23_pset3.pdf",
+      "kind": "ocw",
+      "used_for": "节点 markets：Q3 Aggregate Supply、Q4 Firm Entry（短期供给、自由进入长期均衡）"
+    },
+    {
+      "title": "14.01 F23 Problem Set 4",
+      "url": "https://ocw.mit.edu/courses/14-01-principles-of-microeconomics-fall-2023/mit14_01_f23_pset4.pdf",
+      "kind": "ocw",
+      "used_for": "节点 markets：Q2 最低价与需求弹性下的消费者/生产者剩余与无谓损失；Q3–4 进入与供给无弹性时的剩余"
+    },
+    {
+      "title": "14.01 F23 Problem Set 5",
+      "url": "https://ocw.mit.edu/courses/14-01-principles-of-microeconomics-fall-2023/mit14_01_f23_pset5.pdf",
+      "kind": "ocw",
+      "used_for": "节点 markets：Q1 垄断 MR/弹性/加成；Q3 Cournot、卡特尔与纳什均衡"
+    },
+    {
+      "title": "Preface - Principles of Microeconomics 3e | OpenStax",
+      "url": "https://openstax.org/books/principles-microeconomics-3e/pages/preface",
+      "kind": "open_textbook",
+      "used_for": "全书五块顺序：Ch1–2 稀缺与选择 → Ch3–4 供求 → Ch5–10 弹性/消费者/成本/市场结构 → Ch11–18 政策与外部性 → Ch19–20 贸易；各章有 Self-Check / Problems"
+    },
+    {
+      "title": "Ch. 1 Introduction - Principles of Microeconomics 3e | OpenStax",
+      "url": "https://openstax.org/books/principles-microeconomics-3e/pages/1-introduction",
+      "kind": "open_textbook",
+      "used_for": "导论目标：经济学是什么、微观与宏观、理论与模型"
+    },
+    {
+      "title": "Ch. 2 Introduction to Choice in a World of Scarcity - Principles of Microeconomics 3e | OpenStax",
+      "url": "https://openstax.org/books/principles-microeconomics-3e/pages/2-introduction-to-choice-in-a-world-of-scarcity",
+      "kind": "open_textbook",
+      "used_for": "节点 sd：机会成本、预算约束、生产可能性边界"
+    },
+    {
+      "title": "Ch. 3 Introduction to Demand and Supply - Principles of Microeconomics 3e | OpenStax",
+      "url": "https://openstax.org/books/principles-microeconomics-3e/pages/3-introduction-to-demand-and-supply",
+      "kind": "open_textbook",
+      "used_for": "节点 sd：需求、供给、均衡、四步比较静态、价格上限与下限"
+    },
+    {
+      "title": "Ch. 3 Problems - Principles of Microeconomics 3e | OpenStax",
+      "url": "https://openstax.org/books/principles-microeconomics-3e/pages/3-problems",
+      "kind": "open_textbook",
+      "used_for": "节点 sd 的非微积分交卷：Problems 53–57（自行车/奶酪表、价格上限短缺）"
+    },
+    {
+      "title": "Ch. 5 Introduction to Elasticity - Principles of Microeconomics 3e | OpenStax",
+      "url": "https://openstax.org/books/principles-microeconomics-3e/pages/5-introduction-to-elasticity",
+      "kind": "open_textbook",
+      "used_for": "节点 sd：需求/供给价格弹性、定价与税收收入"
+    },
+    {
+      "title": "Ch. 6 Introduction to Consumer Choices - Principles of Microeconomics 3e | OpenStax",
+      "url": "https://openstax.org/books/principles-microeconomics-3e/pages/6-introduction-to-consumer-choices",
+      "kind": "open_textbook",
+      "used_for": "节点 consumer：预算约束下效用最大化；收入与价格变动如何改变消费；附录无差异曲线"
+    },
+    {
+      "title": "Ch. 6 Problems - Principles of Microeconomics 3e | OpenStax",
+      "url": "https://openstax.org/books/principles-microeconomics-3e/pages/6-problems",
+      "kind": "open_textbook",
+      "used_for": "节点 consumer 替代交卷：Problem 16（Praxilla 诗与黄瓜的边际效用表）"
+    },
+    {
+      "title": "Ch. 7 Introduction to Production, Costs, and Industry Structure - Principles of Microeconomics 3e | OpenStax",
+      "url": "https://openstax.org/books/principles-microeconomics-3e/pages/7-introduction-to-production-costs-and-industry-structure",
+      "kind": "open_textbook",
+      "used_for": "节点 firm：显成本/隐成本、短期生产、短期/长期成本；其后接完全竞争—垄断—寡头谱系"
+    },
+    {
+      "title": "Ch. 7 Problems - Principles of Microeconomics 3e | OpenStax",
+      "url": "https://openstax.org/books/principles-microeconomics-3e/pages/7-problems",
+      "kind": "open_textbook",
+      "used_for": "节点 firm 替代交卷：Problems 40–42（边际产量、ATC/AVC/MC、劳动资本组合）"
+    },
+    {
+      "title": "Ch. 8 Introduction to Perfect Competition - Principles of Microeconomics 3e | OpenStax",
+      "url": "https://openstax.org/books/principles-microeconomics-3e/pages/8-introduction-to-perfect-competition",
+      "kind": "open_textbook",
+      "used_for": "节点 markets：完全竞争产量决策、长期进入退出、竞争性市场的效率"
+    },
+    {
+      "title": "Ch. 8 Problems - Principles of Microeconomics 3e | OpenStax",
+      "url": "https://openstax.org/books/principles-microeconomics-3e/pages/8-problems",
+      "kind": "open_textbook",
+      "used_for": "节点 markets 替代交卷之一：Problems 39–41（TR/TC/MR/MC 表，零利润点与停业点）"
+    },
+    {
+      "title": "Ch. 9 Introduction to a Monopoly - Principles of Microeconomics 3e | OpenStax",
+      "url": "https://openstax.org/books/principles-microeconomics-3e/pages/9-introduction-to-a-monopoly",
+      "kind": "open_textbook",
+      "used_for": "节点 markets：进入壁垒、垄断者如何选产量与价格"
+    },
+    {
+      "title": "Ch. 9 Problems - Principles of Microeconomics 3e | OpenStax",
+      "url": "https://openstax.org/books/principles-microeconomics-3e/pages/9-problems",
+      "kind": "open_textbook",
+      "used_for": "节点 markets 替代交卷之二：Problems 32–33（垄断 MR/MC 图与多生产一单位是否有人愿付高于 MC 的价格）"
+    },
+    {
+      "title": "Ch. 10 Introduction to Monopolistic Competition and Oligopoly - Principles of Microeconomics 3e | OpenStax",
+      "url": "https://openstax.org/books/principles-microeconomics-3e/pages/10-introduction-to-monopolistic-competition-and-oligopoly",
+      "kind": "open_textbook",
+      "used_for": "节点 markets：垄断竞争与寡头；合作定价 vs 各自增产"
+    },
+    {
+      "title": "Ch. 12 Introduction to Environmental Protection and Negative Externalities - Principles of Microeconomics 3e | OpenStax",
+      "url": "https://openstax.org/books/principles-microeconomics-3e/pages/12-introduction-to-environmental-protection-and-negative-externalities",
+      "kind": "open_textbook",
+      "used_for": "节点 failures：污染的社会成本、命令控制与市场化工具"
+    },
+    {
+      "title": "Ch. 12 Problems - Principles of Microeconomics 3e | OpenStax",
+      "url": "https://openstax.org/books/principles-microeconomics-3e/pages/12-problems",
+      "kind": "open_textbook",
+      "used_for": "节点 failures 交卷：Problems 40、42（二手烟/街头小号的私人成本 vs 社会成本与无谓损失）"
+    },
+    {
+      "title": "Ch. 13 Introduction to Positive Externalities and Public Goods - Principles of Microeconomics 3e | OpenStax",
+      "url": "https://openstax.org/books/principles-microeconomics-3e/pages/13-introduction-to-positive-externalities-and-public-goods",
+      "kind": "open_textbook",
+      "used_for": "节点 failures：正外部性、公共物品、公共资源过度使用"
+    },
+    {
+      "title": "《微观经济学》课程教学大纲（长春大学经济学院）",
+      "url": "https://jjxy.ccu.edu.cn/info/1230/2217.htm",
+      "kind": "syllabus",
+      "used_for": "国内本科顺序：导论 → 第1章供求与弹性 → 第2章消费者选择 → 第3章生产与成本 → 第4–5章完全竞争与不完全竞争 → 第7–8章一般均衡/效率与市场失灵；课外习题与 3 次作业"
+    }
+  ],
+  "trunk": ["sd", "consumer", "firm", "markets", "failures"],
+  "forks": [],
+  "join": null,
+  "nodes": {
+    "sd": {
+      "name": "稀缺、供求与弹性",
+      "why": "14.01 日历第一讲就是 Introduction and Supply & Demand。OpenStax 把书分成五块，前两块是 Ch1–2 稀缺选择和 Ch3–4 供求。长春大学第1章「需求、供给和均衡价格」含弹性，并写明通过供需习题巩固。先会画移动和求均衡，后面的约束选择才有市场对象。",
+      "learn": [
+        "机会成本与生产可能性边界",
+        "需求、供给与市场均衡",
+        "需求/供给移动的比较静态",
+        "价格上限与短缺/过剩",
+        "需求价格弹性"
+      ],
+      "task": {
+        "kind": "problem_set",
+        "prompt": "做完 14.01 Problem Set 1 第 4 题 Market for Gas：求出原均衡 (P*, Q*)，再分别算地铁票降价和供给左移后的新均衡，并在图上标出低于均衡的价格上限造成的超额需求。每问留下计算式和一张标注过的供求图。",
+        "from": "MIT 14.01 F23 Problem Set 1 Q4；课历 Lecture 1",
+        "alternatives": [
+          {
+            "kind": "exercise",
+            "prompt": "做 OpenStax Ch.3 Problems 53 与 57：用自行车表求出均衡，再用面包价格上限表算出 P=2.40 和 P=2.00 时的短缺数量。交表、图和短缺数字。",
+            "from": "OpenStax Principles of Microeconomics 3e, Ch.3 Problems 53, 57"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://ocw.mit.edu/courses/14-01-principles-of-microeconomics-fall-2023/pages/calendar/",
+          "title": "14.01 Calendar",
+          "use": "先看 Lecture 1 在整学期最前"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/14-01-principles-of-microeconomics-fall-2023/pages/lecture-notes/",
+          "title": "14.01 Lecture Notes",
+          "use": "打开 Lecture 01 Handout / Summary：Introduction and Supply & Demand"
+        },
+        {
+          "url": "https://openstax.org/books/principles-microeconomics-3e/pages/2-introduction-to-choice-in-a-world-of-scarcity",
+          "title": "OpenStax Ch.2 Choice in a World of Scarcity",
+          "use": "读机会成本、预算约束与 PPF"
+        },
+        {
+          "url": "https://openstax.org/books/principles-microeconomics-3e/pages/3-introduction-to-demand-and-supply",
+          "title": "OpenStax Ch.3 Demand and Supply",
+          "use": "读均衡、四步比较静态、价格上下限"
+        },
+        {
+          "url": "https://openstax.org/books/principles-microeconomics-3e/pages/5-introduction-to-elasticity",
+          "title": "OpenStax Ch.5 Elasticity",
+          "use": "读价格弹性定义，对照长春大学第1章「弹性」"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/14-01-principles-of-microeconomics-fall-2023/mit14_01_f23_pset1.pdf",
+          "title": "14.01 Problem Set 1",
+          "use": "做 Q4 Market for Gas"
+        },
+        {
+          "url": "https://openstax.org/books/principles-microeconomics-3e/pages/3-problems",
+          "title": "OpenStax Ch.3 Problems",
+          "use": "若不用微积分，改做 53 与 57"
+        }
+      ]
+    },
+    "consumer": {
+      "name": "消费者选择",
+      "why": "14.01 在供求之后连续三讲：Preferences and Utility Functions、Budget Constraints and Constrained Choice、Demand Curves and Income/Substitution Effects；Problem Set 1 的主体就是无差异曲线和效用最大化。长春大学第2章消费者选择同样放在供求之后。OpenStax 把 Consumer Choices 放在 Fundamentals 块（Ch.6），并指向无差异曲线附录。",
+      "learn": [
+        "偏好与效用函数 / 无差异曲线",
+        "预算约束与约束下的最优选择",
+        "从最优选择推出需求曲线",
+        "收入效应与替代效应",
+        "正常品 / 劣等品与收入弹性"
+      ],
+      "task": {
+        "kind": "problem_set",
+        "prompt": "交 14.01 Problem Set 1 第 2、3、5 题的手写解答：画出至少两组无差异曲线并写出对应 u(x,y)；对 U=xy^3 求出需求函数；对 U=x^{2}y^{3} 求出苹果与 T 恤需求，并计算苹果的价格弹性与 T 恤的收入弹性。每题标出用的是哪一问。",
+        "from": "MIT 14.01 F23 Problem Set 1 Q2 Indifference Curves, Q3 Utility Maximization, Q5 Income and Substitution Effects",
+        "alternatives": [
+          {
+            "kind": "exercise",
+            "prompt": "做 OpenStax Ch.6 Problem 16：画出 Praxilla 的预算集，按题中表格列（选择 / 多读诗的边际效用增益 / 少吃黄瓜的损失 / 净增益）走到最优束，并核对最优处两种商品的边际效用比是否等于价格比。",
+            "from": "OpenStax Principles of Microeconomics 3e, Ch.6 Problem 16"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://ocw.mit.edu/courses/14-01-principles-of-microeconomics-fall-2023/pages/lecture-notes/",
+          "title": "14.01 Lecture Notes",
+          "use": "读 Lecture Summary 02–04：偏好、预算约束、需求曲线"
+        },
+        {
+          "url": "https://openstax.org/books/principles-microeconomics-3e/pages/6-introduction-to-consumer-choices",
+          "title": "OpenStax Ch.6 Consumer Choices",
+          "use": "读预算约束下的效用最大化，以及收入/价格变动"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/14-01-principles-of-microeconomics-fall-2023/mit14_01_f23_pset1.pdf",
+          "title": "14.01 Problem Set 1",
+          "use": "做 Q2、Q3、Q5"
+        },
+        {
+          "url": "https://openstax.org/books/principles-microeconomics-3e/pages/6-problems",
+          "title": "OpenStax Ch.6 Problems",
+          "use": "不用微积分时改做 Problem 16"
+        },
+        {
+          "url": "https://jjxy.ccu.edu.cn/info/1230/2217.htm",
+          "title": "长春大学《微观经济学》大纲",
+          "use": "对照第2章要求：无差异曲线、预算线、消费者均衡、替代效应与收入效应"
+        }
+      ]
+    },
+    "firm": {
+      "name": "生产与成本",
+      "why": "14.01 日历 Lecture 5 Production Theory、Lecture 6 Costs，随后才进入竞争。OpenStax 写明 Ch.7 是 firm theory 四章中的第一章，先处理短期/长期生产与成本，再进入市场结构。长春大学第3章把生产函数和短期/长期成本放在完全竞争之前。",
+      "learn": [
+        "生产函数、边际产量与规模报酬",
+        "等产量线与边际技术替代率",
+        "会计利润 vs 经济利润（显成本/隐成本）",
+        "短期总成本、边际成本、平均可变成本",
+        "长期成本曲线与规模报酬的关系"
+      ],
+      "task": {
+        "kind": "problem_set",
+        "prompt": "交 14.01 Problem Set 2 第 3–4 题：对 F=L^αK^β 判断规模报酬如何取决于 α+β，并比较 α+β<1 / =1 / >1 时长期 MC 与 AC；对 F=L^{1/3}K^{1/3}、w=1、r=3、短期资本固定为 1 推出短期总成本、MC、AVC 和短期供给曲线（正产量的价格区间）。图不必按比例，但交点与形状必须标对。",
+        "from": "MIT 14.01 F23 Problem Set 2 Q3 Returns to scale, Q4 Short Run and Long Run Cost",
+        "alternatives": [
+          {
+            "kind": "exercise",
+            "prompt": "做 OpenStax Ch.7 Problems 40–42：算理发店从 4 增到 5、5 增到 6 个理发师的边际产量；算出 60 与 72 次理发的 ATC/AVC/MC 并画图；在三种铲雪劳动—资本组合里选出 w=100、r=400 和 w 升到 200 时的成本最小方法。",
+            "from": "OpenStax Principles of Microeconomics 3e, Ch.7 Problems 40–42"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://ocw.mit.edu/courses/14-01-principles-of-microeconomics-fall-2023/pages/lecture-notes/",
+          "title": "14.01 Lecture Notes",
+          "use": "读 Lecture Summary 05 Production、06 From Production to Costs"
+        },
+        {
+          "url": "https://openstax.org/books/principles-microeconomics-3e/pages/7-introduction-to-production-costs-and-industry-structure",
+          "title": "OpenStax Ch.7 Production, Costs, and Industry Structure",
+          "use": "读短期生产、短期/长期成本，以及后面四章市场结构预告"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/14-01-principles-of-microeconomics-fall-2023/mit14_01_f23_pset2.pdf",
+          "title": "14.01 Problem Set 2",
+          "use": "做 Q3、Q4"
+        },
+        {
+          "url": "https://openstax.org/books/principles-microeconomics-3e/pages/7-problems",
+          "title": "OpenStax Ch.7 Problems",
+          "use": "不用微积分时改做 40–42"
+        }
+      ]
+    },
+    "markets": {
+      "name": "竞争、垄断与寡头",
+      "why": "三份来源都把市场结构放在厂商成本之后、政策议题之前。14.01 是 Competition I–II → Surplus/Welfare → Monopoly I–II → Oligopoly I–II，配套 PS3（加总供给与进入）、PS4（剩余）、PS5（垄断 MR 与 Cournot）。OpenStax Fundamentals 块以 Ch.8–10 收束。长春大学第4–5章是完全竞争然后不完全竞争（含古诺）。",
+      "learn": [
+        "完全竞争短期供给、停业与长期自由进入",
+        "消费者剩余、生产者剩余与无谓损失",
+        "垄断：边际收益低于需求、弹性段定价、加成",
+        "寡头：古诺最优反应与纳什均衡",
+        "卡特尔产量 vs 各自偏离"
+      ],
+      "task": {
+        "kind": "problem_set",
+        "prompt": "交两份 14.01 作业节选：(1) Problem Set 3 第 4 题 Firm Entry：写出加总需求、单个与加总短期供给、均衡 (p*,Q*) 对 N 和 J 的依赖，以及自由进入时的 J^{LR}、Q^{LR}、p^{LR}；(2) Problem Set 5 第 3 题前 6 问：算出竞争、垄断、Cournot 三种产量/价格与剩余，并画出两条最优反应与纳什均衡。",
+        "from": "MIT 14.01 F23 Problem Set 3 Q4；Problem Set 5 Q3 Cournot Competition and Cartels (1)–(6)",
+        "alternatives": [
+          {
+            "kind": "exercise",
+            "prompt": "做 OpenStax Ch.8 Problem 41（计算机公司：表列出 TC/MC/AC/AVC，标出零利润点与停业点，并在 P=500 与 P=300 时算出盈亏）和 Ch.9 Problem 32（画出垄断需求、MR、MC，标出原利润最大化点，再画需求右移后的新产量与价格）。",
+            "from": "OpenStax Principles of Microeconomics 3e, Ch.8 Problem 41 and Ch.9 Problem 32"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://ocw.mit.edu/courses/14-01-principles-of-microeconomics-fall-2023/pages/calendar/",
+          "title": "14.01 Calendar",
+          "use": "核 Lecture 7–14 与 PS3–PS5 的对应"
+        },
+        {
+          "url": "https://openstax.org/books/principles-microeconomics-3e/pages/8-introduction-to-perfect-competition",
+          "title": "OpenStax Ch.8 Perfect Competition",
+          "use": "读产量决策、进入退出、竞争性效率"
+        },
+        {
+          "url": "https://openstax.org/books/principles-microeconomics-3e/pages/9-introduction-to-a-monopoly",
+          "title": "OpenStax Ch.9 Monopoly",
+          "use": "读进入壁垒与垄断者如何选产量价格"
+        },
+        {
+          "url": "https://openstax.org/books/principles-microeconomics-3e/pages/10-introduction-to-monopolistic-competition-and-oligopoly",
+          "title": "OpenStax Ch.10 Monopolistic Competition and Oligopoly",
+          "use": "读寡头合作定价 vs 各自增产"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/14-01-principles-of-microeconomics-fall-2023/mit14_01_f23_pset3.pdf",
+          "title": "14.01 Problem Set 3",
+          "use": "做 Q4 Firm Entry"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/14-01-principles-of-microeconomics-fall-2023/mit14_01_f23_pset4.pdf",
+          "title": "14.01 Problem Set 4",
+          "use": "需要剩余语言时补做 Q2（最低价下的 CS/PS/DWL）"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/14-01-principles-of-microeconomics-fall-2023/mit14_01_f23_pset5.pdf",
+          "title": "14.01 Problem Set 5",
+          "use": "做 Q3 前 6 问：竞争 / 垄断 / Cournot"
+        },
+        {
+          "url": "https://openstax.org/books/principles-microeconomics-3e/pages/8-problems",
+          "title": "OpenStax Ch.8 Problems",
+          "use": "替代轨做 Problem 41"
+        },
+        {
+          "url": "https://openstax.org/books/principles-microeconomics-3e/pages/9-problems",
+          "title": "OpenStax Ch.9 Problems",
+          "use": "替代轨做 Problem 32"
+        }
+      ]
+    },
+    "failures": {
+      "name": "外部性与公共物品",
+      "why": "OpenStax 把 Ch.11–18 单独标成 Microeconomic Policy Issues，Ch.12–13 是负外部性与公共物品。14.01 在市场结构之后安排 Lecture 24 Externalities；课程简介也把 public goods and externalities 列为收束主题。长春大学第8章「市场失灵和微观经济政策」放在全部市场结构之后，要求能对外部性、公共物品给出对策图。",
+      "learn": [
+        "私人成本 vs 社会成本、负外部性",
+        "无谓损失（市场产量相对社会最优）",
+        "命令控制 vs 市场化环境工具",
+        "正外部性与创新溢出",
+        "公共物品与公共资源过度使用"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "交 OpenStax Ch.12 Problems 40 与 42：画香烟市场均衡 (Pm,Qm)，标出二手烟的负外部性、社会最优 (Pe,Qe) 并涂出市场产量处的无谓损失；用 Table 12.12 分别求出只计私人成本与计入社会成本的均衡价格与数量，并写清外部性如何改变均衡。",
+        "from": "OpenStax Principles of Microeconomics 3e, Ch.12 Problems 40, 42",
+        "alternatives": [
+          {
+            "kind": "writeup",
+            "prompt": "对照 OpenStax Ch.13 的公共物品定义和长春大学第8章「公共物品和公共资源 / 外部性」，用一页图+文字说明一个非排他、非竞争性的例子：为什么私人市场供给偏低，以及一种来源里提到的政府或市场化纠正（不要写具体处方或法规操作）。",
+            "from": "OpenStax Ch.13 Public Goods；长春大学大纲第8章"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://ocw.mit.edu/courses/14-01-principles-of-microeconomics-fall-2023/",
+          "title": "14.01 Course Description",
+          "use": "核课程把 public goods and externalities 列为收束主题"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/14-01-principles-of-microeconomics-fall-2023/pages/calendar/",
+          "title": "14.01 Calendar",
+          "use": "看 Lecture 24 Externalities 排在市场结构之后"
+        },
+        {
+          "url": "https://openstax.org/books/principles-microeconomics-3e/pages/12-introduction-to-environmental-protection-and-negative-externalities",
+          "title": "OpenStax Ch.12 Negative Externalities",
+          "use": "读污染的社会成本与两类政策工具"
+        },
+        {
+          "url": "https://openstax.org/books/principles-microeconomics-3e/pages/13-introduction-to-positive-externalities-and-public-goods",
+          "title": "OpenStax Ch.13 Positive Externalities and Public Goods",
+          "use": "读正外部性、公共物品、公共资源"
+        },
+        {
+          "url": "https://openstax.org/books/principles-microeconomics-3e/pages/12-problems",
+          "title": "OpenStax Ch.12 Problems",
+          "use": "做 Problems 40、42"
+        },
+        {
+          "url": "https://jjxy.ccu.edu.cn/info/1230/2217.htm",
+          "title": "长春大学《微观经济学》大纲",
+          "use": "对照第8章：垄断/外部性/公共物品/不完全信息作为市场失灵"
+        }
+      ]
+    }
+  },
+  "conflicts": [
+    "要素市场位置打架：OpenStax Ch.4 Labor and Financial Markets 紧接供求、早于消费者理论；14.01 Lecture 15–16 与长春大学第6章都把劳动/资本放在产品市场结构之后。按「更靠后、不单列」处理，主干不设要素市场节点。",
+    "福利块的早晚：14.01 在竞争之后、垄断之前就讲 L9–10 Surplus / Welfare Economics（PS4）；长春大学把一般均衡与效率放在全部市场结构之后；OpenStax 在 Ch.3.5 已出现效率，又在 Ch.8 重复竞争性效率，政策块 Ch.12–13 才是外部性。主干把剩余当作市场结构节点的比较语言（跟 14.01 更靠前的用法），把外部性/公共物品单独放最后（三份来源都同意这块靠后）。",
+    "数学强度：14.01 Syllabus 使用 18.01 水平微积分；OpenStax 以图和表为主；长春大学先修高等数学与线性代数。同一节点用 task.alternatives 给微积分 pset 与 OpenStax 表/图习题，不为此分叉。"
+  ],
+  "missing": "",
+  "checked_at": "2026-10-04"
+}

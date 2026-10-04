@@ -1,0 +1,312 @@
+{
+  "id": "110.74",
+  "name": "运筹学",
+  "format": "tutorial-tree-v2",
+  "status": "ok",
+  "goal": "能把约束下的安排写成线性规划（决策变量、线性目标、线性约束与可行域），用图解法和单纯形表求出最优基，并对照灵敏度报告解释影子价格与对偶；对照 MIT 15.053 的 Problem Set 交卷。不承诺整数规划、网络流或新算法。",
+  "sources": [
+    {
+      "title": "Syllabus | Optimization Methods in Management Science | MIT OCW 15.053 Spring 2013",
+      "url": "https://ocw.mit.edu/courses/15-053-optimization-methods-in-management-science-spring-2013/pages/syllabus/",
+      "kind": "ocw",
+      "used_for": "本科课结构：先 Linear Programming Theory and Applications（7 讲），再整数规划与网络；课历 L2 建模 → L3 几何 → L4–L5 单纯形 → L6 灵敏度；作业是 Problem Set，第一次期中只考线性规划"
+    },
+    {
+      "title": "Lecture Notes | Optimization Methods in Management Science | MIT OCW 15.053",
+      "url": "https://ocw.mit.edu/courses/15-053-optimization-methods-in-management-science-spring-2013/pages/lecture-notes/",
+      "kind": "ocw",
+      "used_for": "讲次目录：L2 Formulations → L3 Geometry → L4–L5 Simplex → L6 Sensitivity analysis and shadow prices"
+    },
+    {
+      "title": "Assignments | Optimization Methods in Management Science | MIT OCW 15.053",
+      "url": "https://ocw.mit.edu/courses/15-053-optimization-methods-in-management-science-spring-2013/pages/assignments/",
+      "kind": "ocw",
+      "used_for": "六份 Problem Set 的入口；PS1 与课历 L3 同期，PS3 对单纯形，PS4 对灵敏度"
+    },
+    {
+      "title": "Tutorial 1: Introduction to LP formulations — MIT 15.053 Spring 2013",
+      "url": "https://ocw.mit.edu/courses/15-053-optimization-methods-in-management-science-spring-2013/c1de066ab3ec192e5c1e74d398978e5a_MIT15_053S13_tut01.pdf",
+      "kind": "lecture_notes",
+      "used_for": "节点 formulate：决策变量、目标函数、约束；产品组合与邮局排班建模例"
+    },
+    {
+      "title": "Formulations of linear and non-linear programs — MIT 15.053 Lecture 2",
+      "url": "https://ocw.mit.edu/courses/15-053-optimization-methods-in-management-science-spring-2013/d244065e2dce13f23254035a14586d6c_MIT15_053S13_lec2.pdf",
+      "kind": "lecture_notes",
+      "used_for": "节点 formulate：饮食、投资组合、邮局工人排班的 LP 写法；决策变量要能写出约束"
+    },
+    {
+      "title": "Problem Set 1 – Group 2 — MIT 15.053 Spring 2013",
+      "url": "https://ocw.mit.edu/courses/15-053-optimization-methods-in-management-science-spring-2013/e1db6a373067f38766a7233563a3b167_MIT15_053S13_ps1-2.pdf",
+      "kind": "ocw",
+      "used_for": "节点 formulate 的交卷：Problem 1 用两套决策变量写出配件厂周生产 LP 并标注约束"
+    },
+    {
+      "title": "Geometry and visualizations of linear programs — MIT 15.053 Lecture 3",
+      "url": "https://ocw.mit.edu/courses/15-053-optimization-methods-in-management-science-spring-2013/56f54ffad5796b9459b260c5138930c5_MIT15_053S13_lec3.pdf",
+      "kind": "lecture_notes",
+      "used_for": "节点 geometry：可行域、凸集、角点、等值线；二维 DTC 变体与不可行/无界三类 LP"
+    },
+    {
+      "title": "Problem Set 3 — MIT 15.053 Spring 2013",
+      "url": "https://ocw.mit.edu/courses/15-053-optimization-methods-in-management-science-spring-2013/0a84b323f2dcfe43680de7768d787caa_MIT15_053S13_ps3.pdf",
+      "kind": "ocw",
+      "used_for": "节点 simplex：Phase I、退化、单纯形表上可行/最优/无界的判定条件"
+    },
+    {
+      "title": "Sensitivity analysis and shadow prices — MIT 15.053 Lecture 6",
+      "url": "https://ocw.mit.edu/courses/15-053-optimization-methods-in-management-science-spring-2013/8fead641e2eee52dc7de15c68a9effab_MIT15_053S13_lec6.pdf",
+      "kind": "lecture_notes",
+      "used_for": "节点 dual-sens：影子价格定义、允许增减区间、reduced cost、100% rule"
+    },
+    {
+      "title": "Problem Set 4 — MIT 15.053 Spring 2013",
+      "url": "https://ocw.mit.edu/courses/15-053-optimization-methods-in-management-science-spring-2013/ff791ddb4489b2749429d835ffbb2205_MIT15_053S13_ps4.pdf",
+      "kind": "ocw",
+      "used_for": "节点 dual-sens 的交卷：Problem 1 用已给出的最优解与灵敏度报告回答情景，不必再解一次 LP"
+    },
+    {
+      "title": "Applied Mathematical Programming — chapter list (Bradley, Hax, Magnanti)",
+      "url": "https://web.mit.edu/15.053/www/AMP.htm",
+      "kind": "open_textbook",
+      "used_for": "15.053 指定免费参考书目录：Ch1 建模概览 → Ch2 解线性规划 → Ch3 灵敏度 → Ch4 对偶"
+    },
+    {
+      "title": "Applied Mathematical Programming, Chapter 1. Mathematical Programming: An Overview",
+      "url": "https://web.mit.edu/15.053/www/AMP-Chapter-01.pdf",
+      "kind": "open_textbook",
+      "used_for": "节点 formulate：§1.3 高炉配料等建模例；章末 Exercises 要求写出 LP"
+    },
+    {
+      "title": "Applied Mathematical Programming, Chapter 2. Solving Linear Programs",
+      "url": "https://web.mit.edu/15.053/www/AMP-Chapter-02.pdf",
+      "kind": "open_textbook",
+      "used_for": "节点 simplex：典范型、基可行解、入基出基、比值检验、Phase I 人工变量"
+    },
+    {
+      "title": "Applied Mathematical Programming, Chapter 3. Sensitivity Analysis",
+      "url": "https://web.mit.edu/15.053/www/AMP-Chapter-03.pdf",
+      "kind": "open_textbook",
+      "used_for": "节点 dual-sens：影子价格、reduced cost、目标系数与右端项变化范围"
+    },
+    {
+      "title": "Applied Mathematical Programming, Chapter 4. Duality in Linear Programming",
+      "url": "https://web.mit.edu/15.053/www/AMP-Chapter-04.pdf",
+      "kind": "open_textbook",
+      "used_for": "节点 dual-sens：由最终单纯形表读对偶变量；原问题与对偶的对应"
+    },
+    {
+      "title": "Fundamentals of Linear Optimization (Huseyin Topaloglu, Cornell ORIE)",
+      "url": "https://people.orie.cornell.edu/huseyin/lp_book.pdf",
+      "kind": "open_textbook",
+      "used_for": "独立学校教材顺序：Ch1 建模与 Excel Solver → Ch2 几何 → Ch4 单纯形 → 其后才是网络与对偶；几何与单纯形节点的例题"
+    },
+    {
+      "title": "中国社会科学院大学《运筹学》课程大纲",
+      "url": "https://jw.ucass.edu.cn/kcdg/zyk/jj/yunchouxue-gengxin.pdf?d=0.7914691772521725",
+      "kind": "syllabus",
+      "used_for": "国内本科周历：线性规划模型/标准型/图解法 → 单纯形与人工变量 → 对偶与敏感性分析；每周指定教材习题"
+    },
+    {
+      "title": "《运筹学》课程教学大纲（南通大学交通运输/交通工程）",
+      "url": "https://jtsyzx.ntu.edu.cn/2021/0508/c6646a168649/page.htm",
+      "kind": "syllabus",
+      "used_for": "国内本科顺序：第1章模型与单纯形 → 第2章对偶与灵敏度；其后运输、整数规划、动态规划、网络为同一门课后续章"
+    },
+    {
+      "title": "Operations Research Models and Methods — Text Contents (University of Texas)",
+      "url": "http://utw11041.utweb.utexas.edu/ORMM/frontpage/contents/text.html",
+      "kind": "open_textbook",
+      "used_for": "独立出版社/学校目录：LP Models → LP Methods（几何与单纯形表）→ Sensitivity, Duality；其后才是网络与整数规划"
+    },
+    {
+      "title": "Operations Research Lecture Notes (Dennis Bricker, University of Iowa)",
+      "url": "https://user.engineering.uiowa.edu/~dbricker/or_lectures.html",
+      "kind": "lecture_notes",
+      "used_for": "独立学校讲义顺序：Formulating LP → Simplex → Duality → Sensitivity；其后运输/整数规划/动态规划"
+    }
+  ],
+  "trunk": ["formulate", "geometry", "simplex", "dual-sens"],
+  "forks": [],
+  "join": null,
+  "nodes": {
+    "formulate": {
+      "name": "写出线性规划",
+      "why": "15.053 Tutorial 1 把每个优化问题拆成决策变量、目标函数、约束，并规定线性目标与线性约束才叫 LP；课历 L2 是 Formulations，Problem Set 1 在 L3 到期。Cornell 书第 1 章先建模再开 Solver。社科大第 2 章从数学模型与标准型起，南通大纲 1.1 也是「线性规划问题及其数学模型」。没有目标和可行域，后面的图解和单纯形没有对象。",
+      "learn": [
+        "决策变量（写清单位与可控量）",
+        "线性目标函数（max 利润或 min 成本）",
+        "线性不等式/等式约束与非负约束",
+        "把文字题写成标准型 LP"
+      ],
+      "task": {
+        "kind": "problem_set",
+        "prompt": "对照 15.053 Problem Set 1 Problem 1：就 Accessories 配件厂的周生产，先用 x1,x2,x3（每天生产时间比例）写出一套 LP，再用 y1,y2,y3（一周产量）写出第二套；每条约束加标签（存储、最低交付、需求上限、非负除外）。把两套完整模型写在一页上交。",
+        "from": "MIT 15.053 Problem Set 1 Problem 1(a)(b)；建模步骤见 Tutorial 1 与 Lecture 2",
+        "alternatives": [
+          {
+            "kind": "exercise",
+            "prompt": "对照 AMP 第 1 章 Exercises 第 5 题：为卡车事业部写出月产量 LP（决策变量、目标、产能/需求约束），交完整模型；本步不必数值求解。",
+            "from": "Bradley–Hax–Magnanti, Applied Mathematical Programming, Chapter 1 Exercises 5"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://ocw.mit.edu/courses/15-053-optimization-methods-in-management-science-spring-2013/c1de066ab3ec192e5c1e74d398978e5a_MIT15_053S13_tut01.pdf",
+          "title": "Tutorial 1: Introduction to LP formulations",
+          "use": "按三步（变量→目标→约束）把产品组合例写成 LP，再自己做邮局排班的变量选择"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/15-053-optimization-methods-in-management-science-spring-2013/d244065e2dce13f23254035a14586d6c_MIT15_053S13_lec2.pdf",
+          "title": "15.053 Lecture 2 — Formulations",
+          "use": "对照邮局工人 7 个开工日变量与每天覆盖约束，核对自己会不会选错变量"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/15-053-optimization-methods-in-management-science-spring-2013/e1db6a373067f38766a7233563a3b167_MIT15_053S13_ps1-2.pdf",
+          "title": "15.053 Problem Set 1 (Group 2)",
+          "use": "做 Problem 1(a)(b) 并交两套标注约束的模型"
+        },
+        {
+          "url": "https://web.mit.edu/15.053/www/AMP-Chapter-01.pdf",
+          "title": "AMP Chapter 1",
+          "use": "读 §1.3 建模例；备选做章末 Exercise 5"
+        }
+      ]
+    },
+    "geometry": {
+      "name": "可行域与图解法",
+      "why": "15.053 在建模之后立刻上 L3 Geometry：可行域、凸性、角点、等值线，并用几何语言引出单纯形。Cornell 书第 2 章紧接第 1 章，先画可行集再求最优。社科大 2.3 图解法列出多最优、空可行域、无有界最优三种情形；南通 1.2 是「图解法及几何意义」。二维图画清了，后面的基可行解才有几何对应。",
+      "learn": [
+        "线性不等式对应半平面，交出来的可行域",
+        "凸集与角点（极点）",
+        "等值线平移求最优",
+        "最优解 / 无界 / 不可行三类二维 LP"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "对照 15.053 Lecture 3 的二维 DTC 变体：约束 2x+3y≤10，x+2y≤6，x+y≤5，y≤3，x≤4，x,y≥0，目标 max 3x+5y。在坐标纸上画出可行域，标出角点，用等值线求出最优解与最优值；再各写一个二维不可行 LP 和一个目标无界的 LP（讲义要求试做这三类）。",
+        "from": "MIT 15.053 Lecture 3（DTC 变体与三类 LP）",
+        "alternatives": [
+          {
+            "kind": "exercise",
+            "prompt": "对照 Cornell 书第 2 章：画出该章例题的可行集，标出目标等值线，用两条紧约束的联立方程算出最优点坐标与目标值，写下计算过程。",
+            "from": "Topaloglu, Fundamentals of Linear Optimization, Chapter 2 §§2.1–2.3"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://ocw.mit.edu/courses/15-053-optimization-methods-in-management-science-spring-2013/56f54ffad5796b9459b260c5138930c5_MIT15_053S13_lec3.pdf",
+          "title": "15.053 Lecture 3 — Geometry and visualizations",
+          "use": "按讲义逐步加约束画出可行域，再用等值线求 3x+5y 的最优角点"
+        },
+        {
+          "url": "https://people.orie.cornell.edu/huseyin/lp_book.pdf",
+          "title": "Cornell Fundamentals of Linear Optimization",
+          "use": "读第 2 章：画可行集、检查目标值、用紧约束交点求最优"
+        },
+        {
+          "url": "https://jw.ucass.edu.cn/kcdg/zyk/jj/yunchouxue-gengxin.pdf?d=0.7914691772521725",
+          "title": "社科大《运筹学》大纲",
+          "use": "核对本周对应「图解法：多最优 / 空集 / 无界」三种情形"
+        }
+      ]
+    },
+    "simplex": {
+      "name": "单纯形表",
+      "why": "15.053 几何之后接 L4–L5 The simplex method，Problem Set 3 在单纯形模块到期，考 Phase I、退化、表上最优/无界判定。AMP 第 2 章把任何 LP 化成典范型后用入基、比值检验、出基迭代。Cornell 第 4 章、社科大 2.5–2.6、南通 1.3–1.4、Iowa 讲义都把单纯形放在建模与几何之后。第一次期中前必须能在表上走完一步。",
+      "learn": [
+        "典范型 / 标准型与松弛变量",
+        "基变量、非基变量、基可行解",
+        "入基规则、比值检验、出基与一次枢轴",
+        "人工变量与 Phase I（大 M / 两阶段）"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "对照 AMP 第 2 章：把书中已化成典范型的例题用手算走完单纯形——每步写下入基变量、比值检验、出基变量和新基；交初始表、每次枢轴后的表，以及最终基与最优值。若某步出现人工变量，按书中 Phase I 目标把它做到 0。",
+        "from": "Bradley–Hax–Magnanti, AMP Chapter 2（典范型例与 §2.4 Formal Procedure）",
+        "alternatives": [
+          {
+            "kind": "problem_set",
+            "prompt": "若已下载 15.053 作业页上的 Excel 工作簿：做 Problem Set 3 Problem 4，就给定单纯形表用 A–F 写出可行/退化/最优/多最优/无界的充要条件；把答案填进 Answers 表。",
+            "from": "MIT 15.053 Problem Set 3 Problem 4"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://web.mit.edu/15.053/www/AMP-Chapter-02.pdf",
+          "title": "AMP Chapter 2. Solving Linear Programs",
+          "use": "按 Improvement Criterion 与比值检验手算枢轴；对照 Figure 2.3 流程图区分不可行 / 最优 / 无界"
+        },
+        {
+          "url": "https://people.orie.cornell.edu/huseyin/lp_book.pdf",
+          "title": "Cornell Fundamentals of Linear Optimization",
+          "use": "读第 4 章单纯形；可用 4.3 较大例子核对你的入基出基"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/15-053-optimization-methods-in-management-science-spring-2013/0a84b323f2dcfe43680de7768d787caa_MIT15_053S13_ps3.pdf",
+          "title": "15.053 Problem Set 3",
+          "use": "备选：表上判定可行、最优、退化、无界（需配套作业簿）"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/15-053-optimization-methods-in-management-science-spring-2013/pages/lecture-notes/",
+          "title": "15.053 Lecture Notes",
+          "use": "打开 L4 The simplex method 1、L5 The simplex method 2 对照表上记号"
+        }
+      ]
+    },
+    "dual-sens": {
+      "name": "对偶与灵敏度",
+      "why": "15.053 单纯形之后是 L6 Sensitivity analysis and shadow prices，Problem Set 4 在 L9 到期，第一次期中覆盖整块线性规划。AMP 第 3 章灵敏度、第 4 章对偶紧接第 2 章。社科大第 3 章、南通第 2 章、Iowa 讲义、Texas ORMM 第 4 章都把对偶/影子价格放在会算单纯形之后。Cornell 书把对偶放到网络章之后，见 conflicts；本科入口取更靠前的这条。",
+      "learn": [
+        "影子价格（右端项增加一单位时最优值的变化）",
+        "reduced cost 与非基变量何时进基",
+        "目标系数、右端项的允许增减区间",
+        "由最终表写出对偶变量 / 对偶问题"
+      ],
+      "task": {
+        "kind": "problem_set",
+        "prompt": "对照 15.053 Problem Set 4 Problem 1（题面已给出 Outdoors, Inc. 的最优解与灵敏度报告，声明不必再解 LP）：写出最优生产组合与贡献；回答再增加 1 小时折弯/焊接或 1 磅管材值多少；判断是否按 $0.70/lb 买最多 550 lb 管材，并写出贡献变化的算法。每问注明用了报告里哪一格。",
+        "from": "MIT 15.053 Problem Set 4 Problem 1（基于 AMP Chapter 3 Problem 1）",
+        "alternatives": [
+          {
+            "kind": "exercise",
+            "prompt": "对照 AMP 第 3 章 custom-molder 最终表：读出各约束影子价格；再按第 4 章 trailer 例，由松弛变量的最终目标系数写出对偶变量，并写下原问题与对偶的对应约束。",
+            "from": "AMP Chapter 3 §3.1–3.2；Chapter 4 §4.1"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://ocw.mit.edu/courses/15-053-optimization-methods-in-management-science-spring-2013/8fead641e2eee52dc7de15c68a9effab_MIT15_053S13_lec6.pdf",
+          "title": "15.053 Lecture 6 — Sensitivity analysis and shadow prices",
+          "use": "先读影子价格定义、允许区间与 reduced cost，再看 mc2 灵敏度报告怎么用"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/15-053-optimization-methods-in-management-science-spring-2013/ff791ddb4489b2749429d835ffbb2205_MIT15_053S13_ps4.pdf",
+          "title": "15.053 Problem Set 4",
+          "use": "做 Problem 1(a)–(c)，答案必须能从 Figure 1 的报告直接算出"
+        },
+        {
+          "url": "https://web.mit.edu/15.053/www/AMP-Chapter-03.pdf",
+          "title": "AMP Chapter 3. Sensitivity Analysis",
+          "use": "从最终表读影子价格与 reduced cost；看目标系数/右端项范围"
+        },
+        {
+          "url": "https://web.mit.edu/15.053/www/AMP-Chapter-04.pdf",
+          "title": "AMP Chapter 4. Duality in Linear Programming",
+          "use": "用 §4.1 trailer 例：由松弛变量最终系数写出对偶"
+        }
+      ]
+    }
+  },
+  "conflicts": [
+    "Cornell Topaloglu 书把对偶（第 10–12 章）放在最小费用流与指派/最短路之后；15.053、AMP、社科大、南通、Iowa、Texas ORMM 都把灵敏度/对偶紧接单纯形。取更靠前的一条：单纯形之后立刻做对偶与灵敏度。",
+    "LP 核心之后的后续模块顺序打架：15.053 是整数规划再网络；社科大/南通是运输→整数规划→动态规划→网络；Texas ORMM 是网络再整数规划。来源都写成同一门课的后续章，不是并行选修轨，故不分叉；本科入口停在线性规划核心。",
+    "15.053 Lecture 3 已用二维图引入右端项变化，但完整灵敏度报告与对偶在 L6 / AMP 第 3–4 章。几何节点只交图解与三类 LP，灵敏度交卷放在 dual-sens。"
+  ],
+  "missing": "",
+  "checked_at": "2026-10-04"
+}

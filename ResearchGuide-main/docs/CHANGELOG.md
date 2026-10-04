@@ -4,12 +4,38 @@
 > 每个 AI 开发会话开始时 agent 必读本文件并提醒用户新变更。
 > 条目格式：`## [日期] [类型] 标题` + 变更内容 / 影响文档 / 影响模块 / 决策来源 / 登记人。
 
----
 
 ## [2026-10-03] [DOC] 产品设计提案 v2（HCI）
 - 变更内容：新增 `docs/DESIGN_PROPOSAL.md`。判断：学东西越来越便宜，技能和知识不再是瓶颈，学生要赢靠的是用自己的边去差异化。所以主价值是定位与博弈层（§1D：边清单 → 竞争地图（需求 / 供给 / 势头，k≥5、按档、滞后）→ 生态位与定位陈述「我是能做 X 的人，因为 Y」→ 信号表 → 时机 → 冲 / 稳 / 保下注组合，并防羊群）；研究思维层（阅读卡 → 综合矩阵 → 问题阶梯 → 提案画布 → 最小测试）是降成本的引擎、也是边的原材料。节奏分层：每日 ≤10 分钟（arXiv 新论文分拣、雷达变化、一次定位微调），重活按周。双窗口：学生自己的 Agent 是手，启研是地图、标准和账本。IA 五标签：今日 / 定位 / 研读 / 机会 / 作品。按天排期，含验证计划（「Agent 单独 vs Agent + 启研」对照）。是提案，不改代码与契约；采纳哪些在群里定。
 - 影响文档：docs/DESIGN_PROPOSAL.md（新增）、docs/README.md
 - 决策来源：陈浩文
+=======
+## [2026-10-04] [BUILD] 教程蒸馏改为流程树（主干 + 有据才分叉）
+
+- 变更内容：`tutorial-distill` 不再强制 6 步直线。输出 `tutorial-tree-v2`：共用主干，仅当大纲把后面写成并行课/选修轨时才分叉；同一关的两种交卷方式写在 `task.alternatives`。每个节点必须有 `learn` / `task` / `resources`（原链接 + 这一页干什么）。样例：人工智能 `520.20`（卷积 | Transformer）、计算机软件 `520.40`（OS | 编译 | 数据库）。`preview.py` 打 mermaid 和节点卡片。其余 JSON 仍是旧 6 步，校验兼容，等确认后再重跑。未接入 `directions.js`。
+- 影响模块：skills/tutorial-distill/、knowledge/tutorials/520.20.json、knowledge/tutorials/520.40.json、skills/README.md、knowledge/tutorials/README.md
+- 决策来源：邬程灿
+- 登记人：助手
+
+## [2026-10-03] [BUILD] 方向教程蒸馏 Skill（检索公开大纲，不编步骤）
+
+- 变更内容：新增 `skills/tutorial-distill/`：输入一个方向，检索大学大纲/公开教材，蒸馏成 6 步并写入 `knowledge/tutorials/{id}.json`。不够 2 个独立来源就标 `insufficient`。附 `validate.py`。烟测 3 条：人工智能 `520.20`（MIT 6.390 + MML）、系统结构 `520.30`（MIT 6.004 + Berkeley 61C）、基础医学 `310`（OpenStax A&P 2e + MIT 7.01SC）。尚未接入 `directions.js`。
+- 影响模块：skills/tutorial-distill/、knowledge/tutorials/、skills/README.md
+- 决策来源：邬程灿
+- 登记人：助手
+
+## [2026-10-03] [BUILD] 方向树与教程同一页切换
+
+- 变更内容：方向区默认是一棵 GB/T 策展学科树（计算机 / 数学 / 心理 / 经济 / 基础医学），统计挂在数学下，医学只做基础医学；三级只留热门切口。同一页用按钮切到教程，顶部写当前方向名，教程随选中的方向变。原有数学、人工智能、认知、经济、统计、系统教程挂到最近的二级；每个二级另有自己的 6 步教程，系统结构不再共用机器学习树。基础医学补了 6 步路径（`docs/paths/基础医学.md`），后两步不预写论文篇名。后端方向目录增加 `med`，任务/项目仍走原有方向代码。
+- 影响模块：web/js/directions.js、web/js/app.js、web/css/styles.css、web/index.html、server/planner.py、knowledge/build_paths.py、knowledge/paths.json、knowledge/direction_tree.json、docs/paths/基础医学.md
+- 决策来源：邬程灿
+- 登记人：助手
+
+## [2026-10-03] [FIX] 点老师名能打开老师页
+- 变更内容：老师页原先叠在节点页下面（z-index 更低），看起来像点不进去。老师页提到节点页上面，并加「返回」。老师名改成真正的按钮。
+- 影响模块：web/js/app.js、web/css/styles.css、web/index.html
+- 决策来源：邬程灿
+
 - 登记人：助手
 
 ## [2026-10-03] [BUILD] 当前学期公开课快照：每个节点本地检索，老师可点

@@ -1,0 +1,291 @@
+{
+  "id": "520.30",
+  "name": "系统结构",
+  "format": "tutorial-tree-v2",
+  "status": "ok",
+  "goal": "能把一小段高级语言落到指令，画出单周期数据通路并对照课上的 CPU lab/project 交记录，再用延迟/吞吐和冒险分析五级流水，最后交一份缓存命中/缺失表。不承诺流片、虚存页表实现或多核一致性协议。",
+  "sources": [
+    {
+      "title": "Home | CS61C Fall 2026 (UC Berkeley)",
+      "url": "https://cs61c.org/fa26/",
+      "kind": "syllabus",
+      "used_for": "主干顺序：RISC-V Basics/Data Transfer/Procedures/Formats（L9–14，Lab 3–4，HW4，Project 2）→ Single-Cycle Datapath/Control（L20–22，Lab 5，HW6，Project 3 CS61CPU）→ 5-Stage Pipeline（L23–25，HW7，Lab 6）→ Caches（L26–29，HW8）。并行与虚存在更后，不进主干。"
+    },
+    {
+      "title": "Policies | CS61C Fall 2026",
+      "url": "https://cs61c.org/fa26/policies/",
+      "kind": "syllabus",
+      "used_for": "作业形态：Homework、2-hour Lab、Project；每人交自己写的解。"
+    },
+    {
+      "title": "Syllabus | Computation Structures 6.004 (MIT OCW, Spring 2017)",
+      "url": "https://ocw.mit.edu/courses/6-004-computation-structures-spring-2017/pages/syllabus/",
+      "kind": "ocw",
+      "used_for": "课程目标：延迟/吞吐、流水线冒险、把 C 译成机器语言、完成并调试简单 RISC CPU、测量访存并调缓存参数。作业是 tutorial/worksheet + 7 个 lab + 学期末 design project。"
+    },
+    {
+      "title": "Calendar | Computation Structures 6.004 (MIT OCW, Spring 2017)",
+      "url": "https://ocw.mit.edu/courses/6-004-computation-structures-spring-2017/pages/calendar/",
+      "kind": "ocw",
+      "used_for": "课历：L9–12 von Neumann / Beta ISA / 汇编 / 把表达式译成指令 / 栈与过程；L13 Beta implementation；L14–15 caches；L16–17 Pipelining the Beta。L23 Parallel processing 不进主干。"
+    },
+    {
+      "title": "9 Designing an Instruction Set | 6.004 (MIT OCW)",
+      "url": "https://ocw.mit.edu/courses/6-004-computation-structures-spring-2017/pages/c9/",
+      "kind": "lecture_notes",
+      "used_for": "节点 isa：von Neumann、ALU/访存/分支/跳转指令；附 Instruction Set Architecture Worksheet"
+    },
+    {
+      "title": "13 Building the Beta | 6.004 (MIT OCW)",
+      "url": "https://ocw.mit.edu/courses/6-004-computation-structures-spring-2017/pages/c13/",
+      "kind": "lecture_notes",
+      "used_for": "节点 datapath：用积木搭 Beta；ALU、load/store、跳转与分支；附 Beta Implementation Worksheet"
+    },
+    {
+      "title": "15 Pipelining the Beta | 6.004 (MIT OCW)",
+      "url": "https://ocw.mit.edu/courses/6-004-computation-structures-spring-2017/pages/c15/",
+      "kind": "lecture_notes",
+      "used_for": "节点 pipeline：五级流水、data hazards、control hazards；附 Pipelining the Beta Worksheet"
+    },
+    {
+      "title": "14 Caches and the Memory Hierarchy | 6.004 (MIT OCW)",
+      "url": "https://ocw.mit.edu/courses/6-004-computation-structures-spring-2017/pages/c14/",
+      "kind": "lecture_notes",
+      "used_for": "节点 cache：locality、direct-mapped / associative caches、write strategies；附 Memory Hierarchy and Caches Worksheet"
+    },
+    {
+      "title": "《计算机系统结构》教学大纲（湖南人文科技学院）",
+      "url": "https://www.huhst.edu.cn/dzxx/info/1641/18471.htm",
+      "kind": "syllabus",
+      "used_for": "国内本科主干：先修组成原理；第二章数据表示/寻址/指令系统（含 2 学时实验）→ 第四章存储体系（Cache、替换、命中率，4 学时实验）→ 第五章流水（时空图、吞吐率/效率/加速比，4 学时实验）。第六、七章阵列/多处理机不进主干。"
+    },
+    {
+      "title": "5. What von Neumann Knew: Computer Architecture — Dive into Systems",
+      "url": "https://diveintosystems.org/book/C5-Arch/index.html",
+      "kind": "open_textbook",
+      "used_for": "ISA 与微结构的区分；RISC/CISC；存储程序的 von Neumann 模型"
+    },
+    {
+      "title": "5.2. The von Neumann Architecture — Dive into Systems",
+      "url": "https://diveintosystems.org/book/C5-Arch/von.html",
+      "kind": "open_textbook",
+      "used_for": "节点 isa/datapath：ALU、寄存器、PC/IR、总线；fetch–decode–execute–store"
+    },
+    {
+      "title": "5.5. Building a Processor: Putting It All Together — Dive into Systems",
+      "url": "https://diveintosystems.org/book/C5-Arch/cpu.html",
+      "kind": "open_textbook",
+      "used_for": "节点 datapath：ALU、寄存器堆、数据通路与控制通路"
+    },
+    {
+      "title": "11. Storage and the Memory Hierarchy — Dive into Systems",
+      "url": "https://diveintosystems.org/book/C11-MemHierarchy/index.html",
+      "kind": "open_textbook",
+      "used_for": "节点 cache：局部性；矩阵按行/按列访问的例子；可用 Cachegrind"
+    },
+    {
+      "title": "11.4. CPU Caches — Dive into Systems",
+      "url": "https://diveintosystems.org/book/C11-MemHierarchy/caching.html",
+      "kind": "open_textbook",
+      "used_for": "节点 cache：hit/miss、direct-mapped、tag/index/offset、组相联与 LRU"
+    },
+    {
+      "title": "Projects | nand2tetris",
+      "url": "https://www.nand2tetris.org/course",
+      "kind": "other",
+      "used_for": "Part I 顺序：Project 4 Machine Language 在 Project 5 Computer Architecture 之前；其后是汇编器，不含流水/缓存"
+    },
+    {
+      "title": "Project 04 | nand2tetris",
+      "url": "https://www.nand2tetris.org/project04",
+      "kind": "other",
+      "used_for": "节点 isa 的可交替卷：Mult.asm（R0*R1→R2）在 CPU Emulator 上跑通 Mult.tst"
+    },
+    {
+      "title": "Project 05 | nand2tetris",
+      "url": "https://www.nand2tetris.org/project05",
+      "kind": "other",
+      "used_for": "节点 datapath 的可交替卷：CPU.hdl / Computer.hdl，用 ComputerAdd/Max/Rect 测试"
+    },
+    {
+      "title": "18-447 Course Schedule, Spring 2024 (CMU)",
+      "url": "https://users.ece.cmu.edu/~jhoe/doku/doku.php?id=18-447_course_schedule_spring_2024",
+      "kind": "syllabus",
+      "used_for": "印证主干：Part 1 Microprocessors（RV32I ISA → Single-Cycle → Pipelining）→ Part 2 Memory（Caches）；Part 3 Parallel 不进本树"
+    }
+  ],
+  "trunk": ["isa", "datapath", "pipeline", "cache"],
+  "forks": [],
+  "join": null,
+  "nodes": {
+    "isa": {
+      "name": "指令集与机器语言",
+      "why": "61C 在 C 与数的表示之后，第 4–6 周连续讲 RISC-V Basics / Data Transfer / Procedures / Formats，并立刻放 Lab 3–4、HW4 和 Project 2。6.004 从 L9 von Neumann / Beta ISA 进到 L10–12 汇编、把表达式译成指令、栈与过程；可测量结果 14、18 是指令集问题和把简单 C 译成机器语言。湖南人文科技学院第二章就是数据表示、寻址与指令系统，并配 2 学时实验。nand2tetris 把 Machine Language 放在搭完整 Computer 之前。没有这一层，后面的 CPU 只是黑箱。",
+      "learn": [
+        "ISA：指令、编码、寄存器及其对处理器状态的效果（Dive into Systems 第 5 章）",
+        "RISC 指令的算术/逻辑、访存、分支与过程调用（61C L9–14；6.004 Unit 9）",
+        "把一小段 C 或表达式落到指令序列（6.004 L11，outcome 18）",
+        "调用时栈与寄存器约定留下什么（61C L12 Procedures；6.004 L12 Stacks and procedures）"
+      ],
+      "task": {
+        "kind": "problem_set",
+        "prompt": "对照 61C Homework 4: RISC-V 或 6.004 Unit 9 Instruction Set Architecture Worksheet，交：① 一段不超过 15 行的 C（或伪 C）译成的指令序列；② 一张表：每条指令的 opcode/寄存器或立即数字段（或 61C Instruction Formats 里对应的格式）；③ 一句调用返回后哪些寄存器/栈槽被改过。写清对照的是哪一讲或哪份 worksheet。",
+        "from": "CS61C HW4 RISC-V + L9–14；6.004 Unit 9 worksheet / outcomes 14、18",
+        "alternatives": [
+          {
+            "kind": "lab",
+            "prompt": "没有 RISC-V/Beta 工具时，对照 nand2tetris Project 4：写出 Mult.asm（R0*R1 写入 R2），在 CPU Emulator 上跑通 Mult.tst；交 .asm、测试通过截图或日志，并写清用了 Chapter 4 的哪一类指令。",
+            "from": "nand2tetris Project 04 Mult.asm / Mult.tst"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://cs61c.org/fa26/",
+          "title": "CS61C Fall 2026 schedule",
+          "use": "对照 L9–14 RISC-V 与 HW4 / Lab 3–4 / Project 2 的周次"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/6-004-computation-structures-spring-2017/pages/c9/",
+          "title": "6.004 Unit 9 Designing an Instruction Set",
+          "use": "读 von Neumann / ALU / 访存 / 分支，做 Instruction Set Architecture Worksheet"
+        },
+        {
+          "url": "https://diveintosystems.org/book/C5-Arch/index.html",
+          "title": "Dive into Systems 第 5 章：Computer Architecture",
+          "use": "先读 ISA 与微结构、RISC/CISC 这两段，再动手译指令"
+        },
+        {
+          "url": "https://www.nand2tetris.org/project04",
+          "title": "nand2tetris Project 04",
+          "use": "选 alternatives 时做 Mult.asm，用 CPU Emulator 跑 Mult.tst"
+        }
+      ]
+    },
+    "datapath": {
+      "name": "单周期数据通路",
+      "why": "61C 在指令格式和 CALL 之后进入 Intro to SDS / Combinational Logic / State，然后 L20–22 是 RISC-V Single-Cycle Datapath I/II 与 Control，同期 Lab 5 Logisim、HW6、Project 3 CS61CPU。6.004 L13 是 Building the Beta（ALU、load/store、跳转），outcome 15 是完成并调试给定 RISC 指令集的简单 CPU。Dive into Systems 5.2/5.5 把数据通路写成 ALU + 寄存器堆 + 总线，控制通路驱动 fetch–decode–execute。nand2tetris Project 5 在机器语言之后搭 CPU.hdl / Computer.hdl。先画出单周期，后面的五级流水才有可切的级。",
+      "learn": [
+        "von Neumann：处理/控制/存储与总线；PC 与 IR（Dive into Systems 5.2）",
+        "数据通路：ALU、寄存器堆、连接它们的总线（Dive into Systems 5.5）",
+        "单周期：一条指令在一个时钟里走完取指、译码、执行、访存/写回（61C L20–22；6.004 L13）",
+        "load/store 与分支如何改数据通路上的 MUX 选择（6.004 Unit 13 视频目录）"
+      ],
+      "task": {
+        "kind": "lab",
+        "prompt": "对照 61C Lab 5 Logisim / Project 3 CS61CPU 或 6.004 Unit 13 Beta Implementation Worksheet，交：① 一张单周期数据通路图（标出 PC、IR 或指令存储器、寄存器堆、ALU、数据存储器和关键 MUX）；② 任选 add、lw/load、beq/branch 三条，各画一条「这一拍哪些控制信号被置位」的表；③ 若做了 Logisim/HDL，附能跑通的截图或测试名。",
+        "from": "CS61C Lab 5 / Project 3；6.004 Unit 13 worksheet / outcome 15",
+        "alternatives": [
+          {
+            "kind": "project",
+            "prompt": "对照 nand2tetris Project 5：实现 CPU.hdl（建议按书中 Figure 5.9），用 CPU.tst 测过后再接到 Computer.hdl，至少跑通 ComputerAdd.tst 或 ComputerMax.tst。交 HDL、测试通过记录，并在图上标出 ALU 与 A/D 寄存器。",
+            "from": "nand2tetris Project 05 CPU.hdl / Computer.hdl"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://cs61c.org/fa26/",
+          "title": "CS61C Fall 2026 schedule",
+          "use": "对照 L20–22 Single-Cycle Datapath/Control 与 Lab 5 / HW6 / Project 3"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/6-004-computation-structures-spring-2017/pages/c13/",
+          "title": "6.004 Unit 13 Building the Beta",
+          "use": "读 Building Blocks / ALU / Load and Store，做 Beta Implementation Worksheet"
+        },
+        {
+          "url": "https://diveintosystems.org/book/C5-Arch/cpu.html",
+          "title": "Dive into Systems 5.5 Building a Processor",
+          "use": "对照 ALU 与寄存器堆如何接成数据通路来画你的图"
+        },
+        {
+          "url": "https://www.nand2tetris.org/project05",
+          "title": "nand2tetris Project 05",
+          "use": "选 alternatives 时按页上的顺序：先测 CPU，再测 Computer"
+        }
+      ]
+    },
+    "pipeline": {
+      "name": "流水线：延迟、吞吐与冒险",
+      "why": "61C L23–25 连续三讲 RISC-V 5-Stage Pipeline，HW7 同名，Lab 6 是 CPU, Pipelining。6.004 先在 L7 用 throughput and latency 讲流水，再在 L16–17 把 Beta 切成五级并处理 data/control hazards；outcome 2、3、13 就是延迟/吞吐、指出冒险、把组合电路流水以提高吞吐。湖南人文科技学院第五章要求画时空图并计算吞吐率、效率、加速比，配 4 学时实验。两边都把冒险放在「已经有一条能跑的数据通路」之后。",
+      "learn": [
+        "延迟与吞吐：流水如何提高吞吐、为何单条指令延迟不一定变短（6.004 L7 / outcome 2、13）",
+        "经典五级：IF–RF–ALU–MEM–WB（6.004 Unit 15；61C 5-Stage Pipeline）",
+        "数据冒险与转发/停顿（6.004 15.2.3 Data Hazards）",
+        "控制冒险：分支如何冲刷或插入气泡（6.004 15.2.4 Control Hazards；outcome 3）"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "对照 6.004 Pipelining the Beta Worksheet 或 61C Homework 7: RISC-V 5-Stage Pipeline，交：① 把上一节点的单周期图切成五级，标出级间寄存器；② 一组至少 5 条指令的流水线图（哪一拍在哪一级）；③ 指出一种数据冒险和一种控制冒险，并写你用转发、停顿还是插入 NOP 处理。数字只来自你的图，不编基准分。",
+        "from": "6.004 Unit 15 worksheet；CS61C HW7 / Lab 6"
+      },
+      "resources": [
+        {
+          "url": "https://ocw.mit.edu/courses/6-004-computation-structures-spring-2017/pages/c15/",
+          "title": "6.004 Unit 15 Pipelining the Beta",
+          "use": "读 Basic 5-Stage Pipeline / Data Hazards / Control Hazards，做该单元 Worksheet"
+        },
+        {
+          "url": "https://cs61c.org/fa26/",
+          "title": "CS61C Fall 2026 schedule",
+          "use": "对照 L23–25 与 HW7、Lab 6: CPU, Pipelining"
+        },
+        {
+          "url": "https://www.huhst.edu.cn/dzxx/info/1641/18471.htm",
+          "title": "湖南人文科技学院《计算机系统结构》大纲",
+          "use": "第五章：用时空图算吞吐率/效率/加速比，作为同一份图旁的计算"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/6-004-computation-structures-spring-2017/pages/syllabus/",
+          "title": "6.004 Syllabus",
+          "use": "核对照 outcome 2、3、13 来写冒险与吞吐，不要写成「理解了流水」"
+        }
+      ]
+    },
+    "cache": {
+      "name": "缓存与存储层次",
+      "why": "61C L26–29 是 Caches I–IV（从 Performance 讲到 IV），HW8 是 Hardware Performance, Caching。6.004 L14–15 是 multilevel memories 与 cache design；outcome 16 是测量访存并调缓存参数。湖南人文科技学院第四章是 Cache 映像、替换（LRU/FIFO/OPT）和命中率，配 4 学时实验。Dive into Systems 第 11 章用按行/按列访问说明局部性，11.4 给出 hit/miss、direct-mapped、tag/index/offset。虚存与并行在各课更后或已有子节点，本步只交缓存表。",
+      "learn": [
+        "存储层次与局部性：时间局部、空间局部（6.004 14.2.5；Dive into Systems 第 11 章）",
+        "命中与缺失；缺失后把块装进缓存（Dive into Systems 11.4）",
+        "直接映像：地址拆成 tag / index / offset（6.004 14.2.7；Dive into Systems 11.4.1）",
+        "组相联与替换：LRU 等（湖南人文科技学院第四章；Dive into Systems 11.4 后半）"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "对照 6.004 Memory Hierarchy and Caches Worksheet 或 61C Homework 8: Hardware Performance, Caching，交一份访存练习：给出一组访问地址、一种缓存配置（容量、块大小、直接映像或几路组相联）、逐次命中/缺失表，并写一句「改块大小、相联度或替换策略会改变哪一种缺失」。可用 Dive into Systems 第 11 章矩阵例子或 Cachegrind 做同一组对比，但必须写清配置数字来自哪一页。",
+        "from": "6.004 Unit 14 worksheet / outcome 16；CS61C HW8；Dive into Systems 第 11 章"
+      },
+      "resources": [
+        {
+          "url": "https://ocw.mit.edu/courses/6-004-computation-structures-spring-2017/pages/c14/",
+          "title": "6.004 Unit 14 Caches and the Memory Hierarchy",
+          "use": "读 Locality / Direct-mapped / Associative，做 Memory Hierarchy and Caches Worksheet"
+        },
+        {
+          "url": "https://cs61c.org/fa26/",
+          "title": "CS61C Fall 2026 schedule",
+          "use": "对照 L26–29 Caches 与 HW8，不要做到后面的 Parallelism / Virtual Memory 才停"
+        },
+        {
+          "url": "https://diveintosystems.org/book/C11-MemHierarchy/caching.html",
+          "title": "Dive into Systems 11.4 CPU Caches",
+          "use": "按 tag/index/offset 拆你给出的地址，核对命中/缺失表"
+        },
+        {
+          "url": "https://www.huhst.edu.cn/dzxx/info/1641/18471.htm",
+          "title": "湖南人文科技学院《计算机系统结构》大纲",
+          "use": "第四章：直接/组相联映像与 LRU/FIFO/OPT，用来解释你改的那一个参数"
+        }
+      ]
+    }
+  },
+  "conflicts": [
+    "6.004 从晶体管/门和通用流水（L7）往上建，把 caches（L14–15）放在 Pipelining the Beta（L16–17）之前；61C 从 C/数的表示进到 RISC-V，再 SDS，再单周期、五级流水，最后才是 Caches；CMU 18-447 也是 ISA → Single-Cycle → Pipeline → Caches。湖南人文科技学院先第四章存储体系、再第五章流水。蒸馏取两边都有、且 61C/18-447 用来「先有一条能跑的 CPU」的顺序：指令 → 单周期数据通路 → 五级流水 → 缓存。晶体管级 CMOS 只留在 6.004 前半，不进树。",
+    "61C 在 Caches 之后还有 Parallelism I–V（Amdahl、SIMD、TLP）和 Virtual Memory；6.004 L18 起是虚存、设备、进程通信，L23 才是 Parallel processing；湖南人文科技学院第六、七章是阵列处理机与多处理机；18-447 把 Parallel 写成 Part 3。产品树上网络、并行是子节点，本文件不展开成网络或 HPC 课。",
+    "nand2tetris 在 Project 5 之后进入汇编器/VM/编译，没有五级流水或缓存；这两步只作 isa/datapath 的交替交卷，不把后半软件栈写进主干。"
+  ],
+  "missing": "",
+  "checked_at": "2026-10-04"
+}

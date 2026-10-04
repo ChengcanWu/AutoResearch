@@ -1,0 +1,522 @@
+{
+  "id": "790.29",
+  "name": "国际经济",
+  "gb_name": "国际经济学",
+  "format": "tutorial-tree-v2",
+  "status": "ok",
+  "goal": "先修微观与宏观后，能分清国际贸易与国际金融两支；选一条交卷：用李嘉图/要素禀赋与关税局部均衡做贸易习题，或用国际收支与利率平价/AA–DD 做开放宏观习题。不承诺新的贸易或汇率研究。",
+  "sources": [
+    {
+      "title": "Syllabus | International Trade | 14.54 (MIT OCW, Fall 2016)",
+      "url": "https://ocw.mit.edu/courses/14-54-international-trade-fall-2016/pages/syllabus/",
+      "kind": "ocw",
+      "used_for": "本科贸易课；先修 14.01 微观与 14.02 宏观；过关是 midterm + final + problem sets"
+    },
+    {
+      "title": "Calendar | International Trade | 14.54 (MIT OCW, Fall 2016)",
+      "url": "https://ocw.mit.edu/courses/14-54-international-trade-fall-2016/pages/calendar/",
+      "kind": "ocw",
+      "used_for": "贸易主干顺序：Introduction → Ricardian → Specific Factors → Heckscher-Ohlin → Increasing Returns → Trade Policy；课历止于要素流动与 offshoring，不含汇率/国际收支"
+    },
+    {
+      "title": "Readings | International Trade | 14.54 (MIT OCW, Fall 2016)",
+      "url": "https://ocw.mit.edu/courses/14-54-international-trade-fall-2016/pages/readings/",
+      "kind": "ocw",
+      "used_for": "指定 Krugman–Obstfeld–Melitz：导论 Ch.1–2；比较优势与标准模型；技术/禀赋/规模 Ch.3–5 与 7；贸易政策 Ch.9–10"
+    },
+    {
+      "title": "Assignments | International Trade | 14.54 (MIT OCW, Fall 2016)",
+      "url": "https://ocw.mit.edu/courses/14-54-international-trade-fall-2016/pages/assignments/",
+      "kind": "ocw",
+      "used_for": "公开 Problem Set 1–3（2006 Lorenzoni 版）；贸易轨可选用的交卷页"
+    },
+    {
+      "title": "Major Requirements | UC Berkeley Economics",
+      "url": "https://econ.berkeley.edu/undergraduate/program/major-requirements",
+      "kind": "syllabus",
+      "used_for": "先修 100A/100B 后再选高年级选修；C181 International Trade 与 182 International Monetary Economics 并列在同一选修清单，互不作为先修"
+    },
+    {
+      "title": "International Trade, 2026 Fall ECON C181 (UC Berkeley)",
+      "url": "https://econ.berkeley.edu/course/2026-fall-econ-c181-001-lec-001",
+      "kind": "syllabus",
+      "used_for": "C181 课程说明：国际贸易理论及其对关税保护的应用；与 182 分开开课"
+    },
+    {
+      "title": "Economics 181 International Trade Fall 2006 (Harrison, UC Berkeley)",
+      "url": "https://eml.berkeley.edu/~webfac/harrison/e181_f06/e181.shtml",
+      "kind": "syllabus",
+      "used_for": "本科贸易课主页：讲义 + Assignments 1–5 + 期中；与 182 并行的另一门课"
+    },
+    {
+      "title": "Lecture #1 Economics 181 International Trade Introduction (Harrison, Berkeley)",
+      "url": "https://eml.berkeley.edu/~webfac/harrison/e181_s04/181s04lectnts1.pdf",
+      "kind": "lecture_notes",
+      "used_for": "定义国际贸易；全球化事实；当堂引入李嘉图：玫瑰/电脑与酒/奶酪单位劳动投入、机会成本与贸易增益"
+    },
+    {
+      "title": "2021 Fall ECON 182 International Monetary Economics (UC Berkeley Class Search)",
+      "url": "https://classes.berkeley.edu/content/2021-Fall-ECON-182-001-LEC-001",
+      "kind": "syllabus",
+      "used_for": "182 课程说明：国际收支、固定/浮动下的贸易余额与收入、开放经济货币与价格、资本流动与汇率决定；不含贸易理论"
+    },
+    {
+      "title": "Econ 182 International Monetary Economics Spring 2006 (Obstfeld, UC Berkeley)",
+      "url": "https://eml.berkeley.edu/~obstfeld/182_sp06/182_s06.shtml",
+      "kind": "syllabus",
+      "used_for": "本科国际货币课：6 次 problem set + 期末；与 181 并行"
+    },
+    {
+      "title": "Chapter 12 National Income Accounting and the Balance of Payments (Obstfeld 182 slides)",
+      "url": "https://eml.berkeley.edu/~obstfeld/182_sp06/chapter12.pdf",
+      "kind": "lecture_notes",
+      "used_for": "金融轨开端：国民收入账户、储蓄与经常账户、国际收支如何加总"
+    },
+    {
+      "title": "Economics 182 Problem Set 1 (Obstfeld, Spring 2006)",
+      "url": "https://eml.berkeley.edu/~obstfeld/182_sp06/ps1.pdf",
+      "kind": "other",
+      "used_for": "金融轨交卷：P1–4 国民收入与 BoP；P5–7 汇率、套保与利率平价"
+    },
+    {
+      "title": "International Trade: Theory and Policy — Open Textbook Library (Suranovic)",
+      "url": "https://open.umn.edu/opentextbooks/textbooks/19",
+      "kind": "open_textbook",
+      "used_for": "一学期贸易教材目录：Ch.2 Ricardo → Ch.5 H-O → Ch.7 贸易政策；评述写明面向 one-semester international trade"
+    },
+    {
+      "title": "International Trade: Theory and Policy — Table of Contents (Saylor / Suranovic)",
+      "url": "https://saylordotorg.github.io/text_international-trade-theory-and-policy/index.html",
+      "kind": "open_textbook",
+      "used_for": "贸易书章节顺序与节标题；与金融书分立"
+    },
+    {
+      "title": "Chapter 1 Introductory Trade Issues: History, Institutions, and Legal Framework (Suranovic)",
+      "url": "https://saylordotorg.github.io/text_international-trade-theory-and-policy/s04-introductory-trade-issues-hist.html",
+      "kind": "open_textbook",
+      "used_for": "学习目标含 distinction between international trade and international finance；正文：two broad subfields；GATT/WTO；出口/GDP 与 FDI 图"
+    },
+    {
+      "title": "Chapter 2 The Ricardian Theory of Comparative Advantage (Suranovic)",
+      "url": "https://saylordotorg.github.io/text_international-trade-theory-and-policy/s05-the-ricardian-theory-of-compar.html",
+      "kind": "open_textbook",
+      "used_for": "贸易轨第一个正式模型：比较优势、PPF、实际工资与总福利"
+    },
+    {
+      "title": "A Ricardian Numerical Example (Suranovic §2.6)",
+      "url": "https://saylordotorg.github.io/text_international-trade-theory-and-policy/s05-06-a-ricardian-numerical-example.html",
+      "kind": "open_textbook",
+      "used_for": "奶酪/葡萄酒数值例子；节末 Exercise：肥皂/牙刷两国 PPF、专业化、自给点与贸易条件"
+    },
+    {
+      "title": "Chapter 5 The Heckscher-Ohlin (Factor Proportions) Model (Suranovic)",
+      "url": "https://saylordotorg.github.io/text_international-trade-theory-and-policy/s08-the-heckscher-ohlin-factor-pro.html",
+      "kind": "open_textbook",
+      "used_for": "H-O 假定、Rybczynski、Stolper-Samuelson、要素价格均等、Specific Factor；节末 Jeopardy 习题"
+    },
+    {
+      "title": "Chapter 7 Trade Policy Effects with Perfectly Competitive Markets (Suranovic)",
+      "url": "https://saylordotorg.github.io/text_international-trade-theory-and-policy/s10-trade-policy-effects-with-perf.html",
+      "kind": "open_textbook",
+      "used_for": "小国/大国、关税与配额局部均衡、福利；开篇 Exercise 区分 large/small 与 partial equilibrium"
+    },
+    {
+      "title": "International Finance: Theory and Policy — Table of Contents (Saylor / Suranovic)",
+      "url": "https://saylordotorg.github.io/text_international-finance-theory-and-policy/index.html",
+      "kind": "open_textbook",
+      "used_for": "一学期金融教材：Ch.2 国际收支 → Ch.4–6 外汇/IRP/PPP → Ch.9 AA-DD → Ch.10–11 浮动/固定政策；与贸易书并行"
+    },
+    {
+      "title": "Chapter 2 National Income and the Balance of Payments Accounts (Suranovic)",
+      "url": "https://saylordotorg.github.io/text_international-finance-theory-and-policy/s05-national-income-and-the-balanc.html",
+      "kind": "open_textbook",
+      "used_for": "GDP/GNP、恒等式 GDP=C+I+G+EX-IM、BoP 定义；节末 Exercises"
+    },
+    {
+      "title": "Chapter 4 Foreign Exchange Markets and Rates of Return (Suranovic)",
+      "url": "https://saylordotorg.github.io/text_international-finance-theory-and-policy/s07-foreign-exchange-markets-and-r.html",
+      "kind": "open_textbook",
+      "used_for": "外汇参与者、汇率两种标价、国际投资收益率；节末 Jeopardy 与收益率计算"
+    },
+    {
+      "title": "Chapter 9 The AA-DD Model (Suranovic)",
+      "url": "https://saylordotorg.github.io/text_international-finance-theory-and-policy/s12-the-aa-dd-model.html",
+      "kind": "open_textbook",
+      "used_for": "开放宏观收束：AA/DD、超均衡、iso-CAB；节末 Jeopardy；写明货币/财政支出可用 iso-CAB 跟踪经常账户"
+    },
+    {
+      "title": "国际经济学课程教学大纲（兰州财经大学国际经济与贸易学院）",
+      "url": "https://ieti.lzufe.edu.cn/info/1109/1572.htm",
+      "kind": "syllabus",
+      "used_for": "一门课拆成微观（贸易）与宏观（金融）两大部分：绪论 → 比较优势 → H-O/特定要素 → 贸易政策 → 下篇国际收支、汇率、IS-LM-BP/蒙代尔—弗莱明；闭卷考核"
+    },
+    {
+      "title": "Econ 3500-090 International Economics Spring 2026 (University of Utah)",
+      "url": "https://class-tools.app.utah.edu/syllabus/1264/8955/syllabus+Econ+3500-090+Spring+2026.pdf",
+      "kind": "syllabus",
+      "used_for": "一门课两段：Part I 贸易（Krugman Ch.2–5、7、10、12）期中；Part 2 开放宏观（Ch.13–15、19–20、22）；每周 quiz + analytical homework"
+    },
+    {
+      "title": "对外经济贸易大学本科培养方案（2022）国际经济与贸易辅修",
+      "url": "https://iss.uibe.edu.cn/AdminUI/UploadFiles/files/202211231426215933.pdf",
+      "kind": "syllabus",
+      "used_for": "国际经济学拆成（一）（二）两门，分在第 4、5 学期；先修微观、宏观。作顺序冲突：连续两学期而非并行选修"
+    }
+  ],
+  "trunk": ["prereq", "intro"],
+  "forks": [
+    {
+      "id": "trade-or-finance",
+      "after": "intro",
+      "pick": 1,
+      "why": "Berkeley 专业选修清单把 Economics C181 International Trade 与 Economics 182 International Monetary Economics 并列，互不作为先修；C181 页写「理论及其对关税保护的应用」，182 目录写国际收支、固定/浮动下的收入与汇率，不含贸易模型。MIT 14.54 课历从 Introduction 到 Trade Policy / factor mobility，没有汇率或国际收支。Suranovic 把同一套本科内容写成两本一学期书：International Trade: Theory and Policy 与 International Finance: Theory and Policy。本科入口选一条轨交卷即可。",
+      "source_urls": [
+        "https://econ.berkeley.edu/undergraduate/program/major-requirements",
+        "https://econ.berkeley.edu/course/2026-fall-econ-c181-001-lec-001",
+        "https://classes.berkeley.edu/content/2021-Fall-ECON-182-001-LEC-001",
+        "https://ocw.mit.edu/courses/14-54-international-trade-fall-2016/pages/calendar/",
+        "https://saylordotorg.github.io/text_international-trade-theory-and-policy/index.html",
+        "https://saylordotorg.github.io/text_international-finance-theory-and-policy/index.html"
+      ],
+      "branches": [
+        {
+          "id": "trade",
+          "name": "国际贸易",
+          "nodes": ["ricardo", "endowments", "policy"]
+        },
+        {
+          "id": "finance",
+          "name": "国际金融",
+          "nodes": ["bop", "fx", "openmacro"]
+        }
+      ]
+    }
+  ],
+  "join": null,
+  "nodes": {
+    "prereq": {
+      "name": "先修：微观与宏观",
+      "why": "MIT 14.54 syllabus 写明 14.01 Principles of Microeconomics 与 14.02 Principles of Macroeconomics 是先修。Berkeley 专业先完成 100A/100B 再选 C181/182。兰州大纲先行课含西方经济学；对外经贸把微观、宏观排在国际经济学（一）（二）之前。贸易图要用 PPF，金融恒等式要用开放经济宏观。",
+      "learn": [
+        "生产可能性边界与机会成本",
+        "封闭经济一般均衡（供给/无差异曲线）",
+        "国民收入恒等式 GDP = C + I + G + EX - IM",
+        "为何贸易课先要微观、金融课还要宏观"
+      ],
+      "task": {
+        "kind": "writeup",
+        "prompt": "对照 14.54 syllabus 的 Prerequisites、Berkeley Major Requirements 的 100A/100B、兰州大纲先行课，交一页核验：列出自己已修的微观工具（PPF、机会成本、一般均衡）与宏观恒等式，每条抄来源页上的原句或课程名。缺的条目补画一张封闭经济 PPF + 无差异曲线均衡图（兰州第二章「主要分析工具」）。",
+        "from": "14.54 Syllabus Prerequisites；Berkeley Major Requirements；兰州财经大学《国际经济学》大纲先行课与第二章"
+      },
+      "resources": [
+        {
+          "url": "https://ocw.mit.edu/courses/14-54-international-trade-fall-2016/pages/syllabus/",
+          "title": "14.54 Syllabus — Prerequisites",
+          "use": "先读 Prerequisites：14.01 与 14.02"
+        },
+        {
+          "url": "https://econ.berkeley.edu/undergraduate/program/major-requirements",
+          "title": "Berkeley Economics Major Requirements",
+          "use": "核对自己是否已修 100A/100B，再进 C181 或 182"
+        },
+        {
+          "url": "https://ieti.lzufe.edu.cn/info/1109/1572.htm",
+          "title": "兰州财经大学国际经济学大纲",
+          "use": "看先行课与第二章 PPF / 无差异曲线 / 一般均衡"
+        }
+      ]
+    },
+    "intro": {
+      "name": "国际经济学分两支",
+      "why": "Suranovic 贸易书第 1 章学习目标写 Learn the distinction between international trade and international finance，正文：There are two broad subfields within the discipline: international trade and international finance。MIT 14.54 第 1 讲 Introduction，Readings 指定 KOM Ch.1–2。犹他 Econ 3500 Module 1 是 World Trade: an Overview。兰州绪论并列「国际贸易理论的发展」与「国际金融理论的发展」。Berkeley 181 第 1 讲先定义贸易与全球化事实。",
+      "learn": [
+        "国际经济学的两个子领域：贸易与金融",
+        "世界出口/GDP、FDI 存量数量级（书中图）",
+        "GATT 与 WTO",
+        "贸易用微观模型看谁出口什么；金融看汇率与国际收支"
+      ],
+      "task": {
+        "kind": "reading",
+        "prompt": "读 Suranovic 贸易书第 1 章「What Is International Economics?」到 GATT/WTO，以及 Berkeley 181 Lecture 1 的定义与贸易趋势。交 800 字笔记：（1）抄下 two broad subfields 原句并各用一句话对照贸易书与金融书目录；（2）用第 1 章世界出口/GDP 或 FDI 图做一个数量级表，写图号与书中给出的大约百分比；（3）用 Lecture 1 的定义写「国际贸易研究什么」。",
+        "from": "Suranovic International Trade Ch.1；Berkeley Econ 181 Lecture 1；14.54 Readings topic 1"
+      },
+      "resources": [
+        {
+          "url": "https://saylordotorg.github.io/text_international-trade-theory-and-policy/s04-introductory-trade-issues-hist.html",
+          "title": "Suranovic Ch.1 Introductory Trade Issues",
+          "use": "读 trade vs finance 区分、出口/GDP 与 FDI 图、GATT/WTO"
+        },
+        {
+          "url": "https://eml.berkeley.edu/~webfac/harrison/e181_s04/181s04lectnts1.pdf",
+          "title": "Berkeley Econ 181 Lecture 1",
+          "use": "抄下课程对 international trade 的定义与贸易流量趋势问句"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/14-54-international-trade-fall-2016/pages/readings/",
+          "title": "14.54 Readings — Introduction",
+          "use": "对照 topic 1：KOM Chapters 1–2"
+        },
+        {
+          "url": "https://class-tools.app.utah.edu/syllabus/1264/8955/syllabus+Econ+3500-090+Spring+2026.pdf",
+          "title": "Utah Econ 3500 syllabus",
+          "use": "看 Module 1 World Trade: an Overview 在课历最前"
+        }
+      ]
+    },
+    "ricardo": {
+      "name": "李嘉图与比较优势",
+      "why": "犹他 Module 2 紧接 overview 就是 The Ricardian Model。Suranovic 第 2 章是第一个正式模型。MIT 课历 ses 8–9 为 Ricardian Trade Model。Berkeley 181 Lecture 1 后半已用单位劳动投入算贸易增益。兰州在分析方法之后讲绝对/相对优势。",
+      "learn": [
+        "绝对优势与比较优势",
+        "单位劳动投入与 PPF 斜率（机会成本）",
+        "专业化提高世界产出",
+        "能使双方都更好的贸易条件"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "做 Suranovic §2.6 节末 Exercise：两国（美国、欧盟）肥皂与牙刷，生产率 aLS_US=2、aLS_E=4、aLT_US=8、aLT_E=4，劳动 3200 与 4000。（a）画两国 PPF；（b）按比较优势专业化后的产量；（c）选自给点使世界产量低于专业化；（d）给出一组贸易条件使两国两种商品消费都高于自给。每问写单位劳动投入与机会成本。",
+        "from": "Suranovic International Trade §2.6 A Ricardian Numerical Example — Exercise",
+        "alternatives": [
+          {
+            "kind": "exercise",
+            "prompt": "重做 Berkeley 181 Lecture 1 的两组例子：玫瑰/电脑（美国 vs 哥伦比亚）与酒/奶酪单位劳动投入表，交重排生产后的世界增益表，并写清机会成本。",
+            "from": "Berkeley Econ 181 Lecture 1 — Gains from Trade Example #1 and #2"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://saylordotorg.github.io/text_international-trade-theory-and-policy/s05-06-a-ricardian-numerical-example.html",
+          "title": "Suranovic §2.6 Ricardian Numerical Example",
+          "use": "先跟奶酪/葡萄酒例子，再做节末肥皂/牙刷四问"
+        },
+        {
+          "url": "https://saylordotorg.github.io/text_international-trade-theory-and-policy/s05-the-ricardian-theory-of-compar.html",
+          "title": "Suranovic Ch.2 Ricardian Theory",
+          "use": "读假定、PPF、绝对/比较优势定义"
+        },
+        {
+          "url": "https://eml.berkeley.edu/~webfac/harrison/e181_s04/181s04lectnts1.pdf",
+          "title": "Berkeley Econ 181 Lecture 1",
+          "use": "对照当堂李嘉图数例（备选交卷）"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/14-54-international-trade-fall-2016/pages/calendar/",
+          "title": "14.54 Calendar — Ricardian",
+          "use": "看 ses 8–9 与 midterm 之前的位置"
+        }
+      ]
+    },
+    "endowments": {
+      "name": "特定要素与 H–O",
+      "why": "犹他 Module 3 Specific Factors、Module 4 Heckscher-Ohlin。MIT ses 11–15 先 Specific Factors 再 Heckscher-Ohlin。Suranovic 第 5 章 H-O，并含 Specific Factor 节。兰州先要素禀赋（H–O、SS、要素价格均等）再特定要素。模型从「技术不同」换成「要素比例不同」。",
+      "learn": [
+        "要素密集度与要素丰裕",
+        "Heckscher-Ohlin 定理",
+        "Stolper-Samuelson 与 Rybczynski",
+        "要素价格均等",
+        "特定要素与短期收入分配"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "做 Suranovic 第 5 章开篇 Jeopardy（资本租金、资本劳动比、资本密集型、产业如何不同、国家如何不同、H-O / Stolper-Samuelson / Rybczynski / 要素价格均等定理名称）。再画一张 2×2 H-O 的 PPF，用一句话对照章内定义写出贸易模式。",
+        "from": "Suranovic International Trade Ch.5 — Exercise (Jeopardy) + H-O assumptions / PPF",
+        "alternatives": [
+          {
+            "kind": "problem_set",
+            "prompt": "打开 14.54 Assignments 的 Problem Set 1–3，选一套与 Specific Factors 或 H-O 对应的题目（课历 ses 11–15）自己写完整步骤后上交；写明用的是哪一套 PDF。",
+            "from": "14.54 Assignments Problem Sets 1–3；Calendar ses 11–15"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://saylordotorg.github.io/text_international-trade-theory-and-policy/s08-the-heckscher-ohlin-factor-pro.html",
+          "title": "Suranovic Ch.5 Heckscher-Ohlin",
+          "use": "读假定与四个定理，做 Jeopardy，画 PPF"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/14-54-international-trade-fall-2016/pages/calendar/",
+          "title": "14.54 Calendar — Specific Factors / H-O",
+          "use": "对照 ses 11–15 的顺序"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/14-54-international-trade-fall-2016/pages/assignments/",
+          "title": "14.54 Assignments",
+          "use": "备选：下载 Problem Set PDF 做禀赋模型题"
+        },
+        {
+          "url": "https://class-tools.app.utah.edu/syllabus/1264/8955/syllabus+Econ+3500-090+Spring+2026.pdf",
+          "title": "Utah Econ 3500 — Modules 3–4",
+          "use": "看 Specific Factors 与 H-O 紧接 Ricardo"
+        }
+      ]
+    },
+    "policy": {
+      "name": "关税、配额与保护",
+      "why": "MIT ses 20–22 在模型之后是 Trade Policy；Readings topic 4 指定 KOM Ch.9–10。犹他 Module 6–7 是政治经济与政策争议。Suranovic 第 7 章在理论之后做完全竞争下的关税/配额。兰州「贸易政策的经济效应」分小国/大国关税与配额。Berkeley C181 课程说明点明 applications to tariff protection。贸易轨收到政策图即可停。",
+      "learn": [
+        "小国与大国假设",
+        "进口关税的价格与福利（CS/PS/关税收入/无谓损失）",
+        "配额与关税的比较",
+        "保护的政治经济学（来源把政策放在模型之后）"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "做 Suranovic 第 7 章开篇 Exercise（large/small country、同质商品、partial equilibrium 四问）。再画小国进口关税的供给–需求图，标出消费者剩余、生产者剩余、关税收入、无谓损失；用一句话写大国关税如何可能改善贸易条件（对照章内 large country 节）。",
+        "from": "Suranovic International Trade Ch.7 — Exercise + Import Tariffs: Small Country Welfare Effects"
+      },
+      "resources": [
+        {
+          "url": "https://saylordotorg.github.io/text_international-trade-theory-and-policy/s10-trade-policy-effects-with-perf.html",
+          "title": "Suranovic Ch.7 Trade Policy Effects",
+          "use": "先做 Jeopardy，再画小国关税福利图"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/14-54-international-trade-fall-2016/pages/readings/",
+          "title": "14.54 Readings — Trade Policy",
+          "use": "对照 topic 4：KOM Chapters 9–10"
+        },
+        {
+          "url": "https://econ.berkeley.edu/course/2026-fall-econ-c181-001-lec-001",
+          "title": "Berkeley ECON C181",
+          "use": "核对本门课停在 tariff protection 应用"
+        },
+        {
+          "url": "https://ieti.lzufe.edu.cn/info/1109/1572.htm",
+          "title": "兰州大纲 — 贸易政策",
+          "use": "对照小国/大国关税与配额效应"
+        }
+      ]
+    },
+    "bop": {
+      "name": "国民收入与国际收支",
+      "why": "犹他期中后 Module 9 是 National Accounting and the Balance of Payments。Suranovic 金融书第 2 章把 GDP 与 BoP 当作金融课的 prime variables。Berkeley 182 目录第一句是 The balance of payments；Obstfeld 讲义第 12 章 + PS1 P1–4。兰州下篇第九章先讲国际收支平衡表。",
+      "learn": [
+        "GDP 与 GNP",
+        "恒等式 GDP = C + I + G + EX - IM",
+        "经常账户、金融账户与官方储备",
+        "经常账户与储蓄—投资、双子赤字"
+      ],
+      "task": {
+        "kind": "problem_set",
+        "prompt": "做 Berkeley Econ 182 Problem Set 1 的 Problem 1–4：用给定 GDP/C/I/G/EX 求进口与经常账户及储蓄率；给三笔交易做贷记/借记分类；回答经常账户盈余能否与国际收支赤字并存并给数字例子；算 Kumar 的官方结算余额与储备变动。手写步骤，数字用来源题目。",
+        "from": "Berkeley Econ 182 Spring 2006 Problem Set 1, Problems 1–4",
+        "alternatives": [
+          {
+            "kind": "exercise",
+            "prompt": "做 Suranovic 金融书第 2 章节末 Exercises：Jeopardy（GDP/GNP、收入 vs 财富、实际 GDP、人均）+ 列出 GDP 不宜作福利指标的五条理由 + 简评 domestic spending / national wealth 两句。",
+            "from": "Suranovic International Finance Ch.2 — Exercises"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://eml.berkeley.edu/~obstfeld/182_sp06/ps1.pdf",
+          "title": "Econ 182 Problem Set 1",
+          "use": "做 P1–4 国民收入与 BoP"
+        },
+        {
+          "url": "https://eml.berkeley.edu/~obstfeld/182_sp06/chapter12.pdf",
+          "title": "Obstfeld 182 Chapter 12 slides",
+          "use": "对照国民收入账户与 BoP 如何加总"
+        },
+        {
+          "url": "https://saylordotorg.github.io/text_international-finance-theory-and-policy/s05-national-income-and-the-balanc.html",
+          "title": "Suranovic Finance Ch.2",
+          "use": "读恒等式与 BoP 定义；备选做节末题"
+        }
+      ]
+    },
+    "fx": {
+      "name": "汇率、收益与平价",
+      "why": "犹他 Module 10 是 Foreign Exchange Rates: An Asset Approach，Module 11 是 Money, Interest Rates, and Exchange Rates。Suranovic 金融书第 4 章外汇与收益率，目录随后是利率平价与购买力平价。Berkeley 182 PS1 P5–7 已是汇率预期、套保与 UIP。兰州第十章重点是 PPP、利率平价、货币模型。",
+      "learn": [
+        "汇率两种标价与升贬值",
+        "经常账户交易者 vs 金融账户投资者",
+        "国际投资收益率",
+        "无抛补利率平价",
+        "购买力平价（相对/绝对）"
+      ],
+      "task": {
+        "kind": "problem_set",
+        "prompt": "做 Berkeley Econ 182 Problem Set 1 的 Problem 5–7：延期收款与汇率预期、远期套保、本币升值对进口中间品利润、美元贬值与外包；画外汇市场均衡并说明外国利率上升时 USD/EUR 方向；算 Kuna 的预期美元收益与 UIP 隐含的美元利率；判断两套 USD/CHF 报价能否套利，并比较一年远期与利率平价。",
+        "from": "Berkeley Econ 182 Spring 2006 Problem Set 1, Problems 5–7",
+        "alternatives": [
+          {
+            "kind": "exercise",
+            "prompt": "做 Suranovic 金融书第 4 章节末 Exercise：8 道 Jeopardy（经常/金融账户参与者、RoR、流动性、风险、股价从 $5.50 到 $6.50 的收益率、楼价从 $650,000 到 $600,000 的收益率）。",
+            "from": "Suranovic International Finance Ch.4 — Exercise"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://eml.berkeley.edu/~obstfeld/182_sp06/ps1.pdf",
+          "title": "Econ 182 Problem Set 1",
+          "use": "做 P5–7 汇率与利率平价"
+        },
+        {
+          "url": "https://saylordotorg.github.io/text_international-finance-theory-and-policy/s07-foreign-exchange-markets-and-r.html",
+          "title": "Suranovic Finance Ch.4",
+          "use": "读外汇市场与收益率公式；备选做 Jeopardy"
+        },
+        {
+          "url": "https://saylordotorg.github.io/text_international-finance-theory-and-policy/index.html",
+          "title": "Suranovic Finance TOC — Ch.5–6",
+          "use": "接着打开利率平价与购买力平价两章目录核对概念"
+        },
+        {
+          "url": "https://class-tools.app.utah.edu/syllabus/1264/8955/syllabus+Econ+3500-090+Spring+2026.pdf",
+          "title": "Utah Econ 3500 — Modules 10–11",
+          "use": "看资产法汇率与货币/利率/汇率的课历位置"
+        }
+      ]
+    },
+    "openmacro": {
+      "name": "开放宏观：AA–DD 与政策",
+      "why": "Suranovic 金融书在外汇与产出之后用第 9 章 AA-DD 收束，目录第 10–11 章是浮动/固定汇率下的政策。兰州第十二章是 IS-LM-BP、蒙代尔—弗莱明与三元悖论。犹他目标写 co-determination of exchange rates, interest rates and output；Module 12 是国际货币体系。Berkeley 182 目录含固定与浮动下的收入以及资本流动。金融轨交到政策方向图即可停。",
+      "learn": [
+        "AA 曲线与 DD 曲线",
+        "超均衡（汇率与产出）",
+        "iso-CAB 线与经常账户方向",
+        "克鲁格曼三元悖论（兰州第十二章）",
+        "浮动 vs 固定是后续政策章，不是另一门课"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "做 Suranovic 第 9 章 iso-CAB 节末 Jeopardy（线上方/下方的经常账户余额或赤字、赤字相对盈余时 iso-CAB 位置、斜率正负、相对 DD 更陡或更平）。再画一张 AA-DD，标出初始超均衡与一条虚线 iso-CAB；根据章内「Using the Iso-CAB Line」写清：仅当移动不是来自 P、P*、T、TR 时，超均衡移到原 iso-CAB 上方意味着经常账户余额上升。另用兰州第十二章列出的三元悖论三项目，各写一句来源中的名称（货币政策独立、汇率稳定、资本自由流动）。",
+        "from": "Suranovic International Finance Ch.9 — Exercise (iso-CAB)；兰州大纲第十二章 蒙代尔—弗莱明 / 三元悖论"
+      },
+      "resources": [
+        {
+          "url": "https://saylordotorg.github.io/text_international-finance-theory-and-policy/s12-the-aa-dd-model.html",
+          "title": "Suranovic Finance Ch.9 AA-DD",
+          "use": "读超均衡与 iso-CAB，做节末 Jeopardy 并画图"
+        },
+        {
+          "url": "https://saylordotorg.github.io/text_international-finance-theory-and-policy/index.html",
+          "title": "Suranovic Finance TOC — Ch.10–13",
+          "use": "核对本轨停在浮动/固定政策与固定 vs 浮动，不另开研究题目"
+        },
+        {
+          "url": "https://ieti.lzufe.edu.cn/info/1109/1572.htm",
+          "title": "兰州大纲 — 开放条件下的宏观经济政策",
+          "use": "对照 IS-LM-BP、蒙代尔—弗莱明、三元悖论条目"
+        },
+        {
+          "url": "https://class-tools.app.utah.edu/syllabus/1264/8955/syllabus+Econ+3500-090+Spring+2026.pdf",
+          "title": "Utah Econ 3500 — Part 2 outcomes",
+          "use": "对照课程目标：汇率、利率与产出的共同决定"
+        }
+      ]
+    }
+  },
+  "conflicts": [
+    "犹他 Econ 3500 与兰州《国际经济学》把贸易与金融写在同一门课里、先贸易后期中再开放宏观；对外经贸把国际经济学（一）（二）排在第 4、5 学期连修。Berkeley 把 C181 与 182 列为互不先修的并行选修，MIT 14.54 只开贸易，Suranovic 写成两本一学期书。本树按并行课分叉，只选一条；若所在学校是一门贯通课，做完贸易轨再接着金融轨即可，不另加必须汇合的节点。",
+    "MIT 14.54 课历在 Ricardo 之前先讲 Preferences、Exchange Economies 与 Standard Trade Models；犹他、Suranovic、Berkeley 181 与兰州都是导论后先李嘉图。取更常见、更靠前的李嘉图作贸易轨第一模型。",
+    "MIT 与犹他在 H-O 之后还有规模经济/不完全竞争再进入政策；Suranovic 第 6 章也有规模经济。贸易轨收到关税局部均衡即可停，不完全竞争与战略性贸易不另开节点。"
+  ],
+  "missing": "",
+  "checked_at": "2026-10-04"
+}

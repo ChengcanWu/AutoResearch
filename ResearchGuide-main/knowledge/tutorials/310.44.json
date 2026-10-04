@@ -1,0 +1,347 @@
+{
+  "id": "310.44",
+  "name": "病理学",
+  "format": "tutorial-tree-v2",
+  "status": "ok",
+  "goal": "能按本科总论顺序，用公开大体/镜下图把组织偏离正常写成可核对的形态记录：适应与损伤 → 修复 → 循环障碍 → 炎症 → 肿瘤性生长。停在改变的描述，不写病名诊断，不做临床操作。",
+  "sources": [
+    {
+      "title": "《病理学》教学大纲（大本科临床等专业）— 遵义医科大学第一临床学院",
+      "url": "https://1stci.zmu.edu.cn/info/1776/9514.htm",
+      "kind": "syllabus",
+      "used_for": "主干顺序：细胞和组织的适应与损伤 → 损伤的修复 → 局部血液循环障碍 → 炎症 → 肿瘤；其后才是各系统疾病（本树不进入）。实验一到实验六给出大体标本/切片清单与实验报告考核"
+    },
+    {
+      "title": "《病理学》理论课程教学大纲（临床五年制）— 山东大学基础医学院病理教研室",
+      "url": "https://pathology.sdu.edu.cn/info/1136/1312.htm",
+      "kind": "syllabus",
+      "used_for": "与遵义相同的总论五章顺序与学时；每章考核点是解释概念、描述基本病变、阐述问题；实验课观察大体标本与切片"
+    },
+    {
+      "title": "Syllabus | Principle and Practice of Human Pathology (HST.035, MIT OCW, Spring 2003)",
+      "url": "https://ocw.mit.edu/courses/hst-035-principle-and-practice-of-human-pathology-spring-2003/pages/syllabus/",
+      "kind": "ocw",
+      "used_for": "先细胞生物学再谈机制；作业形态是 lecture + lab + homework；Lab 1–2 先 Cells and Tissues。诊断工具与尸检实验不纳入本树"
+    },
+    {
+      "title": "Lecture Notes | Principle and Practice of Human Pathology (HST.035, MIT OCW)",
+      "url": "https://ocw.mit.edu/courses/hst-035-principle-and-practice-of-human-pathology-spring-2003/pages/lecture-notes/",
+      "kind": "ocw",
+      "used_for": "课历：Session 3 Cell Injury, Adaptation and Death → Session 4 Acute and Chronic Inflammation 与 Tissue Repair, Fibrosis and Healing 同场；Ischemia and Infarction 排到 Session 10。与中文总论顺序的冲突写入 conflicts"
+    },
+    {
+      "title": "Cell Injury, Adaptation and Death — HST.035 lecture slides (Badizadegan, 2003)",
+      "url": "https://ocw.mit.edu/courses/hst-035-principle-and-practice-of-human-pathology-spring-2003/5d9fc831490924cbf1c6daa3a4f26d9d_cellinjury_2003.pdf",
+      "kind": "lecture_notes",
+      "used_for": "节点 injury：homeostasis → adaptation → irreversible injury；atrophy / hypertrophy / hyperplasia / metaplasia；ATP、钙、膜、自由基；营养不良性与转移性钙化"
+    },
+    {
+      "title": "cellinjury_2003.pdf resource page — HST.035 (MIT OCW)",
+      "url": "https://ocw.mit.edu/courses/hst-035-principle-and-practice-of-human-pathology-spring-2003/resources/cellinjury_2003/",
+      "kind": "ocw",
+      "used_for": "节点 injury：讲义 PDF 的课程资源入口"
+    },
+    {
+      "title": "Tissue Repair, Fibrosis, and Healing — HST.035 lecture slides (Badizadegan, 2003)",
+      "url": "https://ocw.mit.edu/courses/hst-035-principle-and-practice-of-human-pathology-spring-2003/087feb9829527fcab3286112d8b21dfd_tissuerepair2003.pdf",
+      "kind": "lecture_notes",
+      "used_for": "节点 repair：再生 vs 纤维性替代；纤维化四阶段（血管生成、成纤维细胞迁移增殖、ECM 沉积、重塑）"
+    },
+    {
+      "title": "tissuerepair2003.pdf resource page — HST.035 (MIT OCW)",
+      "url": "https://ocw.mit.edu/courses/hst-035-principle-and-practice-of-human-pathology-spring-2003/resources/tissuerepair2003/",
+      "kind": "ocw",
+      "used_for": "节点 repair：讲义 PDF 的课程资源入口"
+    },
+    {
+      "title": "inflammation2003.pdf resource page — HST.035 (MIT OCW)",
+      "url": "https://ocw.mit.edu/courses/hst-035-principle-and-practice-of-human-pathology-spring-2003/resources/inflammation2003/",
+      "kind": "ocw",
+      "used_for": "节点 inflammation：Session 4《Acute and Chronic Inflammation》讲义入口；与课历上 Repair 同场"
+    },
+    {
+      "title": "General pathology images and text — WebPath (University of Utah)",
+      "url": "https://webpath.med.utah.edu/GENERAL.html",
+      "kind": "lecture_notes",
+      "used_for": "按过程分图：Cellular Injury、Inflammation、Neoplasia、Atherosclerosis and Thrombosis。是图库分栏，不是周历，不单独决定主干顺序"
+    },
+    {
+      "title": "Pathology of cell injury — WebPath Cellular Injury Index",
+      "url": "https://webpath.med.utah.edu/CINJHTML/CINJIDX.html",
+      "kind": "lecture_notes",
+      "used_for": "节点 injury：Cell Adaptations（萎缩/肥大/增生/化生）与 Cell Death（凋亡、凝固性/液化性/脂肪性/干酪样/坏疽性坏死）图列"
+    },
+    {
+      "title": "Pathology of inflammation — WebPath Inflammation Index",
+      "url": "https://webpath.med.utah.edu/INFLHTML/INFLIDX.html",
+      "kind": "lecture_notes",
+      "used_for": "节点 inflammation 与 repair：Features of Inflammation；Acute；Chronic Inflammation and Healing；Granulomatous Inflammation"
+    },
+    {
+      "title": "Pathology of atherosclerosis — WebPath Atherosclerosis and Thrombosis Index",
+      "url": "https://webpath.med.utah.edu/ATHHTML/ATHIDX.html",
+      "kind": "lecture_notes",
+      "used_for": "节点 circulation：Thromboembolism（Zahn 线、肺血栓栓子）、Infarction（出血性/缺血性坏死）图列。只用来看管腔与实质改变"
+    },
+    {
+      "title": "Pathology of neoplasia — WebPath Neoplasia Index",
+      "url": "https://webpath.med.utah.edu/NEOHTML/NEOPLIDX.html",
+      "kind": "lecture_notes",
+      "used_for": "节点 neoplasia：Definition / Nomenclature；benign vs malignant characteristics；Metastases；grading and staging 表。当作形态对照，不当诊断手册"
+    },
+    {
+      "title": "Examinations in General Pathology — WebPath Exam Menu",
+      "url": "https://webpath.med.utah.edu/EXAM/MULTGEN/examidx.htm",
+      "kind": "other",
+      "used_for": "各节点 task.alternatives：Cellular Injury 55 题、Inflammation 40 题、Neoplasia 60 题、Atherosclerosis-Thrombosis 50 题；只做问形态/机制的题"
+    },
+    {
+      "title": "Pathology examination questions — WebPath Exam main menu",
+      "url": "https://webpath.med.utah.edu/EXAM/EXAMIDX.html",
+      "kind": "other",
+      "used_for": "说明 General Pathology 单选题第一次点击计分并给反馈；图像测验入口说明"
+    },
+    {
+      "title": "Quizzes with Images in Pathology — WebPath Image Quiz Menu",
+      "url": "https://webpath.med.utah.edu/EXAM/IMGQUIZ/quizidx.htm",
+      "kind": "other",
+      "used_for": "各节点 lab 备选：General Pathology 下 Cell Injury / Inflammation / Neoplasia / Atherosclerosis & Thrombosis 各 10 题带图"
+    }
+  ],
+  "trunk": ["injury", "repair", "circulation", "inflammation", "neoplasia"],
+  "forks": [],
+  "join": null,
+  "nodes": {
+    "injury": {
+      "name": "适应与细胞损伤",
+      "why": "遵义与山大都把第一章定为「细胞和组织的适应与损伤」，并要求先能指出萎缩/肥大/增生/化生，再写可逆损伤与坏死类型。HST.035 Session 3 同样从 homeostasis → adaptation → irreversible injury 讲起，讲义把 atrophy、hypertrophy、hyperplasia、metaplasia 列为最常见的形态适应。",
+      "learn": [
+        "萎缩、肥大、增生、化生的定义与形态",
+        "可逆性损伤：细胞水肿、脂肪变性、玻璃样变",
+        "坏死类型：凝固性、液化性、干酪样、坏疽",
+        "凋亡与坏死的形态差别",
+        "营养不良性钙化与转移性钙化"
+      ],
+      "task": {
+        "kind": "lab",
+        "prompt": "打开 WebPath Cellular Injury Index 的 Cell Adaptations 与 Cell Death。交一张 8 行表：萎缩、肥大、增生、化生、凋亡、凝固性坏死、液化性坏死、干酪样坏死各一行；每行写图题、肉眼或镜下看到的改变、所用大纲术语。对照遵义实验一的切片/大体清单核缺项。只写组织改变，不把图例器官写成病名诊断。",
+        "from": "遵义实验一（细胞与组织的损伤与修复）；山大第一章「描述以下基本病变」；WebPath Cellular Injury Index",
+        "alternatives": [
+          {
+            "kind": "exercise",
+            "prompt": "在 WebPath General Pathology 的 Cellular Injury（Questions 1–55）里做至少 15 题，只保留问适应/坏死类型/机制的题；把题号、你的选择、页面反馈抄进表。跳过要求你给出临床病名诊断的题。",
+            "from": "WebPath Exam Menu · Cellular Injury"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://ocw.mit.edu/courses/hst-035-principle-and-practice-of-human-pathology-spring-2003/5d9fc831490924cbf1c6daa3a4f26d9d_cellinjury_2003.pdf",
+          "title": "Cell Injury, Adaptation and Death (HST.035 slides)",
+          "use": "先读 Overview 与 Cellular Adaptation 四条定义，再对照后面的生化机制页"
+        },
+        {
+          "url": "https://webpath.med.utah.edu/CINJHTML/CINJIDX.html",
+          "title": "WebPath Cellular Injury Index",
+          "use": "按 Cell Adaptations / Cell Death 逐张写形态表"
+        },
+        {
+          "url": "https://1stci.zmu.edu.cn/info/1776/9514.htm",
+          "title": "遵义《病理学》大纲 · 第一章与实验一",
+          "use": "用实验一的大体/切片名单核对自己表里缺了哪一类改变"
+        },
+        {
+          "url": "https://pathology.sdu.edu.cn/info/1136/1312.htm",
+          "title": "山大《病理学》大纲 · 第一章",
+          "use": "按「解释概念 / 描述基本病变 / 阐述坏死结局」三条自检表头"
+        }
+      ]
+    },
+    "repair": {
+      "name": "再生与纤维性修复",
+      "why": "遵义与山大都把第二章紧接在损伤之后，核心是再生潜能、肉芽组织/瘢痕、创伤一期与二期愈合。HST.035 Session 4 的 Repair 讲义把愈合拆成 regeneration 与 fibrosis/scarring，并给出纤维化四阶段。",
+      "learn": [
+        "再生；不稳定细胞、稳定细胞、永久性细胞",
+        "肉芽组织与瘢痕的成分和功能",
+        "机化与包裹",
+        "皮肤创伤的一期愈合与二期愈合",
+        "纤维化四阶段：血管生成、成纤维细胞迁移增殖、ECM 沉积、重塑"
+      ],
+      "task": {
+        "kind": "writeup",
+        "prompt": "对照山大第二章「阐述肉芽组织的功能及每一种成分的作用」，打开 WebPath Inflammation Index 的 Chronic Inflammation and Healing，选至少 2 张愈合/慢性炎图。交不超过 500 字记录：列出你看见的细胞与间质成分；对照 HST.035 纤维化四阶段，标明图上停在哪一阶段；再用遵义术语区分肉芽组织与瘢痕。不写清创或缝合步骤。",
+        "from": "山大第二章纤维性修复考核点；遵义实验一切片「肉芽组织」；HST.035 Tissue Repair slides",
+        "alternatives": [
+          {
+            "kind": "lab",
+            "prompt": "若能对照实体标本，按遵义实验一的「骨折愈合、创伤愈合、肉芽组织」清单各写 1 条肉眼+镜下改变；缺标本则用 WebPath 同主题图代替，并在记录里写替代图题。",
+            "from": "遵义实验一"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://ocw.mit.edu/courses/hst-035-principle-and-practice-of-human-pathology-spring-2003/087feb9829527fcab3286112d8b21dfd_tissuerepair2003.pdf",
+          "title": "Tissue Repair, Fibrosis, and Healing (HST.035 slides)",
+          "use": "读 Regeneration vs Replacement by fibrous tissue，以及 Fibrosis 四阶段"
+        },
+        {
+          "url": "https://pathology.sdu.edu.cn/info/1136/1312.htm",
+          "title": "山大《病理学》大纲 · 第二章",
+          "use": "按再生潜能、肉芽组织成分、一期/二期愈合三问写记录"
+        },
+        {
+          "url": "https://webpath.med.utah.edu/INFLHTML/INFLIDX.html",
+          "title": "WebPath Inflammation Index",
+          "use": "打开 Chronic Inflammation and Healing 一组图，给肉芽/瘢痕找对照"
+        },
+        {
+          "url": "https://1stci.zmu.edu.cn/info/1776/9514.htm",
+          "title": "遵义《病理学》大纲 · 第二章与实验一",
+          "use": "核肉芽组织、瘢痕、创伤愈合在实验清单里的位置"
+        }
+      ]
+    },
+    "circulation": {
+      "name": "局部循环障碍",
+      "why": "遵义与山大都把第三章定为局部血液循环障碍，要求先写充血/淤血，再写血栓类型、栓子运行途径和梗死的贫血性/出血性形态。WebPath 把血栓栓子与梗死图放在 Atherosclerosis and Thrombosis Index 的后半。HST.035 把 Ischemia and Infarction 排到 Session 10，顺序冲突见 conflicts。",
+      "learn": [
+        "充血与淤血；慢性肺淤血、慢性肝淤血的组织学改变",
+        "血栓形成的条件；白色/混合/红色/透明血栓",
+        "栓子与栓塞；栓子运行途径",
+        "梗死的类型与贫血性、出血性坏死范围",
+        "Zahn 线、血栓机化再通的形态"
+      ],
+      "task": {
+        "kind": "lab",
+        "prompt": "打开 WebPath Atherosclerosis and Thrombosis Index 的 Thromboembolism 与 Infarction。交 6 行表（血栓栓子 3、梗死 3）：每行写管腔内物质的颜色/层状结构，或实质坏死区是贫血性还是出血性。用遵义实验清单里的「混合血栓、血栓机化再通、贫血性梗死、出血性梗死、槟榔肝」给行贴标签。只描述循环与组织改变，不写溶栓或手术。",
+        "from": "遵义局部血液循环障碍实验；山大第三章「阐述血栓形成的条件、类型、结局」；WebPath ATH Index",
+        "alternatives": [
+          {
+            "kind": "exercise",
+            "prompt": "做 WebPath Atherosclerosis-Thrombosis 题库或 Image Quiz 同名组至少 10 题；只保留问血栓层状结构、栓子位置、梗死贫血/出血形态的题，记下题号与反馈。跳过要求你写出临床综合征名称的题。",
+            "from": "WebPath Exam Menu · Atherosclerosis-Thrombosis；Image Quiz 同名组"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://webpath.med.utah.edu/ATHHTML/ATHIDX.html",
+          "title": "WebPath Atherosclerosis and Thrombosis Index",
+          "use": "只用 Thromboembolism 与 Infarction 两栏写形态表"
+        },
+        {
+          "url": "https://1stci.zmu.edu.cn/info/1776/9514.htm",
+          "title": "遵义《病理学》大纲 · 第三章与循环障碍实验",
+          "use": "按大体（血栓、贫血性/出血性梗死、槟榔肝）和切片（混合血栓、机化再通）列必写项"
+        },
+        {
+          "url": "https://pathology.sdu.edu.cn/info/1136/1312.htm",
+          "title": "山大《病理学》大纲 · 第三章",
+          "use": "按充血/淤血、血栓类型、栓子途径、梗死类型四问自检"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/hst-035-principle-and-practice-of-human-pathology-spring-2003/pages/lecture-notes/",
+          "title": "HST.035 Lecture Notes",
+          "use": "找到 Session 10 Ischemia and Infarction 在课历中的位置，对照中文第三章，不跟它改主干顺序"
+        }
+      ]
+    },
+    "inflammation": {
+      "name": "炎症的组织改变",
+      "why": "遵义与山大把炎症放在总论第四章，要求写出变质、渗出、增生，再分浆液性/纤维素性/化脓性/出血性，并区分肉芽肿与肉芽组织。HST.035 Session 4 把 Acute and Chronic Inflammation 与 Repair 排在同一场；WebPath Inflammation Index 按 Features → Acute → Chronic and Healing → Granulomatous 给图。",
+      "learn": [
+        "炎症局部的基本改变：变质、渗出、增生",
+        "急性过程：血流动力学改变、通透性增高、白细胞渗出与吞噬",
+        "渗出类型：浆液性、纤维素性、化脓性、出血性",
+        "慢性炎症的一般形态；肉芽肿性炎",
+        "肉芽肿与肉芽组织的形态差别"
+      ],
+      "task": {
+        "kind": "lab",
+        "prompt": "打开 WebPath Inflammation Index。交 4 行形态记录：纤维素性渗出 1、化脓性改变 1、慢性炎 1、肉芽肿 1。每行写图题、渗出物或细胞种类、坏死是否同时存在。另用 3 句话对照遵义能力目标，写出肉芽肿与肉芽组织差在哪。不写抗炎药物或操作规程。",
+        "from": "遵义实验四；山大第四章急性/慢性炎考核点；WebPath Inflammation Index",
+        "alternatives": [
+          {
+            "kind": "exercise",
+            "prompt": "做 WebPath Inflammation（Questions 1–40）或 Image Quiz · Inflammation 至少 10 题；只保留问渗出类型、细胞种类、肉芽肿结构的题。交题号、选择与页面反馈。",
+            "from": "WebPath Exam Menu · Inflammation；Image Quiz · Inflammation"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://webpath.med.utah.edu/INFLHTML/INFLIDX.html",
+          "title": "WebPath Inflammation Index",
+          "use": "按 Features / Acute / Chronic and Healing / Granulomatous 四栏选图"
+        },
+        {
+          "url": "https://1stci.zmu.edu.cn/info/1776/9514.htm",
+          "title": "遵义《病理学》大纲 · 第四章与实验四",
+          "use": "用实验四的绒毛心、脓肿、蜂窝织炎、肉芽肿切片名单核缺项"
+        },
+        {
+          "url": "https://pathology.sdu.edu.cn/info/1136/1312.htm",
+          "title": "山大《病理学》大纲 · 第四章",
+          "use": "按变质/渗出/增生、渗出性炎类型、肉芽肿三问写记录"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/hst-035-principle-and-practice-of-human-pathology-spring-2003/resources/inflammation2003/",
+          "title": "inflammation2003.pdf — HST.035",
+          "use": "下载 Session 4 炎症讲义，对照课历上它与 Repair 同场"
+        }
+      ]
+    },
+    "neoplasia": {
+      "name": "肿瘤性生长的形态",
+      "why": "遵义与山大都把肿瘤作为总论收束（第 5–6 章），要求先分清肿瘤性与非肿瘤性增生，再写异型性、生长与扩散、良恶性形态差别、癌与肉瘤的命名。WebPath Neoplasia Index 同样从 Definition / Nomenclature 走到 benign、malignant、metastases。本节点只写生长方式与形态，不把举例器官写成诊断。",
+      "learn": [
+        "肿瘤性增生与非肿瘤性增生的差别",
+        "异型性：组织结构与细胞形态",
+        "生长方式；直接蔓延与转移途径",
+        "良性与恶性的形态差别",
+        "命名：癌与肉瘤；癌前改变、非典型增生、原位癌作为组织学术语"
+      ],
+      "task": {
+        "kind": "lab",
+        "prompt": "打开 WebPath Neoplasia Index。交 5 行对照表：良性例 2、恶性上皮性 1、恶性间叶性 1、转移灶 1。每行只写分化程度、边界或浸润、是否另有种植灶。再用山大「肿瘤的命名原则」给每行一个形态学名称（如腺瘤、鳞状细胞癌、肉瘤），不要写成对患者的诊断。对照遵义实验五、六的「异型性、乳头状瘤/腺瘤、鳞癌/腺癌、纤维瘤/纤维肉瘤、淋巴结转移」核缺项。",
+        "from": "遵义实验五、六；山大第五章第一至六节；WebPath Neoplasia Index",
+        "alternatives": [
+          {
+            "kind": "exercise",
+            "prompt": "做 WebPath Neoplasia（Questions 1–60）或 Image Quiz · Neoplasia 至少 12 题；只保留问命名、异型性、浸润/转移形态的题。交题号、选择与反馈。跳过分期治疗或筛查策略题。",
+            "from": "WebPath Exam Menu · Neoplasia；Image Quiz · Neoplasia"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://webpath.med.utah.edu/NEOHTML/NEOPLIDX.html",
+          "title": "WebPath Neoplasia Index",
+          "use": "先读 Definition / Nomenclature / benign vs malignant review，再选 Metastases 图"
+        },
+        {
+          "url": "https://1stci.zmu.edu.cn/info/1776/9514.htm",
+          "title": "遵义《病理学》大纲 · 肿瘤章与实验五、六",
+          "use": "按异型性、生长扩散、癌与肉瘤、转移切片清单列必写项"
+        },
+        {
+          "url": "https://pathology.sdu.edu.cn/info/1136/1312.htm",
+          "title": "山大《病理学》大纲 · 第五章",
+          "use": "按肿瘤性 vs 非肿瘤性增生、异型性、生长与扩散、命名原则写表头"
+        },
+        {
+          "url": "https://webpath.med.utah.edu/EXAM/MULTGEN/examidx.htm",
+          "title": "WebPath General Pathology Exam Menu",
+          "use": "若改做习题，从 Neoplasia 题库进入并只记形态题"
+        }
+      ]
+    }
+  },
+  "conflicts": [
+    "HST.035 课历在 Session 3 细胞损伤之后，把 Acute and Chronic Inflammation 与 Tissue Repair 排在 Session 4 同一场，Ischemia and Infarction 迟到 Session 10。遵义与山大本科大纲则是损伤 → 修复 → 局部血液循环障碍 → 炎症 → 肿瘤。两所本科大纲顺序一致，取这条更靠前、也更保守的总论线；MIT 的并列只记在此，不另开分叉。",
+    "总论之后，遵义与山大继续按心血管、呼吸、消化等系统疾病章往下讲，HST.035 也进入器官系统。那些章以病名为单位，超出「描述组织改变」的基础科学范围，本树在肿瘤性生长形态处收束，不把系统疾病写成并行选修轨。"
+  ],
+  "missing": "",
+  "checked_at": "2026-10-04"
+}

@@ -1,0 +1,316 @@
+{
+  "id": "310.34",
+  "name": "人体免疫",
+  "format": "tutorial-tree-v2",
+  "status": "ok",
+  "goal": "能用教材术语区分固有免疫与适应性免疫，画出宿主如何认出外来物（PAMP/PRR、抗原表位、MHC 提呈、抗体），并对照 OpenStax 定义写出过度（超敏/自身免疫）与不足（免疫缺陷）。不写诊断、处方或临床操作。",
+  "sources": [
+    {
+      "title": "《医学免疫学》课程教学大纲（山西医科大学汾阳学院）",
+      "url": "https://www.sxmufyc.edu.cn/__local/F/01/82/593FEDEA913B8C80FF56A44871A_14315E4D_3AD73.pdf",
+      "kind": "syllabus",
+      "used_for": "主干前段顺序：概论（免疫防御/自稳/监视；固有 vs 适应性）→ 免疫器官和组织 → 抗原 → 抗体；后段有 MHC、T/B、抗原提呈、细胞/体液应答；考核含思维导图。固有免疫排在适应性之后，写入 conflicts"
+    },
+    {
+      "title": "山东第一医科大学《医学免疫学》课程（含课内实验）教学大纲（临床医学专业）",
+      "url": "https://jcyx.sdfmu.edu.cn/info/1231/2731.htm",
+      "kind": "syllabus",
+      "used_for": "明文以「抗原刺激免疫应答发生」为主线，从免疫器官到免疫分子，从固有免疫到适应性免疫；基础理论模块后要求用思维导图贯通；超敏/自身免疫作概念收束。防治与检测技术不进树"
+    },
+    {
+      "title": "Ch. 42 Introduction — Biology 2e (OpenStax)",
+      "url": "https://openstax.org/books/biology-2e/pages/42-introduction",
+      "kind": "open_textbook",
+      "used_for": "第 42 章目录顺序：Innate → Adaptive → Antibodies → Disruptions；引言把 pathogen identification、specific response、memory 定为免疫应答特征"
+    },
+    {
+      "title": "42.1 Innate Immune Response — Biology 2e (OpenStax)",
+      "url": "https://openstax.org/books/biology-2e/pages/42-1-innate-immune-response",
+      "kind": "open_textbook",
+      "used_for": "节点 innate：物理化学屏障、PAMP/PRR/TLR、吞噬与炎症、NK 与 MHC I、补体与调理"
+    },
+    {
+      "title": "42.2 Adaptive Immune Response — Biology 2e (OpenStax)",
+      "url": "https://openstax.org/books/biology-2e/pages/42-2-adaptive-immune-response",
+      "kind": "open_textbook",
+      "used_for": "节点 overview 的固有/适应对照与 tolerance；节点 adaptive：APC/MHC、CD4/CD8、细胞免疫与体液免疫、克隆选择、免疫记忆"
+    },
+    {
+      "title": "42.3 Antibodies — Biology 2e (OpenStax)",
+      "url": "https://openstax.org/books/biology-2e/pages/42-3-antibodies",
+      "kind": "open_textbook",
+      "used_for": "节点 adaptive：抗体 Y 形结构、五类 Ig、中和/调理/补体固定、亲和力与交叉反应"
+    },
+    {
+      "title": "42.4 Disruptions in the Immune System — Biology 2e (OpenStax)",
+      "url": "https://openstax.org/books/biology-2e/pages/42-4-disruptions-in-the-immune-system",
+      "kind": "open_textbook",
+      "used_for": "节点 balance：immunodeficiency；immediate/delayed hypersensitivity；autoimmunity 与 molecular mimicry。只取机制定义，不取治疗句"
+    },
+    {
+      "title": "Ch. 42 Review Questions — Biology 2e (OpenStax)",
+      "url": "https://openstax.org/books/biology-2e/pages/42-review-questions",
+      "kind": "open_textbook",
+      "used_for": "各节点 exercise：Q4–7/10 固有；Q8–9/12–17 适应与抗体；Q18–21 过度与不足"
+    },
+    {
+      "title": "Ch. 42 Critical Thinking Questions — Biology 2e (OpenStax)",
+      "url": "https://openstax.org/books/biology-2e/pages/42-critical-thinking-questions",
+      "kind": "open_textbook",
+      "used_for": "节点 innate 的补体级联题 Q23；节点 adaptive 的 epitope/naïve/记忆题 Q24–29"
+    },
+    {
+      "title": "Ch. 17 Introduction — Microbiology (OpenStax)",
+      "url": "https://openstax.org/books/microbiology/pages/17-introduction",
+      "kind": "open_textbook",
+      "used_for": "与 Biology 42 一致：先 nonspecific innate（无记忆），再 adaptive；目录 17.1–17.5 屏障→识别吞噬→炎症发热"
+    },
+    {
+      "title": "Ch. 18 Introduction — Microbiology (OpenStax)",
+      "url": "https://openstax.org/books/microbiology/pages/18-introduction",
+      "kind": "open_textbook",
+      "used_for": "适应性免疫目录：概述 → MHC 与 APC → T 细胞与细胞免疫 → B 细胞与体液免疫"
+    },
+    {
+      "title": "18.2 Major Histocompatibility Complexes and Antigen-Presenting Cells — Microbiology (OpenStax)",
+      "url": "https://openstax.org/books/microbiology/pages/18-2-major-histocompatibility-complexes-and-antigen-presenting-cells",
+      "kind": "open_textbook",
+      "used_for": "节点 adaptive：MHC I 在有核细胞、MHC II 在巨噬细胞/树突状细胞/B 细胞；两条提呈途径与 cross-presentation"
+    },
+    {
+      "title": "Ch. 19 Introduction — Microbiology (OpenStax)",
+      "url": "https://openstax.org/books/microbiology/pages/19-introduction",
+      "kind": "open_textbook",
+      "used_for": "节点 balance 的章目录：Hypersensitivities → Autoimmune Disorders → Immunodeficiency。移植与免疫治疗不进任务"
+    },
+    {
+      "title": "Lecture 30: Immunology 1—Diversity, Specificity, and B Cells — 7.016 Introductory Biology (MIT OCW)",
+      "url": "https://ocw.mit.edu/courses/7-016-introductory-biology-fall-2018/resources/lecture-30-immunology-12014diversity-specificity-and-b-cells/",
+      "kind": "ocw",
+      "used_for": "本科导论把 immunity 定义为基于先前暴露的抗病；先讲 specificity、diversity、memory 与 B 细胞"
+    },
+    {
+      "title": "Lecture 31: Immunology 2—Memory, T Cells, and Autoimmunity — 7.016 Introductory Biology (MIT OCW)",
+      "url": "https://ocw.mit.edu/courses/7-016-introductory-biology-fall-2018/resources/lecture-31-immunology-22014memory-t-cells-and-autoimmunity/",
+      "kind": "ocw",
+      "used_for": "接在 L30 之后：antigen presentation、isotype switching、autoimmunity。压缩导论，不单独分叉"
+    },
+    {
+      "title": "7.013 Problem Set 6 (Spring 2013) — MIT OCW",
+      "url": "https://ocw.mit.edu/courses/7-013-introductory-biology-spring-2013/8b7e5116946adbf2831171a011a86272_MIT7_013S13_Pset_6.pdf",
+      "kind": "ocw",
+      "used_for": "节点 adaptive 的 problem_set 备选：Question 1–2 覆盖固有/适应细胞分工、Ab/TCR/MHC、初次与再次应答。Question 3 起是神经，不做"
+    }
+  ],
+  "trunk": ["overview", "innate", "adaptive", "balance"],
+  "forks": [],
+  "join": null,
+  "nodes": {
+    "overview": {
+      "name": "免疫功能与器官",
+      "why": "汾阳学院大纲第一章先写免疫防御/自稳/监视和固有 vs 适应性，第二章才是中枢（骨髓、胸腺）与外周（淋巴结、脾、黏膜相关淋巴组织）。山东第一医科大学同样把绪论和免疫器官放在最前，并写明后续以「抗原刺激免疫应答发生」为主线。OpenStax Biology 第 42 章引言把 pathogen identification、specific response、memory 定为整章地基。跳过这一步，后面的「谁在认外来物」没有共用坐标。",
+      "learn": [
+        "免疫防御、免疫自稳、免疫监视",
+        "固有免疫与适应性免疫的对照（有无特异性、有无记忆、起效快慢）",
+        "中枢免疫器官：骨髓、胸腺",
+        "外周免疫器官：淋巴结、脾、黏膜相关淋巴组织"
+      ],
+      "task": {
+        "kind": "reading",
+        "prompt": "交一张对照表：至少 4 行比较固有免疫与适应性免疫（特异性、记忆、起效时间、主要细胞/分子），每格注明摘自 OpenStax 42 引言或 42.2 哪一句。再交一张器官表：中枢 2 个 + 外周至少 3 个，功能用汾阳学院第二章术语写。不写疾病诊断。",
+        "from": "汾阳学院大纲第 1–2 章；山东第一医科大学绪论与免疫器官；OpenStax Biology 42 Introduction 与 42.2 开篇对照"
+      },
+      "resources": [
+        {
+          "url": "https://www.sxmufyc.edu.cn/__local/F/01/82/593FEDEA913B8C80FF56A44871A_14315E4D_3AD73.pdf",
+          "title": "汾阳学院《医学免疫学》大纲",
+          "use": "读第一章免疫功能与应答类型、第二章中枢/外周器官，按重点条目填表"
+        },
+        {
+          "url": "https://jcyx.sdfmu.edu.cn/info/1231/2731.htm",
+          "title": "山东第一医科大学《医学免疫学》大纲",
+          "use": "核对学生时安排：绪论 3 学时、免疫器官 1 学时，后面才进入抗原与应答"
+        },
+        {
+          "url": "https://openstax.org/books/biology-2e/pages/42-introduction",
+          "title": "OpenStax Biology 2e 第 42 章引言",
+          "use": "记下 innate vs adaptive 和 identification / specific response / memory 三句，作对照表来源"
+        },
+        {
+          "url": "https://openstax.org/books/biology-2e/pages/42-2-adaptive-immune-response",
+          "title": "OpenStax 42.2 Adaptive Immune Response",
+          "use": "用学习目标里的 compare adaptive and innate 补对照表的时间尺度与记忆"
+        }
+      ]
+    },
+    "innate": {
+      "name": "固有识别与第一道防线",
+      "why": "OpenStax Biology 把 42.1 Innate 放在 Adaptive 之前，并写明没有固有系统提供的信息，适应性应答动员不起来。Microbiology 第 17 章同样先讲 nonspecific innate（无记忆），第 18 章才是 adaptive。山东第一医科大学写明「从固有免疫到适应性免疫」。汾阳学院把固有免疫排在 T/B 应答之后，顺序打架，取更靠前的一条。",
+      "learn": [
+        "皮肤与黏膜的物理/化学屏障",
+        "PAMP、PRR、Toll-like receptors",
+        "巨噬细胞、中性粒细胞、树突状细胞与吞噬",
+        "炎症与细胞因子（白细胞介素、干扰素）",
+        "NK 细胞与 MHC I「缺失自我」",
+        "补体：调理、膜攻击复合物"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "做 OpenStax Biology 第 42 章 Review Questions 第 4、5、6、7、10 题，并做 Critical Thinking 第 23 题（补体蛋白部分缺失会不会拖垮整条级联）。每题抄题号、写选项或简答，并在旁标注依据出在 42.1 哪一段（屏障 / 干扰素 / 溶酶体 / NK / 补体）。不写用药。",
+        "from": "OpenStax Biology 42.1 + Review Q4–7、Q10 + Critical Thinking Q23；顺序依据 Microbiology 第 17 章"
+      },
+      "resources": [
+        {
+          "url": "https://openstax.org/books/biology-2e/pages/42-1-innate-immune-response",
+          "title": "OpenStax 42.1 Innate Immune Response",
+          "use": "按学习目标读屏障、PAMP/PRR、吞噬炎症、NK、补体，答题时回指段落"
+        },
+        {
+          "url": "https://openstax.org/books/biology-2e/pages/42-review-questions",
+          "title": "OpenStax Biology 第 42 章 Review Questions",
+          "use": "做第 4–7、10 题并记下题号"
+        },
+        {
+          "url": "https://openstax.org/books/biology-2e/pages/42-critical-thinking-questions",
+          "title": "OpenStax Biology 第 42 章 Critical Thinking",
+          "use": "做第 23 题：补体级联是否整条被破坏"
+        },
+        {
+          "url": "https://openstax.org/books/microbiology/pages/17-introduction",
+          "title": "OpenStax Microbiology 第 17 章引言",
+          "use": "对照目录 17.1–17.5，确认屏障→识别吞噬→炎症发热的顺序"
+        }
+      ]
+    },
+    "adaptive": {
+      "name": "抗原、MHC 与淋巴细胞",
+      "why": "OpenStax 42.2 把 APC/MHC、T/B、细胞免疫与体液免疫、记忆放在固有之后；42.3 专写抗体结构与五类 Ig。Microbiology 第 18 章目录是 Overview → MHC/APC → T → B。汾阳学院第 3–4、8–13 章同序展开抗原、抗体、MHC、T/B 与提呈。MIT 7.016 第 30 讲先讲 diversity/specificity/memory 与 B 细胞，第 31 讲再讲抗原提呈。同一关两种交卷：教材题或 7.013 Problem Set 6 的免疫题。",
+      "learn": [
+        "抗原、表位（antigenic determinant）、免疫耐受",
+        "MHC I / MHC II 分布与两条提呈途径；专职 APC",
+        "CD4+ 辅助 T 细胞与 CD8+ 细胞毒性 T 细胞；TCR",
+        "BCR、浆细胞、克隆选择；IgM/IgG/IgA/IgD/IgE",
+        "抗体中和、调理、补体固定；初次与再次应答"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "交三样：①自绘两张提呈图（外源抗原–MHC II–CD4+ TH；内源/感染细胞–MHC I–CD8+ CTL），分子名称用 OpenStax 18.2 与 42.2 术语；②自绘一张抗体 Y 形图，标重链/轻链、可变区/恒定区，并列出五类 Ig 各一行功能；③做 Review Questions 第 8、9、12、14、15、16、17 题和 Critical Thinking 第 24、25、28、29 题，旁注节号。不写疫苗接种方案。",
+        "from": "OpenStax 42.2–42.3、18.2；Review Q8–9/12/14–17；Critical Thinking Q24–25/28–29",
+        "alternatives": [
+          {
+            "kind": "problem_set",
+            "prompt": "做 MIT 7.013 Problem Set 6 的 Question 1 与 Question 2（细胞分工表、Ab/TCR/MHC 示意图、初次/再次应答曲线、抗体清除循环病毒的机制）。Question 3 及之后是神经，不要做。图上分子名称与教材题保持同一套术语。",
+            "from": "MIT 7.013 Problem Set 6 (2013) Q1–Q2；讲次对照 7.016 Lecture 30–31"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://openstax.org/books/biology-2e/pages/42-2-adaptive-immune-response",
+          "title": "OpenStax 42.2 Adaptive Immune Response",
+          "use": "读 APC、CD4/CD8、TH1/TH2、B 细胞克隆选择、CTL、免疫记忆，用来画提呈图"
+        },
+        {
+          "url": "https://openstax.org/books/biology-2e/pages/42-3-antibodies",
+          "title": "OpenStax 42.3 Antibodies",
+          "use": "对照 Figure 42.22–42.24 画抗体结构并写五类 Ig 与中和/调理/补体固定"
+        },
+        {
+          "url": "https://openstax.org/books/microbiology/pages/18-2-major-histocompatibility-complexes-and-antigen-presenting-cells",
+          "title": "OpenStax Microbiology 18.2 MHC 与 APC",
+          "use": "核 MHC I/II 分布、抗原结合槽和 cross-presentation，填进提呈图"
+        },
+        {
+          "url": "https://openstax.org/books/microbiology/pages/18-introduction",
+          "title": "OpenStax Microbiology 第 18 章引言",
+          "use": "按 18.1–18.4 目录检查自己是否漏了 MHC、T、B 任一块"
+        },
+        {
+          "url": "https://openstax.org/books/biology-2e/pages/42-review-questions",
+          "title": "OpenStax Biology 第 42 章 Review Questions",
+          "use": "做第 8、9、12、14–17 题"
+        },
+        {
+          "url": "https://openstax.org/books/biology-2e/pages/42-critical-thinking-questions",
+          "title": "OpenStax Biology 第 42 章 Critical Thinking",
+          "use": "做第 24、25、28、29 题（表位、naïve 细胞、B/T 结合对象、再次应答为何更快）"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/7-016-introductory-biology-fall-2018/resources/lecture-30-immunology-12014diversity-specificity-and-b-cells/",
+          "title": "MIT 7.016 Lecture 30",
+          "use": "选修轨：听/读 diversity、specificity、memory 与 B 细胞后再做 7.013 题"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/7-016-introductory-biology-fall-2018/resources/lecture-31-immunology-22014memory-t-cells-and-autoimmunity/",
+          "title": "MIT 7.016 Lecture 31",
+          "use": "选修轨：听/读 antigen presentation 与 isotype switching，对接提呈图"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/7-013-introductory-biology-spring-2013/8b7e5116946adbf2831171a011a86272_MIT7_013S13_Pset_6.pdf",
+          "title": "MIT 7.013 Problem Set 6",
+          "use": "若选 alternatives：只做 Question 1–2"
+        },
+        {
+          "url": "https://www.sxmufyc.edu.cn/__local/F/01/82/593FEDEA913B8C80FF56A44871A_14315E4D_3AD73.pdf",
+          "title": "汾阳学院大纲第 3–4、8–13 章",
+          "use": "用抗原表位、MHC I/II 途径、TD-Ag 应答与抗体初次/再次规律核对图上术语"
+        }
+      ]
+    },
+    "balance": {
+      "name": "过度与不足",
+      "why": "OpenStax 42.4 把免疫扰乱收在固有/适应之后，学习目标只有 hypersensitivity 与 autoimmunity，正文同时定义 immunodeficiency（failure, insufficiency, or delay）。Microbiology 第 19 章目录把 Hypersensitivities、Autoimmune Disorders、Immunodeficiency 并列。汾阳学院第 16 章写超敏概念与分型；山东第一医科大学把超敏、自身免疫、免疫缺陷放在基础应答之后的概念模块，并要求思维导图贯通。MIT 7.016 第 31 讲以 autoimmunity 收束导论。只交机制对照，不写防治原则或处方。",
+      "learn": [
+        "免疫缺陷：应答失败、不足或延迟；可获得或遗传（教材定义）",
+        "速发型超敏（IgE、肥大细胞）与迟发型超敏（TH1、细胞介导）",
+        "自身免疫：自身抗体与对 self antigen 的超敏",
+        "分子模拟（molecular mimicry）作为获得性自身免疫的一种教材机制",
+        "免疫耐受：对无害外来物或自身成分不发动破坏性应答"
+      ],
+      "task": {
+        "kind": "writeup",
+        "prompt": "交一份不超过两页的对照短评：左栏「过度」（immediate hypersensitivity、delayed hypersensitivity、autoimmunity），右栏「不足」（immunodeficiency），每格写教材原句式定义 + 一个 OpenStax 42.4 或 42.2 给出的机制例子（如 IgE–肥大细胞、molecular mimicry、HIV 感染 TH 细胞使应答容量下降）。再做 Review Questions 第 18–21 题，题号入附录。禁止写诊断步骤、急救操作或药物用法。",
+        "from": "OpenStax 42.4 与 Review Q18–21；Microbiology 第 19 章目录作对照框架；山东第一医科大学基础模块收束用的思维导图要求"
+      },
+      "resources": [
+        {
+          "url": "https://openstax.org/books/biology-2e/pages/42-4-disruptions-in-the-immune-system",
+          "title": "OpenStax 42.4 Disruptions in the Immune System",
+          "use": "摘 immunodeficiency / hypersensitivity / autoimmunity / molecular mimicry 的定义句填对照表"
+        },
+        {
+          "url": "https://openstax.org/books/biology-2e/pages/42-review-questions",
+          "title": "OpenStax Biology 第 42 章 Review Questions",
+          "use": "做第 18–21 题（花粉属哪类超敏、分子模拟、自身抗体、HIV 是否自身免疫）"
+        },
+        {
+          "url": "https://openstax.org/books/microbiology/pages/19-introduction",
+          "title": "OpenStax Microbiology 第 19 章引言",
+          "use": "用 19.1 / 19.2 / 19.4 目录核对短评是否覆盖过度与不足；跳过 19.3 移植操作与 19.5 治疗"
+        },
+        {
+          "url": "https://openstax.org/books/biology-2e/pages/42-2-adaptive-immune-response",
+          "title": "OpenStax 42.2 中的 immune tolerance",
+          "use": "补一短段：tolerance 如何把「认出外来物」限制在有害抗原上"
+        },
+        {
+          "url": "https://jcyx.sdfmu.edu.cn/info/1231/2731.htm",
+          "title": "山东第一医科大学大纲",
+          "use": "按基础理论模块收束要求，把对照表画成一张思维导图亦可；不要做临床案例处方"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/7-016-introductory-biology-fall-2018/resources/lecture-31-immunology-22014memory-t-cells-and-autoimmunity/",
+          "title": "MIT 7.016 Lecture 31",
+          "use": "对照讲次摘要里的 autoimmunity，检查短评是否只停在机制"
+        }
+      ]
+    }
+  },
+  "conflicts": [
+    "汾阳学院把第 14 章「固有免疫系统及其介导的免疫应答」排在第 12–13 章 T/B 适应性应答之后；OpenStax Biology 42.1→42.2、Microbiology 17→18、山东第一医科大学「从固有免疫到适应性免疫」都把固有放前面。取更靠前的一条：先固有后适应。",
+    "汾阳学院与山东第一医科大学后半有免疫学防治、检测技术、肿瘤/移植等章；本树按基础科学停在 OpenStax 42.4 / Microbiology 19 的过度与不足概念，不进防治原则或实验操作规程。",
+    "MIT 7.016 用两讲压缩（L30 B 细胞与多样性 → L31 提呈与自身免疫），国内大纲把抗原/抗体/MHC 拆成多章。主干跟 OpenStax 与山东的器官→固有→适应→扰乱；7.016 只作讲次对照，7.013 PS6 Q1–Q2 作为同一关的另一种交卷。"
+  ],
+  "missing": "",
+  "checked_at": "2026-10-04"
+}

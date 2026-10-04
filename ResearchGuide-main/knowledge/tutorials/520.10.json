@@ -1,0 +1,329 @@
+{
+  "id": "520.10",
+  "name": "基础学科",
+  "format": "tutorial-tree-v2",
+  "status": "ok",
+  "goal": "能用渐进分析比较常见结构与算法，实现线性结构、排序/散列、树与图上的经典算法，并按 6.006「give an algorithm」交描述、算例、正确性与时间复杂度。不承诺发明新算法；不覆盖完整自动机理论课或安全工程。",
+  "sources": [
+    {
+      "title": "Syllabus | Introduction to Algorithms | MIT OpenCourseWare (6.006, Spring 2020)",
+      "url": "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/pages/syllabus/",
+      "kind": "ocw",
+      "used_for": "先修 Python 与离散数学；Problem Set 0 未过关不改后续作业；课程覆盖初等数据结构、排序、图搜索、动态规划"
+    },
+    {
+      "title": "Calendar | Introduction to Algorithms | MIT OpenCourseWare (6.006, Spring 2020)",
+      "url": "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/pages/calendar/",
+      "kind": "ocw",
+      "used_for": "主干顺序：Data Structures → Sorting/Hashing → Binary Trees/AVL/Heaps → BFS/DFS/最短路；其后才是 DP 与 Lecture 19 Complexity"
+    },
+    {
+      "title": "Assignments | Introduction to Algorithms | MIT OpenCourseWare (6.006, Spring 2020)",
+      "url": "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/pages/assignments/",
+      "kind": "ocw",
+      "used_for": "作业形态：Problem Set 0–8，每份有 Questions PDF 与编程模板"
+    },
+    {
+      "title": "Syllabus | Introduction to Algorithms | MIT OpenCourseWare (6.006, Fall 2011)",
+      "url": "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-fall-2011/pages/syllabus/",
+      "kind": "ocw",
+      "used_for": "每份 problem set 含 Python 编程 + 理论；“give an algorithm”须含描述、算例、正确性、时间复杂度"
+    },
+    {
+      "title": "CS 61B Fall 2026 | Data Structures at UC Berkeley",
+      "url": "https://fa26.datastructur.es/",
+      "kind": "syllabus",
+      "used_for": "课历：先列表/数组与 Deque 项目，再渐近分析，然后 BST/堆、图与最短路、散列；排序排在课历后半；用 Lab / Coding HW / Project 检查"
+    },
+    {
+      "title": "Lab 3: Linked Lists | CS 61B Fall 2026",
+      "url": "https://fa26.datastructur.es/labs/lab03/",
+      "kind": "syllabus",
+      "used_for": "节点 linear：IntList 盒指针图；破坏/非破坏、迭代/递归 replace；带哨兵的 SLList.insert"
+    },
+    {
+      "title": "Project 1A: Deques and Tests | CS 61B Fall 2026",
+      "url": "https://fa26.datastructur.es/projects/proj1/proj1a/",
+      "kind": "syllabus",
+      "used_for": "节点 linear：先为 Deque 写覆盖空/非空、越界 get 的单元测试，再实现"
+    },
+    {
+      "title": "Project 1B: LinkedListDeque | CS 61B Fall 2026",
+      "url": "https://fa26.datastructur.es/projects/proj1/proj1b/",
+      "kind": "syllabus",
+      "used_for": "节点 linear：环形双向链表 + 哨兵；add/remove 须常数时间；get 用迭代、getRecursive 用递归"
+    },
+    {
+      "title": "An Open Guide to Data Structures and Algorithms — Open Textbook Library",
+      "url": "https://open.umn.edu/opentextbooks/textbooks/an-open-guide-to-data-structures-and-algorithms",
+      "kind": "open_textbook",
+      "used_for": "目录顺序：Big-O → 递归 → 排序/查找 → 链表/栈队列 → 散列 → 树/堆 → DP → 图 → Hard Problems；章末习题要求实现或解题"
+    },
+    {
+      "title": "An Open Guide to Data Structures and Algorithms (Bible & Moser, DePauw / PALNI)",
+      "url": "https://scholarship.depauw.edu/cgi/viewcontent.cgi?article=1010&context=compsci_facpubs",
+      "kind": "open_textbook",
+      "used_for": "各章 Learning Objectives 与 Exercises：代价函数、排序计时、链表删除、哈希探测、BST 删除、LCS/矩阵链、Best Fit、P/NP"
+    },
+    {
+      "title": "AL – CS2013 Version – CS2023 (Algorithms and Complexity)",
+      "url": "https://csed.acm.org/cs2013-version/",
+      "kind": "society",
+      "used_for": "知识单元：Basic Analysis → Strategies → Fundamental DS/Algorithms；Core-Tier1 含二次排序、O(n log n) 排序、散列、BST、BFS/DFS；完整自动机在 Advanced Automata"
+    },
+    {
+      "title": "AL Version Gamma — Algorithmic Foundations (CS2023)",
+      "url": "https://csed.acm.org/wp-content/uploads/2023/09/AL-Version-Gamma.pdf",
+      "kind": "society",
+      "used_for": "三课包装：CS2 引入 Big-O、链表/栈队列/散列/树与排序；第三门算法课再收图、DP、计算模型；四课包装把 AL-Models 放到独立计算理论课"
+    },
+    {
+      "title": "课程简介—算法与数据结构（北京大学）",
+      "url": "https://math.pku.edu.cn/teachers/zhangnx/ds/intro.html",
+      "kind": "syllabus",
+      "used_for": "中文本科顺序：概论与算法分析 → 线性表/栈队列 → 树 → 检索 → 图 → 排序；要求上机实习，实习与讲课比不得小于 1:1"
+    },
+    {
+      "title": "数据结构与算法 (B) 课程详细信息（北京大学 04831420）",
+      "url": "https://elective.pku.edu.cn/elective2008/edu/pku/stu/elective/controller/courseDetail/getCourseDetail.do?course_seq_no=BZ1516204831420_67537&kclx=BK",
+      "kind": "syllabus",
+      "used_for": "章序：简介与大 O → 线性表 → 栈队列 → 二叉树/堆 → 图 → 内排序 → 检索/散列；成绩含上机作业与 POJ"
+    },
+    {
+      "title": "数据结构 课程大纲（中国科学院大学 B0911002Y）",
+      "url": "https://jwba.ucas.ac.cn/sc/course/courseplan/195087",
+      "kind": "syllabus",
+      "used_for": "章序：绪论与算法分析 → 线性表/栈队列 → 树 → 图（DFS/BFS、最短路）→ 查找 → 内部排序"
+    }
+  ],
+  "trunk": ["analysis", "linear", "sort-hash", "trees", "graphs"],
+  "forks": [],
+  "join": null,
+  "nodes": {
+    "analysis": {
+      "name": "先修：编程与渐进分析",
+      "why": "6.006 Spring 2020 Syllabus 把 Python 与离散数学写成先修，并用 Problem Set 0 检查，C 及以下须面谈后才改后续作业。公开教材第 1 章、ACM AL/Basic Analysis、北大/国科大绪论都把算法定义和渐进复杂度放在任何具体结构之前。",
+      "learn": [
+        "算法与数据结构的定义",
+        "最好 / 平均 / 最坏情形",
+        "Big-O 与常数、对数、线性、二次等复杂度类",
+        "对不同规模输入计时并对照数学分析（ACM Basic Analysis）"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "对照公开教材第 1 章 Exercises：交一段可复现的算法描述（题 1：把一副牌全部翻成正面）、一个均匀代价模型下的代价函数（题 2），并判断书中 4 个 f(n) 各是 O(n)、O(n²) 还是两者都是（题 3）。另交一份短程序：对同一过程在至少 3 种输入规模下计时，表里写清规模与时间。",
+        "from": "An Open Guide 第 1 章 Exercises 1–3；经验计时对齐 ACM AL/Basic Analysis",
+        "alternatives": [
+          {
+            "kind": "problem_set",
+            "prompt": "对照 6.006 Assignments 页的 Problem Set 0 交一份先修检查（Python 3 + 离散数学：集合、关系、逻辑、组合、证明、递归、图、概率）。按 Syllabus：须先提交 PS0，再做后面的 Problem Set。",
+            "from": "6.006 Spring 2020 Problem Set 0（Syllabus + Assignments）"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/pages/syllabus/",
+          "title": "6.006 Spring 2020 Syllabus",
+          "use": "先读 Prerequisites 与 Problem Set 0 规则"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/pages/assignments/",
+          "title": "6.006 Spring 2020 Assignments",
+          "use": "下载 Problem Set 0 Questions / Template"
+        },
+        {
+          "url": "https://scholarship.depauw.edu/cgi/viewcontent.cgi?article=1010&context=compsci_facpubs",
+          "title": "An Open Guide to Data Structures and Algorithms（PDF）",
+          "use": "做第 1 章 Exercises 1–3，并按章内目标写 Big-O"
+        },
+        {
+          "url": "https://csed.acm.org/cs2013-version/",
+          "title": "ACM AL / Basic Analysis",
+          "use": "对照 best/expected/worst 与 empirical measurements 两条"
+        }
+      ]
+    },
+    "linear": {
+      "name": "线性表、栈与队列",
+      "why": "61B 前四周是列表、数组、SLList/DLList/AList 和 Deque 项目；北大 04831420 与国科大在绪论之后紧接线性表、栈与队列；ACM CS2023 的 CS2 把 ADT、链表、栈/队列列为核心。MIT 第 2 讲就是 Data Structures（含动态数组）。公开教材把链表放到排序之后，本节点取更靠前的中文大纲与 61B。",
+      "learn": [
+        "顺序存储与链式存储",
+        "动态数组 / 环形数组",
+        "栈与队列 / 双端队列的 ADT 操作",
+        "哨兵节点与头尾指针维护"
+      ],
+      "task": {
+        "kind": "project",
+        "prompt": "对照 61B Mini-Project 1A 先为 Deque 写覆盖空/非空、越界 get 的单元测试；再对照 1B 实现环形双向链表 + 哨兵的 LinkedListDeque：addFirst/addLast 与 removeFirst/removeLast 须常数时间，另交 get（迭代）与 getRecursive。用 toList 核对一组操作轨迹。",
+        "from": "CS 61B Fall 2026 Project 1A + 1B",
+        "alternatives": [
+          {
+            "kind": "lab",
+            "prompt": "没有 61B 仓库时，对照 Lab 3 交：一张 IntList 盒指针图、三种 replace（迭代破坏 / 递归非破坏 / 递归破坏）、以及带哨兵的 SLList.insert。再对照公开教材 Linked Lists 习题 2 或 3 写 removeAtPosition，注明位置 0、末尾、中间时如何维护 Prior 或 Head/Tail。",
+            "from": "61B Lab 3 + An Open Guide 第 5 章 Exercises 2–3"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://fa26.datastructur.es/projects/proj1/proj1a/",
+          "title": "61B Project 1A: Deques and Tests",
+          "use": "先写测试，覆盖页面列出的 add/remove/get/size 标志"
+        },
+        {
+          "url": "https://fa26.datastructur.es/projects/proj1/proj1b/",
+          "title": "61B Project 1B: LinkedListDeque",
+          "use": "按 Task 2–8 实现环形双向链表 Deque"
+        },
+        {
+          "url": "https://fa26.datastructur.es/labs/lab03/",
+          "title": "61B Lab 3: Linked Lists",
+          "use": "做盒指针图、三种 replace 与 SLList.insert"
+        },
+        {
+          "url": "https://scholarship.depauw.edu/cgi/viewcontent.cgi?article=1010&context=compsci_facpubs",
+          "title": "An Open Guide 第 5–6 章",
+          "use": "无 61B 环境时做链表删除与栈/队列实现题"
+        },
+        {
+          "url": "https://elective.pku.edu.cn/elective2008/edu/pku/stu/elective/controller/courseDetail/getCourseDetail.do?course_seq_no=BZ1516204831420_67537&kclx=BK",
+          "title": "北大 04831420 教学大纲",
+          "use": "对照「线性表 → 栈和队列」的学时与上机要求"
+        }
+      ]
+    },
+    "sort-hash": {
+      "name": "排序、查找与散列",
+      "why": "6.006 第 2–3 周就是 Sorting、Hashing、Linear Sorting，同期交 Problem Set 1–2。公开教材第 3–4、7 章。ACM CS2 要求一种 O(n²) 排序、一种 O(n log n) 排序，以及哈希表的冲突处理。61B 把散列和排序放到课历后半，本节点取 MIT 与公开教材的更靠前位置。",
+      "learn": [
+        "插入 / 选择等二次排序",
+        "归并或快速等 O(n log n) 排序",
+        "顺序查找与二分查找",
+        "哈希表的碰撞（探测或拉链）与装载"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "对照公开教材 Sorting 习题 2–3：实现 Insertion Sort 与 Merge Sort，用随机数组计时，写出后者开始明显更快的大约 n。再对照 Hashing 习题 1–2：在纸上走完表长 13、线性探测的插入/删除序列（12, 13, 26, 6, 14, 删 26, 39），并实现能打印槽位状态的哈希表，核对纸面与程序是否一致。",
+        "from": "An Open Guide 第 3 章 Exercises 2–3、第 7 章 Exercises 1–2"
+      },
+      "resources": [
+        {
+          "url": "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/pages/calendar/",
+          "title": "6.006 Spring 2020 Calendar",
+          "use": "对照第 2–3 周 Sorting / Hashing / Linear Sorting 与 Problem Set 1–2"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/pages/assignments/",
+          "title": "6.006 Spring 2020 Assignments",
+          "use": "需要课内作业形态时下载 Problem Set 1–2"
+        },
+        {
+          "url": "https://scholarship.depauw.edu/cgi/viewcontent.cgi?article=1010&context=compsci_facpubs",
+          "title": "An Open Guide 第 3、4、7 章",
+          "use": "做排序计时、查找与线性探测习题"
+        },
+        {
+          "url": "https://csed.acm.org/wp-content/uploads/2023/09/AL-Version-Gamma.pdf",
+          "title": "CS2023 AL Version Gamma",
+          "use": "核对自己是否交了一种 O(n²) 排序、一种 O(n log n) 排序和一种冲突处理"
+        }
+      ]
+    },
+    "trees": {
+      "name": "树、平衡与堆",
+      "why": "6.006 第 4–5 周是 Binary Trees、AVL、Binary Heaps。61B 第 7–8 周是 BST、B-trees、Red-Black、Heaps，并放 Coding HW5 BSTMaps 与 Lab 8。公开教材第 8–9 章。北大 04831420 把二叉检索树、堆与优先队列放在二叉树一章。ACM 把树平衡对操作效率的影响列为基本结果。",
+      "learn": [
+        "二叉搜索树的插入 / 删除 / 查找",
+        "不平衡时退化成链的复杂度",
+        "AVL 或红黑（跟一份即可）如何避免退化",
+        "堆作为优先队列：insert 与 extract-min"
+      ],
+      "task": {
+        "kind": "problem_set",
+        "prompt": "对照公开教材 Search Trees：实现 BST 的 insert/delete/find（删除分无子女、单子女、双子女三例），交一组操作轨迹，并给出一次因不平衡而退化成链的插入序列与复杂度。再实现二叉堆的 insert 与 extract-min，按 6.006 Fall 2011 Syllabus 的“give an algorithm”四件套写：文字/伪代码、一个算例、正确性说明、时间复杂度。",
+        "from": "An Open Guide 第 8 章 Exercises；6.006 Fall 2011 “give an algorithm”",
+        "alternatives": [
+          {
+            "kind": "lab",
+            "prompt": "对照 61B 课历第 7–8 周的 Coding HW5 BSTMaps 或 Lab 8: BSTs and LLRBs 交同等实现与测试记录；堆的四件套仍按 6.006 写法附上。若该学期 lab 页尚未发布，只对照课历写清缺了哪一份。",
+            "from": "61B Fall 2026 Calendar（HW5 / Lab 8）"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/pages/calendar/",
+          "title": "6.006 Spring 2020 Calendar",
+          "use": "对照第 4–5 周 Binary Trees / AVL / Binary Heaps 与 Problem Set 3–4"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-fall-2011/pages/syllabus/",
+          "title": "6.006 Fall 2011 Syllabus",
+          "use": "按 Written Assignments 里 “give an algorithm” 的四条写堆"
+        },
+        {
+          "url": "https://fa26.datastructur.es/",
+          "title": "61B Fall 2026 Calendar",
+          "use": "对照 BST / Heaps 讲次与 HW5 / Lab 8 入口"
+        },
+        {
+          "url": "https://scholarship.depauw.edu/cgi/viewcontent.cgi?article=1010&context=compsci_facpubs",
+          "title": "An Open Guide 第 8–9 章",
+          "use": "做 BST 删除三例，堆实现可对照 Priority Queues"
+        }
+      ]
+    },
+    "graphs": {
+      "name": "图：遍历与最短路",
+      "why": "6.006 第 9–13 讲是 BFS、DFS、加权最短路、Bellman-Ford、Dijkstra。61B 第 8–10 周是 Graph Traversals、Shortest Paths、MST。国科大第 7 章与北大 04831420「图」都要求遍历与最短路。ACM 包装建议图算法多在第三门算法课，但 6.006 与 61B 都已教到可交作业。公开教材把图放在 DP 之后，本节点跟 MIT/61B/中文大纲先图。",
+      "learn": [
+        "邻接表与邻接矩阵",
+        "BFS 与 DFS 的访问顺序",
+        "单源最短路：Dijkstra 与 Bellman-Ford 各适用何时"
+      ],
+      "task": {
+        "kind": "problem_set",
+        "prompt": "对同一张自画小图（至少 6 个顶点、含一条正权与一条说明用的负权边）交出：邻接表示、BFS 与 DFS 的访问顺序、一条正权最短路径。写清负权边时为何改用 Bellman-Ford。按 6.006「give an algorithm」为你选的最短路算法补四件套。公开教材 Graphs 习题 1 可附一句：稀疏图为何选邻接表。",
+        "from": "6.006 Calendar Lectures 9–13 的 problem set 形态；An Open Guide 第 11 章 Exercise 1",
+        "alternatives": [
+          {
+            "kind": "lab",
+            "prompt": "对照 61B 课历 Lab 9 Graphs / Lab 10 Shortest Paths 交同等记录（邻接表示、遍历顺序、一条最短路）。若该学期 lab 页尚未发布，只对照课历与讲次 21–23 写清缺了哪一份。",
+            "from": "61B Fall 2026 Calendar Lab 9 / Lab 10"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/pages/calendar/",
+          "title": "6.006 Spring 2020 Calendar",
+          "use": "对照 Lectures 9–13（BFS / DFS / Bellman-Ford / Dijkstra）与 Problem Set 5–6"
+        },
+        {
+          "url": "https://fa26.datastructur.es/",
+          "title": "61B Fall 2026 Calendar",
+          "use": "对照第 8–10 周 Graph Traversals / Shortest Paths 与 Lab 9–10"
+        },
+        {
+          "url": "https://jwba.ucas.ac.cn/sc/course/courseplan/195087",
+          "title": "国科大数据结构大纲",
+          "use": "对照第 7 章「DFS/BFS、最短路径」的要求"
+        },
+        {
+          "url": "https://scholarship.depauw.edu/cgi/viewcontent.cgi?article=1010&context=compsci_facpubs",
+          "title": "An Open Guide 第 11 章",
+          "use": "读 Graphs，用习题 1 写稀疏图为何选邻接表"
+        }
+      ]
+    }
+  },
+  "conflicts": [
+    "排序位置：MIT 6.006 与公开教材把 Sorting 放在树/图之前；Berkeley 61B 把 Basic Sorts 放到第 12–13 周，北大/国科大把内部排序放在树与图之后。主干取更靠前：在线性结构之后、树之前做排序与散列。",
+    "图与动态规划的先后：MIT 先图后 DP；公开教材第 10 章 DP、第 11 章 Graphs。61B 与北大/国科大主干没有 DP。主干跟 MIT/61B/中文大纲先图，且不把 DP 写成必做。",
+    "自动机与可计算性：ACM CS2013 把 FSM、正则、停机列为 AL/Basic Automata 的 Core-Tier1，P/NP 为 Core-Tier2；CS2023 四课包装把 AL-Models 放到独立计算理论课。6.006 只在 Lecture 19 Complexity；61B 与北大/国科大课历没有自动机。主干不进入完整自动机课，也不把停机/P-NP 证明写成必做。",
+    "安全：方向说明含安全；ACM AL-SEP 有 Social, Ethical, and Secure Algorithms，密码学在 AL-Foundational 标为 Non-core。6.006、61B 与公开教材主干没有安全专章，故不单列安全节点。"
+  ],
+  "missing": "",
+  "checked_at": "2026-10-04"
+}

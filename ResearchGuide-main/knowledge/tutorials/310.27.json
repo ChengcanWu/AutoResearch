@@ -1,0 +1,452 @@
+{
+  "id": "310.27",
+  "name": "医学遗传",
+  "format": "tutorial-tree-v2",
+  "status": "ok",
+  "goal": "能用分离律、自由组合和系谱符号解释单基因传递；能用连锁与非整倍把染色体行为写成机制；能把碱基替换或移码写到密码子与蛋白功能；并能用 Hardy–Weinberg 算出等位基因频率。停在本科交卷，不承诺遗传咨询、诊断流程或新结果。",
+  "sources": [
+    {
+      "title": "Genetics | Biology | MIT OpenCourseWare (7.03, Fall 2004)",
+      "url": "https://ocw.mit.edu/courses/7-03-genetics-fall-2004/",
+      "kind": "ocw",
+      "used_for": "课程目标：基因/染色体/基因组的结构与功能；重组、突变、选择带来的变异；群体遗传；遗传方法分析蛋白功能与 inherited disease"
+    },
+    {
+      "title": "Syllabus | Genetics | MIT OpenCourseWare (7.03)",
+      "url": "https://ocw.mit.edu/courses/7-03-genetics-fall-2004/pages/syllabus/",
+      "kind": "syllabus",
+      "used_for": "作业形态：6 份 graded problem set + 考试；参考 Griffiths Introduction to Genetic Analysis"
+    },
+    {
+      "title": "Lecture Notes | Genetics | MIT OpenCourseWare (7.03)",
+      "url": "https://ocw.mit.edu/courses/7-03-genetics-fall-2004/pages/lecture-notes/",
+      "kind": "lecture_notes",
+      "used_for": "课历顺序：Mendelian Genetics → Probability and Pedigrees → Chromosomes and Sex Linkage → Recombination and Genetic Maps → Gene Structure / Mutations → Population Genetics (HWE, mutation and selection) → Complex Traits → Chromosome Anomalies"
+    },
+    {
+      "title": "Assignments | Genetics | MIT OpenCourseWare (7.03)",
+      "url": "https://ocw.mit.edu/courses/7-03-genetics-fall-2004/pages/assignments/",
+      "kind": "syllabus",
+      "used_for": "Problem Set 与讲次对应：PS1 = L1–5；PS2 = L6–9；PS6 = L25–30"
+    },
+    {
+      "title": "pset1.pdf | Genetics | MIT OpenCourseWare (7.03)",
+      "url": "https://ocw.mit.edu/courses/7-03-genetics-fall-2004/resources/pset1/",
+      "kind": "ocw",
+      "used_for": "节点 mendel / pedigree 的交卷备选：2004 年 PS1"
+    },
+    {
+      "title": "7.03 Problem Sets Fall 2003 (Bible PDF)",
+      "url": "https://ocw.mit.edu/courses/7-03-genetics-fall-2004/d86d53e2dd52f7e6c72fa668903e59d0_ps_2003.pdf",
+      "kind": "ocw",
+      "used_for": "已打开正文：PS1 含系谱；PS2 为果蝇三点测交作图；PS6 Q1 为白化等位基因频率与 Hardy–Weinberg"
+    },
+    {
+      "title": "Ch. 12 Introduction — Biology 2e (OpenStax)",
+      "url": "https://openstax.org/books/biology-2e/pages/12-introduction",
+      "kind": "open_textbook",
+      "used_for": "Unit III 遗传学入口：Mendel 实验先于染色体与基因被鉴定；genes on chromosomes 是遗传的功能单位"
+    },
+    {
+      "title": "12.3 Laws of Inheritance — Biology 2e (OpenStax)",
+      "url": "https://openstax.org/books/biology-2e/pages/12-3-laws-of-inheritance",
+      "kind": "open_textbook",
+      "used_for": "节点 mendel：分离律、自由组合、Punnett、概率乘法"
+    },
+    {
+      "title": "Ch. 12 Review Questions — Biology 2e (OpenStax)",
+      "url": "https://openstax.org/books/biology-2e/pages/12-review-questions",
+      "kind": "open_textbook",
+      "used_for": "节点 mendel 习题：单杂交、双杂交、不完全显性、ABO 复等位与共显性、上位"
+    },
+    {
+      "title": "Ch. 13 Introduction — Biology 2e (OpenStax)",
+      "url": "https://openstax.org/books/biology-2e/pages/13-introduction",
+      "kind": "open_textbook",
+      "used_for": "节点 chrom：基因在染色体上线性排列；减数分裂解释孟德尔比；染色体数目/结构改变"
+    },
+    {
+      "title": "13.1 Chromosomal Theory and Genetic Linkage — Biology 2e (OpenStax)",
+      "url": "https://openstax.org/books/biology-2e/pages/13-1-chromosomal-theory-and-genetic-linkage",
+      "kind": "open_textbook",
+      "used_for": "节点 chrom：Sutton–Boveri；连锁、交叉互换、重组值、centimorgan、三点测交"
+    },
+    {
+      "title": "13.2 Chromosomal Basis of Inherited Disorders — Biology 2e (OpenStax)",
+      "url": "https://openstax.org/books/biology-2e/pages/13-2-chromosomal-basis-of-inherited-disorders",
+      "kind": "open_textbook",
+      "used_for": "节点 chrom：karyogram 概念、不分离、非整倍、倒位与易位；只作机制阅读，不作核型诊断规程"
+    },
+    {
+      "title": "Ch. 13 Review Questions — Biology 2e (OpenStax)",
+      "url": "https://openstax.org/books/biology-2e/pages/13-review-questions",
+      "kind": "open_textbook",
+      "used_for": "节点 chrom 习题：重组值 0 与 0.5、13q12、不分离、倒位环"
+    },
+    {
+      "title": "Ch. 14 Introduction — Biology 2e (OpenStax)",
+      "url": "https://openstax.org/books/biology-2e/pages/14-introduction",
+      "kind": "open_textbook",
+      "used_for": "节点 mutation 的分子入口：基因是编码功能产物的 DNA 序列；线粒体基因组母系传递"
+    },
+    {
+      "title": "Ch. 15 Introduction — Biology 2e (OpenStax)",
+      "url": "https://openstax.org/books/biology-2e/pages/15-introduction",
+      "kind": "open_textbook",
+      "used_for": "节点 mutation：基因从抽象遗传单位变成可复制、表达、突变的分子实体"
+    },
+    {
+      "title": "15.1 The Genetic Code — Biology 2e (OpenStax)",
+      "url": "https://openstax.org/books/biology-2e/pages/15-1-the-genetic-code",
+      "kind": "open_textbook",
+      "used_for": "节点 mutation：中心法则、简并密码子、无义密码子、插入 1–2 碱基导致移码"
+    },
+    {
+      "title": "Ch. 15 Review Questions — Biology 2e (OpenStax)",
+      "url": "https://openstax.org/books/biology-2e/pages/15-review-questions",
+      "kind": "open_textbook",
+      "used_for": "节点 mutation 备选习题：简并、密码子核苷酸数、中心法则"
+    },
+    {
+      "title": "Ch. 19 Introduction — Biology 2e (OpenStax)",
+      "url": "https://openstax.org/books/biology-2e/pages/19-introduction",
+      "kind": "open_textbook",
+      "used_for": "节点 pop：突变是新变异来源；选择只筛选已有变异"
+    },
+    {
+      "title": "19.1 Population Evolution — Biology 2e (OpenStax)",
+      "url": "https://openstax.org/books/biology-2e/pages/19-1-population-evolution",
+      "kind": "open_textbook",
+      "used_for": "节点 pop：等位基因频率、p+q=1、p²+2pq+q²=1；Visual Connection 用 p=0.8, q=0.2, n=500 求 VV/Vv/vv"
+    },
+    {
+      "title": "19.2 Population Genetics — Biology 2e (OpenStax)",
+      "url": "https://openstax.org/books/biology-2e/pages/19-2-population-genetics",
+      "kind": "open_textbook",
+      "used_for": "节点 pop：遗传漂变、瓶颈、建立者效应、基因流、近交使隐性有害等位纯合"
+    },
+    {
+      "title": "Ch. 19 Review Questions — Biology 2e (OpenStax)",
+      "url": "https://openstax.org/books/biology-2e/pages/19-review-questions",
+      "kind": "open_textbook",
+      "used_for": "节点 pop 习题：谁不在 HWE、建立者效应、突变与基因流引入新变异"
+    },
+    {
+      "title": "Table of Contents — Introduction to Genetics (TRU Pressbooks)",
+      "url": "https://opengenetics.pressbooks.tru.ca/table-of-contents/",
+      "kind": "open_textbook",
+      "used_for": "主干顺序：Mendel 第一/第二定律 → 系谱 → 等位基因与中心法则/突变 → 连锁与重组；每章有 Study Questions"
+    },
+    {
+      "title": "1.4 One Locus on a Chromosome - Segregation - Monohybrid — Introduction to Genetics",
+      "url": "https://opengenetics.pressbooks.tru.ca/chapter/one-locus-on-a-chromosome-segregation-monohybrid/",
+      "kind": "open_textbook",
+      "used_for": "节点 mendel：locus、allele、genotype/phenotype、true-breeding、单杂交与分离律"
+    },
+    {
+      "title": "Chapter 1 Study Questions — Introduction to Genetics",
+      "url": "https://opengenetics.pressbooks.tru.ca/chapter/study-questions-2/",
+      "kind": "open_textbook",
+      "used_for": "节点 mendel 习题：Q3 钢丝毛狗单杂交与测交"
+    },
+    {
+      "title": "4.3 Modes of Inheritance — Introduction to Genetics",
+      "url": "https://opengenetics.pressbooks.tru.ca/chapter/modes-of-inheritance/",
+      "kind": "open_textbook",
+      "used_for": "节点 pedigree：AD/AR/XD/XR/Y 的系谱线索；完全外显与罕见假设。例子只用来源机制，不写咨询步骤"
+    },
+    {
+      "title": "Chapter 4 Study Questions — Introduction to Genetics",
+      "url": "https://opengenetics.pressbooks.tru.ca/chapter/study-questions-4/",
+      "kind": "open_textbook",
+      "used_for": "节点 pedigree 习题：判断最可能遗传方式、给基因型、算指定个体受累概率"
+    },
+    {
+      "title": "7.1 Introduction — Introduction to Genetics",
+      "url": "https://opengenetics.pressbooks.tru.ca/chapter/introduction-7/",
+      "kind": "open_textbook",
+      "used_for": "节点 mutation：中心法则；Garrod 先天代谢缺陷（尿黑酸尿）把基因型接到酶缺失"
+    },
+    {
+      "title": "Chapter 7 Study Questions — Introduction to Genetics",
+      "url": "https://opengenetics.pressbooks.tru.ca/chapter/study-questions-7/",
+      "kind": "open_textbook",
+      "used_for": "节点 mutation 习题：Q1 精氨酸途径互补、Q4 氨基酸替换与功能丧失、Q7 色素途径填色"
+    },
+    {
+      "title": "Chapter 9 Study Questions — Introduction to Genetics",
+      "url": "https://opengenetics.pressbooks.tru.ca/chapter/study-questions-9/",
+      "kind": "open_textbook",
+      "used_for": "节点 chrom 备选习题：Q5 cis/trans 测交、Q7 用后代计数算重组率"
+    },
+    {
+      "title": "BASM314340 医学遗传学课程教学大纲 — 西安交通大学医学部",
+      "url": "https://yxbpyc.xjtu.edu.cn/info/1086/1582.htm",
+      "kind": "syllabus",
+      "used_for": "医学遗传学基础顺序：人类基因结构 → 突变类型与分子效应 → 单基因系谱 → 多基因/阈值 → 群体遗传平衡 → 染色体畸变。第十五章诊断、治疗、预防与咨询不进入本树"
+    }
+  ],
+  "trunk": ["mendel", "pedigree", "chrom", "mutation", "pop"],
+  "forks": [],
+  "join": null,
+  "nodes": {
+    "mendel": {
+      "name": "分离律与自由组合",
+      "why": "OpenStax 第 12 章和 Introduction to Genetics 第 1–2 章都把 Mendel 放在遗传学最前：先有可计算的传递单位，后面的染色体和分子才有对象。MIT 7.03 第 3 讲也是 Mendelian Genetics。交大大纲把单基因传递放在基因/突变之后，顺序冲突记入 conflicts，这里取更靠前的本科入口。",
+      "learn": [
+        "locus / allele / genotype / phenotype",
+        "true-breeding 与单杂交",
+        "分离律与 3:1",
+        "自由组合与 9:3:3:1",
+        "Punnett 与概率乘法",
+        "不完全显性、共显性、复等位（ABO）"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "对照 OpenStax 12.3 做第 12 章 Review Questions 第 7–13、17–19 题（单杂交 F1/F2、显性隐性、不完全显性、ABO、双杂交配子比）。每题写下所用定律（分离或自由组合）和计算式。用书后解答自批，记下题号。",
+        "from": "OpenStax Biology 2e 12.3 + Ch. 12 Review Questions",
+        "alternatives": [
+          {
+            "kind": "exercise",
+            "prompt": "做 Introduction to Genetics Chapter 1 Study Questions 第 3 题（钢丝毛狗：写出 F1 基因型表型、F2 最可能表型比、三仔全光滑如何解释、如何用测交判断门口那只狗的基因型）。对照 Chapter 1 Answers 自批。",
+            "from": "Introduction to Genetics Ch. 1 Study Questions Q3"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://openstax.org/books/biology-2e/pages/12-3-laws-of-inheritance",
+          "title": "12.3 Laws of Inheritance — OpenStax Biology 2e",
+          "use": "先读分离律与自由组合，再动手画 Punnett"
+        },
+        {
+          "url": "https://openstax.org/books/biology-2e/pages/12-review-questions",
+          "title": "Ch. 12 Review Questions — OpenStax Biology 2e",
+          "use": "交第 7–13、17–19 题"
+        },
+        {
+          "url": "https://opengenetics.pressbooks.tru.ca/chapter/one-locus-on-a-chromosome-segregation-monohybrid/",
+          "title": "1.4 Segregation — Monohybrid",
+          "use": "核对 locus / true-breeding / 单杂交术语"
+        },
+        {
+          "url": "https://opengenetics.pressbooks.tru.ca/chapter/study-questions-2/",
+          "title": "Chapter 1 Study Questions",
+          "use": "若选备选交卷，做 Q3"
+        }
+      ]
+    },
+    "pedigree": {
+      "name": "系谱与单基因传递方式",
+      "why": "MIT 7.03 在 Mendel 之后立刻安排 Probability and Pedigrees（第 4 讲），PS1 覆盖 L1–5。Introduction to Genetics 第 4 章专写系谱符号与 AD/AR/XD/XR/Y。交大大纲第四章要求掌握五种单基因系谱特征。这一步把豌豆比换成人类家系图，仍停在方式判断，不算再发风险咨询。",
+      "learn": [
+        "系谱常用符号",
+        "常染色体显性 / 隐性",
+        "X 连锁显性 / 隐性与半合子",
+        "Y 连锁（父传子）",
+        "完全外显与“人群中罕见”两条分析假设",
+        "可变表现度、不完全外显（交大大纲；不作咨询流程）"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "读 Introduction to Genetics 4.3，按页上的五条线索（不受累者不能带显性致病等位；娶入者默认不带罕见病等位；隐性可有携带者；XR 男性半合子；X 连锁父亲只传女不传子）完成 Chapter 4 Study Questions 第 3–5 题：为每张系谱写出最可能方式、给字母个体基因型、并计算指定个体受累概率。对照 Chapter 4 Answers 自批。不写遗传咨询步骤。",
+        "from": "Introduction to Genetics 4.3 + Chapter 4 Study Questions Q3–5",
+        "alternatives": [
+          {
+            "kind": "problem_set",
+            "prompt": "打开 7.03 Fall 2003 Problem Set 1 第 4 题（两隐性性状在同一张系谱上分离），写出每个标记最可能的遗传方式，并给指定个体基因型。用同 PDF 中的 Solutions 自批。",
+            "from": "MIT 7.03 Fall 2003 PS1 Q4；讲次对应见 2004 Assignments 的 PS1 = L1–5"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://opengenetics.pressbooks.tru.ca/chapter/modes-of-inheritance/",
+          "title": "4.3 Modes of Inheritance",
+          "use": "先读五种方式的判定线索和例图"
+        },
+        {
+          "url": "https://opengenetics.pressbooks.tru.ca/chapter/study-questions-4/",
+          "title": "Chapter 4 Study Questions",
+          "use": "交 Q3–5"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/7-03-genetics-fall-2004/pages/lecture-notes/",
+          "title": "7.03 Lecture Notes",
+          "use": "对照第 4 讲 Probability and Pedigrees 在课历中的位置"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/7-03-genetics-fall-2004/d86d53e2dd52f7e6c72fa668903e59d0_ps_2003.pdf",
+          "title": "7.03 Problem Sets Fall 2003",
+          "use": "若选备选，做 PS1 第 4 题系谱"
+        },
+        {
+          "url": "https://yxbpyc.xjtu.edu.cn/info/1086/1582.htm",
+          "title": "交大医学遗传学大纲第四章",
+          "use": "核对自己是否覆盖了 AD/AR/XD/XR/Y 五种系谱特征"
+        }
+      ]
+    },
+    "chrom": {
+      "name": "染色体、连锁与非整倍",
+      "why": "OpenStax 把第 13 章紧接 Mendel：减数分裂中的染色体行为解释孟德尔比，连锁打破自由组合，不分离与结构重排改变剂量。MIT 第 5–7 讲是 Chromosomes and Sex Linkage、Recombination and Genetic Maps、Three-factor Crosses；Introduction to Genetics 第 9 章用测交计数算重组率。交大第八章要求掌握数目/结构畸变的发生机理。染色体异常放在群体遗传之后（MIT L32、交大第八章）的冲突取 OpenStax 更靠前的位置。",
+      "learn": [
+        "染色体遗传学说（Sutton–Boveri）",
+        "连锁、交叉互换、亲本型与重组型",
+        "重组值与 centimorgan",
+        "三点测交排序",
+        "不分离导致单体/三体（剂量）",
+        "倒位（臂内/臂间）与易位"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "读 OpenStax 13.1，按页上的三点测交目标，用 Figure 13.4 的图距算出至少一对基因的重组值（写出 cM 减法）。再做 Ch. 13 Review Questions 第 6–8、10 题（重组值 0.50 与 0、13q12 命名、倒位配对成环）。最后对照 13.2 Figure 13.6，用自己的话写清减数第一次与第二次不分离各产生几种配子，不写核型诊断或产前检查流程。",
+        "from": "OpenStax Biology 2e 13.1–13.2 + Ch. 13 Review Questions",
+        "alternatives": [
+          {
+            "kind": "exercise",
+            "prompt": "做 Introduction to Genetics Chapter 9 Study Questions 第 5 题（CcEe 的 cis/trans 测交亲本型与重组型）和第 7 题（用 135/430/390/120 四个计数算重组率，写出公式）。对照 Chapter 9 Answers 自批。",
+            "from": "Introduction to Genetics Ch. 9 Study Questions Q5、Q7"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://openstax.org/books/biology-2e/pages/13-1-chromosomal-theory-and-genetic-linkage",
+          "title": "13.1 Chromosomal Theory and Genetic Linkage",
+          "use": "读连锁、交叉互换，并用 Figure 13.4 算图距"
+        },
+        {
+          "url": "https://openstax.org/books/biology-2e/pages/13-2-chromosomal-basis-of-inherited-disorders",
+          "title": "13.2 Chromosomal Basis of Inherited Disorders",
+          "use": "只读不分离与结构重排机制，对照 Figure 13.6"
+        },
+        {
+          "url": "https://openstax.org/books/biology-2e/pages/13-review-questions",
+          "title": "Ch. 13 Review Questions",
+          "use": "交第 6–8、10 题"
+        },
+        {
+          "url": "https://opengenetics.pressbooks.tru.ca/chapter/study-questions-9/",
+          "title": "Chapter 9 Study Questions",
+          "use": "若选备选，做 Q5 与 Q7"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/7-03-genetics-fall-2004/pages/lecture-notes/",
+          "title": "7.03 Lecture Notes L5–L7",
+          "use": "核对照课历：性连锁 → 重组作图 → 三点杂交"
+        }
+      ]
+    },
+    "mutation": {
+      "name": "基因、密码子与突变效应",
+      "why": "OpenStax 第 15 章把基因写成可复制、表达、突变的分子；15.1 用插入 1–2 碱基证明三联密码并画出移码。Introduction to Genetics 第 7 章用 Garrod 的尿黑酸尿和 Beadle–Tatum 把“一个基因”接到酶与代谢通路。交大第三章要求掌握转换/颠换、同义/错义/无义、移码与动态突变。MIT 第 10–11 讲是 Gene Structure and DNA Analysis、Mutations and Suppressors。这一步回答「变异如何进入结构和功能」。",
+      "learn": [
+        "中心法则：DNA → mRNA → 多肽",
+        "三联密码子、简并、起始/终止",
+        "同义、错义、无义",
+        "插入/缺失导致移码",
+        "one gene–one enzyme 与代谢通路阻断",
+        "真核基因的外显子/内含子/启动子（交大第二章）"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "读 Introduction to Genetics 7.1 与 OpenStax 15.1。交三样东西：(1) Chapter 7 Study Questions 第 1 题（三个 arg- 突变在 MM+orn/cit/arg 上的生长，判定突变在基因 A/B/C）；(2) 第 4 题（氨基酸替换如何造成无、部分、完全功能丧失）；(3) 对照 15.1 Figure 15.5，自己写一段 12 碱基编码序列，删掉 2 个碱基后重新分组，标出新的氨基酸串是否提前遇到终止密码子。不写基因诊断方法。",
+        "from": "Introduction to Genetics 7.1 + Ch. 7 Study Questions Q1、Q4；OpenStax 15.1 Figure 15.5",
+        "alternatives": [
+          {
+            "kind": "exercise",
+            "prompt": "做 OpenStax Ch. 15 Review Questions 第 4–6 题（简并、12 个密码子的核苷酸数、哪件事与中心法则冲突），再做 Introduction to Genetics Chapter 7 Study Questions 第 7 题（白色/黄色/橙色色素途径填表）。对照各自答案页自批。",
+            "from": "OpenStax Ch. 15 Review Questions Q4–6；Introduction to Genetics Ch. 7 Q7"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://opengenetics.pressbooks.tru.ca/chapter/introduction-7/",
+          "title": "7.1 Introduction — Central Dogma and Garrod",
+          "use": "先读中心法则和尿黑酸尿的酶缺失机制"
+        },
+        {
+          "url": "https://openstax.org/books/biology-2e/pages/15-1-the-genetic-code",
+          "title": "15.1 The Genetic Code",
+          "use": "读简并与移码，按 Figure 15.5 改写自己的序列"
+        },
+        {
+          "url": "https://opengenetics.pressbooks.tru.ca/chapter/study-questions-7/",
+          "title": "Chapter 7 Study Questions",
+          "use": "交 Q1、Q4（或备选的 Q7）"
+        },
+        {
+          "url": "https://openstax.org/books/biology-2e/pages/15-review-questions",
+          "title": "Ch. 15 Review Questions",
+          "use": "若选备选，做第 4–6 题"
+        },
+        {
+          "url": "https://yxbpyc.xjtu.edu.cn/info/1086/1582.htm",
+          "title": "交大医学遗传学大纲第二–三章",
+          "use": "用转换/颠换、同义/错义/无义、移码清单核对笔记"
+        }
+      ]
+    },
+    "pop": {
+      "name": "Hardy–Weinberg 与群体变异",
+      "why": "MIT 7.03 在分子遗传之后安排 Population Genetics: Hardy-Weinberg、Mutation and Selection（L25–26），再进入 Complex Traits。交大第六章要求掌握遗传平衡、基因频率、突变与选择系数；第五章先区分质量/数量性状与阈值。OpenStax 19.1 给出 p²+2pq+q² 并用 Visual Connection 出计算题。相关（多基因、建立者效应）必须先有频率机制，才不把相关当成解释。",
+      "learn": [
+        "等位基因频率 p、q 与 p+q=1",
+        "Hardy–Weinberg：p²+2pq+q²=1 及假设",
+        "突变、选择、漂变、基因流、非随机交配",
+        "瓶颈与建立者效应",
+        "近交使隐性有害等位纯合",
+        "质量性状 vs 数量性状、遗传率与阈值（交大第五章；MIT Complex Traits）"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "做 OpenStax 19.1 Visual Connection：紫花 V 对白花 v 显性，p=0.8、q=0.2、群体 500 株，算出 VV、Vv、vv 期望株数以及紫花/白花株数（写出 p²、2pq、q²）。再做 Ch. 19 Review Questions 第 6–9、11 题（谁不在平衡、Amish 多指是漂变+建立者、基因流、突变与基因流引入新变异、近交为何有害）。每题注明用了 19.1 还是 19.2 哪一段。",
+        "from": "OpenStax Biology 2e 19.1 Visual Connection + Ch. 19 Review Questions Q6–9、Q11",
+        "alternatives": [
+          {
+            "kind": "problem_set",
+            "prompt": "做 7.03 Fall 2003 Problem Set 6 第 1 题：百万人口中 500 名 aa 白化、9000 名 Aa 携带者，估算 q 与 p；在随机交配下写出下一代 aa 与 Aa 期望人数；判断第 1 代是否在 Hardy–Weinberg 平衡。用同 PDF 的 PS6 Key 自批。",
+            "from": "MIT 7.03 Fall 2003 PS6 Q1；2004 Assignments 标明 PS6 = L25–30"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://openstax.org/books/biology-2e/pages/19-1-population-evolution",
+          "title": "19.1 Population Evolution",
+          "use": "先用 Visual Connection 算出 500 株的基因型人数"
+        },
+        {
+          "url": "https://openstax.org/books/biology-2e/pages/19-2-population-genetics",
+          "title": "19.2 Population Genetics",
+          "use": "读漂变、建立者、基因流、近交"
+        },
+        {
+          "url": "https://openstax.org/books/biology-2e/pages/19-review-questions",
+          "title": "Ch. 19 Review Questions",
+          "use": "交第 6–9、11 题"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/7-03-genetics-fall-2004/d86d53e2dd52f7e6c72fa668903e59d0_ps_2003.pdf",
+          "title": "7.03 Problem Sets Fall 2003",
+          "use": "若选备选，做 PS6 第 1 题白化频率"
+        },
+        {
+          "url": "https://yxbpyc.xjtu.edu.cn/info/1086/1582.htm",
+          "title": "交大医学遗传学大纲第五–六章",
+          "use": "用遗传平衡、选择系数、质量/数量性状清单核对，跳过再发风险公式与咨询"
+        }
+      ]
+    }
+  },
+  "conflicts": [
+    "起点顺序打架：MIT 7.03 第 1–2 讲先讲基因物理结构与互补测验，交大大纲第二章先讲人类基因结构；OpenStax 第 12 章与 Introduction to Genetics 第 1 章从 Mendel 开始。取更靠前的本科入口（Mendel 先）。",
+    "染色体畸变的位置：OpenStax 13.2 紧接连锁；MIT 把 Chromosome Anomalies 放在 L32–33（群体遗传与复杂性状之后）；交大第八章也在群体遗传之后。取 OpenStax 更靠前的位置，与连锁放在同一节点。",
+    "分子突变相对连锁的位置：Introduction to Genetics 第 6–7 章在连锁（第 9 章）之前；OpenStax 与 MIT 都是染色体/连锁在前、基因结构与突变在后。取后一条。",
+    "同一关的两种交卷：OpenStax Review Questions 与 Introduction to Genetics Study Questions / MIT problem set 写在 alternatives，不长成分叉。"
+  ],
+  "missing": "",
+  "checked_at": "2026-10-04"
+}

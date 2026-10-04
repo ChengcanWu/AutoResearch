@@ -1,0 +1,374 @@
+{
+  "id": "310.14",
+  "name": "人体解剖",
+  "format": "tutorial-tree-v2",
+  "status": "ok",
+  "goal": "能用标准解剖学术语，按系统指出主要器官的形态、位置与毗邻，并画出主干血管和神经的行径；对照公开教材复习题或大纲要求的图/模型指认交卷。只做辨认与绘图，不含诊断、处方与操作。",
+  "sources": [
+    {
+      "title": "Preface — Anatomy and Physiology 2e (OpenStax)",
+      "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/preface",
+      "kind": "open_textbook",
+      "used_for": "两学期单元顺序：组织层次 → 支持与运动（皮肤/骨/关节/肌）→ 神经与内分泌 → 液体运输 → 呼吸消化泌尿 → 生殖；奇数 Review / Critical Thinking 有学生解答手册。第 16 章 Neurological Exam 不采用。"
+    },
+    {
+      "title": "1.2 Structural Organization of the Human Body — Anatomy and Physiology 2e (OpenStax)",
+      "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/1-2-structural-organization-of-the-human-body",
+      "kind": "open_textbook",
+      "used_for": "节点 terms：六层次组织；列出十一器官系统并各举一器官"
+    },
+    {
+      "title": "1.6 Anatomical Terminology — Anatomy and Physiology 2e (OpenStax)",
+      "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/1-6-anatomical-terminology",
+      "kind": "open_textbook",
+      "used_for": "节点 terms：anatomical position、方位术语、矢状/冠状/横切面、背侧与腹侧体腔"
+    },
+    {
+      "title": "Ch. 1 Review Questions — Anatomy and Physiology 2e (OpenStax)",
+      "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/1-review-questions",
+      "kind": "open_textbook",
+      "used_for": "节点 terms 的备选交卷：第 20–23 题（解剖学术语与体腔）。第 24–27 题是影像，不用。"
+    },
+    {
+      "title": "Ch. 7 Introduction — Anatomy and Physiology 2e (OpenStax)",
+      "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/7-introduction",
+      "kind": "open_textbook",
+      "used_for": "节点 skeleton：骨骼两大部分、颅/脊柱/胸廓；强调骨性标志是肌附着点"
+    },
+    {
+      "title": "Ch. 7 Review Questions — Anatomy and Physiology 2e (OpenStax)",
+      "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/7-review-questions",
+      "kind": "open_textbook",
+      "used_for": "节点 skeleton 的备选交卷：中轴骨与胸骨角等复习题"
+    },
+    {
+      "title": "Ch. 8 Introduction — Anatomy and Physiology 2e (OpenStax)",
+      "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/8-introduction",
+      "kind": "open_textbook",
+      "used_for": "节点 skeleton：附肢骨——肩带/骨盆带与自由上、下肢"
+    },
+    {
+      "title": "Ch. 9 Introduction — Anatomy and Physiology 2e (OpenStax)",
+      "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/9-introduction",
+      "kind": "open_textbook",
+      "used_for": "节点 myo：纤维/软骨/滑膜关节的特征；滑膜关节允许骨面相对滑动"
+    },
+    {
+      "title": "Ch. 11 Introduction — Anatomy and Physiology 2e (OpenStax)",
+      "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/11-introduction",
+      "kind": "open_textbook",
+      "used_for": "节点 myo：指出骨骼肌及其对骨的作用；标出 origin 与 insertion"
+    },
+    {
+      "title": "Ch. 13 Introduction — Anatomy and Physiology 2e (OpenStax)",
+      "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/13-introduction",
+      "kind": "open_textbook",
+      "used_for": "节点 nerves：成人神经系统主要区域、皮质标志、脊髓横切、脑神经顺序与周围连结、脊神经丛"
+    },
+    {
+      "title": "Ch. 19 Introduction — Anatomy and Physiology 2e (OpenStax)",
+      "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/19-introduction",
+      "kind": "open_textbook",
+      "used_for": "节点 vessels：心的内外部结构、血液路径、位置。章内心电图与心输出量计算不做。"
+    },
+    {
+      "title": "Ch. 20 Introduction — Anatomy and Physiology 2e (OpenStax)",
+      "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/20-introduction",
+      "kind": "open_textbook",
+      "used_for": "节点 vessels：标注肺循环与体循环主干血管；识别肝门静脉系"
+    },
+    {
+      "title": "Ch. 23 Introduction — Anatomy and Physiology 2e (OpenStax)",
+      "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/23-introduction",
+      "kind": "open_textbook",
+      "used_for": "节点 viscera：列出消化管与附属消化器官的功能解剖。消化化学过程不做。"
+    },
+    {
+      "title": "系统解剖学教学大纲（五年制临床医学）— 成都医学院基础医学实验教学示范中心",
+      "url": "https://cbmet.cmc.edu.cn/info/1040/1177.htm",
+      "kind": "syllabus",
+      "used_for": "主干顺序：绪论·运动系统 → 消化 → 呼吸泌尿 → 生殖腹膜 → 脉管 → 感觉器 → 神经·内分泌；实验为观察标本/模型并指认，标本成绩 20%"
+    },
+    {
+      "title": "正常人体解剖学教学大纲（中西医临床医学专业2023版）— 安徽中医药大学",
+      "url": "https://gjjk.ahtcm.edu.cn/info/2670/2590.htm",
+      "kind": "syllabus",
+      "used_for": "各节点的具体指认清单：骨性标志、肌起止、内脏位置交通、血管行径、神经走行；实验考核 20%。目标 1 写明主要血管和神经的行径和分布。"
+    },
+    {
+      "title": "01:119:127/128 Anatomy and Physiology for the Health Sciences — Rutgers",
+      "url": "https://biology.rutgers.edu/academics/undergraduate/courses/detail/28-biological-sciences-courses-3/54-01-119-127-128-anatomy-and-physiology-for-the-health-sciences",
+      "kind": "syllabus",
+      "used_for": "第一学期 Structural Organization / Bones / Muscles / Nervous；第二学期心、血管、呼吸、肾、消化；实验室 practical exam。与中文大纲的内脏–脉管–神经顺序冲突，见 conflicts。"
+    },
+    {
+      "title": "山东第一医科大学《系统解剖学》课程教学大纲（临床医学本科）",
+      "url": "https://jcyx.sdfmu.edu.cn/info/1231/2721.htm",
+      "kind": "syllabus",
+      "used_for": "确认九大系统顺序（运动→内脏→脉管→感觉器→神经）与实验「观察、辨认和描绘」；后续课才是《局部解剖学》，故不分叉。"
+    },
+    {
+      "title": "BIOL 2326 – HUMAN ANATOMY Course Syllabus (University of Utah, Summer 2026)",
+      "url": "https://class-tools.app.utah.edu/syllabus/1266/1346/Syllabus.pdf",
+      "kind": "syllabus",
+      "used_for": "作业形态：考试须带彩色铅笔作图；实验室有 bone practical 与综合 practical。课历先系统后局部，与山东「后续局部解剖学」同属先后，不是并行选修。"
+    }
+  ],
+  "trunk": ["terms", "skeleton", "myo", "viscera", "vessels", "nerves"],
+  "forks": [],
+  "join": null,
+  "nodes": {
+    "terms": {
+      "name": "姿势、方位与系统划分",
+      "why": "成都、安徽、山东都把解剖学姿势、轴、面、方位术语和人体组成/系统划分放在绪论。OpenStax 第 1 章写明这些标准术语是后面全书的地基；1.2 要求先列出十一系统再进各章。跳过它，后面的「在哪、和谁连着」没有共用坐标。",
+      "learn": [
+        "anatomical position（直立、足平行、掌心向前）",
+        "anterior/posterior、superior/inferior、medial/lateral、proximal/distal、superficial/deep",
+        "sagittal / frontal(coronal) / transverse",
+        "posterior (dorsal) 与 anterior (ventral) 体腔及其分部",
+        "六层次组织与十一器官系统（每系统至少 1 个器官）"
+      ],
+      "task": {
+        "kind": "lab",
+        "prompt": "交一张自己画的解剖学姿势图（标至少 8 个方位术语 + 3 个面 + 背侧/腹侧体腔分部），再交一张十一系统表（每系统 1 个器官）。对照 OpenStax 1.2 与 1.6 的学习目标逐条核对，缺项补上。不写影像诊断。",
+        "from": "OpenStax 1.2、1.6；成都/安徽/山东绪论",
+        "alternatives": [
+          {
+            "kind": "exercise",
+            "prompt": "做 OpenStax 第 1 章 Review Questions 第 20–23 题（解剖学术语、面、腰区、纵隔），对照学生解答手册自批并记下题号。跳过第 24–27 题（影像）。",
+            "from": "OpenStax Ch. 1 Review Questions；前言写明奇数题有学生解答手册"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/1-6-anatomical-terminology",
+          "title": "1.6 Anatomical Terminology",
+          "use": "对照 Figure 1.12–1.15 画姿势、方位、面和体腔"
+        },
+        {
+          "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/1-2-structural-organization-of-the-human-body",
+          "title": "1.2 Structural Organization of the Human Body",
+          "use": "按学习目标列出十一系统并各填 1 个器官"
+        },
+        {
+          "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/1-review-questions",
+          "title": "Ch. 1 Review Questions",
+          "use": "若选备选交卷，做第 20–23 题"
+        },
+        {
+          "url": "https://cbmet.cmc.edu.cn/info/1040/1177.htm",
+          "title": "成都医学院系统解剖学教学大纲",
+          "use": "核对绪论要求：姿势、轴、面、方位术语、系统划分"
+        }
+      ]
+    },
+    "skeleton": {
+      "name": "中轴骨与附肢骨",
+      "why": "OpenStax 把 Unit 2 定为传统的支持与运动序列，第 7 章先拆 skeletal system 的两个 major subdivisions，并要求能指认颅、脊柱分区与胸廓；第 8 章才是肩带/骨盆带与自由肢骨。成都把骨学总论→中轴骨→附肢骨放在运动系统最前；安徽第一章同样先椎骨/胸骨角再上、下肢骨性标志。山东实验纲要按躯干骨、颅骨、四肢骨示教辨认。Utah 实验室有 Appendicular Skeleton 与 bone practical。没有骨性标志，关节和肌的附着点无处可钉。",
+      "learn": [
+        "骨的形态分类与构造",
+        "axial skeleton：颅、椎骨分区、胸廓（含胸骨角）",
+        "appendicular skeleton：上肢带与自由上肢、下肢带与自由下肢",
+        "骨性标志（安徽列出的如肱骨外科颈、股骨大转子、髂前上棘等）"
+      ],
+      "task": {
+        "kind": "lab",
+        "prompt": "交两张标注图：中轴骨（颅整体观至少 6 个孔/标志 + 椎骨分区 + 胸骨角）和附肢骨（上、下肢各至少 4 个骨性标志，名称用安徽或 OpenStax 第 7–8 章术语）。再对照 OpenStax 第 7 章奇数 Review Questions 做 5 道（学生解答手册自批，记下题号）。只指标记，不写骨折处理。",
+        "from": "OpenStax 第 7–8 章与 Ch. 7 Review Questions；安徽第一章骨学；Utah bone practical 的指认形态",
+        "alternatives": [
+          {
+            "kind": "exercise",
+            "prompt": "做 OpenStax 第 7 章 Review Questions 第 7–24 题中至少 8 道（中轴骨、颅、椎骨、胸骨角、真肋），自批并记下题号。跳过第 25–26 题（胚胎发生）。",
+            "from": "OpenStax Ch. 7 Review Questions"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/7-introduction",
+          "title": "Ch. 7 Introduction",
+          "use": "先读中轴骨学习目标，再按图标注颅、脊柱、胸廓"
+        },
+        {
+          "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/8-introduction",
+          "title": "Ch. 8 Introduction",
+          "use": "按肩带/骨盆带与自由肢骨目标标注附肢骨"
+        },
+        {
+          "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/7-review-questions",
+          "title": "Ch. 7 Review Questions",
+          "use": "做中轴骨奇数复习题或备选的第 7–24 题"
+        },
+        {
+          "url": "https://gjjk.ahtcm.edu.cn/info/2670/2590.htm",
+          "title": "安徽中医药大学正常人体解剖学大纲",
+          "use": "按第一章骨学清单核对要标出的骨性标志"
+        },
+        {
+          "url": "https://class-tools.app.utah.edu/syllabus/1266/1346/Syllabus.pdf",
+          "title": "Utah BIOL 2326 Human Anatomy syllabus",
+          "use": "对照 bone practical：用彩色笔在图上指认，不进解剖室操作"
+        }
+      ]
+    },
+    "myo": {
+      "name": "关节与骨骼肌起止",
+      "why": "成都运动系统的组成就是骨、骨连接、骨骼肌；滑膜关节基本构造之后才是中轴/四肢连结。安徽在骨学之后要求关节基本结构与辅助结构，再写斜方肌、背阔肌、胸大肌等的位置、起止和作用。OpenStax 第 9 章区分纤维/软骨/滑膜关节，第 11 章目标是 Identify the origins and insertions。Rutgers 第一学期 Bones 之后是 Muscles。这一步专门回答「这块骨和谁连着、哪块肌拉它」。",
+      "learn": [
+        "纤维连结、软骨连结与滑膜关节的基本构造、辅助结构",
+        "椎骨间连结（椎间盘、前/后纵韧带、黄韧带等）",
+        "肩、肘、髋、膝关节的组成",
+        "肌的形态、辅助装置、origin–insertion–作用"
+      ],
+      "task": {
+        "kind": "lab",
+        "prompt": "交：①滑膜关节基本构造简图（关节面、关节囊、关节腔 + 至少 1 种辅助结构）；②至少 6 块肌的「位置–起点–止点–作用」表，从安徽列出的斜方肌、背阔肌、胸大肌、膈、胸锁乳突肌、三角肌、肱二头肌、肱三头肌、臀大肌、股四头肌、小腿三头肌中选。在 OpenStax 第 11 章或公开图谱上圈出这 6 块并编号。不写手法复位或手术入路。",
+        "from": "安徽第一章关节学/骨骼肌；OpenStax 第 9、11 章；成都运动系统"
+      },
+      "resources": [
+        {
+          "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/9-introduction",
+          "title": "Ch. 9 Introduction",
+          "use": "对照滑膜关节特征画基本构造简图"
+        },
+        {
+          "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/11-introduction",
+          "title": "Ch. 11 Introduction",
+          "use": "按 origin / insertion 目标填 6 块肌的起止表并在图上编号"
+        },
+        {
+          "url": "https://gjjk.ahtcm.edu.cn/info/2670/2590.htm",
+          "title": "安徽中医药大学正常人体解剖学大纲",
+          "use": "从第一章列出的肌中选 6 块，按大纲用语写位置与起止"
+        },
+        {
+          "url": "https://cbmet.cmc.edu.cn/info/1040/1177.htm",
+          "title": "成都医学院系统解剖学教学大纲",
+          "use": "核对滑膜关节基本构造与斜方肌/背阔肌等起止要求"
+        }
+      ]
+    },
+    "viscera": {
+      "name": "内脏位置与交通",
+      "why": "成都、安徽、山东在运动系统之后按消化→呼吸→泌尿（再生殖/腹膜）走，要求的是器官形态、位置、分部和交通，不是功能实验。OpenStax Unit 5 / 第 23 章同样用结构对应物质交换来讲消化（呼吸、泌尿在相邻章），但放在神经和循环之后（见 conflicts）。先完成一个内脏块，才能在下一步把管道和血管接到具体器官上。",
+      "learn": [
+        "消化管分部与交通（咽的交通、食管狭窄、胃分部、十二指肠分部）",
+        "肝与胆囊的位置",
+        "上/下呼吸道、左右主支气管区别、肺的形态分叶、胸膜腔与肋膈隐窝",
+        "肾的位置、输尿管分段与狭窄、膀胱三角"
+      ],
+      "task": {
+        "kind": "lab",
+        "prompt": "在消化 或 呼吸+泌尿 中选一块，交一张至少 8 行的「器官–位置–分部–与谁交通」表（例如食管三个狭窄、胃的分部与位置、肝的位置；或上/下呼吸道、左右主支气管区别、肺分叶、肋膈隐窝；或肾位置、输尿管三个狭窄、膀胱三角）。在 OpenStax 第 23 章或大纲附图上标出表中每一行。不写内镜或手术。",
+        "from": "安徽第二–四章；成都消化/呼吸/泌尿；OpenStax 第 23 章功能解剖目标"
+      },
+      "resources": [
+        {
+          "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/23-introduction",
+          "title": "Ch. 23 Introduction",
+          "use": "按「列出消化管与附属器官」目标画/标位置，不做消化化学"
+        },
+        {
+          "url": "https://gjjk.ahtcm.edu.cn/info/2670/2590.htm",
+          "title": "安徽中医药大学正常人体解剖学大纲",
+          "use": "按第二–四章「位置 / 分部 / 交通」清单填表"
+        },
+        {
+          "url": "https://cbmet.cmc.edu.cn/info/1040/1177.htm",
+          "title": "成都医学院系统解剖学教学大纲",
+          "use": "核对消化、呼吸、泌尿的指认顺序与标本观察要求"
+        },
+        {
+          "url": "https://jcyx.sdfmu.edu.cn/info/1231/2721.htm",
+          "title": "山东第一医科大学系统解剖学大纲",
+          "use": "对照内脏学各章实验：观察、辨认和描绘，不写操作规程"
+        }
+      ]
+    },
+    "vessels": {
+      "name": "心与主干血管行径",
+      "why": "安徽目标 1 把「全身主要血管……的行径和分布」写成课程终点之一。成都脉管系统在内脏之后：先心血管组成与体/肺循环，再心的位置外形与各腔，再动脉行程分支、静脉属支。OpenStax 第 19 章目标含 Identify interior and exterior parts、path of blood、location；第 20 章要求 Label the major blood vessels 并 Identify the hepatic portal system。Rutgers 119:128 有 Cardiac Function 与 Blood Vessels。有了内脏位置，才能把主干接到器官。",
+      "learn": [
+        "体循环与肺循环路径",
+        "心的位置、外形、四个心腔的入口与出口",
+        "主动脉分段及弓上三大分支",
+        "上、下腔静脉的组成与汇入；肝门静脉的组成",
+        "胸导管组成、走行与汇入；脾的位置形态（淋巴收到这一层即可）"
+      ],
+      "task": {
+        "kind": "lab",
+        "prompt": "交三页标注图：①体循环/肺循环路径图（箭头 + 心腔名）；②心四腔「入口–出口」表；③主动脉分段及弓上三大分支，再从上肢或下肢动脉链选一条写出起止与行程（如腋→肱→桡/尺，或股→腘→胫前/胫后）。名称只用安徽第六章或 OpenStax 第 19–20 章术语。只做指认与绘图，不做心电图判读、心输出量计算、用药或介入。",
+        "from": "安徽第六章循环系统；OpenStax 第 19–20 章结构目标；成都脉管系统"
+      },
+      "resources": [
+        {
+          "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/19-introduction",
+          "title": "Ch. 19 Introduction",
+          "use": "只读心的内外部结构、血液路径与位置，用来画四腔出入"
+        },
+        {
+          "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/20-introduction",
+          "title": "Ch. 20 Introduction",
+          "use": "按 Label major vessels / hepatic portal system 标注主干动脉、腔静脉与肝门静脉"
+        },
+        {
+          "url": "https://gjjk.ahtcm.edu.cn/info/2670/2590.htm",
+          "title": "安徽中医药大学正常人体解剖学大纲",
+          "use": "按第六章写出主动脉分段、弓上三大分支和一条肢体动脉链"
+        },
+        {
+          "url": "https://biology.rutgers.edu/academics/undergraduate/courses/detail/28-biological-sciences-courses-3/54-01-119-127-128-anatomy-and-physiology-for-the-health-sciences",
+          "title": "Rutgers 119:127/128",
+          "use": "核对本步对应第二学期 Cardiac Function / Blood Vessels 的结构部分"
+        }
+      ]
+    },
+    "nerves": {
+      "name": "中枢外形与周围神经走行",
+      "why": "成都把神经系统放在最后且学时最多。安徽第九章要求中枢外形与分部、脊神经丛和脑神经的走行与分布。山东把中枢（脊髓/脑干/小脑间脑/端脑）与周围（脊神经/脑神经）排在脉管之后。OpenStax 第 13 章目标是：说出成人神经系统主要区域、按解剖标志定位皮质、描述脊髓横切、按解剖位置列出脑神经及其中枢与周围连结、按椎区与神经丛列出脊神经。Rutgers 第一学期已有 Nervous System（顺序冲突见 conflicts）。这一步收口「结构连到哪一条神经」。不做 OpenStax 第 16 章神经学检查。",
+      "learn": [
+        "灰质/白质、神经核/神经节等常用术语",
+        "脊髓位置与外形；脑的分部（脑干、小脑、间脑、大脑分叶）",
+        "颈/臂/腰/骶丛的组成与位置",
+        "膈神经、正中/尺/桡/腋、股神经、坐骨神经等走行",
+        "十二对脑神经的顺序、连脑部位与出入颅部位"
+      ],
+      "task": {
+        "kind": "lab",
+        "prompt": "交：①中枢分部简图（脊髓 + 脑干三段 + 小脑 + 间脑 + 大脑分叶）；②十二对脑神经顺序表（名称 + 连脑或出入颅部位，用安徽第九章或 OpenStax 第 13 章用语）；③四大神经丛各写 2 条主要神经及分布。对照 OpenStax 第 13 章学习目标自检缺项。不写查体步骤，不写损伤诊疗。",
+        "from": "OpenStax 第 13 章 Chapter Objectives；安徽第九章；成都神经系统"
+      },
+      "resources": [
+        {
+          "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/13-introduction",
+          "title": "Ch. 13 Introduction",
+          "use": "按章目标画中枢分区、列脑神经顺序与脊神经丛"
+        },
+        {
+          "url": "https://gjjk.ahtcm.edu.cn/info/2670/2590.htm",
+          "title": "安徽中医药大学正常人体解剖学大纲",
+          "use": "按第九章核对四大丛主要神经走行与十二对脑神经出入颅"
+        },
+        {
+          "url": "https://cbmet.cmc.edu.cn/info/1040/1177.htm",
+          "title": "成都医学院系统解剖学教学大纲",
+          "use": "核对神经系统常用术语与中枢/周围指认要求"
+        },
+        {
+          "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/preface",
+          "title": "Preface — Anatomy and Physiology 2e",
+          "use": "确认第 16 章 Neurological Exam 是诊断性检查，本节点不用"
+        }
+      ]
+    }
+  },
+  "conflicts": [
+    "成都 / 安徽 / 山东的系统解剖学顺序是绪论 → 运动系统 → 内脏 → 脉管 → 感觉器 → 神经系统。OpenStax 与 Rutgers 119:127 把化学/细胞/组织放在系统之前，且第一学期在肌之后先走 Nervous System，内脏与循环在第二学期（119:128 / OpenStax Unit 4–5）。Utah BIOL 2326 课历是骨→关节→肌→心血管→泌尿→呼吸→消化→神经，然后再做胸腹与四肢局部。本路径按人体解剖学大纲走系统顺序（取中文三校一致、且把内脏放在脉管之前的更靠前排法）；化学与细胞层次不单列（安徽写后续课是组织胚胎学、生理学）。",
+    "OpenStax 第 16 章 Neurological Exam 是五步诊断性检查，不采用。第 19 章心电图与心输出量、第 23 章消化化学过程只作背景，节点任务停在指认与绘图。",
+    "感觉器：OpenStax 并入第 14 章躯体神经，中文大纲独立成章；本路径不单列感觉器，只在 nerves 用第 13 章的脑神经连结。",
+    "Utah 在同一门课后半做局部、山东把《局部解剖学》写成后续课，都是先后而非并行选修，故不分叉。实验室的大体解剖操作不写入任务，交卷改为公开教材图/模型指认与自绘图。"
+  ],
+  "missing": "",
+  "checked_at": "2026-10-04"
+}

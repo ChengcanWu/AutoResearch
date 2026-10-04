@@ -1,0 +1,470 @@
+{
+  "id": "190.50",
+  "name": "生理心理",
+  "format": "tutorial-tree-v2",
+  "status": "ok",
+  "goal": "能按公开课表把神经元信号、脑区与方法、感觉通路、睡眠/情绪等身体状态、学习记忆写成可核对的笔记、问题集或实验观摩记录。停在本科生理机制，不承诺诊断、处方或新实验。",
+  "sources": [
+    {
+      "title": "Syllabus | Introduction to Neuroscience | Brain and Cognitive Sciences | MIT OpenCourseWare (9.01, Fall 2007)",
+      "url": "https://ocw.mit.edu/courses/9-01-introduction-to-neuroscience-fall-2007/pages/syllabus/",
+      "kind": "ocw",
+      "used_for": "主干顺序：Part 1 Neurons（细胞、静息/动作电位、突触与药物效应）→ Part 2 Neural systems（脑组织、视觉、听觉、嗅觉、运动）→ Part 3 Brain and behavior（化学调控、动机、学习记忆、注意、情绪、睡眠）；作业是 3 份 problem set + Week 7 anatomy quiz"
+    },
+    {
+      "title": "Assignments | Introduction to Neuroscience | MIT OpenCourseWare (9.01, Fall 2007)",
+      "url": "https://ocw.mit.edu/courses/9-01-introduction-to-neuroscience-fall-2007/pages/assignments/",
+      "kind": "ocw",
+      "used_for": "节点 neurons / sensory 的交卷形态：Problem set 1–3，独立写答案"
+    },
+    {
+      "title": "Resources | Introduction to Neuroscience | MIT OpenCourseWare (9.01, Fall 2007)",
+      "url": "https://ocw.mit.edu/courses/9-01-introduction-to-neuroscience-fall-2007/download/",
+      "kind": "ocw",
+      "used_for": "点名 Problem Set 1: Cellular Neurophysiology、Problem Set 2: Visual Neuroscience、HHsim"
+    },
+    {
+      "title": "Readings | Introduction to Neuroscience | MIT OpenCourseWare (9.01, Fall 2007)",
+      "url": "https://ocw.mit.edu/courses/9-01-introduction-to-neuroscience-fall-2007/pages/readings/",
+      "kind": "ocw",
+      "used_for": "讲次与 Bear 教材章节对应：细胞/电位/突触在前，脑组织与视觉在中，学习记忆与情绪睡眠在后"
+    },
+    {
+      "title": "生理心理学 Physiological Psychology（北京师范大学心理学院）",
+      "url": "https://psych.bnu.edu.cn/rcpy/bkspy/kcjsa/a970188a1fb346d6a530f316bae4fa10.htm",
+      "kind": "syllabus",
+      "used_for": "中文本科主干：绪论与方法 → 神经细胞 → 神经系统结构 → 视觉 → 听/躯体/化学感觉 → 睡眠节律 → 生殖 → 情绪 → 学习记忆；实验课（膜电位、模型标本、水迷宫观摩）与每月思想论文"
+    },
+    {
+      "title": "Psychology 106: Behavioral Neuroscience Winter 2023 (UC San Diego)",
+      "url": "https://karendobkins.ucsd.edu/files/2023/01/psych-106.pdf",
+      "kind": "syllabus",
+      "used_for": "英文本科课历：神经细胞与通讯 → Synapses & Drugs → 解剖与研究方法 → 视觉/听觉/机械感觉 → 昼夜节律与睡眠 → 激素 → 情绪与应激 → 学习记忆；每周 1–2 段短评"
+    },
+    {
+      "title": "《生理心理学》Physiological Psychology（上海师范大学）",
+      "url": "https://psycet.shnu.edu.cn/2b/67/c23358a666471/page.htm",
+      "kind": "syllabus",
+      "used_for": "主干：细胞与突触 → 脑结构 → 精神药理学（作用点与递质，非处方）→ 方法 → 睡眠 → 摄食/生殖 → 学习记忆 → 情绪；课外任务是结合图示描述递质传递与药物位点、结合模型复习结构、主题报告"
+    },
+    {
+      "title": "Preface - Introduction to Behavioral Neuroscience | OpenStax",
+      "url": "https://openstax.org/books/introduction-behavioral-neuroscience/pages/preface",
+      "kind": "open_textbook",
+      "used_for": "前 3 章（解剖、神经生理、神经化学）是后续全部章节的 requisite knowledge；其后感觉运动、神经内分泌与情绪、内部调节、认知可按课抽样"
+    },
+    {
+      "title": "Ch. 1 Introduction - Introduction to Behavioral Neuroscience | OpenStax",
+      "url": "https://openstax.org/books/introduction-behavioral-neuroscience/pages/1-introduction",
+      "kind": "open_textbook",
+      "used_for": "从细胞组成到 CNS/PNS 组织；为解剖节点提供章节大纲"
+    },
+    {
+      "title": "1.4 The Brain: Structure and Function - Introduction to Behavioral Neuroscience | OpenStax",
+      "url": "https://openstax.org/books/introduction-behavioral-neuroscience/pages/1-4-the-brain-structure-and-function",
+      "kind": "open_textbook",
+      "used_for": "节点 anatomy：端脑/间脑/脑干/小脑；四叶；边缘系统与基底神经节"
+    },
+    {
+      "title": "Ch. 2 Introduction - Introduction to Behavioral Neuroscience | OpenStax",
+      "url": "https://openstax.org/books/introduction-behavioral-neuroscience/pages/2-introduction",
+      "kind": "open_textbook",
+      "used_for": "节点 neurons：兴奋/抑制/调制、动作电位、化学信使"
+    },
+    {
+      "title": "2.4 Mechanisms of Neural Signaling - Introduction to Behavioral Neuroscience | OpenStax",
+      "url": "https://openstax.org/books/introduction-behavioral-neuroscience/pages/2-4-mechanisms-of-neural-signaling",
+      "kind": "open_textbook",
+      "used_for": "节点 neurons 精读：静息电位、EPSP/IPSP、电压门控钠/钾通道与动作电位时相"
+    },
+    {
+      "title": "Ch. 3 Introduction - Introduction to Behavioral Neuroscience | OpenStax",
+      "url": "https://openstax.org/books/introduction-behavioral-neuroscience/pages/3-introduction",
+      "kind": "open_textbook",
+      "used_for": "节点 neurons：递质的产生、储存、释放、受体与失活"
+    },
+    {
+      "title": "3.1 General Neurochemistry Principles - Introduction to Behavioral Neuroscience | OpenStax",
+      "url": "https://openstax.org/books/introduction-behavioral-neuroscience/pages/3-1-general-neurochemistry-principles",
+      "kind": "open_textbook",
+      "used_for": "节点 neurons：囊泡释放、离子型/代谢型受体、再摄取与自身受体；药物只写到作用位点"
+    },
+    {
+      "title": "Ch. 6 Introduction - Introduction to Behavioral Neuroscience | OpenStax",
+      "url": "https://openstax.org/books/introduction-behavioral-neuroscience/pages/6-introduction",
+      "kind": "open_textbook",
+      "used_for": "节点 sensory：视网膜光感受器 → 丘脑与 V1 → 纹外皮层"
+    },
+    {
+      "title": "Ch. 13 Introduction - Introduction to Behavioral Neuroscience | OpenStax",
+      "url": "https://openstax.org/books/introduction-behavioral-neuroscience/pages/13-introduction",
+      "kind": "open_textbook",
+      "used_for": "节点 bodystate：情绪理论、基本情绪类别、脑结构贡献；不采用其后治疗讨论"
+    },
+    {
+      "title": "Ch. 15 Introduction - Introduction to Behavioral Neuroscience | OpenStax",
+      "url": "https://openstax.org/books/introduction-behavioral-neuroscience/pages/15-introduction",
+      "kind": "open_textbook",
+      "used_for": "节点 bodystate：昼夜节律、下丘脑主钟、睡眠分期调节"
+    },
+    {
+      "title": "Ch. 18 Introduction - Introduction to Behavioral Neuroscience | OpenStax",
+      "url": "https://openstax.org/books/introduction-behavioral-neuroscience/pages/18-introduction",
+      "kind": "open_textbook",
+      "used_for": "节点 memory：按时间过程与信息类型分类；内隐/外显；长时记忆的突触机制"
+    },
+    {
+      "title": "Biological Psychology [Revised Edition] (Hove & Martinez, ROTEL)",
+      "url": "https://rotel.pressbooks.pub/biologicalpsychology/",
+      "kind": "open_textbook",
+      "used_for": "公开教材身份：先基础（解剖、神经元、方法），再药物与激素、发育、遗传、情绪，后接损伤与障碍"
+    },
+    {
+      "title": "Front Matter – Biological Psychology [Revised Edition]",
+      "url": "https://rotel.pressbooks.pub/biologicalpsychology/front-matter/introduction/",
+      "kind": "open_textbook",
+      "used_for": "修订版加入第 8 章 Learning and Memory；激素章含内分泌与行为"
+    },
+    {
+      "title": "Chapter 2: The Brain and Nervous System – Biological Psychology [Revised Edition]",
+      "url": "https://rotel.pressbooks.pub/biologicalpsychology/part/chapter-2/",
+      "kind": "open_textbook",
+      "used_for": "节点 anatomy 学习目标：CNS/PNS、方位术语、脑干/丘脑/下丘脑/大脑半球、四叶、皮层下核团"
+    },
+    {
+      "title": "2.6: The Brain – Biological Psychology [Revised Edition]",
+      "url": "https://rotel.pressbooks.pub/biologicalpsychology/chapter/the-brain/",
+      "kind": "open_textbook",
+      "used_for": "节点 anatomy：前脑/中脑/后脑衍生结构；灰质白质"
+    },
+    {
+      "title": "Chapter 3: Neurons – Biological Psychology [Revised Edition]",
+      "url": "https://rotel.pressbooks.pub/biologicalpsychology/part/neurons/",
+      "kind": "open_textbook",
+      "used_for": "节点 neurons 目标：神经元与胶质、扩散与静电、静息电位、EPSP/IPSP、动作电位、轴突与突触通讯"
+    },
+    {
+      "title": "3.4: Communication Within and Between Neurons – Biological Psychology [Revised Edition]",
+      "url": "https://rotel.pressbooks.pub/biologicalpsychology/chapter/communication-within-and-between-neurons/",
+      "kind": "open_textbook",
+      "used_for": "节点 neurons 精读：离子、阈值、总和、盐跃传导、谷氨酸/GABA、再摄取（指向药理章）"
+    },
+    {
+      "title": "Chapter 4: Research Methods in Biological Psychology – Biological Psychology [Revised Edition]",
+      "url": "https://rotel.pressbooks.pub/biologicalpsychology/part/chapter-4-research-methods-in-biological-psychology/",
+      "kind": "open_textbook",
+      "used_for": "节点 anatomy 方法：损毁、植入记录、遗传操作；EEG、TMS、PET、MRI 的优劣；刺激法提供因果证据"
+    },
+    {
+      "title": "5.1: Introduction – Biological Psychology [Revised Edition]",
+      "url": "https://rotel.pressbooks.pub/biologicalpsychology/chapter/introduction-4/",
+      "kind": "open_textbook",
+      "used_for": "节点 neurons：精神活性药物通过改变神经元通讯起作用；递质与行为对应表。不采用处方或疗程"
+    },
+    {
+      "title": "8.1: Introduction – Biological Psychology [Revised Edition]",
+      "url": "https://rotel.pressbooks.pub/biologicalpsychology/chapter/8-1-introduction/",
+      "kind": "open_textbook",
+      "used_for": "节点 memory：编码/巩固/储存/提取；感觉/短时/长时记忆；突触可塑性"
+    },
+    {
+      "title": "Biological Psychology [Revised Edition] - Open Textbook Library",
+      "url": "https://open.umn.edu/opentextbooks/1/textbooks/biological-psychology",
+      "kind": "open_textbook",
+      "used_for": "核对公开教材目录：Introduction → Brain → Neurons → Methods → Psychopharmacology → Hormones …"
+    },
+    {
+      "title": "Introduction to Biological Psychology (University of Sussex Library, ed. Catherine N. Hall)",
+      "url": "https://openpress.sussex.ac.uk/introductiontobiologicalpsychology/",
+      "kind": "open_textbook",
+      "used_for": "英国 BPS 认证本科一、二年级公开教材；顺序：神经系统组织 → 神经元通讯 → 感觉与知觉 → 与世界互动"
+    },
+    {
+      "title": "Under the microscope: cells of the nervous system – Introduction to Biological Psychology",
+      "url": "https://openpress.sussex.ac.uk/introductiontobiologicalpsychology/chapter/cells-of-the-nervous-system/",
+      "kind": "open_textbook",
+      "used_for": "节点 neurons：神经元形态、树突/轴突/突触、胶质细胞功能"
+    },
+    {
+      "title": "Sensing the environment and perceiving the world – Introduction to Biological Psychology",
+      "url": "https://openpress.sussex.ac.uk/introductiontobiologicalpsychology/part/sensing-the-environment-and-perceiving-the-world/",
+      "kind": "open_textbook",
+      "used_for": "节点 sensory：刺激检测、感觉通路、脑内加工；放在神经元通讯之后"
+    }
+  ],
+  "trunk": ["neurons", "anatomy", "sensory", "bodystate", "memory"],
+  "forks": [],
+  "join": null,
+  "nodes": {
+    "neurons": {
+      "name": "神经元、电位与突触化学",
+      "why": "MIT 9.01 把 Part 1 整段放在任何感觉系统之前：细胞、静息/动作电位、突触生理与化学，并写明药物对这一过程的效应。OpenStax 前言把前 3 章定为后续全部章节的 requisite knowledge。北师大第 2 章、上师大第 2 章、UCSD 第 3–4 讲、Hove 第 3 章、Sussex 细胞章都从神经元与电化学通讯起讲。",
+      "learn": [
+        "神经元与胶质细胞的功能分工",
+        "静息膜电位：扩散力与静电力、漏钾通道",
+        "动作电位：阈值、电压门控钠/钾通道、全或无",
+        "EPSP / IPSP 与时间/空间总和",
+        "突触释放、离子型/代谢型受体、再摄取",
+        "药物在突触上的作用点（激动/拮抗/再摄取），不是处方"
+      ],
+      "task": {
+        "kind": "problem_set",
+        "prompt": "打开 MIT 9.01 Assignments / Resources 上的 Problem Set 1: Cellular Neurophysiology（可用页内 HHsim 说明），独立写出答案；每题旁注你对照了 OpenStax 2.4 或 Hove 3.4 的哪一段（离子、阈值、上升/下降相、突触）。",
+        "from": "MIT 9.01 Problem Set 1: Cellular Neurophysiology；OpenStax 2.4；Hove 3.4",
+        "alternatives": [
+          {
+            "kind": "exercise",
+            "prompt": "按上师大第 2 章课外要求，对照 Hove 3.4 与 OpenStax 3.1 画一张去甲肾上腺素（或乙酰胆碱）突触传递图：合成→囊泡→释放→受体→酶解/再摄取；再另用 5.1 的表标出一种精神活性物质改的是哪一步。只写作用位点，不写用法用量。",
+            "from": "上海师范大学《生理心理学》第 2、4 章；Hove 3.4 与 5.1；OpenStax 3.1"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://ocw.mit.edu/courses/9-01-introduction-to-neuroscience-fall-2007/pages/assignments/",
+          "title": "Assignments | Introduction to Neuroscience",
+          "use": "下载 Problem set 1，按课要求独立写答案"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/9-01-introduction-to-neuroscience-fall-2007/download/",
+          "title": "Resources | Introduction to Neuroscience",
+          "use": "确认 PS1 标题是 Cellular Neurophysiology，需要时打开 HHsim 说明"
+        },
+        {
+          "url": "https://openstax.org/books/introduction-behavioral-neuroscience/pages/2-4-mechanisms-of-neural-signaling",
+          "title": "2.4 Mechanisms of Neural Signaling",
+          "use": "精读静息电位、EPSP/IPSP、动作电位时相，给 PS1 每题标节"
+        },
+        {
+          "url": "https://rotel.pressbooks.pub/biologicalpsychology/chapter/communication-within-and-between-neurons/",
+          "title": "3.4: Communication Within and Between Neurons",
+          "use": "对照离子表与突触循环图，画递质传递"
+        },
+        {
+          "url": "https://openstax.org/books/introduction-behavioral-neuroscience/pages/3-1-general-neurochemistry-principles",
+          "title": "3.1 General Neurochemistry Principles",
+          "use": "核对囊泡释放、两类受体、再摄取"
+        },
+        {
+          "url": "https://openpress.sussex.ac.uk/introductiontobiologicalpsychology/chapter/cells-of-the-nervous-system/",
+          "title": "Under the microscope: cells of the nervous system",
+          "use": "先分清神经元形态与五类胶质，再进入电位"
+        }
+      ]
+    },
+    "anatomy": {
+      "name": "脑区解剖与研究方法",
+      "why": "MIT 在 Exam 1 之后进入 Organization of the vertebrate brain，Week 7 有 anatomy quiz。北师大第 3 章用模型与标本实验。Hove 第 2 章专讲 CNS/PNS 与脑区，第 4 章专讲损毁、EEG、TMS、PET、MRI。UCSD 在突触之后接 Anatomy 与 Investigating how the Brain Works。上师大第 3 章要求结合模型复习前脑、小脑、脑干。",
+      "learn": [
+        "中枢与外周神经系统及其交感/副交感划分",
+        "大脑四叶与胼胝体",
+        "脑干、小脑、丘脑、下丘脑",
+        "边缘系统与基底神经节",
+        "损毁、电生理记录、EEG、TMS、PET、MRI 各自能回答什么"
+      ],
+      "task": {
+        "kind": "lab",
+        "prompt": "对照北师大第 3 章实验课与 Hove 第 2 章学习目标：用公开脑模型图或实物模型指出并书面列出脑干、小脑、丘脑、下丘脑、海马、杏仁核、基底神经节、四叶各一条功能。再按 Hove 第 4 章目标做一张四行表：EEG / TMS / PET / MRI，各写一条优势和一条局限。",
+        "from": "北师大生理心理学第 3 章实验课；Hove Chapter 2、Chapter 4；OpenStax 1.4",
+        "alternatives": [
+          {
+            "kind": "exercise",
+            "prompt": "按 MIT Week 7 anatomy quiz 的位置，用 OpenStax 1.4 的胚胎五部（端脑/间脑/中脑/后脑分部）对照成体结构，交一页填空：每个分部写出两个成体衍生结构。",
+            "from": "MIT 9.01 syllabus Week 7 Anatomy quiz；OpenStax 1.4"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://psych.bnu.edu.cn/rcpy/bkspy/kcjsa/a970188a1fb346d6a530f316bae4fa10.htm",
+          "title": "生理心理学 Physiological Psychology（北京师范大学）",
+          "use": "读第 3 章教学要求与模型/标本实验安排"
+        },
+        {
+          "url": "https://rotel.pressbooks.pub/biologicalpsychology/part/chapter-2/",
+          "title": "Chapter 2: The Brain and Nervous System",
+          "use": "按页内学习目标列脑区与方位术语"
+        },
+        {
+          "url": "https://rotel.pressbooks.pub/biologicalpsychology/chapter/the-brain/",
+          "title": "2.6: The Brain",
+          "use": "对照前脑/中脑/后脑衍生结构画简图"
+        },
+        {
+          "url": "https://openstax.org/books/introduction-behavioral-neuroscience/pages/1-4-the-brain-structure-and-function",
+          "title": "1.4 The Brain: Structure and Function",
+          "use": "填胚胎分部与成体结构，读四叶与边缘系统"
+        },
+        {
+          "url": "https://rotel.pressbooks.pub/biologicalpsychology/part/chapter-4-research-methods-in-biological-psychology/",
+          "title": "Chapter 4: Research Methods in Biological Psychology",
+          "use": "做 EEG/TMS/PET/MRI 对照表"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/9-01-introduction-to-neuroscience-fall-2007/pages/syllabus/",
+          "title": "Syllabus | Introduction to Neuroscience",
+          "use": "核 Week 7 anatomy quiz 卡在视觉之前"
+        }
+      ]
+    },
+    "sensory": {
+      "name": "感觉换能与视觉通路",
+      "why": "MIT Part 2 在脑组织之后连续讲 Vision（眼→丘脑与 V1→V1 以外）、Hearing、Olfaction，Problem set 2 卡在听觉/嗅觉周。北师大第 4–5 章先视觉再听/躯体/化学感觉。UCSD Exam 1 之后整块是 Vision、Audition、Mechanical Senses。OpenStax 第 6 章从视网膜跟到纹外皮层。Sussex 把感觉单元放在神经元通讯之后。",
+      "learn": [
+        "光能如何在视网膜被换成神经信号",
+        "视网膜 → 丘脑 → V1 的通路",
+        "V1 以外的视觉加工",
+        "听觉、躯体/前庭、味嗅通路中至少再选一条对照"
+      ],
+      "task": {
+        "kind": "problem_set",
+        "prompt": "做 MIT 9.01 Problem Set 2: Visual Neuroscience；每题注明对照 OpenStax 第 6 章大纲哪一节（视网膜、双极/神经节细胞、丘脑与 V1、纹外皮层）。",
+        "from": "MIT 9.01 Problem Set 2: Visual Neuroscience；OpenStax Chapter 6",
+        "alternatives": [
+          {
+            "kind": "writeup",
+            "prompt": "按北师大第 4 章讨论要求，选一种日常视错觉或科教片中的视错觉，写不超过一页：刺激在网膜上怎样编码、通路经过哪里、错觉更可能出在哪一段加工。再按 Sussex 感觉单元目标，用三句话比较视觉与另一感觉（听或嗅）的换能差异。",
+            "from": "北师大第 4 章其它教学环节；Sussex Sensing the environment；OpenStax Chapter 6"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://ocw.mit.edu/courses/9-01-introduction-to-neuroscience-fall-2007/download/",
+          "title": "Resources | Introduction to Neuroscience",
+          "use": "下载 Problem Set 2: Visual Neuroscience"
+        },
+        {
+          "url": "https://openstax.org/books/introduction-behavioral-neuroscience/pages/6-introduction",
+          "title": "Ch. 6 Introduction - Vision",
+          "use": "按 6.1–6.5 大纲跟视网膜到纹外皮层"
+        },
+        {
+          "url": "https://openpress.sussex.ac.uk/introductiontobiologicalpsychology/part/sensing-the-environment-and-perceiving-the-world/",
+          "title": "Sensing the environment and perceiving the world",
+          "use": "对照感觉刺激、检测、通路、脑内加工四步"
+        },
+        {
+          "url": "https://psych.bnu.edu.cn/rcpy/bkspy/kcjsa/a970188a1fb346d6a530f316bae4fa10.htm",
+          "title": "生理心理学 Physiological Psychology（北京师范大学）",
+          "use": "读第 4–5 章视觉与其它感觉的教学要求"
+        },
+        {
+          "url": "https://karendobkins.ucsd.edu/files/2023/01/psych-106.pdf",
+          "title": "Psychology 106: Behavioral Neuroscience",
+          "use": "核课历：视觉两讲 → 听觉 → 前庭与躯体感觉"
+        }
+      ]
+    },
+    "bodystate": {
+      "name": "睡眠、节律与情绪生理",
+      "why": "北师大在感觉之后排睡眠及生理节律，再排情绪（含自主神经与应激）。UCSD 在机械感觉之后接 Circadian Rhythms & Sleep，再接激素与 Emotional Behaviors / Autonomic / Stress。上师大第 6 章先睡眠再后接情绪。OpenStax 第 15 章讲主钟与睡眠调节，第 13 章讲情绪理论与脑结构。MIT 把情绪与睡眠放在 Part 3 末，仍属同一「脑与行为」块。本步只写可观察生理指标，不写治疗或处方。",
+      "learn": [
+        "昼夜节律与授时因子",
+        "下丘脑主钟如何协调睡眠分期",
+        "睡眠的生理学分期与觉醒机制",
+        "情绪的外周生理与相关脑区",
+        "应激的可观察自主神经反应"
+      ],
+      "task": {
+        "kind": "writeup",
+        "prompt": "对照 OpenStax 第 15 章引言与大纲，画一张流程图：环境授时因子 → 下丘脑主钟 → 睡眠分期，并用北师大第 6 章术语标出睡眠类型/阶段。再对照 OpenStax 13.3 与北师大第 8 章，选恐惧或应激之一，列出至少两个相关脑区和两项可观察指标（如心率、皮肤电）。按 UCSD 每周短评格式写 1–2 段：你从哪一讲看出身体状态如何被测量。不要写用药或治疗步骤。",
+        "from": "OpenStax Chapters 15、13；北师大第 6、8 章；UCSD Psych 106 weekly writing",
+        "alternatives": [
+          {
+            "kind": "writeup",
+            "prompt": "按上师大第 6 章课外要求准备一份主题报告提纲（一页）：觉醒的生理机制、睡眠发生机制各列三条来自 OpenStax 15 或北师大第 6 章的可核对陈述。",
+            "from": "上海师范大学第 6 章；OpenStax Chapter 15"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://openstax.org/books/introduction-behavioral-neuroscience/pages/15-introduction",
+          "title": "Ch. 15 Introduction - Biological Rhythms and Sleep",
+          "use": "读主钟、睡眠调节与社会节律例子，画流程图"
+        },
+        {
+          "url": "https://openstax.org/books/introduction-behavioral-neuroscience/pages/13-introduction",
+          "title": "Ch. 13 Introduction - Emotion and Mood",
+          "use": "只用 13.1–13.3 的理论、基本情绪与脑结构；跳过治疗讨论"
+        },
+        {
+          "url": "https://psych.bnu.edu.cn/rcpy/bkspy/kcjsa/a970188a1fb346d6a530f316bae4fa10.htm",
+          "title": "生理心理学 Physiological Psychology（北京师范大学）",
+          "use": "读第 6 章睡眠与第 8 章情绪/应激的教学要求"
+        },
+        {
+          "url": "https://karendobkins.ucsd.edu/files/2023/01/psych-106.pdf",
+          "title": "Psychology 106: Behavioral Neuroscience",
+          "use": "按每周短评格式交 1–2 段；核睡眠与情绪在课历上的位置"
+        },
+        {
+          "url": "https://psycet.shnu.edu.cn/2b/67/c23358a666471/page.htm",
+          "title": "《生理心理学》Physiological Psychology（上海师范大学）",
+          "use": "第 6 章主题报告：觉醒与睡眠机制"
+        }
+      ]
+    },
+    "memory": {
+      "name": "学习、记忆与突触可塑性",
+      "why": "MIT Part 3 在化学调控之后连续两讲 Learning and memory，Problem set 3 落在这一段。北师大第 9 章把突触可塑性、经典/工具性条件反射和短时/长时机制放在情绪之后，并安排观摩 Morris 水迷宫。UCSD 最后两讲是 Learning & Memory。上师大第 9 章重点是学习与突触可塑性。OpenStax 第 18 章与 Hove 第 8 章都从记忆分类走到突触机制。",
+      "learn": [
+        "编码、巩固、储存、提取",
+        "感觉/短时/长时记忆与内隐/外显分类",
+        "突触可塑性与长时程增强",
+        "与陈述/空间记忆相关的海马等结构"
+      ],
+      "task": {
+        "kind": "writeup",
+        "prompt": "对照 OpenStax 第 18 章大纲与 Hove 8.1，交一份一页对照表：至少三种记忆类型 × 主要脑区 × 对应的突触或回路机制。若能观摩北师大所列的小鼠 Morris 水迷宫演示，另附半页记录：自变量/因变量是什么、它测的是哪一类记忆。不能观摩就只交对照表，并注明缺实验演示。",
+        "from": "OpenStax Chapter 18；Hove 8.1；北师大第 9 章实验（观摩水迷宫）",
+        "alternatives": [
+          {
+            "kind": "writeup",
+            "prompt": "按上师大第 9 章课外要求写主题报告提纲：学习与突触可塑性一段，经典条件反射与工具性条件反射各举一个来自 OpenStax 18.2 的例子，每例标出脑内变化写在哪一小节。",
+            "from": "上海师范大学第 9 章；OpenStax 18.2"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://openstax.org/books/introduction-behavioral-neuroscience/pages/18-introduction",
+          "title": "Ch. 18 Introduction - Learning and Memory",
+          "use": "按 18.1–18.4 填记忆类型与突触机制表"
+        },
+        {
+          "url": "https://rotel.pressbooks.pub/biologicalpsychology/chapter/8-1-introduction/",
+          "title": "8.1: Introduction (Learning and Memory)",
+          "use": "核对编码/巩固/提取与三阶段模型"
+        },
+        {
+          "url": "https://psych.bnu.edu.cn/rcpy/bkspy/kcjsa/a970188a1fb346d6a530f316bae4fa10.htm",
+          "title": "生理心理学 Physiological Psychology（北京师范大学）",
+          "use": "读第 9 章突触可塑性要求；能观摩则记水迷宫"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/9-01-introduction-to-neuroscience-fall-2007/pages/syllabus/",
+          "title": "Syllabus | Introduction to Neuroscience",
+          "use": "核 Learning and memory 两讲与 Problem set 3 的位置"
+        },
+        {
+          "url": "https://psycet.shnu.edu.cn/2b/67/c23358a666471/page.htm",
+          "title": "《生理心理学》Physiological Psychology（上海师范大学）",
+          "use": "第 9 章主题报告：可塑性与两类条件反射"
+        }
+      ]
+    }
+  },
+  "conflicts": [
+    "Hove 第 2 章先讲脑解剖再讲神经元；MIT、北师大、上师大、UCSD 先细胞与电生理。OpenStax 第 1 章把细胞与解剖放在一起，第 2 章才是神经生理。取多数课表：先神经元后解剖。",
+    "北师大把研究方法放进第 1 章绪论；UCSD、Hove、上师大放在细胞/解剖之后；OpenStax 把 Methods 放在 Appendix A。取细胞与解剖之后，以便方法名能对上结构。",
+    "MIT 把睡眠放在学期最后；北师大、UCSD、上师大在感觉之后、学习记忆之前讲睡眠/节律。取更靠前的睡眠位置，与情绪合成「身体状态」一步。",
+    "精神药理学：UCSD 与 MIT 导言把它和突触放在一起；上师大单独第 4 章讲作用点；OpenStax 把 Psychopharmacology 放在很后。本树只把「药物作用点」并入突触节点，不单列治疗轨。",
+    "运动系统：MIT、OpenStax、Sussex 在感觉后有运动控制；北师大、UCSD、上师大主干不单列。不另开节点。",
+    "Hove 公开教材缺少感觉专章；感觉节点依据 MIT、北师大、UCSD、OpenStax、Sussex。",
+    "北师大第 10 章、上师大第 13–15 章有神经/精神障碍。停在机制阅读之外，不收入主干，避免写成诊疗。"
+  ],
+  "missing": "",
+  "checked_at": "2026-10-04"
+}

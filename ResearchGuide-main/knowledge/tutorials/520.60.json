@@ -1,0 +1,383 @@
+{
+  "id": "520.60",
+  "name": "计算机应用",
+  "format": "tutorial-tree-v2",
+  "status": "ok",
+  "goal": "能对照公开课作业写出带齐次变换的三角形光栅器（含采样与纹理），再交一份能生成相机射线并与三角形/球面求交的光线投射记录。停在本科入门交卷，不承诺全局光照新算法或图像处理/仿真研究。",
+  "sources": [
+    {
+      "title": "Syllabus | Computer Graphics 6.837 (MIT OCW, Fall 2012)",
+      "url": "https://ocw.mit.edu/courses/6-837-computer-graphics-fall-2012/pages/syllabus/",
+      "kind": "ocw",
+      "used_for": "本科入门目标：3D 图形算法、实时绘制与 OpenGL；明确不写 2D 插画或图像处理；先修线代/微积分与 C++；作业交代码 + README"
+    },
+    {
+      "title": "Computer Graphics 6.837 (MIT OCW, Fall 2012)",
+      "url": "https://ocw.mit.edu/courses/6-837-computer-graphics-fall-2012/",
+      "kind": "ocw",
+      "used_for": "课程主题列表：ray tracing、graphics pipeline、transformations、texture mapping、sampling、animation"
+    },
+    {
+      "title": "Calendar | Computer Graphics 6.837 (MIT OCW, Fall 2012)",
+      "url": "https://ocw.mit.edu/courses/6-837-computer-graphics-fall-2012/pages/calendar/",
+      "kind": "ocw",
+      "used_for": "课历顺序冲突：Lec 03 Coordinates and Transformations 靠前；粒子/动画在光线之前；Graphics Pipeline and Rasterization 排在 Lec 21–22"
+    },
+    {
+      "title": "Assignments | Computer Graphics 6.837 (MIT OCW, Fall 2012)",
+      "url": "https://ocw.mit.edu/courses/6-837-computer-graphics-fall-2012/pages/assignments/",
+      "kind": "ocw",
+      "used_for": "作业形态：A0 OpenGL Mesh Viewer → A4 Ray Casting → A5 Ray Tracing；A3 Particles 证明仿真在本课出现但不作主干必做"
+    },
+    {
+      "title": "Lecture Notes | Computer Graphics 6.837 (MIT OCW, Fall 2012)",
+      "url": "https://ocw.mit.edu/courses/6-837-computer-graphics-fall-2012/pages/lecture-notes/",
+      "kind": "lecture_notes",
+      "used_for": "Lec 03 变换、Lec 11–14 光线、Lec 15–17 着色/纹理/采样、Lec 21–22 光栅化"
+    },
+    {
+      "title": "Warm up (mesh display with OpenGL) | 6.837 Assignment 0",
+      "url": "https://ocw.mit.edu/courses/6-837-computer-graphics-fall-2012/resources/mit6_837f12_assn0/",
+      "kind": "ocw",
+      "used_for": "入门作业形态：用 OpenGL 显示网格，作为环境热身而不是主干卡点"
+    },
+    {
+      "title": "CS 184/284A Spring 2026 | Computer Graphics at UC Berkeley",
+      "url": "https://cs184.eecs.berkeley.edu/sp26/",
+      "kind": "syllabus",
+      "used_for": "主干顺序：Drawing Triangles / Sampling → Transforms → Texture → Rasterization Pipeline → 其后才是 Ray Tracing、Animation、Physical Simulation"
+    },
+    {
+      "title": "Homework 1 | CS 184/284A Spring 2026",
+      "url": "https://cs184.eecs.berkeley.edu/sp26/hw/hw1/",
+      "kind": "syllabus",
+      "used_for": "光栅器作业总览：画三角形、超采样、变换、重心坐标、纹理与 mipmap；交付物是代码 + write-up"
+    },
+    {
+      "title": "Getting Started | CS 184 Homework 1 (Spring 2026)",
+      "url": "https://cs184.eecs.berkeley.edu/sp26/hw/hw1/getting-started/",
+      "kind": "syllabus",
+      "used_for": "HW1 任务分值与 GUI（S 键截 PNG）；屏幕空间原点在左上，采样点在半整数坐标"
+    },
+    {
+      "title": "Task 1: Drawing Single-Color Triangles | CS 184 Homework 1",
+      "url": "https://cs184.eecs.berkeley.edu/sp26/hw/hw1/task1/",
+      "kind": "syllabus",
+      "used_for": "节点 raster：rasterize_triangle、像素中心采样、包围盒、basic/test4.svg 截图"
+    },
+    {
+      "title": "Task 3: Transforms | CS 184 Homework 1",
+      "url": "https://cs184.eecs.berkeley.edu/sp26/hw/hw1/task3/",
+      "kind": "syllabus",
+      "used_for": "节点 transforms：transforms.cpp 的 translate / scale / rotate（齐次 3×3）；robot.svg"
+    },
+    {
+      "title": "Task 5: Pixel sampling for texture mapping | CS 184 Homework 1",
+      "url": "https://cs184.eecs.berkeley.edu/sp26/hw/hw1/task5/",
+      "kind": "syllabus",
+      "used_for": "节点 shade：最近邻与双线性纹理采样；svg/texmap/ 对比图"
+    },
+    {
+      "title": "CS184 Assignment 3 | CS 184/284A Spring 2026",
+      "url": "https://cs184.eecs.berkeley.edu/sp26/hw/hw3/",
+      "kind": "syllabus",
+      "used_for": "节点 ray：path tracer 作业；Part 1 射线生成与求交即可过关，后面全局光照不进主干必做"
+    },
+    {
+      "title": "Part 1: Ray Generation and Scene Intersection | CS 184 Homework 3",
+      "url": "https://cs184.eecs.berkeley.edu/sp26/hw/hw3/part1/",
+      "kind": "syllabus",
+      "used_for": "节点 ray：generate_ray、三角形/球面求交、CBempty.png / CBspheres.png"
+    },
+    {
+      "title": "CS 148: Introduction to Computer Graphics and Imaging (Stanford)",
+      "url": "https://web.stanford.edu/class/cs148/",
+      "kind": "syllabus",
+      "used_for": "入门课目标：合成图像；先修向量/矩阵/线代与 Python；终项是光线追踪器出图"
+    },
+    {
+      "title": "CS 148 Assignments and Grading (Stanford)",
+      "url": "https://web.stanford.edu/class/cs148/assignments.html",
+      "kind": "syllabus",
+      "used_for": "作业顺序冲突：HW2 Triangles & Transformations → HW3 Ray Tracing → HW4 Lighting & Shading；终项仍是 ray traced image"
+    },
+    {
+      "title": "Introduction to Computer Graphics — Title Page (David J. Eck)",
+      "url": "https://math.hws.edu/graphicsbook/",
+      "kind": "open_textbook",
+      "used_for": "公开本科教材：一学期、至少两学期编程先修；章序 2D → OpenGL 几何 → 光与材质 → 光线追踪"
+    },
+    {
+      "title": "Introduction to Computer Graphics — Table of Contents (Eck)",
+      "url": "https://math.hws.edu/eck/cs424/graphicsbook-1.4/contents.html",
+      "kind": "open_textbook",
+      "used_for": "目录顺序：Ch2 像素/变换 → Ch3 三维坐标与投影 → Ch4 光照与纹理 → Ch8 Ray Tracing / Path Tracing"
+    },
+    {
+      "title": "Chapter 2 — Two-Dimensional Graphics (Eck)",
+      "url": "https://math.hws.edu/graphicsbook/c2/index.html",
+      "kind": "open_textbook",
+      "used_for": "先 2D 再 3D：像素、形状、变换、层次建模"
+    },
+    {
+      "title": "Section 2.1 — Pixels, Coordinates, and Colors (Eck)",
+      "url": "https://math.hws.edu/graphicsbook/c2/s1.html",
+      "kind": "open_textbook",
+      "used_for": "节点 raster：像素坐标、走样、抗锯齿、光栅化是矢量图变成像素的一步"
+    },
+    {
+      "title": "Section 2.3 — Transforms (Eck)",
+      "url": "https://math.hws.edu/graphicsbook/c2/s3.html",
+      "kind": "open_textbook",
+      "used_for": "节点 transforms：视口/窗口、建模变换、仿射变换公式与平移"
+    },
+    {
+      "title": "Chapter 3 — OpenGL 1.1: Geometry (Eck)",
+      "url": "https://math.hws.edu/graphicsbook/c3/index.html",
+      "kind": "open_textbook",
+      "used_for": "三维几何、投影与观察放在光照之前"
+    },
+    {
+      "title": "Section 3.2 — 3D Coordinates and Transforms (Eck)",
+      "url": "https://math.hws.edu/graphicsbook/c3/s2.html",
+      "kind": "open_textbook",
+      "used_for": "节点 transforms：三维平移/缩放/绕轴旋转与层次建模"
+    },
+    {
+      "title": "Chapter 4 — OpenGL 1.1: Light and Material (Eck)",
+      "url": "https://math.hws.edu/graphicsbook/c4/index.html",
+      "kind": "open_textbook",
+      "used_for": "节点 shade：几何之后才加光照、材质与图像纹理"
+    },
+    {
+      "title": "Section 4.1 — Introduction to Lighting (Eck)",
+      "url": "https://math.hws.edu/graphicsbook/c4/s1.html",
+      "kind": "open_textbook",
+      "used_for": "节点 shade：漫反射/镜面反射、环境光、点光源与方向光"
+    },
+    {
+      "title": "Chapter 8 — Beyond Basic 3D Graphics (Eck)",
+      "url": "https://math.hws.edu/graphicsbook/c8/index.html",
+      "kind": "open_textbook",
+      "used_for": "实时管线之后才进入光线追踪；第 8.2 节路径追踪不作为必做"
+    },
+    {
+      "title": "Section 8.1 — Ray Tracing (Eck)",
+      "url": "https://math.hws.edu/graphicsbook/c8/s1.html",
+      "kind": "open_textbook",
+      "used_for": "节点 ray：ray casting、最近交点、阴影射线、递归反射的概念图"
+    },
+    {
+      "title": "GAMES101: 现代计算机图形学入门 (Yan Lingqi, UCSB)",
+      "url": "http://sites.cs.ucsb.edu/~lingqi/teaching/games101.html",
+      "kind": "lecture_notes",
+      "used_for": "主干顺序：向量与线代 → 变换 → 光栅化 → 着色与纹理 → 光线追踪；第 11 周才是动画与模拟；声明不涉及图像视频处理"
+    },
+    {
+      "title": "《计算机图形学》教学大纲（许昌学院）",
+      "url": "https://sx.xxu.edu.cn/13Xjisuanjituxingxue-1512103603.pdf",
+      "kind": "syllabus",
+      "used_for": "国内本科大纲：二维变换 → 扫描转换与反走样 → 真实感/光线跟踪；第九章动画与可视化只是了解；实践必做含多边形填充与变换"
+    },
+    {
+      "title": "Graphics and Interactive Techniques (GIT) — CS2023 Version Gamma (ACM)",
+      "url": "https://csed.acm.org/wp-content/uploads/2023/09/GIT-Version-Gamma.pdf",
+      "kind": "society",
+      "used_for": "GIT-Rendering 把变换、三角形光栅化、纹理、光线追踪写成入门必覆盖；Image Processing 与 Simulation 是另打的课包，不并进图形入门主干"
+    }
+  ],
+  "trunk": ["transforms", "raster", "shade", "ray"],
+  "forks": [],
+  "join": null,
+  "nodes": {
+    "transforms": {
+      "name": "坐标与仿射变换",
+      "why": "GAMES101 第 1–2 周先向量与线代，再讲二维/三维变换和模型–视图–投影。Eck 2.3 把视口/窗口与建模变换写成后续一切的前提，3.2 扩到三维平移、缩放与绕轴旋转。Berkeley HW1 Task 3 要求在齐次 3×3 里实现 translate / scale / rotate。MIT 6.837 Lec 03 也是 Coordinates and Transformations。没有这一层，后面的光栅化和光线都没有统一坐标。",
+      "learn": [
+        "物体坐标、世界坐标、视口与窗口",
+        "二维仿射变换（平移、旋转、缩放）与齐次坐标",
+        "三维平移、缩放、绕轴旋转",
+        "模型、视图、投影变换"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "对照 Eck §2.3，手算一次由平移、旋转、缩放组成的复合仿射变换：写出一般式里的 6 个系数，并对 3 个样点给出变换后坐标（注明节号）。再对照 CS184 HW1 Task 3，在 transforms.cpp 实现 translate / scale / rotate，用 GUI 的 S 键交出 robot.svg（或改过的 my_robot.svg）的 PNG。",
+        "from": "Eck §2.3；CS184 HW1 Task 3",
+        "alternatives": [
+          {
+            "kind": "exercise",
+            "prompt": "没有 Berkeley 框架时，对照 GAMES101 第 2 周「变换（模型、视图、投影）」写出投影矩阵推导，并交一张变换前后的三角形对比图。",
+            "from": "GAMES101 第 2 周课件与课历"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://math.hws.edu/graphicsbook/c2/s3.html",
+          "title": "Eck §2.3 Transforms",
+          "use": "读视口/窗口与仿射变换，手算复合变换"
+        },
+        {
+          "url": "https://math.hws.edu/graphicsbook/c3/s2.html",
+          "title": "Eck §3.2 3D Coordinates and Transforms",
+          "use": "把同一套平移/缩放/旋转扩到三维"
+        },
+        {
+          "url": "https://cs184.eecs.berkeley.edu/sp26/hw/hw1/task3/",
+          "title": "CS184 HW1 Task 3 Transforms",
+          "use": "实现 translate / scale / rotate 并渲染 robot.svg"
+        },
+        {
+          "url": "http://sites.cs.ucsb.edu/~lingqi/teaching/games101.html",
+          "title": "GAMES101 课历",
+          "use": "对照第 2 周变换讲次（备选交卷）"
+        }
+      ]
+    },
+    "raster": {
+      "name": "三角形光栅化",
+      "why": "Berkeley 第 1–4 周是 Drawing Triangles、Sampling and Aliasing、Rasterization Pipeline，HW1 Task 1 就要实现 rasterize_triangle。GAMES101 第 3 周把光栅化写成三角形离散化、深度测试与抗锯齿。Eck 2.1 先讲像素、走样与抗锯齿，并写明光栅化是矢量图变成像素的一步。CS2023 GIT-Rendering 把 simple triangle rasterization 列为入门核心。许昌学院第五章是扫描转换与反走样。",
+      "learn": [
+        "像素、采样点与走样 / 抗锯齿",
+        "三角形内外判定（像素中心采样）",
+        "只扫包围盒的光栅化",
+        "图形管线里的光栅化一步"
+      ],
+      "task": {
+        "kind": "lab",
+        "prompt": "对照 CS184 HW1 Task 1，实现 rasterize_triangle：在像素中心 (x+0.5, y+0.5) 做点在三角形内测试，边界点要画上，效率不低于包围盒扫描。交 basic/test4.svg 的 S 键 PNG，并写清算法为何不差于包围盒扫描。有余力再做 Task 2 超采样。",
+        "from": "CS184 HW1 Task 1",
+        "alternatives": [
+          {
+            "kind": "exercise",
+            "prompt": "没有 CS184 框架时，对照 Eck §2.1 交两张放大图：一条斜线的走样像素、同一条线的抗锯齿（部分覆盖混色），并标明采样点在像素中心还是角上。",
+            "from": "Eck §2.1 Pixels, Coordinates, and Colors"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://cs184.eecs.berkeley.edu/sp26/hw/hw1/task1/",
+          "title": "CS184 HW1 Task 1 Drawing Single-Color Triangles",
+          "use": "实现 rasterize_triangle 并按 write-up 交 test4.svg 截图"
+        },
+        {
+          "url": "https://cs184.eecs.berkeley.edu/sp26/hw/hw1/getting-started/",
+          "title": "CS184 HW1 Getting Started",
+          "use": "先搭 draw 环境，确认 S 键 PNG 与半整数采样约定"
+        },
+        {
+          "url": "https://math.hws.edu/graphicsbook/c2/s1.html",
+          "title": "Eck §2.1 Pixels, Coordinates, and Colors",
+          "use": "读像素、走样与抗锯齿；备选交卷对照这一节"
+        },
+        {
+          "url": "https://cs184.eecs.berkeley.edu/sp26/",
+          "title": "CS184 Spring 2026 schedule",
+          "use": "对照第 1–4 周三角形 / 采样 / 光栅化管线"
+        }
+      ]
+    },
+    "shade": {
+      "name": "光照、材质与纹理",
+      "why": "Eck 把光与材质放在三维几何之后的第 4 章，4.1 讲漫反射/镜面/环境光，4.3 才是图像纹理。GAMES101 第 4–5 周是着色模型、管线与纹理映射。Berkeley HW1 在三角形之后接重心坐标和 Task 5 纹理采样。MIT Lec 15–17 是 Shading、Texture Mapping、Sampling/Mipmaps。CS2023 把 texture mapping 与 minification/magnification 写进 GIT-Rendering。",
+      "learn": [
+        "漫反射、镜面反射、环境光与材质颜色",
+        "点光源与方向光",
+        "重心坐标插值",
+        "纹理的最近邻与双线性采样"
+      ],
+      "task": {
+        "kind": "lab",
+        "prompt": "对照 CS184 HW1 Task 5，实现 rasterize_textured_triangle 以及 Texture::sample_nearest / sample_bilinear。从 svg/texmap/ 交四张 S 键 PNG：最近邻 1 spp、最近邻 16 spp、双线性 1 spp、双线性 16 spp，并写一句何时两种采样差最大。",
+        "from": "CS184 HW1 Task 5",
+        "alternatives": [
+          {
+            "kind": "reading",
+            "prompt": "没有 Berkeley 框架时，对照 Eck §4.1 交一页笔记：漫反射 / 镜面反射 / 环境光 / 自发光各决定画面哪一块，再画「点光源 vs 方向光」示意图；对照第 4 章目录说明一张图像如何作为纹理贴到三角形上。",
+            "from": "Eck §4.1 与 Chapter 4"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://cs184.eecs.berkeley.edu/sp26/hw/hw1/task5/",
+          "title": "CS184 HW1 Task 5 Pixel sampling",
+          "use": "实现最近邻/双线性纹理采样并交四张对比图"
+        },
+        {
+          "url": "https://math.hws.edu/graphicsbook/c4/s1.html",
+          "title": "Eck §4.1 Introduction to Lighting",
+          "use": "读漫反射、镜面、环境光与两种光源"
+        },
+        {
+          "url": "https://math.hws.edu/graphicsbook/c4/index.html",
+          "title": "Eck Chapter 4 Light and Material",
+          "use": "看 4.3 Image Textures 在章内的位置"
+        },
+        {
+          "url": "http://sites.cs.ucsb.edu/~lingqi/teaching/games101.html",
+          "title": "GAMES101 课历",
+          "use": "对照第 4–5 周着色与纹理映射"
+        }
+      ]
+    },
+    "ray": {
+      "name": "光线投射与求交",
+      "why": "Stanford CS148 把终项写成 build a ray tracer 出图。Berkeley HW3 Part 1 要求 generate_ray 并与三角形/球面求交。MIT 作业 A4/A5 是 Ray Casting / Ray Tracing。Eck 8.1 在实时管线之后讲 ray casting、最近交点与阴影射线。GAMES101 第 7 周进入光线追踪基本原理。许昌学院第八章要求掌握光线跟踪算法。本科入口停在能交出发射线和求交图，不要求做完路径追踪。",
+      "learn": [
+        "从相机经像素生成射线（相机空间再到世界空间）",
+        "光线与三角形、球面求交，t 落在 [min_t, max_t]",
+        "阴影射线如何判定遮挡",
+        "光线追踪与光栅化在可见性问题上的差别"
+      ],
+      "task": {
+        "kind": "project",
+        "prompt": "对照 CS184 HW3 Part 1，实现 Camera::generate_ray、raytrace_pixel 的采样循环，以及 Triangle / Sphere 的求交（合法 t 才更新 max_t）。交 CBempty.png（射线方向可视化）和 CBspheres.png（法线着色），并写清三角形求交步骤。做到 Part 1 即可过关，不要把 Part 4 全局光照写成必做。",
+        "from": "CS184 HW3 Part 1",
+        "alternatives": [
+          {
+            "kind": "writeup",
+            "prompt": "没有 pathtracer 框架时，对照 Eck §8.1 交不超过 3 页的图+说明：视点 A → 像素 B → 最近交点 C，以及从 C 射向 Light 1 / Light 2 的阴影射线谁被挡住。再实现一个只含若干球面的最小光线投射器，交一张图和 README（如何运行；求交公式对应 8.1 哪一段）。",
+            "from": "Eck §8.1 Ray Tracing"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://cs184.eecs.berkeley.edu/sp26/hw/hw3/part1/",
+          "title": "CS184 HW3 Part 1 Ray Generation and Scene Intersection",
+          "use": "做 generate_ray 与三角形/球面求交，交两张指定 PNG"
+        },
+        {
+          "url": "https://cs184.eecs.berkeley.edu/sp26/hw/hw3/",
+          "title": "CS184 Homework 3",
+          "use": "看 Part 划分：只做到 Part 1，不要把后面 GI 当成过关条件"
+        },
+        {
+          "url": "https://math.hws.edu/graphicsbook/c8/s1.html",
+          "title": "Eck §8.1 Ray Tracing",
+          "use": "读 ray casting 与阴影射线；备选交卷对照这一节"
+        },
+        {
+          "url": "https://web.stanford.edu/class/cs148/assignments.html",
+          "title": "CS148 Assignments",
+          "use": "核对照终项是 ray traced image，作业形态是现场 demo 出图"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/6-837-computer-graphics-fall-2012/pages/assignments/",
+          "title": "6.837 Assignments",
+          "use": "对照 A4 Ray Casting / A5 Ray Tracing 的交卷形态（代码 + README）"
+        }
+      ]
+    }
+  },
+  "conflicts": [
+    "Stanford CS148 把 HW3 Ray Tracing 放在 HW4 Lighting 之前；Berkeley、GAMES101、Eck 都是先光栅化/着色再光线。主干取更常见、也更靠前的「变换 → 光栅化 → 光照纹理 → 光线投射」。",
+    "MIT 6.837 把粒子系统/动画放在光线之前，并把 Graphics Pipeline and Rasterization 排到 Lec 21–22。Berkeley / GAMES101 把动画与物理模拟放在课末。仿真不进主干；光栅化按 Berkeley / GAMES101 / Eck 放在光线之前。",
+    "MIT 6.837 写明不讲图像处理；GAMES101 声明不涉及图像视频处理。ACM CS2023 把 Image Processing 与 Simulation 打成与 Interactive Computer Graphics 并列的课包。本方向策展入口是图形学，图像处理与仿真不另开分叉。",
+    "许昌学院先讲 DDA / Bresenham 画线，再讲扫描转换；Berkeley / GAMES101 以三角形光栅化为第一份编程作业。光栅化节点取三角形，不把画线算法写成必做。"
+  ],
+  "missing": "",
+  "checked_at": "2026-10-04"
+}

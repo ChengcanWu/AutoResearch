@@ -1,0 +1,81 @@
+{
+  "id": "310",
+  "name": "基础医学",
+  "status": "ok",
+  "goal": "能按公开教材的层次（化学 → 细胞 → 组织 → 系统 → 稳态/免疫）画出一条「结构如何对应功能」的链，并能做公开课或教材上的复习题。不含临床诊断与处方。",
+  "sources": [
+    {
+      "title": "Preface — Anatomy and Physiology 2e (OpenStax)",
+      "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/preface",
+      "kind": "open_textbook",
+      "used_for": "两学期 A&P 的标准单元顺序：组织层次与稳态 → 运动支持 → 调控 → 液体与免疫 → 物质交换 → 遗传"
+    },
+    {
+      "title": "Syllabus | Fundamentals of Biology 7.01SC (MIT OCW)",
+      "url": "https://ocw.mit.edu/courses/7-01sc-fundamentals-of-biology-fall-2011/pages/syllabus/",
+      "kind": "ocw",
+      "used_for": "分子层顺序：生化（大分子、代谢、ATP）→ 分子生物学 → 遗传 → 重组 DNA；带 Problem Sets 与 Exams"
+    }
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "name": "人体语言与组织层次",
+      "why": "OpenStax 把第 1–4 章定为后续所有系统的地基：语言、组织层次、化学与细胞如何维持稳态。跳过它直接背系统，后面的功能没有落点。",
+      "focus": "解剖学术语、组织层次、稳态在第 1 章框架里的位置。",
+      "done_when": "对照 OpenStax 第 1 章复习题（Review / Critical Thinking，奇数题可对学生解答手册），交：一张自己标的方位术语图 + 3 道复习题答案（注明题号）。",
+      "source_urls": ["https://openstax.org/books/anatomy-and-physiology-2e/pages/preface"]
+    },
+    {
+      "step": 2,
+      "name": "化学与细胞",
+      "why": "OpenStax Unit 1 把化学层次和细胞层次放在组织之前。7.01SC 第一单元就是生化：大分子结构、代谢、酶、ATP。两边都要求先能画分子，再谈器官。",
+      "focus": "糖/脂/核酸/蛋白、酶与 ATP、细胞层次（OpenStax 第 2–3 章；7.01SC Biochemistry）。",
+      "done_when": "交一张大分子功能表（四类各一句功能），并完成 7.01SC Biochemistry 的一份 Problem Set（对公布的解答自行批改，记下错了哪一问）。",
+      "source_urls": [
+        "https://openstax.org/books/anatomy-and-physiology-2e/pages/preface",
+        "https://ocw.mit.edu/courses/7-01sc-fundamentals-of-biology-fall-2011/pages/syllabus/"
+      ]
+    },
+    {
+      "step": 3,
+      "name": "组织，以及稳态如何被说成过程",
+      "why": "OpenStax 第 4 章是组织层次；前言强调 Unit 1 特别关注区域、化学和细胞如何维持稳态。没有组织类型，系统只是名词表。",
+      "focus": "四种组织；稳态失衡在教材里作为专题（Homeostatic Imbalances）。",
+      "done_when": "对照第 4 章，交四种组织各一个位置例子；再从该章或第 1 章选一处 Homeostatic Imbalances，用三句话写：感受什么、拉回来的是什么、断了会怎样（只用来材里有的过程）。",
+      "source_urls": ["https://openstax.org/books/anatomy-and-physiology-2e/pages/preface"]
+    },
+    {
+      "step": 4,
+      "name": "一个系统：结构如何对应功能",
+      "why": "OpenStax 从 Unit 2 起按系统走，并写明「在走系统时保持对稳态的关注」。先走完一个系统，比同时背十一章更接近教材自己的用法。",
+      "focus": "任选骨骼肌（Unit 2）或心脏与血管（Unit 4 第 19–20 章）其一：结构名称必须能指到功能。",
+      "done_when": "交该系统的一张结构–功能表（至少 8 行）+ 该章奇数复习题 5 道。不写诊断。",
+      "source_urls": ["https://openstax.org/books/anatomy-and-physiology-2e/pages/preface"]
+    },
+    {
+      "step": 5,
+      "name": "淋巴与免疫：保护也是一种稳态",
+      "why": "OpenStax 把淋巴与免疫放在 Unit 4 第 21 章，和血液、循环放在一起，定义为「运输、调节内部环境、提供保护」。这是基础医学里宿主防御的位置，不是临床免疫科。",
+      "focus": "淋巴系统解剖与免疫在教材中的位置；屏障与适应性免疫只用来材术语。",
+      "done_when": "对照第 21 章，交一页图：屏障 / 先天 / 适应（用书中划分），并完成该章 5 道复习题。",
+      "source_urls": ["https://openstax.org/books/anatomy-and-physiology-2e/pages/preface"]
+    },
+    {
+      "step": 6,
+      "name": "分子信息：遗传，不写临床",
+      "why": "OpenStax 最后一章是 Development and Genetic Inheritance。7.01SC 在生化之后是分子生物学与遗传，目标包括从给定 DNA 预测 RNA 和蛋白、分析突变效应。两边都把遗传放在分子机制，而不是产前诊断。",
+      "focus": "中心法则层次的复制/转录/翻译；孟德尔与连锁（7.01SC 课程目标）。",
+      "done_when": "完成 7.01SC Molecular Biology 或 Genetics 一份 Problem Set，并交：一段给定 DNA → mRNA → 肽的推导，以及一处突变会怎样（只用课上的表）。查不到的临床含义留空。",
+      "source_urls": [
+        "https://ocw.mit.edu/courses/7-01sc-fundamentals-of-biology-fall-2011/pages/syllabus/",
+        "https://openstax.org/books/anatomy-and-physiology-2e/pages/preface"
+      ]
+    }
+  ],
+  "conflicts": [
+    "OpenStax 是按人体系统走的两学期 A&P；7.01SC 是分子生物与遗传，几乎不讲系统解剖。蒸馏取共同的分子/细胞地基，系统解剖只跟 OpenStax 的一个系统，遗传机制跟 7.01SC。OpenStax 第 16 章神经学检查偏临床操作，本路径不采用。"
+  ],
+  "missing": "",
+  "checked_at": "2026-10-03"
+}

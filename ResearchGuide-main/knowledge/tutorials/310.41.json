@@ -1,0 +1,367 @@
+{
+  "id": "310.41",
+  "name": "医学微生物",
+  "format": "tutorial-tree-v2",
+  "status": "ok",
+  "goal": "能按教材顺序区分细菌与病毒的结构、增殖方式，并用毒力、内外毒素、正常菌群和感染阶段说明宿主相遇；对照 OpenStax 章末选择题或大纲要求的对比表交卷。不含诊断操作、处方与临床指南。",
+  "sources": [
+    {
+      "title": "Preface — Microbiology (OpenStax)",
+      "url": "https://openstax.org/books/microbiology/pages/preface",
+      "kind": "open_textbook",
+      "used_for": "全书顺序：分类与细胞 → 原核/真核/无细胞病原 → 代谢与生长 → 遗传 → 第15章起致病机制与宿主免疫；后半按系统感染巡礼。对齐 ASM 本科指南 Cell Structure、viral replication、host interaction 等条目"
+    },
+    {
+      "title": "1.3 Types of Microorganisms — Microbiology (OpenStax)",
+      "url": "https://openstax.org/books/microbiology/pages/1-3-types-of-microorganisms",
+      "kind": "open_textbook",
+      "used_for": "节点 classify：Bacteria / Archaea / Eukarya；病毒为无细胞；肽聚糖、典型大小（细菌约 1 µm、病毒再小约 10 倍）"
+    },
+    {
+      "title": "Ch. 1 Multiple Choice — Microbiology (OpenStax)",
+      "url": "https://openstax.org/books/microbiology/pages/1-multiple-choice",
+      "kind": "open_textbook",
+      "used_for": "节点 classify 交卷：题 8、10–13（三域、光合、原核、无细胞、酵母）"
+    },
+    {
+      "title": "3.3 Unique Characteristics of Prokaryotic Cells — Microbiology (OpenStax)",
+      "url": "https://openstax.org/books/microbiology/pages/3-3-unique-characteristics-of-prokaryotic-cells",
+      "kind": "open_textbook",
+      "used_for": "节点 prok-cell：形态与排列、细胞壁与渗透、核质、质粒、70S 核糖体、芽胞"
+    },
+    {
+      "title": "Ch. 3 Multiple Choice — Microbiology (OpenStax)",
+      "url": "https://openstax.org/books/microbiology/pages/3-multiple-choice",
+      "kind": "open_textbook",
+      "used_for": "节点 prok-cell 交卷：题 7–11（vibrio、黏附结构、G− 特有 LPS、鞭毛着生、肽聚糖）"
+    },
+    {
+      "title": "9.1 How Microbes Grow — Microbiology (OpenStax)",
+      "url": "https://openstax.org/books/microbiology/pages/9-1-how-microbes-grow",
+      "kind": "open_textbook",
+      "used_for": "节点 growth：二分裂、世代时间 Nn=N0·2^n、封闭培养生长曲线 lag/log/stationary/death、生物膜与群体感应"
+    },
+    {
+      "title": "Ch. 9 Multiple Choice — Microbiology (OpenStax)",
+      "url": "https://openstax.org/books/microbiology/pages/9-multiple-choice",
+      "kind": "open_textbook",
+      "used_for": "节点 growth 交卷：题 2–6、9（生长时相、世代时间、Z 环、代次计算、群体感应）"
+    },
+    {
+      "title": "6.1 Viruses — Microbiology (OpenStax)",
+      "url": "https://openstax.org/books/microbiology/pages/6-1-viruses",
+      "kind": "open_textbook",
+      "used_for": "节点 virus：专性细胞内寄生、DNA 或 RNA 基因组（不同时两者）、衣壳/包膜/刺突、裸病毒与有包膜病毒"
+    },
+    {
+      "title": "6.2 The Viral Life Cycle — Microbiology (OpenStax)",
+      "url": "https://openstax.org/books/microbiology/pages/6-2-the-viral-life-cycle",
+      "kind": "open_textbook",
+      "used_for": "节点 virus：裂解周期五步、溶原/前噬菌体/溶原转换、动物病毒吸附—穿入—生物合成—装配—释放、逆转录病毒与前病毒"
+    },
+    {
+      "title": "Ch. 6 Multiple Choice — Microbiology (OpenStax)",
+      "url": "https://openstax.org/books/microbiology/pages/6-multiple-choice",
+      "kind": "open_textbook",
+      "used_for": "节点 virus 交卷：题 1–7、14（刺突、包膜来源、裂解周期、朊粒无核酸）；不用题 11–12 的培养/检测"
+    },
+    {
+      "title": "15.2 How Pathogens Cause Disease — Microbiology (OpenStax)",
+      "url": "https://openstax.org/books/microbiology/pages/15-2-how-pathogens-cause-disease",
+      "kind": "open_textbook",
+      "used_for": "节点 encounter：pathogenicity/virulence、ID50/LD50、原发与条件致病、致病四步 exposure–adhesion–invasion–infection"
+    },
+    {
+      "title": "15.3 Virulence Factors of Bacterial and Viral Pathogens — Microbiology (OpenStax)",
+      "url": "https://openstax.org/books/microbiology/pages/15-3-virulence-factors-of-bacterial-and-viral-pathogens",
+      "kind": "open_textbook",
+      "used_for": "节点 encounter：黏附素、内外毒素对比表（Table 15.9：来源、成分、热稳定性、LD50）"
+    },
+    {
+      "title": "Ch. 15 Multiple Choice — Microbiology (OpenStax)",
+      "url": "https://openstax.org/books/microbiology/pages/15-multiple-choice",
+      "kind": "open_textbook",
+      "used_for": "节点 encounter 交卷：题 6–11（Koch 局限、ID50、致病步骤顺序、内外毒素判别）"
+    },
+    {
+      "title": "BASM312740 医学微生物学课程教学大纲 — 西安交通大学医学部",
+      "url": "https://yxbpyc.xjtu.edu.cn/info/1086/1578.htm",
+      "kind": "syllabus",
+      "used_for": "主干：绪论分类 → 细菌形态与结构 → 细菌生理 →（噬菌体/遗传）→ 细菌的感染与免疫 → 病毒基本性状 → 病毒的感染与免疫。掌握细胞壁、特殊结构、生长繁殖条件、正常菌群与机会致病菌、内外毒素区别、病毒结构与增殖。检查方法与防治原则各章标为了解/自学，本树不用"
+    },
+    {
+      "title": "山东第一医科大学《医学微生物学》课程（含课内实验）教学大纲",
+      "url": "https://jcyx.sdfmu.edu.cn/info/1231/2741.htm",
+      "kind": "syllabus",
+      "used_for": "与西交同一条四大段：绪论、细菌学、病毒学、真菌学；细菌形态与结构、生理、感染与免疫、病毒基本性状与感染与免疫为授课块。实验含染色鉴定与抗原检测，本树不取作任务"
+    },
+    {
+      "title": "《医学微生物学》教学大纲（影像、麻醉、口腔专业）— 锦州医科大学",
+      "url": "https://jcxy.jzmu.edu.cn/__local/2/CC/8C/213AB5996CEAC60403F8FA8828A_6ED9D18E_53791.pdf?e=.pdf",
+      "kind": "syllabus",
+      "used_for": "第1章细胞壁 G+/G− 与特殊结构；第2章生长曲线与厌氧；第7章正常菌群、侵袭力、内外毒素、内源/外源感染；第26章病毒复制周期；第27章病毒对宿主细胞的杀细胞效应、稳定状态、基因整合。消毒灭菌与检查防治标实验课/自学"
+    },
+    {
+      "title": "Syllabus | Systems Microbiology 20.106J/1.084J — MIT OpenCourseWare",
+      "url": "https://ocw.mit.edu/courses/20-106j-systems-microbiology-fall-2006/pages/syllabus/",
+      "kind": "ocw",
+      "used_for": "本科课历：Lec 2 Cell Structure → Lec 4 Microbial Growth → Lec 6 Virology → Lec 17 Microbe-host Interactions；作业为隔周 Problem Set。Lec 20 Diagnostic 与其后传播病种不进入本树"
+    },
+    {
+      "title": "Lecture Notes | Systems Microbiology — MIT OpenCourseWare",
+      "url": "https://ocw.mit.edu/courses/20-106j-systems-microbiology-fall-2006/pages/lecture-notes/",
+      "kind": "lecture_notes",
+      "used_for": "核对讲次与讲义页对应：lecture02 细胞结构、lecture04 生长、lecture06 病毒、lecture17 宿主相互作用"
+    },
+    {
+      "title": "lecture02.pdf Cell Structure and Function — MIT 20.106J",
+      "url": "https://ocw.mit.edu/courses/20-106j-systems-microbiology-fall-2006/resources/lecture02/",
+      "kind": "lecture_notes",
+      "used_for": "节点 prok-cell：与 OpenStax 3.3、西交第一章并列的细胞结构讲次"
+    },
+    {
+      "title": "lecture04.pdf Microbial Growth — MIT 20.106J",
+      "url": "https://ocw.mit.edu/courses/20-106j-systems-microbiology-fall-2006/resources/lecture04/",
+      "kind": "lecture_notes",
+      "used_for": "节点 growth：课历把生长放在细胞结构之后、病毒之前"
+    },
+    {
+      "title": "lecture06.pdf Virology — MIT 20.106J",
+      "url": "https://ocw.mit.edu/courses/20-106j-systems-microbiology-fall-2006/resources/lecture06/",
+      "kind": "lecture_notes",
+      "used_for": "节点 virus：properties of viruses, viral growth, viral replication, viral structure"
+    },
+    {
+      "title": "lecture17.pdf Microbe-host Interactions — MIT 20.106J",
+      "url": "https://ocw.mit.edu/courses/20-106j-systems-microbiology-fall-2006/resources/lecture17/",
+      "kind": "lecture_notes",
+      "used_for": "节点 encounter：microbe-host interactions、indigenous microbiota；页面摘要含抗菌耐药术语，任务只用正常菌群与相遇机制"
+    },
+    {
+      "title": "Assignments | Systems Microbiology — MIT OpenCourseWare",
+      "url": "https://ocw.mit.edu/courses/20-106j-systems-microbiology-fall-2006/pages/assignments/",
+      "kind": "ocw",
+      "used_for": "作业形态：Problem Set 1–6；作 encounter 节点的备选交卷方式"
+    },
+    {
+      "title": "Chapter 7 Bacterial Pathogenesis — Medical Microbiology, 4th ed. (Baron, NCBI Bookshelf)",
+      "url": "https://www.ncbi.nlm.nih.gov/books/NBK8526/",
+      "kind": "open_textbook",
+      "used_for": "节点 encounter：感染=微生物侵入并在组织中增殖；毒力因子帮助 invade / cause disease / evade；黏附（菌毛）、荚膜、内毒素（G− LPS）、外毒素（细胞毒/神经毒/肠毒）"
+    }
+  ],
+  "trunk": ["classify", "prok-cell", "growth", "virus", "encounter"],
+  "forks": [],
+  "join": null,
+  "nodes": {
+    "classify": {
+      "name": "微生物分类与三大类",
+      "why": "西交、山一、锦州都把「微生物的概念及按细胞结构分类」放在绪论最前。OpenStax 第 1 章在细胞各论之前先列 Bacteria / Archaea / Eukarya 与无细胞病毒，并给出可见阈值和典型大小。后面的细胞壁和复制周期都建立在这一划分上。",
+      "learn": [
+        "微生物：多数需显微镜才可见；典型细菌约 1 µm，病毒再小约一个数量级",
+        "三域：Bacteria、Archaea、Eukarya；病毒不进入三域",
+        "细菌细胞壁常含 peptidoglycan；古菌无肽聚糖、目前未显示为人类病原",
+        "真核微生物：原生生物、真菌（酵母/霉菌，细胞壁常为 chitin）",
+        "病毒：无细胞，核酸为 DNA 或 RNA（不同时两者），必须进入宿主细胞才能增殖"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "对照 OpenStax 1.3 自制一张分类表：原核（细菌/古菌）、真核微生物、无细胞因子各至少 2 条区分特征，并各举 1 个来源里出现的例子。再做第 1 章 Multiple Choice 第 8、10、11、12、13 题，写下题号与选项。不写病种诊断。",
+        "from": "OpenStax Microbiology 1.3 + Ch. 1 Multiple Choice；分类要求见西交/锦州绪论"
+      },
+      "resources": [
+        {
+          "url": "https://openstax.org/books/microbiology/pages/1-3-types-of-microorganisms",
+          "title": "1.3 Types of Microorganisms",
+          "use": "读 Types of Microorganisms 与 Check Your Understanding，填分类表"
+        },
+        {
+          "url": "https://openstax.org/books/microbiology/pages/1-multiple-choice",
+          "title": "Ch. 1 Multiple Choice",
+          "use": "做题 8、10–13"
+        },
+        {
+          "url": "https://yxbpyc.xjtu.edu.cn/info/1086/1578.htm",
+          "title": "西交医学微生物学大纲 · 绪论",
+          "use": "核对自己的表是否覆盖「微生物的概念及分类」"
+        }
+      ]
+    },
+    "prok-cell": {
+      "name": "细菌形态与结构",
+      "why": "西交第一章要求先掌握细胞壁结构与 G+/G− 差异、L 型、荚膜/鞭毛/菌毛/芽胞的医学意义。锦州把 G+ 与 G− 细胞壁差别列为重点。OpenStax 3.3 用形态、细胞壁与渗透、核质、质粒、70S 核糖体、芽胞展开同一块。MIT 20.106J Lec 2 同样是 Cell Structure/Function，排在生长之前。",
+      "learn": [
+        "常见形态：coccus / bacillus / vibrio / spirillum；排列由分裂面决定",
+        "G+ 与 G− 细胞壁：肽聚糖厚度不同；G− 外膜含 lipopolysaccharide（LPS）",
+        "特殊结构：荚膜、鞭毛、菌毛/伞毛、芽胞（休眠、抗逆，不是真菌孢子）",
+        "核质区与质粒；原核核糖体 70S",
+        "细胞壁帮助对抗低渗胀裂（hypotonic lysis）"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "交两张对照图：（1）并排标注 G+ 与 G− 细胞壁层次，G− 必须标出 LPS/lipid A；（2）荚膜、鞭毛、菌毛、芽胞各一，旁注来源里的功能（黏附、运动、抗吞噬或休眠）。再做 OpenStax 第 3 章 Multiple Choice 第 7–11 题。只标结构，不写染色操作步骤或鉴定流程。",
+        "from": "OpenStax 3.3 + Ch. 3 Multiple Choice；西交第一章 / 锦州第 1 章"
+      },
+      "resources": [
+        {
+          "url": "https://openstax.org/books/microbiology/pages/3-3-unique-characteristics-of-prokaryotic-cells",
+          "title": "3.3 Unique Characteristics of Prokaryotic Cells",
+          "use": "读形态、细胞壁、核质、质粒、芽胞，作为标注底本"
+        },
+        {
+          "url": "https://openstax.org/books/microbiology/pages/3-multiple-choice",
+          "title": "Ch. 3 Multiple Choice",
+          "use": "做题 7–11"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/20-106j-systems-microbiology-fall-2006/resources/lecture02/",
+          "title": "MIT 20.106J lecture02 Cell Structure and Function",
+          "use": "对照本科讲次：结构在生长之前"
+        },
+        {
+          "url": "https://jcxy.jzmu.edu.cn/__local/2/CC/8C/213AB5996CEAC60403F8FA8828A_6ED9D18E_53791.pdf?e=.pdf",
+          "title": "锦州医学微生物学大纲 · 第 1 章",
+          "use": "用「G+ / G− 细胞壁不同点及特殊结构」核对标注是否缺项"
+        }
+      ]
+    },
+    "growth": {
+      "name": "细菌生理与生长曲线",
+      "why": "西交第二章把个体生长繁殖方式与条件放在结构之后。锦州要求熟悉生长曲线，并掌握专性厌氧菌在有氧环境不能生长的原理。OpenStax 第 9 章在分类与细胞之后讲二分裂、世代时间和封闭培养四时相。MIT Lec 4 Microbial Growth 紧接细胞结构，Problem Set 1 在此讲次前后收。",
+      "learn": [
+        "原核最常见的繁殖：binary fission；世代时间=群体加倍一次的时间",
+        "封闭培养生长曲线：lag / log / stationary / death",
+        "对氧关系：专性需氧、专性厌氧、兼性厌氧等（锦州强调厌氧菌有氧不能生长）",
+        "生物膜：基质包裹的群体，群体感应感知密度",
+        "公式 Nn = N0 · 2^n（无死亡时的代次推算）"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "按 OpenStax 9.1 Figure 9.5 手绘一条封闭培养生长曲线，标出 lag / log / stationary / death 并各写一句该时相细胞在做什么。用 Nn = N0 · 2^n 算一道：N0=50、5 代、无死亡，写出得数。再做第 9 章 Multiple Choice 第 2–6、9 题。不写培养基配制或菌落计数操作。",
+        "from": "OpenStax 9.1 + Ch. 9 Multiple Choice；西交第二章 / 锦州第 2 章；MIT Lec 4"
+      },
+      "resources": [
+        {
+          "url": "https://openstax.org/books/microbiology/pages/9-1-how-microbes-grow",
+          "title": "9.1 How Microbes Grow",
+          "use": "读二分裂、世代时间、四时相与公式，再画曲线"
+        },
+        {
+          "url": "https://openstax.org/books/microbiology/pages/9-multiple-choice",
+          "title": "Ch. 9 Multiple Choice",
+          "use": "做题 2–6、9"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/20-106j-systems-microbiology-fall-2006/resources/lecture04/",
+          "title": "MIT 20.106J lecture04 Microbial Growth",
+          "use": "对照课历：生长在病毒之前"
+        },
+        {
+          "url": "https://yxbpyc.xjtu.edu.cn/info/1086/1578.htm",
+          "title": "西交大纲 · 第二章细菌的生理",
+          "use": "核对自己是否写清生长繁殖方式与条件"
+        }
+      ]
+    },
+    "virus": {
+      "name": "病毒结构与复制周期",
+      "why": "OpenStax 把 Acellular Pathogens 放在细胞类型之后、致病机制之前；MIT Lec 6 Virology 在生长之后、宿主相互作用之前。西交第二十章与锦州第 26 章要求掌握病毒体结构、化学组成和复制周期（吸附、穿入、脱壳、生物合成、成熟与释放）。中文大纲把病毒总论放在细菌感染之后，见 conflicts；本树取英方更靠前的位置。",
+      "learn": [
+        "病毒：无细胞、专性细胞内寄生；基因组为 DNA 或 RNA，不同时两者",
+        "病毒体：核酸 + 衣壳（capsomere）；可有包膜（来自宿主膜）和刺突",
+        "噬菌体裂解周期：attachment → penetration → biosynthesis → maturation → release/lysis",
+        "溶原：前噬菌体、溶原菌、溶原转换（可带入毒素基因）",
+        "动物病毒可经内吞或膜融合进入；+ssRNA 可直接作 mRNA；逆转录病毒以 reverse transcriptase 形成前病毒"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "交两张图：（1）裸病毒与有包膜病毒，标核酸、衣壳、包膜、刺突；（2）裂解周期五步与溶原（标 prophage / lysogen）。用三行列出 dsDNA、+ssRNA、逆转录病毒进入宿主后核酸如何变成可翻译的信息（对照 6.2）。再做第 6 章 Multiple Choice 第 1–7、14 题。不要做培养、鉴定或检测题（11–12）。",
+        "from": "OpenStax 6.1–6.2 + Ch. 6 Multiple Choice；西交第二十章 / 锦州第 26 章；MIT Lec 6"
+      },
+      "resources": [
+        {
+          "url": "https://openstax.org/books/microbiology/pages/6-1-viruses",
+          "title": "6.1 Viruses",
+          "use": "读 Table 6.1 与衣壳/包膜/刺突，完成结构图"
+        },
+        {
+          "url": "https://openstax.org/books/microbiology/pages/6-2-the-viral-life-cycle",
+          "title": "6.2 The Viral Life Cycle",
+          "use": "对照 Figure 6.7–6.8、6.10–6.12 画周期并写核酸策略"
+        },
+        {
+          "url": "https://openstax.org/books/microbiology/pages/6-multiple-choice",
+          "title": "Ch. 6 Multiple Choice",
+          "use": "做题 1–7、14"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/20-106j-systems-microbiology-fall-2006/resources/lecture06/",
+          "title": "MIT 20.106J lecture06 Virology",
+          "use": "对照讲义页：viral structure / replication"
+        }
+      ]
+    },
+    "encounter": {
+      "name": "致病机制与宿主相遇",
+      "why": "OpenStax 从第 15 章起把焦点转到微生物如何与宿主相互作用。西交第六章、锦州第 7 章把正常菌群、机会致病、毒力（侵袭力与内外毒素）、感染类型写成细菌学总论的收束；第 27 章再写病毒对细胞的杀细胞效应、稳定状态感染与基因整合。MIT Lec 17 为 Microbe-host Interactions，强调 indigenous microbiota。Baron 第 7 章把感染定义为侵入并在组织中增殖，并列黏附、荚膜、内外毒素。停在机制，不进入系统感染各论或检查防治。",
+      "learn": [
+        "感染 vs 疾病；pathogenicity 与 virulence；ID50 / LD50",
+        "原发致病菌 vs 条件/机会致病菌；正常菌群及其生理作用",
+        "致病阶段：exposure（门户）→ adhesion → invasion → infection",
+        "毒力因子：黏附素/菌毛、荚膜、侵袭性酶；内毒素=G− LPS 的 lipid A；外毒素=分泌蛋白（热不稳定、LD50 更低）",
+        "病毒对细胞：杀细胞效应、稳定状态感染、凋亡、基因整合/转化（锦州第 27 章）"
+      ],
+      "task": {
+        "kind": "writeup",
+        "prompt": "交一份不超过两页的对照短评：（1）用 OpenStax Table 15.9 做内毒素 vs 外毒素五列对比（来源、化学本质、对宿主的作用方式、热稳定性、LD50 高低），并各举来源中的 1 个例子；（2）用四步写出一次宿主相遇（门户→黏附→侵入→感染），标明正常菌群或条件致病在哪一步出现；（3）另用三行区分病毒的杀细胞效应、溶原/潜伏、基因整合。再做第 15 章 Multiple Choice 第 6–11 题。不写用药、疫苗程序或标本检测。",
+        "from": "OpenStax 15.2–15.3 + Ch. 15 Multiple Choice；西交第六章 / 锦州第 7、27 章；Baron Ch. 7；MIT Lec 17",
+        "alternatives": [
+          {
+            "kind": "problem_set",
+            "prompt": "若不用短评，打开 MIT 20.106J Assignments，选一套排在 Lec 17 前后的 Problem Set（课历上 PS 5 在 Immunology 前后），只做其中关于 microbiota / host interaction / virulence 的题目，交手写解答并注明题号。跳过 diagnostic 与抗菌药题。",
+            "from": "MIT 20.106J Assignments + lecture17；课历见 Syllabus"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://openstax.org/books/microbiology/pages/15-2-how-pathogens-cause-disease",
+          "title": "15.2 How Pathogens Cause Disease",
+          "use": "读 virulence、ID50/LD50、原发 vs 条件致病、四步致病"
+        },
+        {
+          "url": "https://openstax.org/books/microbiology/pages/15-3-virulence-factors-of-bacterial-and-viral-pathogens",
+          "title": "15.3 Virulence Factors",
+          "use": "用 Table 15.9 做内外毒素对比"
+        },
+        {
+          "url": "https://openstax.org/books/microbiology/pages/15-multiple-choice",
+          "title": "Ch. 15 Multiple Choice",
+          "use": "做题 6–11"
+        },
+        {
+          "url": "https://www.ncbi.nlm.nih.gov/books/NBK8526/",
+          "title": "Baron Ch. 7 Bacterial Pathogenesis",
+          "use": "读 General Concepts：黏附、荚膜、内毒素、外毒素类别"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/20-106j-systems-microbiology-fall-2006/resources/lecture17/",
+          "title": "MIT 20.106J lecture17 Microbe-host Interactions",
+          "use": "对照 indigenous microbiota 与宿主相遇术语"
+        },
+        {
+          "url": "https://yxbpyc.xjtu.edu.cn/info/1086/1578.htm",
+          "title": "西交大纲 · 第六章细菌的感染与免疫",
+          "use": "核对自己是否写清正常菌群、机会致病菌、内外毒素区别"
+        }
+      ]
+    }
+  },
+  "conflicts": [
+    "病毒总论的位置：OpenStax 第 6 章与 MIT Lec 6 把病毒放在宿主相遇之前；西交/山一/锦州在「细菌的感染与免疫」之后才讲病毒基本性状。取更靠前：生长之后先病毒结构与复制，再统一做宿主相遇。",
+    "免疫学：Baron 全书以 Immunology Overview 开篇；西交把免疫学列为先修；OpenStax 在第 15 章之后才开先天/获得性免疫；MIT 在 Lec 17 之后才 Immunology I/II。本树停在微生物侧的相遇机制，不另开免疫学节点。",
+    "后半巡礼：OpenStax 第 21–26 章按器官系统感染，中文大纲按球菌/肠杆菌/呼吸道病毒等病原各论。二者都进入病种与防治，不作主干、也不作为分叉。"
+  ],
+  "missing": "",
+  "checked_at": "2026-10-04"
+}

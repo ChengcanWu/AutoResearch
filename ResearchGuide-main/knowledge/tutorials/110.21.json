@@ -1,0 +1,411 @@
+{
+  "id": "110.21",
+  "name": "代数学",
+  "format": "tutorial-tree-v2",
+  "status": "ok",
+  "goal": "先按高等代数 / MIT 18.700 算出一组基并判断矩阵可否对角化，再按 18.703、Harvard Math 122 或 Judson 的 weekly problem set 验证一个集合是否成群或成环、写出商结构上的运算，并完成多项式环上的一次整除或不可约判断。不承诺 Galois 理论或新结果。",
+  "sources": [
+    {
+      "title": "Syllabus | Linear Algebra | Mathematics | MIT OpenCourseWare (18.700, Fall 2013)",
+      "url": "https://ocw.mit.edu/courses/18-700-linear-algebra-fall-2013/pages/syllabus/",
+      "kind": "ocw",
+      "used_for": "与 18.703 组成标准代数序列的前半：vector spaces、线性方程组、bases、matrices、determinants、eigenvalues、inner products、quadratic forms；作业是 Problem Sets"
+    },
+    {
+      "title": "Calendar | Linear Algebra | Mathematics | MIT OpenCourseWare (18.700, Fall 2013)",
+      "url": "https://ocw.mit.edu/courses/18-700-linear-algebra-fall-2013/pages/calendar/",
+      "kind": "ocw",
+      "used_for": "主干前两步顺序：Lec 1–4 向量空间与基（PS1）→ Lec 5–6 线性映射与矩阵 → Lec 11–13 特征向量与对角化（PS4）→ Lec 15–18 内积与谱定理"
+    },
+    {
+      "title": "Assignments | Linear Algebra | Mathematics | MIT OpenCourseWare (18.700, Fall 2013)",
+      "url": "https://ocw.mit.edu/courses/18-700-linear-algebra-fall-2013/pages/assignments/",
+      "kind": "ocw",
+      "used_for": "18.700 交卷形态：九份 Problem Set，多题出自 Axler Linear Algebra Done Right"
+    },
+    {
+      "title": "18.700 Fall 2013 Problem Set 1 | Linear Algebra | MIT OpenCourseWare",
+      "url": "https://ocw.mit.edu/courses/18-700-linear-algebra-fall-2013/resources/mit18_700f13_ps1/",
+      "kind": "ocw",
+      "used_for": "节点 vec 的 Problem Set：课历标在 Lec 4，覆盖 vector spaces / subspaces / span / independence / bases"
+    },
+    {
+      "title": "18.700 Fall 2013 Problem Set 4 | Linear Algebra | MIT OpenCourseWare",
+      "url": "https://ocw.mit.edu/courses/18-700-linear-algebra-fall-2013/resources/mit18_700f13_ps4/",
+      "kind": "ocw",
+      "used_for": "节点 linmap 的 Problem Set：课历标在 Lec 12，接在 Finding eigenvectors 之后、Upper triangular and diagonal matrices"
+    },
+    {
+      "title": "Syllabus | Modern Algebra | Mathematics | MIT OpenCourseWare (18.703, Spring 2013)",
+      "url": "https://ocw.mit.edu/courses/18-703-modern-algebra-spring-2013/pages/syllabus/",
+      "kind": "ocw",
+      "used_for": "本科现代代数：finite groups、ideals 与多项式/Euclidean rings 的唯一分解、finite fields；写明 Linear Algebra 18.700 与 18.703 合为 standard algebra sequence；每周 Homework，可用 Judson"
+    },
+    {
+      "title": "Calendar | Modern Algebra | Mathematics | MIT OpenCourseWare (18.703, Spring 2013)",
+      "url": "https://ocw.mit.edu/courses/18-703-modern-algebra-spring-2013/pages/calendar/",
+      "kind": "ocw",
+      "used_for": "主干后两步顺序：Lec 1–13 群（至 Sylow）→ Lec 14–22 环、理想、分式域、Euclidean domains、多项式环"
+    },
+    {
+      "title": "Assignments | Modern Algebra | Mathematics | MIT OpenCourseWare (18.703, Spring 2013)",
+      "url": "https://ocw.mit.edu/courses/18-703-modern-algebra-spring-2013/pages/assignments/",
+      "kind": "ocw",
+      "used_for": "18.703 作业出自 Herstein 或 Judson Abstract Algebra: Theory and Applications；11 份 Homework"
+    },
+    {
+      "title": "Lecture Notes | Modern Algebra | Mathematics | MIT OpenCourseWare (18.703, Spring 2013)",
+      "url": "https://ocw.mit.edu/courses/18-703-modern-algebra-spring-2013/pages/lecture-notes/",
+      "kind": "ocw",
+      "used_for": "Lec 1–13 群讲义与 Lec 14–21 环/分式域/多项式环讲义的题目列表"
+    },
+    {
+      "title": "Math 122 -- Algebra I-- Fall 2019 (Harvard)",
+      "url": "https://people.math.harvard.edu/~bullery/math122/",
+      "kind": "syllabus",
+      "used_for": "本科抽象代数：先 groups（Sec 1–18，含商群、同构定理、Sylow）再 rings（Sec 19–28，至分式域与不可约判别）；每周 problem set"
+    },
+    {
+      "title": "Math 122 - Problem Set 1",
+      "url": "https://people.math.harvard.edu/~bullery/math122/PS1.pdf",
+      "kind": "other",
+      "used_for": "节点 groups 的可交卷作业：判别二元运算是否成群、(Z/nZ)×、元素阶、直积"
+    },
+    {
+      "title": "Math 122 Section 2: Groups (lecture notes)",
+      "url": "https://people.math.harvard.edu/~bullery/math122/Section%202_%20Groups.pdf",
+      "kind": "lecture_notes",
+      "used_for": "节点 groups：群公理、对称、Z/nZ、子群定义"
+    },
+    {
+      "title": "Math 122 - Problem Set 9",
+      "url": "https://people.math.harvard.edu/~bullery/math122/PS9.pdf",
+      "kind": "other",
+      "used_for": "节点 rings 的可交卷作业：Q 的子环、center、nilpotent、环同态、Z[x] 与 Q[x] 不同构"
+    },
+    {
+      "title": "《高等代数》课程教学大纲（惠州学院）",
+      "url": "https://zy.hzu.edu.cn/gdds/2018/1101/c6379a164183/page.psp",
+      "kind": "syllabus",
+      "used_for": "中国本科主干：多项式、行列式、线性方程组、矩阵、向量空间、线性变换、欧氏空间、二次型；写明为近世代数打基础；习题课与闭卷考试"
+    },
+    {
+      "title": "《近世代数》教学大纲（惠州学院）",
+      "url": "https://kc.hzu.edu.cn/jsds/5311/list.psp",
+      "kind": "syllabus",
+      "used_for": "先修高等代数；群论 20 学时后接环与域、整环因子分解；作业与习题课；不含域扩张/Galois"
+    },
+    {
+      "title": "《抽象代数》教学大纲（许昌学院）",
+      "url": "https://sx.xxu.edu.cn/chouxiangdaishu-090325.pdf",
+      "kind": "syllabus",
+      "used_for": "先修高等代数；群论 20 → 环论 18 → 域论 16；考核含平时作业；环论含多项式环、理想、商域、整环因子分解"
+    },
+    {
+      "title": "抽象代数（北京大学数学学院本科课程）",
+      "url": "https://math.pku.edu.cn/bks/sykc/148666.htm",
+      "kind": "syllabus",
+      "used_for": "先修高等代数 I、II；群→环→域扩张；Galois 为后续 5 学时；成绩含作业；对照用：本科主干停在环，不把 Galois 写成必做"
+    },
+    {
+      "title": "Linear Algebra (Jim Hefferon) — official site",
+      "url": "https://hefferon.net/linearalgebra/",
+      "kind": "open_textbook",
+      "used_for": "美国本科第一门线代目录：linear systems and Gauss's method → vector spaces → linear maps and matrices → determinants → eigenvectors；每小节有习题"
+    },
+    {
+      "title": "Linear Algebra — OpenIntro (Hefferon, 4th ed.)",
+      "url": "https://www.openintro.org/book/linalg/",
+      "kind": "open_textbook",
+      "used_for": "与 Hefferon 官网同一本：重申上述五块顺序，并写明每小节有从验算到挑战的习题、另有解答册"
+    },
+    {
+      "title": "Abstract Algebra: Theory and Applications – Judson Books",
+      "url": "https://judsonbooks.org/abstract-algebra-theory-and-applications/",
+      "kind": "open_textbook",
+      "used_for": "本科一至两学期：上半学期群至 Sylow，下半学期环、整环、向量空间、域；18.703 作业可用此书"
+    },
+    {
+      "title": "Abstract Algebra: Theory and Applications — Open Textbook Library",
+      "url": "https://open.umn.edu/opentextbooks/textbooks/abstract-algebra-theory-and-applications",
+      "kind": "open_textbook",
+      "used_for": "标准顺序 groups then rings then fields；典型一学期覆盖群与环并略及域；目录含 Ch 3 Groups、16 Rings、17 Polynomials"
+    },
+    {
+      "title": "AATA Chapter 3 Groups",
+      "url": "https://judsonbooks.org/aata-files/aata-html/groups.html",
+      "kind": "open_textbook",
+      "used_for": "节点 groups：从单一运算的公理结构讲起，整数加法与可逆矩阵乘法是群的例子"
+    },
+    {
+      "title": "AATA Section 3.2 Definitions and Examples",
+      "url": "https://judsonbooks.org/aata-files/aata-html/groups-section-defnitions.html",
+      "kind": "open_textbook",
+      "used_for": "节点 groups：群公理、Z_n、U(n)、S3/D3、GL2(R)"
+    },
+    {
+      "title": "AATA Chapter 3 Exercises",
+      "url": "https://judsonbooks.org/aata-files/aata-html/groups-exercises.html",
+      "kind": "open_textbook",
+      "used_for": "节点 groups 的习题：Cayley 表是否成群、U(12)、证明 (R\\{-1}, a*b=a+b+ab) 是交换群"
+    },
+    {
+      "title": "AATA Chapter 16 Rings",
+      "url": "https://judsonbooks.org/aata-files/aata-html/rings.html",
+      "kind": "open_textbook",
+      "used_for": "节点 rings：在群之后引入两种相关运算；整数的加减乘是环的原型"
+    },
+    {
+      "title": "AATA Chapter 16 Exercises",
+      "url": "https://judsonbooks.org/aata-files/aata-html/rings-exercises.html",
+      "kind": "open_textbook",
+      "used_for": "节点 rings 的习题：哪些集合是环/域、单位、理想与极大/素理想、商环运算表"
+    },
+    {
+      "title": "AATA Chapter 17 Polynomials",
+      "url": "https://judsonbooks.org/aata-files/aata-html/poly.html",
+      "kind": "open_textbook",
+      "used_for": "节点 rings：多项式构成环；带余除法与 Euclid 算法在多项式环中有对应"
+    }
+  ],
+  "trunk": ["vec", "linmap", "groups", "rings"],
+  "forks": [],
+  "join": null,
+  "nodes": {
+    "vec": {
+      "name": "方程组、矩阵与向量空间",
+      "why": "MIT 18.703 写明 18.700 与 18.703 合为 standard algebra sequence，线代在现代代数之前。惠州《高等代数》把行列式、方程组、矩阵、向量空间放在线性变换之前，并写明为近世代数打基础。Hefferon / OpenIntro 第一门线代从 linear systems and Gauss's method 进到 vector spaces。18.700 课历 Lec 1–4 是 vector spaces、subspaces、span、independence、bases，PS1 在 Lec 4 到期。",
+      "learn": [
+        "线性方程组的消元与矩阵的秩",
+        "有解判别与齐次方程组的基础解系",
+        "向量空间、子空间",
+        "线性相关、基与维数",
+        "坐标与过渡矩阵"
+      ],
+      "task": {
+        "kind": "problem_set",
+        "prompt": "打开 18.700 Problem Set 1（课历标在 Lec 4）。交一份手写或 LaTeX 解答：至少核对一个集合是否满足向量空间公理、判定一组向量是否线性无关，并写出一组基与维数。每题旁注明对应课历第 1–4 讲中的哪一条（span / independence / bases）。",
+        "from": "MIT 18.700 Calendar Lec 1–4 + Problem Set 1",
+        "alternatives": [
+          {
+            "kind": "exercise",
+            "prompt": "对照惠州《高等代数》第 4–6 章：用初等变换求一个矩阵的秩，写出对应齐次方程组的基础解系，再验证另一组向量是否构成基。三道题都写清用了大纲里的哪一条（秩 / 有解判别 / 基与维数）。",
+            "from": "惠州学院《高等代数》第 4–6 章（线性方程组、矩阵、向量空间）"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://ocw.mit.edu/courses/18-700-linear-algebra-fall-2013/pages/calendar/",
+          "title": "18.700 Calendar",
+          "use": "先对 Lec 1–4 的题目：vector spaces → bases and dimension"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/18-700-linear-algebra-fall-2013/resources/mit18_700f13_ps1/",
+          "title": "18.700 Problem Set 1",
+          "use": "做这套作业并留下解答"
+        },
+        {
+          "url": "https://zy.hzu.edu.cn/gdds/2018/1101/c6379a164183/page.psp",
+          "title": "惠州学院《高等代数》大纲",
+          "use": "读第 4–6 章知识点，按习题课要求做秩、基础解系、基"
+        },
+        {
+          "url": "https://hefferon.net/linearalgebra/",
+          "title": "Hefferon Linear Algebra",
+          "use": "读 systems / Gauss 与 vector spaces 两章，做小节习题"
+        },
+        {
+          "url": "https://www.openintro.org/book/linalg/",
+          "title": "OpenIntro Linear Algebra (Hefferon)",
+          "use": "同一本的目录确认：systems 在 vector spaces 之前"
+        }
+      ]
+    },
+    "linmap": {
+      "name": "线性映射、特征值与内积",
+      "why": "18.700 在 bases 之后接 linear maps、matrices，再接 Finding eigenvectors 与对角化（PS4 在 Lec 12），然后 inner products 与 spectral theorem。惠州第 7–9 章是线性变换（核与象、相似、特征根、可对角化）、欧氏空间、二次型。Hefferon 在 vector spaces 之后是 linear maps and matrices、determinants、eigenvectors。这一块做完，18.703 才把线代当已经会的语言。",
+      "learn": [
+        "线性映射的核与象",
+        "线性映射的矩阵与相似",
+        "特征根、特征向量、特征多项式",
+        "可对角化条件",
+        "内积、Gram-Schmidt、正交补",
+        "二次型的标准形（惠州第 9 章 / 18.700 的 quadratic forms）"
+      ],
+      "task": {
+        "kind": "problem_set",
+        "prompt": "交 18.700 Problem Set 4（课历标在 Lec 12，接在 Finding eigenvectors 之后）。至少手算两个方阵的特征值与特征向量，并判断其中一个是否可对角化；若可对角化，写出对角形与过渡矩阵。",
+        "from": "MIT 18.700 Calendar Lec 5–13 + Problem Set 4",
+        "alternatives": [
+          {
+            "kind": "exercise",
+            "prompt": "对照惠州大纲第 7 章：对一个 3×3 矩阵求特征多项式、特征根与特征向量，用「不同特征根的特征向量线性无关」判断可否对角化；再在第 8 章用 Gram-Schmidt 把一组基正交化。",
+            "from": "惠州学院《高等代数》第 7–8 章（线性变换、欧氏空间）"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://ocw.mit.edu/courses/18-700-linear-algebra-fall-2013/pages/calendar/",
+          "title": "18.700 Calendar",
+          "use": "对 Lec 5–6（linear maps / matrices）和 Lec 11–13（eigenvectors / diagonal）"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/18-700-linear-algebra-fall-2013/resources/mit18_700f13_ps4/",
+          "title": "18.700 Problem Set 4",
+          "use": "做这套特征向量与对角化作业"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/18-700-linear-algebra-fall-2013/pages/syllabus/",
+          "title": "18.700 Syllabus",
+          "use": "核对自己是否已覆盖 eigenvalues、inner products、quadratic forms"
+        },
+        {
+          "url": "https://zy.hzu.edu.cn/gdds/2018/1101/c6379a164183/page.psp",
+          "title": "惠州学院《高等代数》大纲",
+          "use": "第 7–9 章：线性变换、欧氏空间、二次型"
+        },
+        {
+          "url": "https://hefferon.net/linearalgebra/",
+          "title": "Hefferon Linear Algebra",
+          "use": "读 linear maps and matrices、determinants、eigenvectors 三章并做习题"
+        }
+      ]
+    },
+    "groups": {
+      "name": "群、陪集与同态",
+      "why": "惠州近世代数、许昌抽象代数、北大抽象代数都把高等代数列为先修，正文从群论开始。18.703 课历 Lec 1–13 是 Groups → Subgroups → Cosets → Cyclic / Permutation → Homomorphisms → Quotient Groups → Isomorphism Theorems（Sylow 在 Lec 13）。Harvard Math 122 讲义 Sec 1–18 同一条线。Judson 上半学期也是群至 Sylow。来源都把群写成环之前的第一块抽象结构。",
+      "learn": [
+        "群公理、交换群、元素的阶",
+        "循环群、置换群、对称群",
+        "子群、陪集、Lagrange 定理",
+        "正规子群与商群",
+        "群同态、核、同构定理"
+      ],
+      "task": {
+        "kind": "problem_set",
+        "prompt": "交 Harvard Math 122 Problem Set 1：对第 1 题四个 (X, *) 逐条核对结合律/单位元/逆元；完成第 2 题证明 (Z/nZ)× 是乘法群并写出 (Z/12Z)× 的乘法表与各元素的阶。解答对照 Ullery Section 2 讲义里的群定义。",
+        "from": "Harvard Math 122 PS1 + Section 2 Groups notes",
+        "alternatives": [
+          {
+            "kind": "exercise",
+            "prompt": "做 Judson 第 3 章习题 2、6、7：判断四张 Cayley 表谁成群、写出 U(12) 乘法表、证明 S = R \\ {-1} 配 a * b = a + b + ab 是交换群。18.703 作业页允许用 Judson 代替 Herstein。",
+            "from": "Judson AATA Chapter 3 Exercises；18.703 Assignments 写明可用 Judson"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://people.math.harvard.edu/~bullery/math122/Section%202_%20Groups.pdf",
+          "title": "Math 122 Section 2: Groups",
+          "use": "先读群公理、Z/nZ 与子群，再动手写 PS1"
+        },
+        {
+          "url": "https://people.math.harvard.edu/~bullery/math122/PS1.pdf",
+          "title": "Math 122 Problem Set 1",
+          "use": "交这套判别成群与 (Z/nZ)× 的作业"
+        },
+        {
+          "url": "https://judsonbooks.org/aata-files/aata-html/groups-section-defnitions.html",
+          "title": "AATA 3.2 Definitions and Examples",
+          "use": "对照 Z_n、U(n)、S3、GL2(R) 的公理核对"
+        },
+        {
+          "url": "https://judsonbooks.org/aata-files/aata-html/groups-exercises.html",
+          "title": "AATA Chapter 3 Exercises",
+          "use": "做习题 2、6、7（或续做陪集/子群题 34–38）"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/18-703-modern-algebra-spring-2013/pages/calendar/",
+          "title": "18.703 Calendar",
+          "use": "用 Lec 1–10 核对：Groups → Cosets → Homomorphisms → Isomorphism Theorems"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/18-703-modern-algebra-spring-2013/pages/lecture-notes/",
+          "title": "18.703 Lecture Notes",
+          "use": "读 Lec 1–10 对应 PDF：Groups 到 The Isomorphism Theorems"
+        },
+        {
+          "url": "https://kc.hzu.edu.cn/jsds/5311/list.psp",
+          "title": "惠州学院《近世代数》大纲",
+          "use": "第二章群论：陪集、Lagrange、不变子群、同态基本定理"
+        }
+      ]
+    },
+    "rings": {
+      "name": "环、理想与多项式环",
+      "why": "18.703 在 Midterm 前后从 Lec 14 Rings 走到 Lec 21 Polynomial Rings（中间有 ideals、field of fractions、Euclidean domains）。Harvard Math 122 在 Sylow 之后是 Sec 19–28：Rings → polynomial rings → ideals → ED/PID/UFD → fields of fractions → irreducibility。Judson 第 16–17 章把环放在群之后，并强调多项式环有带余除法。许昌环论 18 学时、惠州「环与域 + 整环因子分解」都停在商域与多项式分解，而不是域扩张。",
+      "learn": [
+        "环、零因子、整环、除环与域",
+        "理想、商环、环同态基本定理",
+        "素理想与极大理想",
+        "多项式环与带余除法",
+        "欧氏整环、主理想整环、唯一分解整环",
+        "分式域（商域）"
+      ],
+      "task": {
+        "kind": "problem_set",
+        "prompt": "交 Harvard Math 122 Problem Set 9：完成第 1 题判断 Q 的四个子集谁是子环，第 2 题证明 center 是含幺子环，第 5 题证明 2Z 与 3Z 不同构、Z[x] 与 Q[x] 不同构。每题写清用了环公理、单位还是同构不变量。",
+        "from": "Harvard Math 122 PS9；课历上对应 Sec 19–22 环与理想",
+        "alternatives": [
+          {
+            "kind": "exercise",
+            "prompt": "做 Judson 第 16 章习题 1、3、4：判断哪些集合是环/域、列出 Z_10 与 Z_7 的单位、找出 Z_18 的全部理想并标出极大/素理想。再读第 17 章开头，对 Q[x] 做一次带余除法并写下商和余式。",
+            "from": "Judson AATA Chapter 16 Exercises + Chapter 17 Polynomials"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://people.math.harvard.edu/~bullery/math122/PS9.pdf",
+          "title": "Math 122 Problem Set 9",
+          "use": "交子环、center、同态与不同构这套题"
+        },
+        {
+          "url": "https://judsonbooks.org/aata-files/aata-html/rings.html",
+          "title": "AATA Chapter 16 Rings",
+          "use": "先读环的两种运算与分配律，再做习题"
+        },
+        {
+          "url": "https://judsonbooks.org/aata-files/aata-html/rings-exercises.html",
+          "title": "AATA Chapter 16 Exercises",
+          "use": "做习题 1、3、4（环/域、单位、理想）"
+        },
+        {
+          "url": "https://judsonbooks.org/aata-files/aata-html/poly.html",
+          "title": "AATA Chapter 17 Polynomials",
+          "use": "读多项式环与带余除法，做一次手算除法"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/18-703-modern-algebra-spring-2013/pages/calendar/",
+          "title": "18.703 Calendar",
+          "use": "对 Lec 14–21：Rings → Ideals → Field of Fractions → Euclidean Domains → Polynomial Rings"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/18-703-modern-algebra-spring-2013/pages/lecture-notes/",
+          "title": "18.703 Lecture Notes",
+          "use": "读 Lec 14–21 的 Rings / Ideals / Polynomial Rings 讲义"
+        },
+        {
+          "url": "https://sx.xxu.edu.cn/chouxiangdaishu-090325.pdf",
+          "title": "许昌学院《抽象代数》大纲",
+          "use": "第二章环论：多项式环、理想、商环、商域、整环因子分解"
+        },
+        {
+          "url": "https://kc.hzu.edu.cn/jsds/5311/list.psp",
+          "title": "惠州学院《近世代数》大纲",
+          "use": "第三、四章：环与域、欧氏环、多项式因子分解"
+        }
+      ]
+    }
+  },
+  "conflicts": [
+    "多项式位置：惠州《高等代数》把一元多项式整除放在第 2 章、线性代数之前；18.703 / Math 122 / Judson 把多项式环放在环论里。主干按更靠后的环论位置写，高等代数里的带余除法只作为后一步的计算预习，不另开节点。",
+    "向量空间起点：18.700（Axler）先讲抽象向量空间，方程组出现在 Lec 8；惠州与 Hefferon 先消元再抽象空间。节点 vec 把两块放在同一步，不强制先抽象后消元。",
+    "域扩张与 Galois：北大抽象代数在环之后有域扩张 7 学时和 Galois 5 学时；许昌有域论 16 学时。惠州近世代数停在商域与因子分解；18.703 课历只有 Field of Fractions 与 Polynomial Rings；Math 122 停在 irreducibility，课程简介写的是 groups, rings, and modules。取更靠前的收束：环 + 多项式 + 分式域，不把 Galois 或模写成必做。",
+    "Sylow 与群作用：18.703 Lec 13 与 Math 122 Sec 18 有 Sylow；许昌把有限群/Sylow 标为选讲。惠州群论止于同态基本定理。节点 groups 的交卷停在公理、陪集与同态，Sylow 不作为过关题。"
+  ],
+  "missing": "",
+  "checked_at": "2026-10-04"
+}

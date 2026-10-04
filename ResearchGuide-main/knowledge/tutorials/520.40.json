@@ -1,0 +1,339 @@
+{
+  "id": "520.40",
+  "name": "计算机软件",
+  "format": "tutorial-tree-v2",
+  "status": "ok",
+  "goal": "先按 6.031 写出带规约和单元测试的中小规模程序；之后在操作系统、编译前端、数据库三条并行课里选一条，对照该课前几周的 lab/project 交记录。不承诺实现完整内核或生产级编译器。",
+  "sources": [
+    {
+      "title": "General Information & FAQ — 6.031 Software Construction (MIT, Spring 2022)",
+      "url": "https://web.mit.edu/6.031/www/sp22/general/",
+      "kind": "syllabus",
+      "used_for": "主干：SFB/ETU/RFC；规约、不变量、ADT、单元测试；正则与文法、并发都排在能写程序之后"
+    },
+    {
+      "title": "Getting Started: TypeScript, VS Code, & Git — 6.031 (MIT, Spring 2022)",
+      "url": "https://web.mit.edu/6.031/www/sp22/getting-started/",
+      "kind": "syllabus",
+      "used_for": "节点 tools：先搭 TypeScript / VS Code / Git，再进入 Problem Set 0"
+    },
+    {
+      "title": "Reading 1: Static Checking — 6.031 (MIT, Spring 2022)",
+      "url": "https://web.mit.edu/6.031/www/sp22/classes/01-static-checking/",
+      "kind": "lecture_notes",
+      "used_for": "节点 tools：static checking；hailstone 例与类型"
+    },
+    {
+      "title": "Reading 3: Testing — 6.031 (MIT, Spring 2022)",
+      "url": "https://web.mit.edu/6.031/www/sp22/classes/03-testing/",
+      "kind": "lecture_notes",
+      "used_for": "节点 tools：test-first、划分输入空间、黑盒/玻璃盒、单元测试与回归"
+    },
+    {
+      "title": "Reading 6: Specifications — 6.031 (MIT, Spring 2022)",
+      "url": "https://web.mit.edu/6.031/www/sp22/classes/06-specifications/",
+      "kind": "lecture_notes",
+      "used_for": "节点 adt：前置/后置条件、@param/@returns"
+    },
+    {
+      "title": "Reading 10: Abstract Data Types — 6.031 (MIT, Spring 2022)",
+      "url": "https://web.mit.edu/6.031/www/sp22/classes/10-abstract-data-types/",
+      "kind": "lecture_notes",
+      "used_for": "节点 adt：ADT 由操作及其规约定义；表示无关；按操作分类测试"
+    },
+    {
+      "title": "CS 162: Operating Systems and System Programming — lecture schedule (UC Berkeley)",
+      "url": "https://cs162.org/",
+      "kind": "syllabus",
+      "used_for": "操作系统轨：What is an OS → 进程/线程与文件 → 同步 → 调度/虚存；Homework 0 / Project 0"
+    },
+    {
+      "title": "6.1810 / Fall 2024 schedule (MIT, xv6 / RISC-V)",
+      "url": "https://pdos.csail.mit.edu/6.S081/2024/schedule.html",
+      "kind": "syllabus",
+      "used_for": "操作系统轨：Lab util → Lab syscall → locking / scheduling；先系统调用再锁"
+    },
+    {
+      "title": "Syllabus | Computer Language Engineering 6.035 (MIT OCW, Spring 2010)",
+      "url": "https://ocw.mit.edu/courses/6-035-computer-language-engineering-spring-2010/pages/syllabus/",
+      "kind": "ocw",
+      "used_for": "编译轨课历：正则与形式文法 → 语法分析 → 语义 → 代码生成"
+    },
+    {
+      "title": "Projects | Computer Language Engineering 6.035 (MIT OCW, Spring 2010)",
+      "url": "https://ocw.mit.edu/courses/6-035-computer-language-engineering-spring-2010/pages/projects/",
+      "kind": "ocw",
+      "used_for": "编译轨作业：P1 Scanner and parser（本轨停在这里）"
+    },
+    {
+      "title": "CS 164, Spring 2025 — syllabus (UC Berkeley)",
+      "url": "https://berkeley-cs164-sp25.github.io/syllabus.html",
+      "kind": "syllabus",
+      "used_for": "编译轨目标：Write a parser；按正确性与测试质量评分"
+    },
+    {
+      "title": "CS 164, Spring 2025 — schedule (UC Berkeley)",
+      "url": "https://berkeley-cs164-sp25.github.io/schedule.html",
+      "kind": "syllabus",
+      "used_for": "编译轨：第 10 周 Parsing 与 Regex Activity"
+    },
+    {
+      "title": "Introduction to Database Systems — CS 186 (UC Berkeley)",
+      "url": "https://cs186berkeley.net/",
+      "kind": "syllabus",
+      "used_for": "数据库轨：第 1–2 周 SQL I/II 与 SQL project"
+    },
+    {
+      "title": "Syllabus - CS 186 (UC Berkeley)",
+      "url": "https://cs186berkeley.net/syllabus/",
+      "kind": "syllabus",
+      "used_for": "数据库轨：Project 1 用 SQL；后面才是磁盘/索引"
+    },
+    {
+      "title": "Computer Science Curricula 2023 — Executive Report (ACM / IEEE-CS / AAAI)",
+      "url": "https://csed.acm.org/wp-content/uploads/2025/11/CS2023-Report.htm",
+      "kind": "society",
+      "used_for": "分叉依据：Software competency 是 Systems（OS）与 Data Management 的先修；FPL 与 DM 是并列知识领域"
+    },
+    {
+      "title": "计算机科学与技术专业核心专业课教学大纲汇总（山东科技大学）",
+      "url": "https://cise.sdust.edu.cn/uploads/ueditor/file/20200808/1596830461691695.pdf",
+      "kind": "syllabus",
+      "used_for": "分叉依据：操作系统、编译原理、数据库是三门并行核心课，各有自己的章序与作业"
+    }
+  ],
+  "trunk": ["tools", "adt"],
+  "forks": [
+    {
+      "id": "after-adt",
+      "after": "adt",
+      "pick": 1,
+      "why": "ACM CS2023 把 Software competency 写成 Systems（含 OS）和 Data Management 的先修，FPL（含 Syntax Analysis）与 DM 是并列领域。山东科技大学把操作系统、编译原理、数据库列为并行核心课。MIT 6.1810 / Berkeley CS162、6.035 / CS164、CS186 也是三门独立高年级课，不是六周一门课。选一条做完该课前几周即可。",
+      "source_urls": [
+        "https://csed.acm.org/wp-content/uploads/2025/11/CS2023-Report.htm",
+        "https://cise.sdust.edu.cn/uploads/ueditor/file/20200808/1596830461691695.pdf",
+        "https://cs162.org/",
+        "https://ocw.mit.edu/courses/6-035-computer-language-engineering-spring-2010/pages/syllabus/",
+        "https://cs186berkeley.net/"
+      ],
+      "branches": [
+        { "id": "os", "name": "操作系统", "nodes": ["os-process", "os-sync"] },
+        { "id": "compiler", "name": "编译前端", "nodes": ["parser"] },
+        { "id": "db", "name": "数据库", "nodes": ["sql"] }
+      ]
+    }
+  ],
+  "join": null,
+  "nodes": {
+    "tools": {
+      "name": "工具、静态检查与测试",
+      "why": "6.031 Getting Started 要求先装 TypeScript、VS Code 与 Git，Problem Set 0 才开做。Reading 1 把 static checking 写成课上消缺陷的第一项；Reading 3 紧接着教 test-first。ACM CS2023 写明 Software competency 是后面 Systems / DM 的先修。",
+      "learn": [
+        "静态类型与静态检查",
+        "test-first programming",
+        "按输入空间划分选用例（黑盒 / 玻璃盒）",
+        "单元测试与回归测试",
+        "Git 的 clone / commit / push"
+      ],
+      "task": {
+        "kind": "lab",
+        "prompt": "对照 Getting Started 交一份能编译的环境记录（语言工具 + 一次 Git clone/commit/push）；对照 Reading 1 的 hailstone 写出带静态类型的版本；对照 Reading 3 为一小函数交一份按划分选好的测试，写清黑盒还是玻璃盒、测了哪几个分区。",
+        "from": "6.031 Getting Started + Reading 1 + Reading 3 / Problem Set 0 形态"
+      },
+      "resources": [
+        {
+          "url": "https://web.mit.edu/6.031/www/sp22/getting-started/",
+          "title": "Getting Started: TypeScript, VS Code, & Git",
+          "use": "先照这页搭环境，再做后面的阅读"
+        },
+        {
+          "url": "https://web.mit.edu/6.031/www/sp22/classes/01-static-checking/",
+          "title": "Reading 1: Static Checking",
+          "use": "读这一讲，用 hailstone 交带类型的版本"
+        },
+        {
+          "url": "https://web.mit.edu/6.031/www/sp22/classes/03-testing/",
+          "title": "Reading 3: Testing",
+          "use": "读这一讲，按输入空间划分写测试"
+        }
+      ]
+    },
+    "adt": {
+      "name": "规约与抽象数据类型",
+      "why": "6.031 课程目标把 specifications、invariants、ADT、representation independence 和 unit testing 列成核心。Reading 6 补前置/后置条件；Reading 10 把 ADT 定义成操作集合及其规约。没有这一层，后面三条轨都只是能跑的脚本。",
+      "learn": [
+        "前置条件与后置条件、@param / @returns",
+        "表示无关",
+        "creator / producer / observer / mutator",
+        "用观察者测其他操作"
+      ],
+      "task": {
+        "kind": "problem_set",
+        "prompt": "对照 Reading 6 为一个模块写操作规约（每个操作有 @param/@returns，并标出类型检查不到的合同）；对照 Reading 10 实现一个小 ADT，交：操作分类表、一组把 creator/observer 绑在一起的单元测试、一句你改过表示但测试未改的说明。",
+        "from": "6.031 Reading 6 + Reading 10，形态对齐个人完成的 Problem Set"
+      },
+      "resources": [
+        {
+          "url": "https://web.mit.edu/6.031/www/sp22/general/",
+          "title": "6.031 General Information & FAQ",
+          "use": "看课程目标里 specifications / ADT / 单元测试这一条"
+        },
+        {
+          "url": "https://web.mit.edu/6.031/www/sp22/classes/06-specifications/",
+          "title": "Reading 6: Specifications",
+          "use": "读这一讲，写操作规约"
+        },
+        {
+          "url": "https://web.mit.edu/6.031/www/sp22/classes/10-abstract-data-types/",
+          "title": "Reading 10: Abstract Data Types",
+          "use": "读这一讲，实现小 ADT 并按操作测试"
+        }
+      ]
+    },
+    "os-process": {
+      "name": "进程与系统调用",
+      "why": "CS162 第 1–4 讲是 What is an OS、进程/线程、Process Management / Files and I/O，同期放 Homework 0 与 Project 0。6.1810 第一次编程实验是 Lab util，紧接着 Lab syscall。山东科技大学操作系统从引论进到进程管理。两边都把进程/系统调用放在锁之前。",
+      "learn": [
+        "操作系统在用户程序与硬件之间做什么",
+        "进程与线程",
+        "系统调用入口",
+        "文件作为早期抽象（CS162 Abstractions 2–3）"
+      ],
+      "task": {
+        "kind": "lab",
+        "prompt": "对照 6.1810 Lab util 或 Lab syscall 交一份能跑的记录：实现或改过的一条用户态工具 / 一次系统调用路径（写清读了 xv6 book 哪一章或 CS162 哪一讲），并附一张图：用户程序 → 系统调用 → 内核。",
+        "from": "6.1810 Lab util / Lab syscall",
+        "alternatives": [
+          {
+            "kind": "lab",
+            "prompt": "没有 xv6 环境时，对照 CS162 Homework 0 / Project 0 Pregame 交同等入门提交物，并写清缺了哪一个 lab。",
+            "from": "CS162 Homework 0 / Project 0"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://cs162.org/",
+          "title": "CS 162 lecture schedule",
+          "use": "看第 1–4 讲与 Homework 0 / Project 0"
+        },
+        {
+          "url": "https://pdos.csail.mit.edu/6.S081/2024/schedule.html",
+          "title": "6.1810 Fall 2024 schedule",
+          "use": "做 Lab util 或 Lab syscall，对照课历写记录"
+        },
+        {
+          "url": "https://cise.sdust.edu.cn/uploads/ueditor/file/20200808/1596830461691695.pdf",
+          "title": "山东科技大学核心课大纲汇总",
+          "use": "对照操作系统「引论 → 进程管理」的章序"
+        }
+      ]
+    },
+    "os-sync": {
+      "name": "并发与同步",
+      "why": "CS162 在进程与 IPC 之后连续三讲 Synchronization（互斥、锁、信号量与管程）。6.1810 在 syscall 之后有 Locking / Coordination 和 Lab lock。山东科技大学把进程同步放在进程之后。不把完整虚存做成必做。",
+      "learn": [
+        "互斥与锁",
+        "信号量与管程",
+        "读者/写者或睡眠/唤醒协调（6.1810 Coordination）"
+      ],
+      "task": {
+        "kind": "lab",
+        "prompt": "对照 CS162 Synchronization 1–3 或 6.1810 Locking/Coordination，交一个能演示竞态的小程序：无锁时失败、加锁或信号量后通过；写清哪些共享状态被保护。若做 6.1810 Lab lock，把命令与通过/失败记录附上。",
+        "from": "CS162 Synchronization 讲次或 6.1810 Lab lock"
+      },
+      "resources": [
+        {
+          "url": "https://cs162.org/",
+          "title": "CS 162 lecture schedule",
+          "use": "读 Synchronization 1–3 讲"
+        },
+        {
+          "url": "https://pdos.csail.mit.edu/6.S081/2024/schedule.html",
+          "title": "6.1810 Fall 2024 schedule",
+          "use": "对照 Locking / Coordination 讲次，或做 Lab lock"
+        },
+        {
+          "url": "https://web.mit.edu/6.031/www/sp22/general/",
+          "title": "6.031 General Information",
+          "use": "只作印证：课目标里有 concurrent program，但不作为本轨顺序"
+        }
+      ]
+    },
+    "parser": {
+      "name": "扫描器与语法分析",
+      "why": "6.035 第 1–2 周是正则与形式文法，然后语法分析，Project 1 就是 Scanner and parser。CS164 学习目标第一条是 Write a parser，第 10 周有 Parsing / Regex。山东科技大学《编译原理》第三章词法、第四章语法，并要求课后作业。ACM FPL 把 Syntax Analysis 放在 Semantic Analysis 与 Code Generation 之前。不要求做完代码生成。",
+      "learn": [
+        "正则与形式文法",
+        "扫描器",
+        "自顶向下或自底向上语法分析",
+        "编译器正确性（CS164：what it means for a compiler to be correct）"
+      ],
+      "task": {
+        "kind": "project",
+        "prompt": "对照 6.035 Project 1 或 CS164 Week 10 Parsing/Regex，交一个能吃测试输入的扫描器或递归下降解析器：文法或正则、若干接受/拒绝用例、失败时的错误位置。",
+        "from": "6.035 Project 1 Scanner and parser"
+      },
+      "resources": [
+        {
+          "url": "https://ocw.mit.edu/courses/6-035-computer-language-engineering-spring-2010/pages/syllabus/",
+          "title": "6.035 Syllabus",
+          "use": "看正则 / 文法 / 语法分析的周次"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/6-035-computer-language-engineering-spring-2010/pages/projects/",
+          "title": "6.035 Projects",
+          "use": "做 Project 1 Scanner and parser，不要做到 P3"
+        },
+        {
+          "url": "https://berkeley-cs164-sp25.github.io/syllabus.html",
+          "title": "CS 164 syllabus",
+          "use": "看 Write a parser 这一条学习目标"
+        },
+        {
+          "url": "https://berkeley-cs164-sp25.github.io/schedule.html",
+          "title": "CS 164 schedule",
+          "use": "第 10 周 Parsing / Regex Activity 可作同一份交付物"
+        }
+      ]
+    },
+    "sql": {
+      "name": "关系模型与 SQL",
+      "why": "CS186 第 1–2 周就是 SQL I/II，并立刻放 SQL project；大纲写明 Project 1 用 SQL，后面才是磁盘、B+ 树、连接与事务。山东科技大学《数据库系统》在关系模型之后用 8 学时讲 SQL。本科入口停在能交上查询，不承诺查询优化器。",
+      "learn": [
+        "关系模型上的查询",
+        "SQL 的定义与查询（CS186 SQL I / SQL II）",
+        "选择、插入、至少一次连接"
+      ],
+      "task": {
+        "kind": "project",
+        "prompt": "对照 CS186 第 1–2 周与 SQL project，交一组能跑的查询（建表/插入、选择、至少一次连接），每条标注对应 SQL I 还是 SQL II。另附一页：数据如何进入该工具、输出是什么。",
+        "from": "CS186 Project 1（SQL）"
+      },
+      "resources": [
+        {
+          "url": "https://cs186berkeley.net/",
+          "title": "CS 186 course site",
+          "use": "看第 1–2 周 SQL I/II 与 project 入口"
+        },
+        {
+          "url": "https://cs186berkeley.net/syllabus/",
+          "title": "CS 186 syllabus",
+          "use": "对照 Project 1 用 SQL 的要求"
+        },
+        {
+          "url": "https://cise.sdust.edu.cn/uploads/ueditor/file/20200808/1596830461691695.pdf",
+          "title": "山东科技大学核心课大纲汇总",
+          "use": "对照数据库「关系模型 → SQL」的学时与目标"
+        }
+      ]
+    }
+  },
+  "conflicts": [
+    "CS164 先用 OCaml 做增量编译器，第 10 周才到 Parsing；6.035 与国内编译原理是正则/文法 → 扫描 → 语法分析。编译轨取两边都要求、且更靠前的「写出 parser」，不把 CS164 前八周写成必做。",
+    "6.1810 把 page tables 放在 Locking 之前；CS162 先 Synchronization 再 Memory。操作系统轨取两者都有的并发/锁，不把完整虚存做成必做。",
+    "6.031 把 concurrency 放在 ADT 之后的课程目标里；OS 课把 concurrency 放在进程之后。并发只出现在操作系统轨，不回到主干。"
+  ],
+  "missing": "",
+  "checked_at": "2026-10-04"
+}

@@ -1,0 +1,394 @@
+{
+  "id": "190.15",
+  "name": "认知",
+  "format": "tutorial-tree-v2",
+  "status": "ok",
+  "goal": "能按信息加工顺序读完知觉、注意、记忆、知识与语言、推理与决策，对照公开教材习题或课内 lab 交一份可核对的实验记录或短评；能指出一项日常判断是启发式还是规范推理。不承诺独立发表，也不进入认知神经科学或临床评估。",
+  "sources": [
+    {
+      "title": "Syllabus | Cognitive Processes | MIT OpenCourseWare (9.65, Spring 2004)",
+      "url": "https://ocw.mit.edu/courses/9-65-cognitive-processes-spring-2004/pages/syllabus/",
+      "kind": "ocw",
+      "used_for": "课程终点：human experimental cognitive psychology；作业形态是 3 次 in-class lab + lab report，强调 experimental methods and evidence"
+    },
+    {
+      "title": "Calendar | Cognitive Processes | MIT OpenCourseWare (9.65, Spring 2004)",
+      "url": "https://ocw.mit.edu/courses/9-65-cognitive-processes-spring-2004/pages/calendar/",
+      "kind": "ocw",
+      "used_for": "主干顺序：Object Recognition → Attention → Lab 1 Memory → Working/Implicit Memory → Concepts → Language → Lab 3 Judgment/Reasoning/Problem-solving → Solving Problems"
+    },
+    {
+      "title": "Lecture Notes | Cognitive Processes | MIT OpenCourseWare (9.65, Spring 2004)",
+      "url": "https://ocw.mit.edu/courses/9-65-cognitive-processes-spring-2004/pages/lecture-notes/",
+      "kind": "ocw",
+      "used_for": "确认各讲有可下载 outline；Lab 1 Memory、Lab 2 Images/Concepts/Language、Lab 3 Judgment/Reasoning/Problem-solving 的课历位置"
+    },
+    {
+      "title": "Labs | Cognitive Processes | MIT OpenCourseWare (9.65, Spring 2004)",
+      "url": "https://ocw.mit.edu/courses/9-65-cognitive-processes-spring-2004/pages/labs/",
+      "kind": "ocw",
+      "used_for": "lab 目标：分析 memory 与 vision 的认知过程；交 lab report"
+    },
+    {
+      "title": "9.65 February 11, 2004 Attention I. HANDOUT (MIT)",
+      "url": "https://ocw.mit.edu/courses/9-65-cognitive-processes-spring-2004/a39f58e79423b07fa1174d2fdc9ad717_feb11h04.pdf",
+      "kind": "lecture_notes",
+      "used_for": "注意节点术语：iconic memory / partial report；Cherry shadowing；Broadbent filter；Treisman attenuation；late selection；Stroop demo"
+    },
+    {
+      "title": "Psychology 40: Introduction to Cognitive Psychology — Syllabus (Stanford, Winter 2004–2005)",
+      "url": "http://web.stanford.edu/class/psych40/coursework/content/Psych40syllabus.html",
+      "kind": "syllabus",
+      "used_for": "主干五大块：perception and attention → learning and memory → language → reasoning and problem solving → judgment and decision making；三次 lab：写方法与结果 / 改实验 / 提出新实验"
+    },
+    {
+      "title": "Cognitive Foundations (Pilegard, UC San Diego OER)",
+      "url": "https://pilegard.github.io/cogfoundations/",
+      "kind": "open_textbook",
+      "used_for": "公开教材身份与全书顺序：History and Research Methods → Perception → Attention → Working Memory → Long-Term Memory → Memory in Context → Knowledge → Language → Reasoning and Decision Making → Problem Solving"
+    },
+    {
+      "title": "Chapter 1 History and Research Methods | Cognitive Foundations",
+      "url": "https://pilegard.github.io/cogfoundations/history-and-research-methods.html",
+      "kind": "open_textbook",
+      "used_for": "节点 methods：认知革命、实验 vs 相关、IV/DV、随机分配；章末 Compare / Practice 习题"
+    },
+    {
+      "title": "Chapter 2 Perception | Cognitive Foundations",
+      "url": "https://pilegard.github.io/cogfoundations/perception.html",
+      "kind": "open_textbook",
+      "used_for": "节点 perc-attn：sensation vs perception、深度线索、Gestalt、知觉恒常、期望与错觉；Practice / Discussion 习题"
+    },
+    {
+      "title": "Chapter 3 Attention | Cognitive Foundations",
+      "url": "https://pilegard.github.io/cogfoundations/attention.html",
+      "kind": "open_textbook",
+      "used_for": "节点 perc-attn：dichotic listening、filter / attenuation / late selection、Stroop、task switching、inattentional blindness；Discuss / Practice 习题"
+    },
+    {
+      "title": "Chapter 4 Short-term and Working Memory | Cognitive Foundations",
+      "url": "https://pilegard.github.io/cogfoundations/working-memory-chapter.html",
+      "kind": "open_textbook",
+      "used_for": "节点 memory：Modal Model、chunk、Baddeley 多成分工作记忆；短词/长词表练习"
+    },
+    {
+      "title": "Chapter 5 Long-term Memory | Cognitive Foundations",
+      "url": "https://pilegard.github.io/cogfoundations/long-term-memory-chapter.html",
+      "kind": "open_textbook",
+      "used_for": "节点 memory：explicit/implicit、episodic/semantic、encoding–retrieval、context-dependent learning；考试复习计划习题"
+    },
+    {
+      "title": "Chapter 6 Memory in Context | Cognitive Foundations",
+      "url": "https://pilegard.github.io/cogfoundations/memory-in-context.html",
+      "kind": "open_textbook",
+      "used_for": "节点 memory：schema、目击错误、proactive/retroactive interference；陪审员与 schema 练习"
+    },
+    {
+      "title": "Chapter 7 Knowledge | Cognitive Foundations",
+      "url": "https://pilegard.github.io/cogfoundations/knowledge.html",
+      "kind": "open_textbook",
+      "used_for": "节点 knowledge-lang：范畴定义问题、典型性、semantic network、先验知识与专长；给范畴写定义的 Practice"
+    },
+    {
+      "title": "Chapter 8 Language | Cognitive Foundations",
+      "url": "https://pilegard.github.io/cogfoundations/language.html",
+      "kind": "open_textbook",
+      "used_for": "节点 knowledge-lang：phoneme / morpheme / syntax、理解与生成、语言与思维；讨论题"
+    },
+    {
+      "title": "Chapter 9 Reasoning and Decision Making | Cognitive Foundations",
+      "url": "https://pilegard.github.io/cogfoundations/reasoning-and-decision-making.html",
+      "kind": "open_textbook",
+      "used_for": "节点 thinking：演绎/归纳、启发式、normative vs descriptive、framing / default；期望值计算题"
+    },
+    {
+      "title": "Chapter 10 Problem Solving | Cognitive Foundations",
+      "url": "https://pilegard.github.io/cogfoundations/problem-solving.html",
+      "kind": "open_textbook",
+      "used_for": "节点 thinking：well-defined vs ill-defined、insight、functional fixedness、专家/新手；life hack 习题"
+    },
+    {
+      "title": "《认知心理学》课程教学大纲｜上海师范大学心理学院",
+      "url": "https://psycet.shnu.edu.cn/66/06/c23358a812550/page.htm",
+      "kind": "syllabus",
+      "used_for": "中文课顺序：绪论（对象与方法）→知觉→注意→记忆结构/短时/长时→表象→概念→问题解决→推理→言语；三次作业：解读知觉、解读记忆、注意研究设计"
+    }
+  ],
+  "trunk": ["methods", "perc-attn", "memory", "knowledge-lang", "thinking"],
+  "forks": [],
+  "join": null,
+  "nodes": {
+    "methods": {
+      "name": "信息加工与实验方法",
+      "why": "Cognitive Foundations 第 1 章把认知革命和实验/相关设计放在任何内容章之前；上师大第一章先讲对象、六种研究范式与信息加工观点；9.65 大纲写明 emphasis on experimental methods and evidence；Stanford Psych 40 也要求 lectures/labs/exams 都按 experimenter 来想。分不清实验证据，后面各章会变成名词表。",
+      "learn": [
+        "认知心理学：attention / memory / perception / language / problem solving / thinking",
+        "认知革命相对行为主义：把心理过程重新纳入可测对象",
+        "information-processing：输入、编码、贮存、提取",
+        "experimental vs correlational；independent / dependent variable；random assignment",
+        "introspection 的局限；confound / placebo / double-blind"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "对照 Cognitive Foundations 第 1 章 Exercises：用一段话写出 experimental 与 correlational 的关键差别（能否推断因果、是否操纵变量、随机分配管什么）；再列行为主义、Gestalt 等认知革命之前的取向，各用一两句标明它们把什么当作对象。",
+        "from": "Cognitive Foundations Ch.1 Exercises 1–2",
+        "alternatives": [
+          {
+            "kind": "writeup",
+            "prompt": "对照上师大第一章课外要求：从该章举例的实验里挑 1 个，写半页说明它用了哪种范式、自变量/因变量是什么、以及一条优点和一条不足。",
+            "from": "上海师范大学《认知心理学》第一章课外学习要求"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://pilegard.github.io/cogfoundations/history-and-research-methods.html",
+          "title": "Chapter 1 History and Research Methods",
+          "use": "读 1.1–1.2，做章末 Compare / Practice"
+        },
+        {
+          "url": "https://psycet.shnu.edu.cn/66/06/c23358a812550/page.htm",
+          "title": "上师大《认知心理学》教学大纲",
+          "use": "看第一章：对象、研究方法、信息加工观点"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/9-65-cognitive-processes-spring-2004/pages/syllabus/",
+          "title": "9.65 Syllabus",
+          "use": "读 Overview：experimental methods and evidence；lab report 占比"
+        },
+        {
+          "url": "http://web.stanford.edu/class/psych40/coursework/content/Psych40syllabus.html",
+          "title": "Stanford Psychology 40 Syllabus",
+          "use": "读 OVERVIEW：认知是实验学科，作业按 experimenter 来写"
+        }
+      ]
+    },
+    "perc-attn": {
+      "name": "知觉与注意",
+      "why": "四份来源都把知觉/物体识别紧挨着放在注意之前：CF 第 2–3 章、9.65 日历 Ses 2–4、Stanford 先 Perception 再 Attention、上师大第二–三章。Stanford 综述也把 perception and attention 列为第一大块。先分清感觉与知觉，再谈选择，后面的记忆才有输入。",
+      "learn": [
+        "sensation vs perception；transduction；rods / cones / blind spot",
+        "object / 模式识别：板块、原型、特征；自上而下与自下而上",
+        "Gestalt 组织；binocular / monocular depth cues；perceptual constancy",
+        "selective attention：dichotic listening / shadowing；cocktail party",
+        "Broadbent filter、Treisman attenuation、late selection / flexible selection",
+        "Stroop；automatic vs controlled；inattentional blindness"
+      ],
+      "task": {
+        "kind": "writeup",
+        "prompt": "对照上师大考核方案第一次作业：选一件生活中的知觉现象（错觉、模式识别或期望改变所见均可），用教材第 2 章的一条机制（如 Gestalt、深度线索、恒常性或期望）写 400–600 字短评，标明用了哪一节。",
+        "from": "上海师范大学考核方案第一次个人作业；Cognitive Foundations Ch.2",
+        "alternatives": [
+          {
+            "kind": "exercise",
+            "prompt": "对照 CF 第 2 章 Practice：列出视觉知觉如何支撑开车或骑车的 4 条具体过程（深度、恒常、外周视等，注明书中术语）。再对照第 3 章 Practice：各举一件你觉得能并行和不能并行的事，说明任务或情境里哪一点在吃注意容量。",
+            "from": "Cognitive Foundations Ch.2–3 Exercises"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://pilegard.github.io/cogfoundations/perception.html",
+          "title": "Chapter 2 Perception",
+          "use": "读感觉/知觉、深度与 Gestalt，做 Practice / Discussion"
+        },
+        {
+          "url": "https://pilegard.github.io/cogfoundations/attention.html",
+          "title": "Chapter 3 Attention",
+          "use": "读双耳分听与三种选择模型，做 Discuss / Practice"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/9-65-cognitive-processes-spring-2004/a39f58e79423b07fa1174d2fdc9ad717_feb11h04.pdf",
+          "title": "9.65 Attention I Handout",
+          "use": "对照 filter / attenuation / late selection 与 Stroop demo 填自己的笔记"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/9-65-cognitive-processes-spring-2004/pages/calendar/",
+          "title": "9.65 Calendar",
+          "use": "核 Ses 2 Object Recognition 与 Ses 3–4 Attention 的先后"
+        },
+        {
+          "url": "https://psycet.shnu.edu.cn/66/06/c23358a812550/page.htm",
+          "title": "上师大《认知心理学》教学大纲",
+          "use": "看第二–三章：模式识别三模型；过滤器/衰减/反应选择"
+        }
+      ]
+    },
+    "memory": {
+      "name": "工作记忆与长时记忆",
+      "why": "注意之后四份来源都进入记忆：9.65 先 Lab 1 Memory 再讲 WM/内隐/遗忘；CF 第 4–6 章；Stanford 从 Short Term Memories 讲到 implicit/explicit 与 episodic；上师大第四–六章是记忆结构→短时→长时。这是调查课的核心块，也是 9.65 / Psych 40 第一次 lab 的对象。",
+      "learn": [
+        "Modal Model：感觉记忆 → 短时/工作记忆 → 长时记忆",
+        "chunk；Miller 7±2 与词长效应",
+        "Baddeley：phonological loop、visuospatial sketchpad、central executive、episodic buffer",
+        "explicit vs implicit；episodic vs semantic；levels of processing",
+        "encoding / storage / retrieval；context-dependent learning",
+        "schema 与重构；目击错误；proactive / retroactive interference"
+      ],
+      "task": {
+        "kind": "lab",
+        "prompt": "对照 Stanford Psych 40 Lab Assignment 1：用公开认知实验（或教材第 4 章短词/长词表自测）记下自己的方法与结果，并至少再收 1 名未上过这门课的人的数据；写清刺激、程序、你测的是 WM 容量还是词长效应。9.65 的对应交卷是 Lab 1 Memory report。",
+        "from": "Stanford Psychology 40 Lab Assignment 1；MIT 9.65 Lab 1 Memory",
+        "alternatives": [
+          {
+            "kind": "writeup",
+            "prompt": "对照上师大考核方案第二次作业：用记忆结构、加工水平或编码/提取中的一条理论，解读一则日常记忆现象（遗忘、错误记忆或学习策略），写 400–600 字并点明理论名称。",
+            "from": "上海师范大学考核方案第二次个人作业"
+          },
+          {
+            "kind": "exercise",
+            "prompt": "对照 CF 第 4 章 Practice：各列一份短词表和长词表，测自己或朋友能立刻复述多少，写下哪一份更好并标 chunk / 词长。再对照第 5 章：为下一次考试列一份复习步骤，至少用上 elaborative encoding 与 context-dependent learning 各一条。",
+            "from": "Cognitive Foundations Ch.4–5 Exercises"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://pilegard.github.io/cogfoundations/working-memory-chapter.html",
+          "title": "Chapter 4 Short-term and Working Memory",
+          "use": "读 Modal Model 与 Baddeley，做短词/长词表练习"
+        },
+        {
+          "url": "https://pilegard.github.io/cogfoundations/long-term-memory-chapter.html",
+          "title": "Chapter 5 Long-term Memory",
+          "use": "读 explicit/implicit 与编码提取，写考试复习计划"
+        },
+        {
+          "url": "https://pilegard.github.io/cogfoundations/memory-in-context.html",
+          "title": "Chapter 6 Memory in Context",
+          "use": "读 schema 与目击错误；可选做陪审员练习"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/9-65-cognitive-processes-spring-2004/pages/calendar/",
+          "title": "9.65 Calendar",
+          "use": "看 Lab 1 Memory 与 Ses 6–10 记忆讲次"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/9-65-cognitive-processes-spring-2004/pages/labs/",
+          "title": "9.65 Labs",
+          "use": "确认 lab 要交 report，对象是 memory / vision"
+        },
+        {
+          "url": "http://web.stanford.edu/class/psych40/coursework/content/Psych40syllabus.html",
+          "title": "Stanford Psychology 40 Syllabus",
+          "use": "读 Lab Assignment 1：方法、结果、至少一名非选课者的数据"
+        }
+      ]
+    },
+    "knowledge-lang": {
+      "name": "概念、知识与语言",
+      "why": "记忆之后，CF 第 7–8 章、9.65 Lab 2（Images, Concepts, Language）再 Concepts and Prototypes / Psycholinguistics、Stanford General Knowledge 之后是 Language Structure / Comprehension，都把范畴与语言放在思维之前。上师大把言语放到全书最后，顺序冲突见 conflicts；主干取更靠前的三份来源。",
+      "learn": [
+        "范畴难以充分定义；典型与非典型成员",
+        "概念表征：特征表 / 原型 / 样例；semantic network 与 spreading activation",
+        "先验知识与专长如何改变组块和看到的结构",
+        "phoneme / morpheme / syntax；理解与生成",
+        "语言与思维：影响注意与描述，不是语言决定论",
+        "双语贮存的两种课堂说法（共同贮存 / 单独贮存）只作上师大大纲术语，不展开神经机制"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "对照 CF 第 7 章 Practice：选两个日常范畴，各写一条定义，并检查它是否既准确、又像人们真会用来辨认成员；再各标一个典型和一个非典型成员及理由。然后对照第 8 章：用书中成分（phoneme / morpheme / syntax）说明你学第二语言时卡在哪一层，或论证 Kanzi 算不算「有语言」，须引用书中一条判据。",
+        "from": "Cognitive Foundations Ch.7–8 Exercises",
+        "alternatives": [
+          {
+            "kind": "writeup",
+            "prompt": "对照上师大第八章课外作业：就记忆或概念任选一题，写一份本科级实验草案，只含文献综述要点、问题（含假设）、自变量/因变量与程序，不写临床或治疗方案。",
+            "from": "上海师范大学第八章课外学习要求（第二次书面作业）"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://pilegard.github.io/cogfoundations/knowledge.html",
+          "title": "Chapter 7 Knowledge",
+          "use": "读范畴与语义网络，做定义/典型性 Practice"
+        },
+        {
+          "url": "https://pilegard.github.io/cogfoundations/language.html",
+          "title": "Chapter 8 Language",
+          "use": "读语言成分与语言–思维，做讨论题"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/9-65-cognitive-processes-spring-2004/pages/lecture-notes/",
+          "title": "9.65 Lecture Notes",
+          "use": "打开 Concepts and Prototypes、Language: Psycholinguistics 两讲 outline"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/9-65-cognitive-processes-spring-2004/pages/calendar/",
+          "title": "9.65 Calendar",
+          "use": "看 Lab 2 Images, Concepts, Language 与 Ses 13–14"
+        },
+        {
+          "url": "http://web.stanford.edu/class/psych40/coursework/content/Psych40syllabus.html",
+          "title": "Stanford Psychology 40 Syllabus",
+          "use": "看 Feb 8 General Knowledge 与 Feb 22–24 Language Structure / Comprehension"
+        },
+        {
+          "url": "https://psycet.shnu.edu.cn/66/06/c23358a812550/page.htm",
+          "title": "上师大《认知心理学》教学大纲",
+          "use": "看第八章概念、第十一章言语；第二次书面作业要求"
+        }
+      ]
+    },
+    "thinking": {
+      "name": "推理、决策与问题解决",
+      "why": "调查课收在思维：9.65 Lab 3 把 Judgment, Reasoning, and Problem-solving 绑在一起再讲 Solving Problems；Stanford 最后三分之一是 Reasoning and Problem Solving → Judgment → Decision Making；CF 第 9 章推理决策、第 10 章问题解决。上师大先问题解决再推理，合成一个节点，不另开枝。",
+      "learn": [
+        "deductive vs inductive；belief bias；confirmation bias",
+        "availability / representativeness heuristics",
+        "normative vs descriptive decision making；expected value",
+        "framing effects；default effects",
+        "well-defined vs ill-defined problems；insight / restructuring",
+        "functional fixedness；专家与新手的问题表征"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "对照 CF 第 9 章：计算「20% 概率赢 $50」按期望值该付多少；再用一段话写出 framing 与 default 各一例，并说明它们和「完全理性决策者」差在哪。再对照第 10 章：找 2 个把日常物品改作他用的例子，标明原用途、新用途，以及打破了哪一种 functional fixedness。",
+        "from": "Cognitive Foundations Ch.9–10 Exercises",
+        "alternatives": [
+          {
+            "kind": "writeup",
+            "prompt": "对照 Stanford Psych 40 Lab Assignment 3：就判断、推理或问题解决提一个新实验（自变量、因变量、预测、为何能区分两种理论），写成一页草案。时间不够可对照 9.65 Lab 3 主题，用 CF 第 9 或第 10 章的一个效应当操作定义。",
+            "from": "Stanford Psychology 40 Lab Assignment 3；MIT 9.65 Lab 3"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://pilegard.github.io/cogfoundations/reasoning-and-decision-making.html",
+          "title": "Chapter 9 Reasoning and Decision Making",
+          "use": "读演绎/归纳与启发式，做期望值与 framing 题"
+        },
+        {
+          "url": "https://pilegard.github.io/cogfoundations/problem-solving.html",
+          "title": "Chapter 10 Problem Solving",
+          "use": "读问题表征与功能固着，做 life hack 练习"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/9-65-cognitive-processes-spring-2004/pages/calendar/",
+          "title": "9.65 Calendar",
+          "use": "看 Lab 3 与 Ses 19–22 Judgment / Reasoning / Solving Problems"
+        },
+        {
+          "url": "http://web.stanford.edu/class/psych40/coursework/content/Psych40syllabus.html",
+          "title": "Stanford Psychology 40 Syllabus",
+          "use": "看 Mar 1–8 课历与 Lab Assignment 3：提出新实验"
+        },
+        {
+          "url": "https://psycet.shnu.edu.cn/66/06/c23358a812550/page.htm",
+          "title": "上师大《认知心理学》教学大纲",
+          "use": "看第九–十章：算法/启发式；三段论与命题检验"
+        }
+      ]
+    }
+  },
+  "conflicts": [
+    "上师大把言语放在问题解决和推理之后；9.65、Stanford Psych 40 与 Cognitive Foundations 都把 language 放在 reasoning / problem solving 之前。主干取更靠前的三份来源。",
+    "上师大先第九章问题解决再第十章推理；CF 先推理决策再问题解决；9.65 先 Judgment/Reasoning 再 Solving Problems。合成节点 thinking，内部按 CF / 9.65。",
+    "表象/心理旋转：上师大放在长时记忆之后、概念之前；9.65 的 Visual Knowledge / Mental Codes 在语言之后。两份来源位置不一致，不单列节点。",
+    "Stanford 有一讲 Cognition and the Brain，部分中文课有「神经基础」单元。认知神经科学是子节点，本树不展开脑成像或神经环路。"
+  ],
+  "missing": "",
+  "checked_at": "2026-10-04"
+}

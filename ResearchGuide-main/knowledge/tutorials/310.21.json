@@ -1,0 +1,332 @@
+{
+  "id": "310.21",
+  "name": "人体生理",
+  "format": "tutorial-tree-v2",
+  "status": "ok",
+  "goal": "能用内环境、调定点与正常区间说明体温、血压和体液如何靠负反馈维持；能画出跨膜转运、动作电位、神经–肌接头与心动周期，并对照公开教材复习题或大纲掌握项交卷。只做正常功能，不含诊断、处方与操作。",
+  "sources": [
+    {
+      "title": "Preface — Anatomy and Physiology 2e (OpenStax)",
+      "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/preface",
+      "kind": "open_textbook",
+      "used_for": "两学期单元顺序：组织层次与稳态 → 肌组织 → 神经与内分泌 → 血液与循环 → 呼吸/消化/泌尿与酸碱；奇数 Review / Critical Thinking 有学生解答手册"
+    },
+    {
+      "title": "1.5 Homeostasis — Anatomy and Physiology 2e (OpenStax)",
+      "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/1-5-homeostasis",
+      "kind": "open_textbook",
+      "used_for": "主干第一步：set point、normal range、sensor/control center/effector、负反馈（体温、血糖）、正反馈（分娩、凝血）"
+    },
+    {
+      "title": "Ch. 1 Review Questions — Anatomy and Physiology 2e (OpenStax)",
+      "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/1-review-questions",
+      "kind": "open_textbook",
+      "used_for": "稳态节点习题：Q16–19（体温反应、控制中枢、散热、正反馈实例）"
+    },
+    {
+      "title": "3.1 The Cell Membrane — Anatomy and Physiology 2e (OpenStax)",
+      "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/3-1-the-cell-membrane",
+      "kind": "open_textbook",
+      "used_for": "主干第二步：ICF/ECF、选择通透、简单扩散/易化扩散/渗透/主动转运"
+    },
+    {
+      "title": "12.4 The Action Potential — Anatomy and Physiology 2e (OpenStax)",
+      "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/12-4-the-action-potential",
+      "kind": "open_textbook",
+      "used_for": "主干第二步：钠钾泵、静息电位约 -70 mV、去极化/复极化/超极化、电压门控通道"
+    },
+    {
+      "title": "Ch. 12 Review Questions — Anatomy and Physiology 2e (OpenStax)",
+      "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/12-review-questions",
+      "kind": "open_textbook",
+      "used_for": "膜与兴奋性习题：Q23–28、Q31（去极化离子、阈值、配体/机械门控、不应期、ACh）"
+    },
+    {
+      "title": "10.3 Muscle Fiber Contraction and Relaxation — Anatomy and Physiology 2e (OpenStax)",
+      "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/10-3-muscle-fiber-contraction-and-relaxation",
+      "kind": "open_textbook",
+      "used_for": "主干第三步：ACh、T 管、SR 释放 Ca++、肌钙蛋白–原肌球蛋白、滑行与横桥、舒张时钙回泵"
+    },
+    {
+      "title": "19.2 Cardiac Muscle and Electrical Activity — Anatomy and Physiology 2e (OpenStax)",
+      "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/19-2-cardiac-muscle-and-electrical-activity",
+      "kind": "open_textbook",
+      "used_for": "主干第四步：自律性、SA→AV→His→浦肯野、传导细胞预电位与收缩细胞平台期；正常 ECG 的 P/QRS/T 对应关系"
+    },
+    {
+      "title": "19.3 Cardiac Cycle — Anatomy and Physiology 2e (OpenStax)",
+      "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/19-3-cardiac-cycle",
+      "kind": "open_textbook",
+      "used_for": "主干第四步：收缩/舒张、等容收缩、EDV 约 130 mL、每搏量 70–80 mL、ESV"
+    },
+    {
+      "title": "Ch. 19 Review Questions — Anatomy and Physiology 2e (OpenStax)",
+      "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/19-review-questions",
+      "kind": "open_textbook",
+      "used_for": "循环节点习题：Q9–17（自律性、平台期钙、心动周期与前/后负荷）"
+    },
+    {
+      "title": "20.2 Blood Flow, Blood Pressure, and Resistance — Anatomy and Physiology 2e (OpenStax)",
+      "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/20-2-blood-flow-blood-pressure-and-resistance",
+      "kind": "open_textbook",
+      "used_for": "主干第四步：收缩压/舒张压/脉压/MAP；教材给出约 120/80 与 MAP 70–110 mm Hg；MAP ≈ 舒张压 + 脉压/3"
+    },
+    {
+      "title": "22.3 The Process of Breathing — Anatomy and Physiology 2e (OpenStax)",
+      "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/22-3-the-process-of-breathing",
+      "kind": "open_textbook",
+      "used_for": "主干第五步：Boyle 定律、胸膜腔负压、潮气量约 500 mL、肺活量、成人呼吸频率 12–18 次/分"
+    },
+    {
+      "title": "25.5 Physiology of Urine Formation — Anatomy and Physiology 2e (OpenStax)",
+      "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/25-5-physiology-of-urine-formation",
+      "kind": "open_textbook",
+      "used_for": "主干第五步：GFR 约 125 mL/min（区间 90–140）、净滤过压、99% 重吸收、每日尿量约 1–2 L"
+    },
+    {
+      "title": "26.1 Body Fluids and Fluid Compartments — Anatomy and Physiology 2e (OpenStax)",
+      "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/26-1-body-fluids-and-fluid-compartments",
+      "kind": "open_textbook",
+      "used_for": "主干第一步与第五步：ICF/ECF/血浆与组织液；ECF 高 Na+、ICF 高 K+；静水压与胶体渗透压"
+    },
+    {
+      "title": "BASM312540生理学 — 西安交通大学医学部",
+      "url": "https://yxbpyc.xjtu.edu.cn/info/1086/1576.htm",
+      "kind": "syllabus",
+      "used_for": "中文医学生理顺序：绪论（内环境与稳态、神经/体液/自身调节、反馈）→ 细胞（转运、静息/动作电位、神经–肌接头）→ 血液 → 循环 → 呼吸 → 消化 → 能量代谢 → 尿 → 神经 → 内分泌 → 生殖；各章列掌握项"
+    },
+    {
+      "title": "MCB 32: Introduction to Human Physiology, Fall 2016 (UC Berkeley)",
+      "url": "https://mcb.berkeley.edu/sites/mcb.berkeley.edu/files/downloads/undergrad/syllabus/MCB%2032%20F16%20Syllabus.pdf",
+      "kind": "syllabus",
+      "used_for": "本科导论目标：器官如何工作、如何调节以维持稳态；课历：Introduction → Homeostasis and negative feedback → Membrane transport → Intercellular signaling → （内分泌较早）→ Membrane and action potentials → 骨骼肌 → CV → Respiration → Renal → GI"
+    },
+    {
+      "title": "Syllabus: BIOS-3755-A Human Physiology (Georgia Tech, Spring 2021)",
+      "url": "https://biosciences.gatech.edu/sites/default/files/images/bios_3755_sp2021_syllabus_ver.2.pdf",
+      "kind": "syllabus",
+      "used_for": "课程目标：正常组织与器官功能、功能如何服从结构、系统如何提供稳态；课历：Physiology Concepts → Membranes → Electrochemical Potential and Excitable Cells → Neuronal Signaling → Muscle → Cardiovascular → Respiratory → Renal / Fluid / Electrolyte & Acid-Base；作业为 4 次 Homework"
+    },
+    {
+      "title": "Human Physiology: A Student’s Open Path to Understanding the Body — Table of Contents (LibreTexts / Fresno City College)",
+      "url": "https://bio.libretexts.org/Workbench/Human_Physiology%3A_A_Students_Open_Path_to_Understanding_the_Body/00%3A_Front_Matter/05%3A_A_Students_Open_Path_to_Understanding_the_Body",
+      "kind": "open_textbook",
+      "used_for": "另一本公开生理教材目录：Introduction → Membrane → Cell Communication and Homeostatic Control → Endocrine → Nervous → Muscle → Blood → Heart → Blood Pressure → Breathing → Gas Exchange → Renal → Fluid/Electrolyte/Acid-Base；章内有 Check Your Understanding"
+    }
+  ],
+  "trunk": ["homeostasis", "membrane", "excitable", "cardio", "exchange"],
+  "forks": [],
+  "join": null,
+  "nodes": {
+    "homeostasis": {
+      "name": "稳态与区间",
+      "why": "OpenStax 1.5 把 set point 和 normal range 写成生理指标在区间内波动的原因；交大大纲第一章先讲内环境和稳态，再讲神经/体液/自身调节与负/正反馈。Berkeley MCB 32 第 2 讲、Georgia Tech 第 1 讲都从稳态概念起。",
+      "learn": [
+        "内环境、ICF 与 ECF",
+        "调定点与正常区间",
+        "感受器、控制中枢、效应器",
+        "负反馈与正反馈"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "对照 OpenStax 1.5 画两张负反馈图：体温（图 1.10）和血糖（文中胰岛素一例）。每张图标出 stimulus、sensor、control center、effector、set point 和 normal range；再交 Ch.1 Review Q16–19 的书面答案（奇数题可对教材学生解答手册）。另用一两句话写出交大大纲里神经调节、体液调节、自身调节各举一例。",
+        "from": "OpenStax 1.5 + Ch.1 Review Q16–19；交大生理学第一章",
+        "alternatives": [
+          {
+            "kind": "writeup",
+            "prompt": "按 Berkeley MCB 32 第 2 讲 Homeostasis and negative feedback 的形态，交一页书面说明：选体温或血压，写出偏离区间后如何回到区间，并标出反馈是负还是正。",
+            "from": "MCB 32 Lecture 2；机制细节仍对照 OpenStax 1.5"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/1-5-homeostasis",
+          "title": "1.5 Homeostasis",
+          "use": "读 set point / normal range 与负、正反馈两节，临摹图 1.10"
+        },
+        {
+          "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/1-review-questions",
+          "title": "Ch. 1 Review Questions",
+          "use": "做 Q16–19"
+        },
+        {
+          "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/26-1-body-fluids-and-fluid-compartments",
+          "title": "26.1 Body Fluids and Fluid Compartments",
+          "use": "核 ICF/ECF 分区和 Na+/K+ 分布，用来标内环境"
+        },
+        {
+          "url": "https://yxbpyc.xjtu.edu.cn/info/1086/1576.htm",
+          "title": "交大生理学大纲 第一章",
+          "use": "对照「机体的内环境和稳态」「生理功能的调节」掌握项写三种调节"
+        }
+      ]
+    },
+    "membrane": {
+      "name": "膜转运与兴奋性",
+      "why": "交大第二章把跨膜转运和静息/动作电位放在任何器官系统之前，并单列 7 学时讲细胞电活动。Georgia Tech 在 Cells 之后连续安排 Membranes、Electrochemical Potential and Excitable Cells、Neuronal Signaling。Berkeley 是 Membrane transport 再进入 Membrane and action potentials。OpenStax 3.1 讲转运，12.4 再讲 -70 mV 与动作电位。",
+      "learn": [
+        "选择通透与 ICF/ECF",
+        "简单扩散、易化扩散、渗透、主动转运",
+        "钠钾泵与静息电位",
+        "去极化、复极化、超射、全或无"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "交一张四行表：简单扩散 / 易化扩散 / 渗透 / 主动转运，每行写 OpenStax 3.1 里的一个实例和是否耗 ATP。再按 12.4 画一条动作电位：标出约 -70 mV、阈值、+30 mV、超极化，并注明 Na+ 与 K+ 通道开闭。书面完成 Ch.12 Review Q23–28。",
+        "from": "OpenStax 3.1、12.4 与 Ch.12 Review；交大第二章「细胞膜的物质转运」「细胞的电活动」"
+      },
+      "resources": [
+        {
+          "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/3-1-the-cell-membrane",
+          "title": "3.1 The Cell Membrane",
+          "use": "读转运各段，收集表里的实例"
+        },
+        {
+          "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/12-4-the-action-potential",
+          "title": "12.4 The Action Potential",
+          "use": "临摹静息电位与动作电位各时相"
+        },
+        {
+          "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/12-review-questions",
+          "title": "Ch. 12 Review Questions",
+          "use": "做 Q23–28"
+        },
+        {
+          "url": "https://biosciences.gatech.edu/sites/default/files/images/bios_3755_sp2021_syllabus_ver.2.pdf",
+          "title": "BIOS-3755 课历 L03–L06",
+          "use": "核对自己是否已覆盖膜转运与可兴奋细胞，再往神经–肌接头走"
+        }
+      ]
+    },
+    "excitable": {
+      "name": "突触与骨骼肌",
+      "why": "交大把神经–肌接头和横纹肌兴奋–收缩耦联接在细胞电活动之后。OpenStax 10.3 从运动神经元释放 ACh 写到钙与滑行。Berkeley 在动作电位与突触传递之后安排 Skeletal muscle；Georgia Tech 在 Neuronal Signaling 之后是 Muscle Physiology。",
+      "learn": [
+        "神经–肌接头与乙酰胆碱",
+        "终板去极化传到 T 管",
+        "肌浆网释放与回收 Ca++",
+        "滑行丝与横桥周期"
+      ],
+      "task": {
+        "kind": "writeup",
+        "prompt": "按时间顺序列出从「动作电位到达运动神经末梢」到「肌纤维缩短再舒张」的步骤，每步点名 OpenStax 10.3 或交大 2.4 里的一个结构或分子（ACh、Na+、T 管、SR、肌钙蛋白、ATP）。再回答 Ch.12 Review Q31：神经–肌接头释放的递质是什么。",
+        "from": "OpenStax 10.3 + Ch.12 Q31；交大第二章「肌细胞的收缩」"
+      },
+      "resources": [
+        {
+          "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/10-3-muscle-fiber-contraction-and-relaxation",
+          "title": "10.3 Muscle Fiber Contraction and Relaxation",
+          "use": "按图 10.8–10.11 写收缩与舒张顺序，不要写疾病或用药"
+        },
+        {
+          "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/12-review-questions",
+          "title": "Ch. 12 Review Questions",
+          "use": "做 Q31（神经–肌接头递质）"
+        },
+        {
+          "url": "https://yxbpyc.xjtu.edu.cn/info/1086/1576.htm",
+          "title": "交大生理学大纲 第二章 2.4",
+          "use": "对照「骨骼肌神经-肌接头处兴奋的传递」掌握项检查步骤有没有漏"
+        },
+        {
+          "url": "https://mcb.berkeley.edu/sites/mcb.berkeley.edu/files/downloads/undergrad/syllabus/MCB%2032%20F16%20Syllabus.pdf",
+          "title": "MCB 32 课历 Lec 9–14",
+          "use": "核动作电位 → 突触 → 骨骼肌这一段再进入循环"
+        }
+      ]
+    },
+    "cardio": {
+      "name": "泵血与血压",
+      "why": "交大第四章是血液循环，掌握心动周期、每搏输出量/心输出量、动脉血压正常值与影响因素。OpenStax 把心脏电活动与心动周期放在 Unit 4，20.2 给出 120/80 与 MAP 区间。Berkeley 与 Georgia Tech 都在神经肌肉之后连续讲 Heart、cardiac cycle、blood pressure。",
+      "learn": [
+        "自律性与 SA→AV→His→浦肯野",
+        "收缩细胞平台期与钙内流",
+        "收缩/舒张、EDV、每搏量、心输出量",
+        "收缩压、舒张压、脉压、平均动脉压"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "交三样书面作业：（1）列出正常传导顺序 SA→AV→His→束支→浦肯野，并对照 19.2 用一句话区分传导细胞预电位和收缩细胞平台期；（2）用 19.3 的数字写 EDV、SV、ESV 关系，并按交大大纲写出影响心输出量的四个因素（前负荷、后负荷、心肌收缩能力、心率）；（3）用 20.2 公式由 120/80 算出脉压和 MAP，注明教材给出的 MAP 区间 70–110 mm Hg。再做 Ch.19 Review Q9–17。不要做听诊或量血压操作。",
+        "from": "OpenStax 19.2、19.3、20.2 与 Ch.19 Review；交大第四章"
+      },
+      "resources": [
+        {
+          "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/19-2-cardiac-muscle-and-electrical-activity",
+          "title": "19.2 Cardiac Muscle and Electrical Activity",
+          "use": "读传导系统与两类心肌动作电位；P/QRS/T 只用来对齐周期，不当作读图诊断"
+        },
+        {
+          "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/19-3-cardiac-cycle",
+          "title": "19.3 Cardiac Cycle",
+          "use": "读等容收缩、射血、EDV/SV/ESV 各段"
+        },
+        {
+          "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/20-2-blood-flow-blood-pressure-and-resistance",
+          "title": "20.2 Blood Flow, Blood Pressure, and Resistance",
+          "use": "用教材公式算脉压和 MAP，抄下 120/80 与 MAP 区间"
+        },
+        {
+          "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/19-review-questions",
+          "title": "Ch. 19 Review Questions",
+          "use": "做 Q9–17"
+        },
+        {
+          "url": "https://yxbpyc.xjtu.edu.cn/info/1086/1576.htm",
+          "title": "交大生理学大纲 第四章",
+          "use": "对照泵血功能评定指标和影响动脉血压的因素"
+        }
+      ]
+    },
+    "exchange": {
+      "name": "通气、滤过与体液",
+      "why": "交大在循环之后连续讲呼吸与尿生成，两者都是维持内环境的交换。OpenStax Unit 5 把呼吸（22）和泌尿/体液（25–26）放在一起。Berkeley Lec 19–22、Georgia Tech L17–L22 同样是呼吸后接肾与体液/酸碱。LibreTexts 目录是 Breathing → Gas Exchange → Renal → Fluid/Electrolyte/Acid-Base。",
+      "learn": [
+        "Boyle 定律与胸膜腔负压",
+        "潮气量、余气量、肺活量",
+        "GFR 及其区间、净滤过压",
+        "滤过、重吸收与每日尿量约 1–2 L"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "交一份计算+图解：（1）用 Boyle 定律和胸膜腔约 -4 mm Hg 说明吸气时空气为何入肺；列出 TV（约 500 mL）、ERV、IRV、RV，并写出 VC = TV+IRV+ERV。（2）抄 OpenStax 25.5 的 GFR 平均与区间，用 NFP = GBHP - [CHP + BCOP] = 55 - [15 + 30] 复核 10 mm Hg；按表 25.4 说明约 99% 滤过液被重吸收、每日尿量约 1–2 L。（3）对照 26.1 画 ICF/ECF，标 ECF 高 Na+、ICF 高 K+。不要做肺量计操作或尿液检验。",
+        "from": "OpenStax 22.3、25.5、26.1；交大第五、八章"
+      },
+      "resources": [
+        {
+          "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/22-3-the-process-of-breathing",
+          "title": "22.3 The Process of Breathing",
+          "use": "读压力关系与 Respiratory Volumes and Capacities，抄 TV/VC 数字"
+        },
+        {
+          "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/25-5-physiology-of-urine-formation",
+          "title": "25.5 Physiology of Urine Formation",
+          "use": "读 GFR 区间、NFP 公式和表 25.4，只抄正常滤过与重吸收数字"
+        },
+        {
+          "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/26-1-body-fluids-and-fluid-compartments",
+          "title": "26.1 Body Fluids and Fluid Compartments",
+          "use": "画 ICF/ECF 并标主要离子，用来回答「指标为什么是区间」"
+        },
+        {
+          "url": "https://yxbpyc.xjtu.edu.cn/info/1086/1576.htm",
+          "title": "交大生理学大纲 第五、八章",
+          "use": "对照肺通气掌握项与肾小球滤过率、肾糖阈、血管升压素/RAAS"
+        },
+        {
+          "url": "https://bio.libretexts.org/Workbench/Human_Physiology%3A_A_Students_Open_Path_to_Understanding_the_Body/00%3A_Front_Matter/05%3A_A_Students_Open_Path_to_Understanding_the_Body",
+          "title": "LibreTexts Human Physiology 目录",
+          "use": "核 Ch.17–20 与本节点同一收束：通气 → 气体交换 → 肾 → 体液"
+        }
+      ]
+    }
+  },
+  "conflicts": [
+    "内分泌课序打架：Berkeley MCB 32 把 Pituitary and cortisol 放在动作电位之前；LibreTexts 第 7 章内分泌也在神经之前；交大把内分泌放在神经之后的第十章，Georgia Tech 把 Endocrine System 放在学期末。不另开分叉，胰岛素/甲状腺只在稳态节点按 OpenStax 1.5 出现，ADH 与 RAAS 只在交换节点按交大第八章出现。",
+    "血液是否独立成章：交大第三章在循环之前单讲血液（比容、渗透压、生理性止血）；OpenStax 第 18 章、LibreTexts 第 14 章也单列 Blood。Berkeley / Georgia Tech 课历不把血液做成单独大块。取更靠前、更保守的做法：血浆渗透压与 ICF/ECF 离子并入稳态与体液，不单列血液/血型节点。",
+    "循环与神经的先后：交大先血液循环、后神经系统；OpenStax、Berkeley、Georgia Tech 先神经/肌肉、后心血管。取更靠前的一条：细胞兴奋性之后先完成神经–肌接头与骨骼肌，再进入泵血与血压。",
+    "OpenStax 第 16 章 Neurological Exam 用五项检查讲神经功能，属操作/评估，本树不收入。"
+  ],
+  "missing": "",
+  "checked_at": "2026-10-04"
+}
