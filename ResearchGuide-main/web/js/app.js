@@ -639,10 +639,11 @@ function openConnect() {
   box.innerHTML = `
     <p class="hero-kicker">MODEL</p>
     <h3>连接模型</h3>
-    <p class="panel-sub">OpenAI 兼容接口。密钥只写在本机 .env，不会出现在页面回显里。</p>
+    <p class="panel-sub">OpenAI 兼容接口，改的是整台服务器用的模型。密钥只写在服务器的 .env，不会出现在页面回显里。只有在服务器本机，或填了管理员口令才能改。</p>
     <label>接口地址<input name="base" value="https://api.deepseek.com/v1" /></label>
     <label>API Key<input name="key" type="password" placeholder="sk-…" autocomplete="off" /></label>
-    <label>模型名<input name="model" value="deepseek-chat" /></label>
+    <label>模型名<input name="model" value="deepseek-flash" /></label>
+    <label>管理员口令<input name="admin" type="password" placeholder="服务器设了 ADMIN_TOKEN 才需要" autocomplete="off" /></label>
     <div class="connect-actions">
       <button type="button" class="btn secondary" id="connectCancel">取消</button>
       <button type="submit" class="btn" id="connectGo">测试并保存</button>
@@ -656,11 +657,15 @@ function openConnect() {
     const go = box.querySelector("#connectGo");
     go.disabled = true; go.textContent = "正在连通…";
     try {
-      const r = await api("POST", "/api/llm/connect", {
-        base_url: box.base.value.trim(),
-        api_key: box.key.value.trim(),
-        model: box.model.value.trim(),
+      // 管理员口令走请求头，所以这里不用 api()
+      const res = await fetch("/api/llm/connect", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-Admin-Token": box.admin.value.trim() },
+        body: JSON.stringify({ base_url: box.base.value.trim(), api_key: box.key.value.trim(), model: box.model.value.trim() }),
       });
+      let r = null;
+      try { r = await res.json(); } catch (_) { /* no body */ }
+      if (!res.ok) throw new Error((r && r.detail) || `请求失败 (${res.status})`);
       applyLlmPill({ enabled: true, model: r.model });
       toast(`已连接 ${r.model}`);
       mask.remove();
