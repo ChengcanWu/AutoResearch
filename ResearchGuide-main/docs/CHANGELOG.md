@@ -13,6 +13,12 @@
 - 决策来源：邬程灿
 - 登记人：助手
 
+## [2026-10-03] [DOC] 产品设计提案 v2（HCI）
+- 变更内容：新增 `docs/DESIGN_PROPOSAL.md`。判断：学东西越来越便宜，技能和知识不再是瓶颈，学生要赢靠的是用自己的边去差异化。所以主价值是定位与博弈层（§1D：边清单 → 竞争地图（需求 / 供给 / 势头，k≥5、按档、滞后）→ 生态位与定位陈述「我是能做 X 的人，因为 Y」→ 信号表 → 时机 → 冲 / 稳 / 保下注组合，并防羊群）；研究思维层（阅读卡 → 综合矩阵 → 问题阶梯 → 提案画布 → 最小测试）是降成本的引擎、也是边的原材料。节奏分层：每日 ≤10 分钟（arXiv 新论文分拣、雷达变化、一次定位微调），重活按周。双窗口：学生自己的 Agent 是手，启研是地图、标准和账本。IA 五标签：今日 / 定位 / 研读 / 机会 / 作品。按天排期，含验证计划（「Agent 单独 vs Agent + 启研」对照）。是提案，不改代码与契约；采纳哪些在群里定。
+- 影响文档：docs/DESIGN_PROPOSAL.md（新增）、docs/README.md
+- 决策来源：陈浩文
+- 登记人：助手
+
 ## [2026-10-03] [BUILD] 方向教程蒸馏 Skill（检索公开大纲，不编步骤）
 
 - 变更内容：新增 `skills/tutorial-distill/`：输入一个方向，检索大学大纲/公开教材，蒸馏成 6 步并写入 `knowledge/tutorials/{id}.json`。不够 2 个独立来源就标 `insufficient`。附 `validate.py`。烟测 3 条：人工智能 `520.20`（MIT 6.390 + MML）、系统结构 `520.30`（MIT 6.004 + Berkeley 61C）、基础医学 `310`（OpenStax A&P 2e + MIT 7.01SC）。尚未接入 `directions.js`。
@@ -31,6 +37,12 @@
 - 变更内容：老师页原先叠在节点页下面（z-index 更低），看起来像点不进去。老师页提到节点页上面，并加「返回」。老师名改成真正的按钮。
 - 影响模块：web/js/app.js、web/css/styles.css、web/index.html
 - 决策来源：邬程灿
+- 登记人：助手
+
+## [2026-10-03] [FIX] 模型设置只许管理员改；DeepSeek 默认关思考、输出封顶
+- 变更内容：`POST /api/llm/connect` 原来任何访客都能调用，可以换掉服务器的密钥，或把所有模型请求转到任意 https 地址；现在设了 `ADMIN_TOKEN` 就要带 `X-Admin-Token`，没设只许服务器本机。「连接模型」弹窗多一个可选的管理员口令。写 `.env` 改为只改三行，不再冲掉别的配置。默认模型改为 `deepseek-flash`（DeepSeek 的 /models 只剩它和 `deepseek-v4-pro`，`deepseek-chat` 已列入停用，目前仍被路由到 flash 非思考）；flash 默认开思考，对 DeepSeek 显式关掉（设了 `LLM_REASONING_EFFORT` 则不关）；每次请求 `max_tokens` 默认封顶 2000。
+- 影响模块：server/main.py、server/llm.py、web/js/app.js、.env.example、server/tests/test_llm_guard.py
+- 决策来源：陈浩文
 - 登记人：助手
 
 ## [2026-10-03] [FIX] 性能与资源上限（Codex 审出的七处）

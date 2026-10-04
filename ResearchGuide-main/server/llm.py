@@ -4,7 +4,9 @@
 环境变量（也可写在项目根目录 .env）：
   LLM_API_KEY   必填才会真正请求
   LLM_BASE_URL  默认 https://api.deepseek.com/v1
-  LLM_MODEL     默认 deepseek-chat（DeepSeek 把它路由到 deepseek-flash 的非思考模式，最省）
+  LLM_MODEL     默认 deepseek-flash。DeepSeek 的 /models 只剩 deepseek-flash、deepseek-v4-pro；
+                旧名 deepseek-chat 已列入停用，目前仍被路由到 deepseek-flash 的非思考模式。
+                deepseek-flash 默认开思考（贵、慢），这里对 DeepSeek 默认关掉，见 _deepseek_extras()。
   LLM_REASONING_EFFORT  可选 low/high/max，只在支持的模型上填写
 """
 from __future__ import annotations
@@ -46,7 +48,7 @@ def config() -> dict:
         or ""
     ).strip()
     base = (os.environ.get("LLM_BASE_URL") or os.environ.get("OPENAI_BASE_URL") or "https://api.deepseek.com/v1").rstrip("/")
-    model = (os.environ.get("LLM_MODEL") or os.environ.get("OPENAI_MODEL") or "deepseek-chat").strip()
+    model = (os.environ.get("LLM_MODEL") or os.environ.get("OPENAI_MODEL") or "deepseek-flash").strip()
     return {"enabled": bool(key), "base_url": base, "model": model, "has_key": bool(key)}
 
 
@@ -58,7 +60,7 @@ def apply_config(base_url: str, api_key: str, model: str, *, persist: bool = Tru
     """运行时写入环境变量，并可选落盘到 .env（已在 gitignore）。"""
     base = (base_url or "https://api.deepseek.com/v1").strip().rstrip("/")
     key = (api_key or "").strip()
-    name = (model or "deepseek-chat").strip()
+    name = (model or "deepseek-flash").strip()
     if not key:
         raise ValueError("API key is required")
     if not base.startswith("https://"):
@@ -72,15 +74,19 @@ def apply_config(base_url: str, api_key: str, model: str, *, persist: bool = Tru
 
 
 def _save_dotenv(base: str, key: str, model: str) -> None:
+    """只改这三行，其余配置和注释原样保留（原来整份重写，会把别的变量冲掉）。"""
     path = _ROOT / ".env"
-    lines = [
-        "# 本地密钥，勿提交。由页面「连接模型」写入。",
-        f"LLM_BASE_URL={base}",
-        f"LLM_API_KEY={key}",
-        f"LLM_MODEL={model}",
-        "",
-    ]
-    path.write_text("\n".join(lines), encoding="utf-8")
+    want = {"LLM_BASE_URL": base, "LLM_API_KEY": key, "LLM_MODEL": model}
+    old = path.read_text(encoding="utf-8").splitlines() if path.exists() else ["# 本地密钥，勿提交。由页面「连接模型」写入。"]
+    out = []
+    for line in old:
+        name = line.split("=", 1)[0].strip()
+        if not line.lstrip().startswith("#") and name in want:
+            out.append(f"{name}={want.pop(name)}")
+        else:
+            out.append(line)
+    out += [f"{k}={v}" for k, v in want.items()]
+    path.write_text("\n".join(out) + "\n", encoding="utf-8")
 
 
 def probe() -> dict:
@@ -120,8 +126,15 @@ def _post(url: str, key: str, payload: dict, timeout: int) -> tuple[dict | None,
         return None, "bad json"
 
 
+def _deepseek_extras(cfg: dict, effort: str) -> dict:
+    """DeepSeek 的 deepseek-flash 默认开思考：没设推理强度就显式关掉，省钱也省时间。别的服务不加这个字段。"""
+    if "api.deepseek.com" not in cfg["base_url"] or effort:
+        return {}
+    return {"thinking": {"type": "disabled"}}
+
+
 def chat(system: str, user: str, *, temperature: float = 0.4, timeout: int = 25,
-         json_mode: bool = False, tag: str = "chat") -> str | None:
+         json_mode: bool = False, tag: str = "chat", max_tokens: int = 2000) -> str | None:
     """返回助手文本；失败或未配置返回 None。网络错误、429、5xx 重试一次。"""
     cfg = config()
     if not cfg["enabled"]:
@@ -130,6 +143,7 @@ def chat(system: str, user: str, *, temperature: float = 0.4, timeout: int = 25,
     payload: dict = {
         "model": cfg["model"],
         "temperature": temperature,
+        "max_tokens": max_tokens,  # 封顶：出错的长输出不会无限计费
         "messages": [
             {"role": "system", "content": system},
             {"role": "user", "content": user},
@@ -140,6 +154,7 @@ def chat(system: str, user: str, *, temperature: float = 0.4, timeout: int = 25,
     effort = (os.environ.get("LLM_REASONING_EFFORT") or "").strip()
     if effort:
         payload["reasoning_effort"] = effort
+    payload.update(_deepseek_extras(cfg, effort))
     url = cfg["base_url"] + "/chat/completions"
     t0 = time.time()
     data, err = None, ""
