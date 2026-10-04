@@ -1,0 +1,515 @@
+{
+  "id": "llm-eval",
+  "name": "大模型评测与基准",
+  "version": "0.1",
+  "direction": "ai",
+  "path_steps": [
+    2,
+    4,
+    5
+  ],
+  "status": "草稿：论文、数据集与引文均已用脚本核对；阅读顺序与示范卡待学长学姐核对",
+  "verified_at": "2026-10-03",
+  "reviewed_by": "",
+  "goal": "读懂「一个大模型分数是怎么来的、能信几分」：基准怎么出题、怎么判分、数据污染和裁判偏差怎么影响结论。",
+  "daily": {
+    "categories": [
+      "cs.CL",
+      "cs.LG",
+      "cs.AI"
+    ],
+    "keywords": [
+      "benchmark contamination",
+      "data contamination",
+      "LLM evaluation",
+      "LLM-as-a-judge",
+      "evaluation benchmark"
+    ]
+  },
+  "papers": [
+    {
+      "order": 1,
+      "arxiv_id": "2009.03300",
+      "title": "Measuring Massive Multitask Language Understanding",
+      "published": "2020-09-07",
+      "url": "https://arxiv.org/abs/2009.03300",
+      "why": "先看「多学科选择题基准」长什么样：后面大多数评测都是它的变体，也最容易看懂怎么算分。"
+    },
+    {
+      "order": 2,
+      "arxiv_id": "2305.08322",
+      "title": "C-Eval: A Multi-Level Multi-Discipline Chinese Evaluation Suite for Foundation Models",
+      "published": "2023-05-15",
+      "url": "https://arxiv.org/abs/2305.08322",
+      "why": "MMLU 的中文版思路：题目从哪来、怎么分难度，对照着看基准怎么换一种语言。"
+    },
+    {
+      "order": 3,
+      "arxiv_id": "2306.09212",
+      "title": "CMMLU: Measuring massive multitask language understanding in Chinese",
+      "published": "2023-06-15",
+      "url": "https://arxiv.org/abs/2306.09212",
+      "why": "另一个中文多学科基准；和 C-Eval 并排读，矩阵里会出现第一组可比的格子。"
+    },
+    {
+      "order": 4,
+      "arxiv_id": "2110.14168",
+      "title": "Training Verifiers to Solve Math Word Problems",
+      "published": "2021-10-27",
+      "url": "https://arxiv.org/abs/2110.14168",
+      "why": "数学应用题基准：答案能自动判对，适合看「怎么判对」本身会不会出错。"
+    },
+    {
+      "order": 5,
+      "arxiv_id": "2306.05685",
+      "title": "Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena",
+      "published": "2023-06-09",
+      "url": "https://arxiv.org/abs/2306.05685",
+      "why": "开放式回答没法自动判，于是让模型当裁判；读它列出的裁判偏差。"
+    },
+    {
+      "order": 6,
+      "arxiv_id": "2403.04132",
+      "title": "Chatbot Arena: An Open Platform for Evaluating LLMs by Human Preference",
+      "published": "2024-03-07",
+      "url": "https://arxiv.org/abs/2403.04132",
+      "why": "用众包的人类偏好给模型排名；重点读它自己承认的用户和题目偏差。"
+    },
+    {
+      "order": 7,
+      "arxiv_id": "2211.09110",
+      "title": "Holistic Evaluation of Language Models",
+      "published": "2022-11-16",
+      "url": "https://arxiv.org/abs/2211.09110",
+      "why": "全面评测框架（很长）：只读引言、方法总览和结果摘要，学它怎么同时看多个指标。"
+    },
+    {
+      "order": 8,
+      "arxiv_id": "2308.08493",
+      "title": "Time Travel in LLMs: Tracing Data Contamination in Large Language Models",
+      "published": "2023-08-16",
+      "url": "https://arxiv.org/abs/2308.08493",
+      "why": "数据污染：在拿不到预训练数据时，怎么判断模型是不是见过测试题。"
+    },
+    {
+      "order": 9,
+      "arxiv_id": "2310.17623",
+      "title": "Proving Test Set Contamination in Black Box Language Models",
+      "published": "2023-10-26",
+      "url": "https://arxiv.org/abs/2310.17623",
+      "why": "同一个问题的统计检验做法；和上一篇并排，矩阵里「是否查污染」这一列会亮起来。"
+    },
+    {
+      "order": 10,
+      "arxiv_id": "2311.12022",
+      "title": "GPQA: A Graduate-Level Google-Proof Q&A Benchmark",
+      "published": "2023-11-20",
+      "url": "https://arxiv.org/abs/2311.12022",
+      "why": "专家出的、搜不到答案的难题；读它为什么只有几百道题，以及这对统计功效意味着什么。"
+    }
+  ],
+  "datasets": [
+    {
+      "name": "MMLU",
+      "url": "https://github.com/hendrycks/test",
+      "note": "57 个学科的选择题；笔记本就能跑小子集"
+    },
+    {
+      "name": "C-Eval",
+      "url": "https://github.com/hkust-nlp/ceval",
+      "note": "中文多学科选择题"
+    },
+    {
+      "name": "CMMLU",
+      "url": "https://github.com/haonan-li/CMMLU",
+      "note": "中文多学科选择题"
+    },
+    {
+      "name": "GSM8K",
+      "url": "https://github.com/openai/grade-school-math",
+      "note": "小学数学应用题，答案可自动判"
+    },
+    {
+      "name": "MT-Bench（FastChat 里的 llm_judge）",
+      "url": "https://github.com/lm-sys/FastChat",
+      "note": "多轮开放问题 + 模型当裁判"
+    },
+    {
+      "name": "GPQA",
+      "url": "https://github.com/idavidrein/gpqa",
+      "note": "专家难题，题量小"
+    },
+    {
+      "name": "HELM",
+      "url": "https://github.com/stanford-crfm/helm",
+      "note": "评测框架，可直接复用它的指标实现"
+    }
+  ],
+  "open_problems": [
+    {
+      "id": "single-dup",
+      "niche": "只出现一次的污染怎么查",
+      "arxiv_id": "2310.17623",
+      "paper": "Proving Test Set Contamination in Black Box Language Models",
+      "quote": "we believe it is an exciting open problem to build tests that are capable of reliably detecting contamination at the single-duplication-count regime",
+      "section": "conclusion",
+      "note": "只重复出现一次的测试题，现有检验抓不到",
+      "keywords": [
+        "contamination detection",
+        "membership inference"
+      ],
+      "edge_keywords": [
+        "统计",
+        "假设检验",
+        "概率",
+        "数理统计",
+        "GPU",
+        "算力"
+      ],
+      "momentum": {
+        "last12": 278,
+        "prev12": 212,
+        "relative": 1.02,
+        "trend": "flat",
+        "checked_at": "2026-10-03",
+        "query": "(cat:cs.CL OR cat:cs.LG OR cat:cs.AI) AND (abs:\"contamination detection\" OR abs:\"membership inference\")"
+      }
+    },
+    {
+      "id": "multi-test",
+      "niche": "污染检验的多重比较校正",
+      "arxiv_id": "2310.17623",
+      "paper": "Proving Test Set Contamination in Black Box Language Models",
+      "quote": "the p-values presented in this paper do not have multiple test corrections applied",
+      "section": "limitations",
+      "note": "做了很多次检验却没做多重比较校正",
+      "keywords": [
+        "multiple testing",
+        "multiple hypothesis"
+      ],
+      "edge_keywords": [
+        "统计",
+        "假设检验",
+        "多重比较",
+        "FDR",
+        "数理统计"
+      ],
+      "momentum": {
+        "last12": 58,
+        "prev12": 30,
+        "relative": 1.5,
+        "trend": "up",
+        "checked_at": "2026-10-03",
+        "query": "(cat:cs.CL OR cat:cs.LG OR cat:cs.AI) AND (abs:\"multiple testing\" OR abs:\"multiple hypothesis\")"
+      }
+    },
+    {
+      "id": "shuffle",
+      "niche": "基准有没有打乱：检验能不能用的前提",
+      "arxiv_id": "2310.17623",
+      "paper": "Proving Test Set Contamination in Black Box Language Models",
+      "quote": "We strongly encourage future dataset creators to apply a random shuffle to their datasets (and to publicize this fact), which would allow our tests to be applied.",
+      "section": "limitations",
+      "note": "数据集是否打乱过，决定这类检验能不能用",
+      "keywords": [
+        "benchmark contamination",
+        "dataset documentation"
+      ],
+      "edge_keywords": [
+        "数据集",
+        "数据整理",
+        "开源",
+        "标注"
+      ],
+      "momentum": {
+        "last12": 27,
+        "prev12": 19,
+        "relative": 1.1,
+        "trend": "flat",
+        "checked_at": "2026-10-03",
+        "query": "(cat:cs.CL OR cat:cs.LG OR cat:cs.AI) AND (abs:\"benchmark contamination\" OR abs:\"dataset documentation\")"
+      }
+    },
+    {
+      "id": "contam-types",
+      "niche": "分清是哪一种污染",
+      "arxiv_id": "2308.08493",
+      "paper": "Time Travel in LLMs: Tracing Data Contamination in Large Language Models",
+      "quote": "does not distinguish between different types of contamination",
+      "section": "limitations",
+      "note": "能查出污染，但分不清是哪一种污染",
+      "keywords": [
+        "data contamination",
+        "contamination types"
+      ],
+      "edge_keywords": [
+        "语料",
+        "爬虫",
+        "数据",
+        "文本处理"
+      ],
+      "momentum": {
+        "last12": 135,
+        "prev12": 130,
+        "relative": 0.81,
+        "trend": "flat",
+        "checked_at": "2026-10-03",
+        "query": "(cat:cs.CL OR cat:cs.LG OR cat:cs.AI) AND (abs:\"data contamination\" OR abs:\"contamination types\")"
+      }
+    },
+    {
+      "id": "contam-source",
+      "niche": "追溯污染从哪来",
+      "arxiv_id": "2308.08493",
+      "paper": "Time Travel in LLMs: Tracing Data Contamination in Large Language Models",
+      "quote": "we encourage future research that can detect contamination, pinpoint its sources, and identify its various forms",
+      "section": "limitations",
+      "note": "污染从哪来、有哪些形式，还没人系统地分清",
+      "keywords": [
+        "data contamination",
+        "training data attribution"
+      ],
+      "edge_keywords": [
+        "语料",
+        "爬虫",
+        "数据",
+        "信息检索",
+        "搜索"
+      ],
+      "momentum": {
+        "last12": 154,
+        "prev12": 140,
+        "relative": 0.86,
+        "trend": "flat",
+        "checked_at": "2026-10-03",
+        "query": "(cat:cs.CL OR cat:cs.LG OR cat:cs.AI) AND (abs:\"data contamination\" OR abs:\"training data attribution\")"
+      }
+    },
+    {
+      "id": "judge-safety",
+      "niche": "模型当裁判时怎么评安全",
+      "arxiv_id": "2306.05685",
+      "paper": "Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena",
+      "quote": "This paper emphasizes helpfulness but largely neglects safety.",
+      "section": "limitations",
+      "note": "模型当裁判只评了有用性，没评安全",
+      "keywords": [
+        "LLM-as-a-judge",
+        "safety evaluation"
+      ],
+      "edge_keywords": [
+        "安全",
+        "伦理",
+        "法律",
+        "心理",
+        "内容审核"
+      ],
+      "momentum": {
+        "last12": 954,
+        "prev12": 465,
+        "relative": 1.59,
+        "trend": "up",
+        "checked_at": "2026-10-03",
+        "query": "(cat:cs.CL OR cat:cs.LG OR cat:cs.AI) AND (abs:\"LLM-as-a-judge\" OR abs:\"safety evaluation\")"
+      }
+    },
+    {
+      "id": "judge-multidim",
+      "niche": "裁判打分从一个数拆成多维",
+      "arxiv_id": "2306.05685",
+      "paper": "Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena",
+      "quote": "there are multiple dimensions like accuracy, relevance, and creativity, but they are all combined into a single metric in this study",
+      "section": "limitations",
+      "note": "多个维度被压成一个分数",
+      "keywords": [
+        "LLM-as-a-judge",
+        "multi-dimensional evaluation"
+      ],
+      "edge_keywords": [
+        "心理测量",
+        "量表",
+        "问卷",
+        "统计",
+        "心理"
+      ],
+      "momentum": {
+        "last12": 770,
+        "prev12": 385,
+        "relative": 1.55,
+        "trend": "up",
+        "checked_at": "2026-10-03",
+        "query": "(cat:cs.CL OR cat:cs.LG OR cat:cs.AI) AND (abs:\"LLM-as-a-judge\" OR abs:\"multi-dimensional evaluation\")"
+      }
+    },
+    {
+      "id": "real-use",
+      "niche": "真实使用场景与专业领域的评测",
+      "arxiv_id": "2403.04132",
+      "paper": "Chatbot Arena: An Open Platform for Evaluating LLMs by Human Preference",
+      "quote": "This source might not accurately reflect the real-world usage of LLMs in production environments or specialized domains, potentially leading to a skewed prompt distribution.",
+      "section": "limitations",
+      "note": "众包题目不代表真实使用场景",
+      "keywords": [
+        "domain-specific benchmark",
+        "real-world evaluation"
+      ],
+      "edge_keywords": [
+        "医学",
+        "医院",
+        "法律",
+        "金融",
+        "教育",
+        "行业",
+        "实习",
+        "临床"
+      ],
+      "momentum": {
+        "last12": 87,
+        "prev12": 54,
+        "relative": 1.25,
+        "trend": "up",
+        "checked_at": "2026-10-03",
+        "query": "(cat:cs.CL OR cat:cs.LG OR cat:cs.AI) AND (abs:\"domain-specific benchmark\" OR abs:\"real-world evaluation\")"
+      }
+    },
+    {
+      "id": "zh-beyond-acc",
+      "niche": "中文基准：准确率之外的鲁棒性与偏见",
+      "arxiv_id": "2305.08322",
+      "paper": "C-Eval: A Multi-Level Multi-Discipline Chinese Evaluation Suite for Foundation Models",
+      "quote": "There are many other abilities such as reasoning over and calling APIs, as well as multiple aspects that extend beyond accuracy, including safety, bias, and robustness.",
+      "section": "discussion",
+      "note": "中文基准只看准确率，没看鲁棒性和偏见",
+      "keywords": [
+        "Chinese benchmark",
+        "robustness evaluation"
+      ],
+      "edge_keywords": [
+        "中文",
+        "方言",
+        "粤语",
+        "吴语",
+        "闽南",
+        "少数民族",
+        "偏见",
+        "社会学"
+      ],
+      "momentum": {
+        "last12": 241,
+        "prev12": 233,
+        "relative": 0.8,
+        "trend": "flat",
+        "checked_at": "2026-10-03",
+        "query": "(cat:cs.CL OR cat:cs.LG OR cat:cs.AI) AND (abs:\"Chinese benchmark\" OR abs:\"robustness evaluation\")"
+      }
+    },
+    {
+      "id": "small-bench-power",
+      "niche": "小基准的统计功效：差距是不是噪声",
+      "arxiv_id": "2311.12022",
+      "paper": "GPQA: A Graduate-Level Google-Proof Q&A Benchmark",
+      "quote": "it does not provide a lot of statistical power for accuracy comparisons",
+      "section": "limitations",
+      "note": "题目太少，两个模型的差距可能只是噪声",
+      "keywords": [
+        "statistical power",
+        "statistical significance"
+      ],
+      "edge_keywords": [
+        "统计",
+        "实验设计",
+        "bootstrap",
+        "置信区间",
+        "数理统计"
+      ],
+      "momentum": {
+        "last12": 779,
+        "prev12": 337,
+        "relative": 1.8,
+        "trend": "up",
+        "checked_at": "2026-10-03",
+        "query": "(cat:cs.CL OR cat:cs.LG OR cat:cs.AI) AND (abs:\"statistical power\" OR abs:\"statistical significance\")"
+      }
+    },
+    {
+      "id": "multimodal",
+      "niche": "纯文本基准之外：多模态评测",
+      "arxiv_id": "2009.03300",
+      "paper": "Measuring Massive Multitask Language Understanding",
+      "quote": "as models gain the ability to process multimodal inputs, benchmarks should be designed to reflect this change",
+      "section": "discussion",
+      "note": "纯文本基准测不到多模态能力",
+      "keywords": [
+        "multimodal benchmark",
+        "vision-language evaluation"
+      ],
+      "edge_keywords": [
+        "视觉",
+        "图像",
+        "语音",
+        "音频",
+        "多模态",
+        "摄影"
+      ],
+      "momentum": {
+        "last12": 245,
+        "prev12": 116,
+        "relative": 1.64,
+        "trend": "up",
+        "checked_at": "2026-10-03",
+        "query": "(cat:cs.CL OR cat:cs.LG OR cat:cs.AI) AND (abs:\"multimodal benchmark\" OR abs:\"vision-language evaluation\")"
+      }
+    }
+  ],
+  "dimensions": [
+    {
+      "key": "models",
+      "label": "评测对象",
+      "hint": "测了哪些模型（写代表性的两三个）"
+    },
+    {
+      "key": "task",
+      "label": "任务与数据",
+      "hint": "哪个基准，或自建的什么数据"
+    },
+    {
+      "key": "language",
+      "label": "语言",
+      "hint": "英文 / 中文 / 多语"
+    },
+    {
+      "key": "metric",
+      "label": "指标",
+      "hint": "准确率、胜率、人工评分……；同一指标才可比",
+      "role": "metric"
+    },
+    {
+      "key": "judge",
+      "label": "判分方式",
+      "hint": "规则匹配 / 人工 / 模型当裁判"
+    },
+    {
+      "key": "direction",
+      "label": "主要发现",
+      "hint": "up 方法或模型有提升；down 下降或失效；mixed 有好有坏；none 没报告",
+      "role": "direction",
+      "options": [
+        "up",
+        "down",
+        "mixed",
+        "none"
+      ]
+    },
+    {
+      "key": "contamination",
+      "label": "查没查数据污染",
+      "hint": "查了 / 没查 / 论文就是讲污染的"
+    }
+  ],
+  "momentum_base": {
+    "last12": 105518,
+    "prev12": 82028,
+    "growth": 1.29,
+    "checked_at": "2026-10-03"
+  }
+}

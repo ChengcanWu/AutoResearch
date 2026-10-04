@@ -9,19 +9,21 @@
 from __future__ import annotations
 
 import json
-import threading
 import time
 import urllib.error
 import urllib.parse
 import urllib.request
 from typing import Any, Callable
 
+from limits import ReadLimitError, TTLCache, fetch
 from schemas import now_iso
+from singleflight import SingleFlight
 
 UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Safari/537.36 QiyanResearchMentor/0.2"
 CACHE_TTL = 6 * 3600
-_CACHE: dict[str, tuple[float, Any]] = {}
-_LOCK = threading.Lock()
+_CACHE = TTLCache(CACHE_TTL, 1024)
+MAX_BYTES = 8 * 1024 * 1024  # 单个响应上限；来源页面和接口都远小于这个
+_FLIGHT = SingleFlight()
 
 
 class AdapterError(Exception):
@@ -30,11 +32,17 @@ class AdapterError(Exception):
 
 def http(url: str, *, data: dict | None = None, headers: dict | None = None, timeout: int = 12, as_json: bool = True) -> Any:
     """GET（或带 JSON 体的 POST），结果缓存 6 小时。"""
-    key = url + "|" + json.dumps(data or {}, sort_keys=True, ensure_ascii=False)
-    with _LOCK:
-        hit = _CACHE.get(key)
-    if hit and time.time() - hit[0] < CACHE_TTL:
-        return hit[1]
+    key = url + "|" + json.dumps(data or {}, sort_keys=True, ensure_ascii=False) + f"|{as_json}"
+    hit, value = _CACHE.lookup(key)
+    if hit:
+        return value
+    return _FLIGHT.do(key, lambda: _fetch(key, url, data, headers, timeout, as_json))
+
+
+def _fetch(key: str, url: str, data: dict | None, headers: dict | None, timeout: int, as_json: bool) -> Any:
+    hit, value = _CACHE.lookup(key)
+    if hit:
+        return value
     body = json.dumps(data, ensure_ascii=False).encode("utf-8") if data is not None else None
     h = {"User-Agent": UA, "Accept": "application/json, text/html;q=0.9"}
     if body is not None:
@@ -44,11 +52,12 @@ def http(url: str, *, data: dict | None = None, headers: dict | None = None, tim
     for attempt in range(2):  # 有的站 TLS 偶尔直接断开（UNEXPECTED_EOF），重试一次
         req = urllib.request.Request(url, data=body, headers=h, method="POST" if body is not None else "GET")
         try:
-            with urllib.request.urlopen(req, timeout=timeout) as resp:
-                raw = resp.read()
+            raw = fetch(req, timeout=timeout, max_bytes=MAX_BYTES)  # 每次尝试的总时限：连接、响应头、正文一起算
             break
         except urllib.error.HTTPError as exc:
             raise AdapterError(f"HTTP {exc.code}") from exc
+        except ReadLimitError as exc:
+            raise AdapterError(str(exc)) from exc  # 超时或过大，重试也一样
         except (urllib.error.URLError, TimeoutError, OSError) as exc:
             if attempt == 1:
                 raise AdapterError("连不上") from exc
@@ -60,8 +69,7 @@ def http(url: str, *, data: dict | None = None, headers: dict | None = None, tim
             out = json.loads(text)
         except json.JSONDecodeError as exc:
             raise AdapterError("返回的不是 JSON") from exc
-    with _LOCK:
-        _CACHE[key] = (time.time(), out)
+    _CACHE.set(key, out)
     return out
 
 

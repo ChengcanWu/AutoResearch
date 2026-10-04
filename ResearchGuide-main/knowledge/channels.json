@@ -1,0 +1,2003 @@
+{
+  "version": "0.1",
+  "checked_at": "2026-10-03",
+  "access_note": "「境内直连 / 需要 VPN」按已知封锁情况填写，没有在境内实测；「未核实」的条目没确认 2025–2026 仍活跃或需要登录才能看。",
+  "signal_kinds": {
+    "frontier": "前沿论文",
+    "review": "同行评审与争议",
+    "open_problem": "开放问题",
+    "code": "代码与复现",
+    "opportunity": "招生与机会",
+    "experience": "经验帖",
+    "tutorial": "课程与教程",
+    "industry": "行业动态"
+  },
+  "blind_spots": {
+    "ai": "中文圈学生多停在机器之心、量子位、知乎的二手解读，漏掉 OpenReview 评审和作者在 X、Discord 的一手讨论，看不出一篇论文被谁质疑、哪里站不住；英文圈学生则漏掉中文媒体对国内实验室发布和招人的第一时间报道，以及 B站论文精读。",
+    "math": "中文圈学生熟悉知乎和 B站科普，却很少逛 MathOverflow、数学家博客和 Lean Zulip，而开放问题现状、形式化与 AI 数学的前沿讨论主要在那里；英文圈学生漏掉 BICMR 等国内讨论班和超理论坛里的中文教材与学习路线经验。",
+    "stat": "中文圈学生多用公众号和经管之家的代码模板，少看 Cross Validated、Gelman 博客和 datamethods 上对方法误用的公开批评；英文圈学生漏掉统计之都、狗熊会这类连接国内数据实践与教学的社区。",
+    "psy": "中文圈学生常把小红书、知乎的心理科普当成心理学研究，漏掉 PsyArXiv、Data Colada、SIPS 的可重复性讨论和已从 X 迁到 Bluesky 的学者圈；英文圈学生漏掉《心理学报》和 COSN 里基于中国样本的研究与中文方法课。",
+    "econ": "中文圈学生以为前沿要等期刊或 arXiv，实际经济学前沿在 NBER、NEP 工作论文和 VoxEU，RA/pre-doc 招聘在 PREDOC.org、NBER RA 页和 X/Bluesky；英文圈学生漏掉连享会、国发院等渠道里的中国数据、计量实操和国内政策研究。",
+    "se": "中文圈学生偏 CSDN、掘金式工程教程，少读 USENIX 原文、Murat 式论文点评以及 LLVM、内核邮件列表里的设计争论，也不知道系统顶会论文常不挂 arXiv；英文圈学生漏掉 V2EX、InfoQ 中文和蒋炎岩课程里关于国内工业实践与基础软件的讨论。",
+    "career": "中文圈学生熟悉保研论坛、知乎和小红书经验帖，却漏掉 Mitacs 等海外暑研、经济学 pre-doc RA、GradCafe 的录取时间线和教授在 X/Bluesky 上的招生帖；英文圈学生不知道夏令营和预推免集中在 5–9 月，信息主要靠 GitHub 汇总仓库、保研论坛和树洞流转。"
+  },
+  "channels": [
+    {
+      "id": "arxiv-cs-ai",
+      "name": "arXiv cs.LG / cs.CL / cs.AI",
+      "url": "https://arxiv.org/list/cs.LG/recent",
+      "search_hint": "",
+      "directions": [
+        "ai"
+      ],
+      "circle": "英文圈",
+      "kind": "预印本",
+      "signals": [
+        "frontier"
+      ],
+      "good_for": "每天最早读到 ML/NLP 新论文原文，比公众号解读早 1–3 天。",
+      "caveat": "每天数百篇且未经评审，刷榜和标题党论文多，按上新顺序读很容易被数量淹没。",
+      "cadence": "daily",
+      "access": "境内直连",
+      "feed": "https://rss.arxiv.org/rss/cs.LG+cs.CL+cs.AI",
+      "verified": true,
+      "verified_how": "curl 列表页 200；合并 RSS 200，最新 pubDate 2026-10-02。"
+    },
+    {
+      "id": "hf-daily-papers",
+      "name": "Hugging Face Daily Papers",
+      "url": "https://huggingface.co/papers",
+      "search_hint": "",
+      "directions": [
+        "ai"
+      ],
+      "circle": "英文圈",
+      "kind": "预印本",
+      "signals": [
+        "frontier",
+        "code"
+      ],
+      "good_for": "社区每天挑出的热门 arXiv 论文，常附模型、数据、代码链接和作者本人回复。",
+      "caveat": "按点赞排序，偏向大厂和擅长宣传的团队，冷门但扎实的工作很难上榜。",
+      "cadence": "daily",
+      "access": "需要 VPN",
+      "feed": "https://huggingface.co/api/daily_papers",
+      "verified": true,
+      "verified_how": "页面 curl 200；API 匿名返回 JSON，最新 publishedAt 2026-09-30；另：paperswithcode.com 已重定向到 huggingface.co/papers/trending。"
+    },
+    {
+      "id": "openreview",
+      "name": "OpenReview（ICLR / NeurIPS / TMLR 等）",
+      "url": "https://openreview.net/",
+      "search_hint": "",
+      "directions": [
+        "ai"
+      ],
+      "circle": "英文圈",
+      "kind": "评审平台",
+      "signals": [
+        "review",
+        "frontier"
+      ],
+      "good_for": "能直接读到审稿意见、作者 rebuttal 和 AC 决定，看清一篇论文被质疑在哪里、为什么被拒或被救回。",
+      "caveat": "审稿质量参差，近年不少审稿人是学生甚至用 LLM 写评审，单条意见不能当定论。",
+      "cadence": "weekly",
+      "access": "境内直连",
+      "feed": "",
+      "verified": true,
+      "verified_how": "首页 curl 200，含大量 2026 年场次；api2.openreview.net 对匿名请求返回 403 ChallengeRequiredError（需人机验证，未处理），feed 留空。"
+    },
+    {
+      "id": "alphaxiv",
+      "name": "alphaXiv",
+      "url": "https://www.alphaxiv.org/",
+      "search_hint": "",
+      "directions": [
+        "ai"
+      ],
+      "circle": "英文圈",
+      "kind": "评审平台",
+      "signals": [
+        "review",
+        "frontier"
+      ],
+      "good_for": "在 arXiv 论文上逐段评论提问，作者有时回复，能看到一篇新论文具体卡在哪一句。",
+      "caveat": "讨论集中在少数热门 ML 论文，大多数论文页没有评论；评论者以学生为主，权威性不一。",
+      "cadence": "weekly",
+      "access": "境内直连",
+      "feed": "",
+      "verified": true,
+      "verified_how": "首页 curl 200，页面含 2026 年论文；未找到公开 API，feed 留空。"
+    },
+    {
+      "id": "reddit-machinelearning",
+      "name": "Reddit r/MachineLearning",
+      "url": "https://www.reddit.com/r/MachineLearning/",
+      "search_hint": "",
+      "directions": [
+        "ai"
+      ],
+      "circle": "英文圈",
+      "kind": "论坛",
+      "signals": [
+        "review",
+        "frontier",
+        "experience"
+      ],
+      "good_for": "[D] 讨论帖里有审稿吐槽、复现失败报告和博士生求职经验，是匿名的同行真话。",
+      "caveat": "用户以北美学生和工程师为主，审稿季情绪化吐槽多，对中国团队论文常带刻板印象。",
+      "cadence": "weekly",
+      "access": "需要 VPN",
+      "feed": "https://www.reddit.com/r/MachineLearning/.rss",
+      "verified": true,
+      "verified_how": ".rss 200，<updated> 2026-10-02；连续请求会 429 限流，JSON 接口返回 403。"
+    },
+    {
+      "id": "x-academic",
+      "name": "X（Twitter）学术圈",
+      "url": "https://x.com/",
+      "search_hint": "关注会议官方号（@iclr_conf、@NeurIPSConf）和读过论文的作者；搜「arxiv.org <关键词>」「recruiting PhD students」；经济学关注 @econ_ra",
+      "directions": [
+        "ai",
+        "econ"
+      ],
+      "circle": "英文圈",
+      "kind": "社交媒体",
+      "signals": [
+        "frontier",
+        "opportunity",
+        "review"
+      ],
+      "good_for": "作者本人发论文串讲动机和局限，教授发招生和 RA 帖，常比正式公告早几周。",
+      "caveat": "算法放大大 V 和争议话题；心理、神经和部分经济学者已迁往 Bluesky，只看 X 会漏人。",
+      "cadence": "daily",
+      "access": "需要 VPN",
+      "feed": "",
+      "verified": false,
+      "verified_how": "无法核实：x.com 未登录无法浏览时间线，未确认具体账号 2025–2026 活跃度；@econ_ra 仅见于知乎/豆瓣经验帖转述。"
+    },
+    {
+      "id": "hacker-news",
+      "name": "Hacker News",
+      "url": "https://news.ycombinator.com/",
+      "search_hint": "",
+      "directions": [
+        "ai",
+        "se"
+      ],
+      "circle": "英文圈",
+      "kind": "论坛",
+      "signals": [
+        "industry",
+        "review",
+        "code"
+      ],
+      "good_for": "工程师对新模型、新工具和系统论文的一线评价，评论区常有作者或业内人直接下场。",
+      "caveat": "硅谷创业和工程视角，偏好能马上用的东西，对理论和非英文工作关注少，热度不等于学术价值。",
+      "cadence": "daily",
+      "access": "境内直连",
+      "feed": "https://hn.algolia.com/api/v1/search_by_date?tags=story&query=arxiv",
+      "verified": true,
+      "verified_how": "首页 curl 200，含 2026 年条目；Algolia API 匿名返回 JSON。"
+    },
+    {
+      "id": "github",
+      "name": "GitHub（Trending + 搜索）",
+      "url": "https://github.com/trending",
+      "search_hint": "",
+      "directions": [
+        "ai",
+        "se"
+      ],
+      "circle": "英文圈",
+      "kind": "数据/代码",
+      "signals": [
+        "code"
+      ],
+      "good_for": "找论文官方实现和复现仓库，看 issue 区的「跑不出来」报告，判断一项工作能否真正用起来。",
+      "caveat": "star 可刷，热门仓库多是应用工具而非研究代码，README 宣称的效果常与 issue 区反馈不符。",
+      "cadence": "weekly",
+      "access": "境内直连",
+      "feed": "https://api.github.com/search/repositories?q=topic:llm+pushed:>2026-09-01&sort=stars",
+      "verified": true,
+      "verified_how": "trending 页 200；search API 未认证返回 JSON（限速约 10 次/分钟），可替换 q 参数为任意关键词。"
+    },
+    {
+      "id": "eleutherai-discord",
+      "name": "EleutherAI Discord",
+      "url": "https://discord.gg/eleutherai",
+      "search_hint": "",
+      "directions": [
+        "ai"
+      ],
+      "circle": "英文圈",
+      "kind": "论坛",
+      "signals": [
+        "frontier",
+        "open_problem",
+        "opportunity"
+      ],
+      "good_for": "开放研究社区，有论文读书会、可认领的开源项目和面向新人的暑期研究计划（SOAR），本科生能直接参与真实项目。",
+      "caveat": "话题集中在大模型可解释性、对齐和评测；频道多信息杂，新人提问常无人回应，需要主动认领任务。",
+      "cadence": "weekly",
+      "access": "需要 VPN",
+      "feed": "",
+      "verified": true,
+      "verified_how": "Discord 邀请 API 返回服务器名 EleutherAI、约 3.96 万成员；官网 eleuther.ai 链接到该邀请；第三方页面显示 2026 年 SOAR 招募；频道内容需注册登录，未查看。"
+    },
+    {
+      "id": "lilian-weng-blog",
+      "name": "Lil'Log（Lilian Weng 博客）",
+      "url": "https://lilianweng.github.io/",
+      "search_hint": "",
+      "directions": [
+        "ai"
+      ],
+      "circle": "英文圈",
+      "kind": "博客",
+      "signals": [
+        "tutorial",
+        "frontier"
+      ],
+      "good_for": "一篇长文梳理一个子领域（RL、扩散、agent、幻觉等）的脉络和关键论文，适合进组前快速补背景。",
+      "caveat": "一年只更新几篇，代表工业实验室视角，对学术界小组的工作覆盖有限。",
+      "cadence": "when-needed",
+      "access": "境内直连",
+      "feed": "https://lilianweng.github.io/index.xml",
+      "verified": true,
+      "verified_how": "index.xml 200，最新 pubDate 2026-07-04。"
+    },
+    {
+      "id": "jiqizhixin",
+      "name": "机器之心",
+      "url": "https://www.jiqizhixin.com/",
+      "search_hint": "微信搜公众号「机器之心」",
+      "directions": [
+        "ai"
+      ],
+      "circle": "中文圈",
+      "kind": "公众号",
+      "signals": [
+        "frontier",
+        "industry",
+        "opportunity"
+      ],
+      "good_for": "国内实验室新论文、开源模型发布和招聘信息的第一时间中文报道，常有作者署名解读。",
+      "caveat": "大量机构合作稿和投稿，标题偏夸张（「炸裂」「超越 GPT」），几乎不提缺点。",
+      "cadence": "daily",
+      "access": "境内直连",
+      "feed": "https://www.jiqizhixin.com/api/article_library/articles.json?sort=time&page=1&per=20",
+      "verified": true,
+      "verified_how": "网站为 JS 渲染；文章接口（未公开文档）匿名返回 JSON，最新文章 2026-10-02；/rss 已重定向到数据服务页。"
+    },
+    {
+      "id": "qbitai",
+      "name": "量子位",
+      "url": "https://www.qbitai.com/",
+      "search_hint": "微信搜公众号「量子位」",
+      "directions": [
+        "ai"
+      ],
+      "circle": "中文圈",
+      "kind": "公众号",
+      "signals": [
+        "industry",
+        "frontier"
+      ],
+      "good_for": "国内大模型公司动态、融资和产品发布，适合了解工业界在做什么、谁在招人。",
+      "caveat": "流量导向，重发布会轻方法细节，转述论文时常丢掉实验限制条件。",
+      "cadence": "daily",
+      "access": "境内直连",
+      "feed": "https://www.qbitai.com/feed",
+      "verified": true,
+      "verified_how": "feed 200，最新 pubDate 2026-10-02。"
+    },
+    {
+      "id": "zhihu-ai",
+      "name": "知乎 · AI / 机器学习",
+      "url": "https://www.zhihu.com/",
+      "search_hint": "搜「如何评价 <论文/模型名>」「<会议> 2026 有哪些值得关注的论文」「<方向> 入门 读博」",
+      "directions": [
+        "ai"
+      ],
+      "circle": "中文圈",
+      "kind": "问答",
+      "signals": [
+        "review",
+        "experience",
+        "tutorial"
+      ],
+      "good_for": "国内研究者和博士生对热门论文的中文点评，以及读博、进组、选方向的经验回答。",
+      "caveat": "高赞回答常来自卖课引流号和公司宣传号，「如何评价」类问题容易站队，冷门方向几乎无人讨论。",
+      "cadence": "weekly",
+      "access": "需登录才能看全",
+      "feed": "",
+      "verified": true,
+      "verified_how": "话题页对匿名访问跳转登录/验证页；搜索结果显示知乎专栏「国内外知名大模型及应用（2026/10/01）」等 2026 年内容。"
+    },
+    {
+      "id": "bilibili-limu",
+      "name": "B站 · 跟李沐学AI",
+      "url": "https://space.bilibili.com/1567748478",
+      "search_hint": "",
+      "directions": [
+        "ai"
+      ],
+      "circle": "中文圈",
+      "kind": "视频",
+      "signals": [
+        "tutorial"
+      ],
+      "good_for": "经典论文逐段精读（Transformer、GPT、ViT 等），示范一篇论文该怎么读，适合大一大二入门。",
+      "caveat": "官方更新很少，内容停在经典论文；站内大量「2026 版」合集是他人搬运加营销。",
+      "cadence": "when-needed",
+      "access": "境内直连",
+      "feed": "",
+      "verified": false,
+      "verified_how": "无法核实活跃度：B站 card API 确认账号名「跟李沐学AI」、约 117 万粉丝，但投稿列表接口被限流；搜索到的「2026 版」均为他人搬运。"
+    },
+    {
+      "id": "arxiv-math",
+      "name": "arXiv math",
+      "url": "https://arxiv.org/archive/math",
+      "search_hint": "",
+      "directions": [
+        "math"
+      ],
+      "circle": "英文圈",
+      "kind": "预印本",
+      "signals": [
+        "frontier"
+      ],
+      "good_for": "数学新结果几乎都先上 arXiv，按子类（math.CO、math.PR 等）订阅即可跟上自己方向。",
+      "caveat": "未经评审，偶有重大声明后撤回或被发现漏洞；跨类投递多，总量大。",
+      "cadence": "daily",
+      "access": "境内直连",
+      "feed": "https://rss.arxiv.org/rss/math",
+      "verified": true,
+      "verified_how": "RSS 200，含当日（2026-10）条目。"
+    },
+    {
+      "id": "mathoverflow",
+      "name": "MathOverflow",
+      "url": "https://mathoverflow.net/",
+      "search_hint": "",
+      "directions": [
+        "math"
+      ],
+      "circle": "英文圈",
+      "kind": "问答",
+      "signals": [
+        "open_problem",
+        "review"
+      ],
+      "good_for": "研究级问答，职业数学家会回答「某猜想现状如何」「某引理有无反例」，是查开放问题现状的最快入口。",
+      "caveat": "只收研究级问题，本科习题会被迅速关闭；代数、拓扑、数论问题多，应用数学少。",
+      "cadence": "weekly",
+      "access": "境内直连",
+      "feed": "https://api.stackexchange.com/2.3/questions?site=mathoverflow&order=desc&sort=activity",
+      "verified": true,
+      "verified_how": "首页 200 含 2026；StackExchange API 匿名返回 JSON，最新活动时间戳为 2026-10-02。"
+    },
+    {
+      "id": "math-stackexchange",
+      "name": "Mathematics Stack Exchange",
+      "url": "https://math.stackexchange.com/",
+      "search_hint": "",
+      "directions": [
+        "math"
+      ],
+      "circle": "英文圈",
+      "kind": "问答",
+      "signals": [
+        "tutorial"
+      ],
+      "good_for": "课程和自学中卡住的证明与习题，大多数标准问题已有高质量答案可搜。",
+      "caveat": "重复题极多、答案质量参差，求作业答案式提问会被差评关闭。",
+      "cadence": "when-needed",
+      "access": "境内直连",
+      "feed": "https://api.stackexchange.com/2.3/questions?site=math&order=desc&sort=creation",
+      "verified": true,
+      "verified_how": "首页 200；API 最新提问时间戳 2026-10-02。"
+    },
+    {
+      "id": "terry-tao-blog",
+      "name": "Terence Tao 博客 What's new",
+      "url": "https://terrytao.wordpress.com/",
+      "search_hint": "",
+      "directions": [
+        "math"
+      ],
+      "circle": "英文圈",
+      "kind": "博客",
+      "signals": [
+        "frontier",
+        "open_problem",
+        "tutorial"
+      ],
+      "good_for": "菲尔兹奖得主公开写研究笔记、讲义和开放问题，近年大量讨论 AI 辅助证明与形式化。",
+      "caveat": "反映一位顶尖分析/组合学家的个人兴趣，难度高，不代表整个数学界的关注点。",
+      "cadence": "weekly",
+      "access": "需要 VPN",
+      "feed": "https://terrytao.wordpress.com/feed/",
+      "verified": true,
+      "verified_how": "feed 200，最新 pubDate 2026-10-02（*.wordpress.com 境内通常无法直连）。"
+    },
+    {
+      "id": "gil-kalai-blog",
+      "name": "Gil Kalai 博客 Combinatorics and more",
+      "url": "https://gilkalai.wordpress.com/",
+      "search_hint": "",
+      "directions": [
+        "math"
+      ],
+      "circle": "英文圈",
+      "kind": "博客",
+      "signals": [
+        "open_problem",
+        "frontier"
+      ],
+      "good_for": "组合与离散几何方向的新突破速报、猜想进展和会议见闻，常列出仍未解决的问题。",
+      "caveat": "选题跟作者个人兴趣走，含量子计算怀疑论等有争议的立场，不是全面综述。",
+      "cadence": "weekly",
+      "access": "需要 VPN",
+      "feed": "https://gilkalai.wordpress.com/feed/",
+      "verified": true,
+      "verified_how": "feed 200，最新 pubDate 2026-09-25。"
+    },
+    {
+      "id": "quanta-math",
+      "name": "Quanta Magazine 数学版",
+      "url": "https://www.quantamagazine.org/mathematics/",
+      "search_hint": "",
+      "directions": [
+        "math"
+      ],
+      "circle": "英文圈",
+      "kind": "博客",
+      "signals": [
+        "frontier"
+      ],
+      "good_for": "用非专业语言讲清近期重要数学突破和背后的人，帮你判断哪些方向正在发生大事。",
+      "caveat": "偏好有故事性的大突破，英雄叙事明显，对积累型进展和应用数学覆盖少。",
+      "cadence": "weekly",
+      "access": "境内直连",
+      "feed": "https://api.quantamagazine.org/feed/",
+      "verified": true,
+      "verified_how": "数学栏目页 200；feed 200（由 www 重定向到 api.quantamagazine.org），最新 2026-10-02，为全站 feed，含物理和生物。"
+    },
+    {
+      "id": "erdos-problems",
+      "name": "Erdős Problems",
+      "url": "https://www.erdosproblems.com/",
+      "search_hint": "",
+      "directions": [
+        "math"
+      ],
+      "circle": "英文圈",
+      "kind": "数据/代码",
+      "signals": [
+        "open_problem"
+      ],
+      "good_for": "收录上千个 Erdős 问题并标注已解决/未解决和相关文献，适合找可以下手的具体开放问题。",
+      "caveat": "难度跨度极大，未解决不等于适合本科生；近来 AI 解题声明多，需核对是否早有文献。",
+      "cadence": "when-needed",
+      "access": "境内直连",
+      "feed": "",
+      "verified": true,
+      "verified_how": "首页 200，含 2026-09-12 等更新日期。"
+    },
+    {
+      "id": "lean-zulip",
+      "name": "Lean Zulip（形式化数学社区）",
+      "url": "https://leanprover.zulipchat.com/",
+      "search_hint": "",
+      "directions": [
+        "math"
+      ],
+      "circle": "英文圈",
+      "kind": "论坛",
+      "signals": [
+        "code",
+        "open_problem",
+        "frontier"
+      ],
+      "good_for": "Mathlib 贡献者和数学家实时讨论形式化与 AI 证明，新人频道有人带你提交第一个 PR。",
+      "caveat": "讨论以形式化工程为主，与传统数学研究的问题意识有距离；消息量大，只能跟少数频道。",
+      "cadence": "weekly",
+      "access": "境内直连",
+      "feed": "",
+      "verified": true,
+      "verified_how": "首页 200，页面注明有免登录可读的 web-public 频道；Zulip API 匿名请求返回 UNAUTHORIZED，feed 留空。"
+    },
+    {
+      "id": "reddit-math",
+      "name": "Reddit r/math",
+      "url": "https://www.reddit.com/r/math/",
+      "search_hint": "",
+      "directions": [
+        "math"
+      ],
+      "circle": "英文圈",
+      "kind": "论坛",
+      "signals": [
+        "experience",
+        "tutorial"
+      ],
+      "good_for": "学生和研究者讨论学习路线、教材选择和读研经历，偶有研究者解释自己的新结果。",
+      "caveat": "以北美本科生和研究生为主，职业数学家声量小，民科帖与入门问题混杂。",
+      "cadence": "weekly",
+      "access": "需要 VPN",
+      "feed": "https://www.reddit.com/r/math/.rss",
+      "verified": true,
+      "verified_how": ".rss 200，<updated> 2026-10-02。"
+    },
+    {
+      "id": "bicmr",
+      "name": "北京国际数学研究中心（BICMR）",
+      "url": "https://bicmr.pku.edu.cn/",
+      "search_hint": "",
+      "directions": [
+        "math"
+      ],
+      "circle": "中文圈",
+      "kind": "官方",
+      "signals": [
+        "frontier",
+        "opportunity"
+      ],
+      "good_for": "北大本地的讨论班、学术报告和暑期学校日程，本科生可直接去听前沿报告、认识老师。",
+      "caveat": "报告默认面向研究生以上，没有入门引导；信息只挂官网，不主动推送。",
+      "cadence": "weekly",
+      "access": "境内直连",
+      "feed": "",
+      "verified": true,
+      "verified_how": "curl 跟随跳转后 200，页面列有 2026-09-30、10-08、10-15 的活动。"
+    },
+    {
+      "id": "zhihu-math",
+      "name": "知乎 · 数学",
+      "url": "https://www.zhihu.com/",
+      "search_hint": "搜「<方向> 入门 书单」「数学系 本科 科研」「如何评价 <某新结果>」",
+      "directions": [
+        "math"
+      ],
+      "circle": "中文圈",
+      "kind": "问答",
+      "signals": [
+        "tutorial",
+        "experience",
+        "frontier"
+      ],
+      "good_for": "中文书单、课程难度评价和国内数学系读研/出国经验，偶有研究者解读新结果。",
+      "caveat": "民科和「天才叙事」内容多，高赞答主偏竞赛背景，对应用数学和统计关注少。",
+      "cadence": "weekly",
+      "access": "需登录才能看全",
+      "feed": "",
+      "verified": true,
+      "verified_how": "搜索结果显示知乎专栏「2026年3月16日数学新闻十大热点」「2026Q1《小乐数学科普》精选」等；话题页需登录。"
+    },
+    {
+      "id": "bilibili-3b1b",
+      "name": "B站 · 3Blue1Brown 官方双语",
+      "url": "https://space.bilibili.com/88461692",
+      "search_hint": "",
+      "directions": [
+        "math"
+      ],
+      "circle": "中文圈",
+      "kind": "视频",
+      "signals": [
+        "tutorial"
+      ],
+      "good_for": "可视化讲清线性代数、微积分、神经网络等概念，先建立直觉再读教材或论文。",
+      "caveat": "讲的是已知知识的直观理解，不涉及研究前沿；容易产生「看懂了」的错觉而不动手推导。",
+      "cadence": "when-needed",
+      "access": "境内直连",
+      "feed": "",
+      "verified": true,
+      "verified_how": "B站 card API 确认账号「3Blue1Brown」、约 276 万粉丝；搜索结果显示 2026-10-01 上传「【官方双语】AI 未能解决的最后一道IMO真题」。"
+    },
+    {
+      "id": "fanpu",
+      "name": "返朴（公众号）",
+      "url": "",
+      "search_hint": "微信搜公众号「返朴」；或在虎嗅、知乎搜「返朴 <数学家名>」",
+      "directions": [
+        "math"
+      ],
+      "circle": "中文圈",
+      "kind": "公众号",
+      "signals": [
+        "frontier",
+        "experience"
+      ],
+      "good_for": "科学家主导的中文科普，常有数学家撰文介绍新成果、讲研究经历和学科动向（如 AI 对数学的冲击）。",
+      "caveat": "偏重人物和大叙事，技术细节被删减；对国内名家的报道有明显褒扬倾向。",
+      "cadence": "weekly",
+      "access": "境内直连",
+      "feed": "",
+      "verified": true,
+      "verified_how": "虎嗅转载的 2026-09-21 文章注明「本文来自微信公众号：返朴」；公众号本身未直接访问。"
+    },
+    {
+      "id": "chaoli",
+      "name": "超理论坛",
+      "url": "https://chaoli.club/",
+      "search_hint": "",
+      "directions": [
+        "math"
+      ],
+      "circle": "中文圈",
+      "kind": "论坛",
+      "signals": [
+        "tutorial",
+        "experience"
+      ],
+      "good_for": "理科学生的中文学术论坛，有教材讨论、学习路线和对新结果（如菲尔兹奖）的讨论，比知乎更硬核。",
+      "caveat": "用户少、以本科生和爱好者为主，专业判断需再核实；部分板块冷清。",
+      "cadence": "when-needed",
+      "access": "境内直连",
+      "feed": "",
+      "verified": true,
+      "verified_how": "curl 返回 403（反爬）；搜索结果显示站内有「关于 2026 年菲尔兹奖的问题」帖子。"
+    },
+    {
+      "id": "arxiv-stat",
+      "name": "arXiv stat（ME / ML / AP / TH）",
+      "url": "https://arxiv.org/archive/stat",
+      "search_hint": "",
+      "directions": [
+        "stat"
+      ],
+      "circle": "英文圈",
+      "kind": "预印本",
+      "signals": [
+        "frontier"
+      ],
+      "good_for": "统计方法新论文通常先出现在 stat.ME、stat.ML、stat.AP，期刊发表要晚一两年。",
+      "caveat": "stat.ML 与 cs.LG 大量重叠，容易被 ML 论文淹没；统计期刊审稿周期长，arXiv 版与终稿差别可能很大。",
+      "cadence": "daily",
+      "access": "境内直连",
+      "feed": "https://rss.arxiv.org/rss/stat",
+      "verified": true,
+      "verified_how": "RSS 200，含 2026-10 条目。"
+    },
+    {
+      "id": "cross-validated",
+      "name": "Cross Validated（StackExchange 统计版）",
+      "url": "https://stats.stackexchange.com/",
+      "search_hint": "",
+      "directions": [
+        "stat"
+      ],
+      "circle": "英文圈",
+      "kind": "问答",
+      "signals": [
+        "tutorial",
+        "review"
+      ],
+      "good_for": "方法选择和误用的问答（p 值、多重比较、混合模型、因果识别），高分答案常由统计学者撰写。",
+      "caveat": "偏应用统计的标准做法，前沿方法讨论少；老答案可能落后于新软件实现。",
+      "cadence": "when-needed",
+      "access": "境内直连",
+      "feed": "https://api.stackexchange.com/2.3/questions?site=stats&order=desc&sort=creation",
+      "verified": true,
+      "verified_how": "首页 200；API 最新提问时间戳 2026-10-02。"
+    },
+    {
+      "id": "gelman-blog",
+      "name": "Andrew Gelman 博客（Statistical Modeling, Causal Inference, and Social Science）",
+      "url": "https://statmodeling.stat.columbia.edu/",
+      "search_hint": "",
+      "directions": [
+        "stat",
+        "psy"
+      ],
+      "circle": "英文圈",
+      "kind": "博客",
+      "signals": [
+        "review",
+        "open_problem"
+      ],
+      "good_for": "几乎每天点评新发表研究的统计错误、可重复性问题和贝叶斯建模，是学「怎么挑毛病」的最好教材。",
+      "caveat": "立场鲜明（贝叶斯、反 p 值崇拜），批评对象集中在社科和心理学热门论文，语气尖锐。",
+      "cadence": "weekly",
+      "access": "境内直连",
+      "feed": "https://statmodeling.stat.columbia.edu/feed/atom/",
+      "verified": true,
+      "verified_how": "首页对 curl 和 WebFetch 均返回 403（反爬）；Atom feed 200，最新 published 2026-10-02。"
+    },
+    {
+      "id": "cosx-forum",
+      "name": "统计之都（COS 论坛）",
+      "url": "https://d.cosx.org/",
+      "search_hint": "",
+      "directions": [
+        "stat"
+      ],
+      "circle": "中文圈",
+      "kind": "论坛",
+      "signals": [
+        "tutorial",
+        "experience",
+        "opportunity"
+      ],
+      "good_for": "国内统计和 R 用户的中文社区，有方法讨论、读研求职经验和中国 R 会议等活动信息。",
+      "caveat": "主站 cosx.org 文章自 2024 年底基本停更，论坛活跃度明显低于高峰期；业界数据分析话题多于理论研究。",
+      "cadence": "weekly",
+      "access": "境内直连",
+      "feed": "https://d.cosx.org/api/discussions?sort=-lastPostedAt",
+      "verified": true,
+      "verified_how": "论坛 API 200，最新讨论 2026-09-26；主站 cosx.org 最新文章日期为 2024-11。"
+    },
+    {
+      "id": "r-bloggers",
+      "name": "R-bloggers",
+      "url": "https://www.r-bloggers.com/",
+      "search_hint": "",
+      "directions": [
+        "stat"
+      ],
+      "circle": "英文圈",
+      "kind": "博客",
+      "signals": [
+        "tutorial",
+        "code"
+      ],
+      "good_for": "聚合数百个 R 博客，新包发布、方法教程和可复现代码每天更新。",
+      "caveat": "只聚合不筛选，质量参差，部分是商业培训软文；不覆盖 Python 生态。",
+      "cadence": "weekly",
+      "access": "境内直连",
+      "feed": "https://feeds.feedburner.com/RBloggers",
+      "verified": true,
+      "verified_how": "feed 200，最新 pubDate 2026-09-30。"
+    },
+    {
+      "id": "posit-community",
+      "name": "Posit Community（R / RStudio 论坛）",
+      "url": "https://forum.posit.co/",
+      "search_hint": "",
+      "directions": [
+        "stat"
+      ],
+      "circle": "英文圈",
+      "kind": "论坛",
+      "signals": [
+        "code",
+        "tutorial"
+      ],
+      "good_for": "R、tidyverse、Quarto 实操问题由开发者和资深用户解答，适合卡在代码而非方法时求助。",
+      "caveat": "只管工具不管统计正确性，代码跑通不等于分析正确。",
+      "cadence": "when-needed",
+      "access": "境内直连",
+      "feed": "https://forum.posit.co/latest.json",
+      "verified": true,
+      "verified_how": "latest.json 200，最新帖 2026-10-02。"
+    },
+    {
+      "id": "datamethods",
+      "name": "datamethods（方法讨论论坛）",
+      "url": "https://discourse.datamethods.org/",
+      "search_hint": "",
+      "directions": [
+        "stat"
+      ],
+      "circle": "英文圈",
+      "kind": "论坛",
+      "signals": [
+        "review",
+        "open_problem"
+      ],
+      "good_for": "生物统计学者和临床研究者公开争论具体论文的设计与分析问题，看得到「发表之后」的方法批评。",
+      "caveat": "偏医学和临床试验场景，频率派与贝叶斯派之争明显，社科方法讨论少。",
+      "cadence": "weekly",
+      "access": "境内直连",
+      "feed": "https://discourse.datamethods.org/latest.json",
+      "verified": true,
+      "verified_how": "latest.json 200，最新帖 2026-10-02。"
+    },
+    {
+      "id": "data-colada",
+      "name": "Data Colada",
+      "url": "https://datacolada.org/",
+      "search_hint": "",
+      "directions": [
+        "stat",
+        "psy"
+      ],
+      "circle": "英文圈",
+      "kind": "博客",
+      "signals": [
+        "review"
+      ],
+      "good_for": "三位行为科学家用数据法医方式检验已发表研究（含造假调查），是识别 p-hacking 和学研究诚信的一手材料。",
+      "caveat": "每月一两篇，案例集中在行为科学和心理学，曾因揭露造假卷入诉讼，结论要结合原始数据看。",
+      "cadence": "when-needed",
+      "access": "境内直连",
+      "feed": "https://datacolada.org/feed",
+      "verified": true,
+      "verified_how": "feed 200，最新 pubDate 2026-09-02。"
+    },
+    {
+      "id": "kaggle",
+      "name": "Kaggle",
+      "url": "https://www.kaggle.com/",
+      "search_hint": "",
+      "directions": [
+        "stat"
+      ],
+      "circle": "英文圈",
+      "kind": "数据/代码",
+      "signals": [
+        "code",
+        "opportunity"
+      ],
+      "good_for": "真实数据集、公开 notebook 和竞赛讨论区，能看到同一问题几十种建模思路的对比。",
+      "caveat": "竞赛奖励排行榜分数，容易学到过拟合榜单的技巧，而不是可解释、可推断的统计分析。",
+      "cadence": "when-needed",
+      "access": "境内直连",
+      "feed": "",
+      "verified": true,
+      "verified_how": "discussions 页 200；competitions 页对 curl 返回 reCAPTCHA 检查（未处理）；搜索结果显示 2026-09-23 开始的新竞赛；官方 API 需 key，feed 留空。"
+    },
+    {
+      "id": "reddit-statistics",
+      "name": "Reddit r/statistics",
+      "url": "https://www.reddit.com/r/statistics/",
+      "search_hint": "",
+      "directions": [
+        "stat"
+      ],
+      "circle": "英文圈",
+      "kind": "论坛",
+      "signals": [
+        "experience",
+        "tutorial"
+      ],
+      "good_for": "统计学生和从业者讨论读研、方法选择和行业现状，常有统计与数据科学的职业对比经验。",
+      "caveat": "北美视角为主，求作业解答和职业焦虑帖多，研究级讨论少。",
+      "cadence": "weekly",
+      "access": "需要 VPN",
+      "feed": "https://www.reddit.com/r/statistics/.rss",
+      "verified": true,
+      "verified_how": ".rss 首次 429 限流，间隔后 200，<updated> 2026-10-02。"
+    },
+    {
+      "id": "zhihu-stat",
+      "name": "知乎 · 统计学 / 因果推断",
+      "url": "https://www.zhihu.com/",
+      "search_hint": "搜「统计学 读博 方向」「因果推断 入门」「<方法A> 和 <方法B> 区别」",
+      "directions": [
+        "stat"
+      ],
+      "circle": "中文圈",
+      "kind": "问答",
+      "signals": [
+        "tutorial",
+        "experience"
+      ],
+      "good_for": "中文方法入门长文（因果推断、贝叶斯、高维统计）和国内统计、生统读研经验。",
+      "caveat": "大量内容来自业界数据分析和算法岗视角，把统计当工具；搬运教材多，原创研究讨论少。",
+      "cadence": "weekly",
+      "access": "需登录才能看全",
+      "feed": "",
+      "verified": true,
+      "verified_how": "搜索结果显示 2025 年专栏（Stata 19 发布解读）和多篇因果推断专栏；话题页需登录。"
+    },
+    {
+      "id": "clubear",
+      "name": "狗熊会（公众号 / B站）",
+      "url": "https://space.bilibili.com/479849093",
+      "search_hint": "微信搜公众号「狗熊会」（ID: CluBear）",
+      "directions": [
+        "stat"
+      ],
+      "circle": "中文圈",
+      "kind": "公众号",
+      "signals": [
+        "tutorial",
+        "industry"
+      ],
+      "good_for": "北大光华王汉生团队运营，讲统计学与商业数据分析的结合，适合了解统计在业界怎么用。",
+      "caveat": "偏商业分析和教学推广，带课程和书籍宣传，理论统计前沿内容少。",
+      "cadence": "weekly",
+      "access": "境内直连",
+      "feed": "",
+      "verified": false,
+      "verified_how": "无法核实活跃度：B站 card API 确认账号「狗熊会」（约 9.7 万粉丝），搜索确认公众号 ID CluBear、创始人王汉生，但未找到 2025–2026 年具体发布。"
+    },
+    {
+      "id": "pinggu",
+      "name": "经管之家（原人大经济论坛）",
+      "url": "https://bbs.pinggu.org/",
+      "search_hint": "",
+      "directions": [
+        "stat",
+        "econ"
+      ],
+      "circle": "中文圈",
+      "kind": "论坛",
+      "signals": [
+        "code",
+        "tutorial",
+        "experience"
+      ],
+      "good_for": "Stata、R、SPSS 实操、计量答疑和数据资源帖最多的中文论坛，查某命令怎么用、某数据从哪来很快。",
+      "caveat": "下载要论坛币，广告和代写、付费资料多；已与人大经济学院终止合作，现为商业网站。",
+      "cadence": "when-needed",
+      "access": "境内直连",
+      "feed": "",
+      "verified": true,
+      "verified_how": "首页 curl 200（GBK 页面未解析出日期）；搜索结果显示 2026 年帖子及人大经济学院的终止合作声明。"
+    },
+    {
+      "id": "psyarxiv",
+      "name": "PsyArXiv（OSF 预印本）",
+      "url": "https://osf.io/preprints/psyarxiv",
+      "search_hint": "",
+      "directions": [
+        "psy"
+      ],
+      "circle": "英文圈",
+      "kind": "预印本",
+      "signals": [
+        "frontier",
+        "code"
+      ],
+      "good_for": "心理学预印本，很多附预注册、原始数据和分析代码，能直接看研究是怎么做的。",
+      "caveat": "未经评审，被试多为欧美大学生和网络样本，结论外推到中国人群要谨慎。",
+      "cadence": "weekly",
+      "access": "境内直连",
+      "feed": "https://api.osf.io/v2/preprints/?filter[provider]=psyarxiv&sort=-date_created",
+      "verified": true,
+      "verified_how": "网页为 JS 渲染；OSF API 匿名返回 JSON，最新预印本创建于 2026-10-02。"
+    },
+    {
+      "id": "reddit-academicpsychology",
+      "name": "Reddit r/AcademicPsychology",
+      "url": "https://www.reddit.com/r/AcademicPsychology/",
+      "search_hint": "",
+      "directions": [
+        "psy"
+      ],
+      "circle": "英文圈",
+      "kind": "论坛",
+      "signals": [
+        "experience",
+        "review"
+      ],
+      "good_for": "心理学研究生和研究者讨论读研申请、RA 经历、统计方法和具体研究，比 r/psychology 学术得多。",
+      "caveat": "美国临床心理学申请视角占主导，对认知和实验方向、中国学生情况覆盖少。",
+      "cadence": "weekly",
+      "access": "需要 VPN",
+      "feed": "https://www.reddit.com/r/AcademicPsychology/.rss",
+      "verified": true,
+      "verified_how": ".rss 200，含 2026 年帖子。"
+    },
+    {
+      "id": "bps-research-digest",
+      "name": "BPS Research Digest",
+      "url": "https://www.bps.org.uk/research-digest",
+      "search_hint": "",
+      "directions": [
+        "psy"
+      ],
+      "circle": "英文圈",
+      "kind": "博客",
+      "signals": [
+        "frontier"
+      ],
+      "good_for": "英国心理学会用短文介绍新发表研究，快速了解各子领域在研究什么。",
+      "caveat": "偏向有话题性的结果，少谈效应量和重复失败，容易把单篇研究当定论。",
+      "cadence": "weekly",
+      "access": "境内直连",
+      "feed": "",
+      "verified": true,
+      "verified_how": "页面 200，含 2026 年文章；未测试 RSS，feed 留空。"
+    },
+    {
+      "id": "sips",
+      "name": "SIPS（心理科学改进学会）",
+      "url": "https://improvingpsych.org/",
+      "search_hint": "",
+      "directions": [
+        "psy"
+      ],
+      "circle": "英文圈",
+      "kind": "官方",
+      "signals": [
+        "review",
+        "opportunity"
+      ],
+      "good_for": "开放科学与可重复性运动的核心组织，发布多实验室合作项目和会议信息，本科生可加入大型合作。",
+      "caveat": "改革派立场鲜明，对传统研究做法批评多；活动以欧美时区为主。",
+      "cadence": "when-needed",
+      "access": "境内直连",
+      "feed": "",
+      "verified": true,
+      "verified_how": "页面 200，最新动态 2026-08（PsyArXiv 与 OSF 变化说明）和 2026-07（SIPS 2026 奖项）。"
+    },
+    {
+      "id": "connectionists",
+      "name": "Connectionists 邮件列表（CMU）",
+      "url": "https://mailman.srv.cs.cmu.edu/pipermail/connectionists/",
+      "search_hint": "",
+      "directions": [
+        "psy"
+      ],
+      "circle": "英文圈",
+      "kind": "论坛",
+      "signals": [
+        "opportunity",
+        "frontier"
+      ],
+      "good_for": "计算神经科学、认知建模和神经网络的老牌邮件列表，发布博士、博后、RA 职位和研讨会征稿，归档免登录可读。",
+      "caveat": "几乎全是招聘和会议广告，没有讨论；偏欧洲和计算方向，传统实验心理学信息少。",
+      "cadence": "weekly",
+      "access": "境内直连",
+      "feed": "",
+      "verified": true,
+      "verified_how": "归档页 200，含 2026 年 9 月和 10 月归档；pipermail 无 RSS。"
+    },
+    {
+      "id": "cogsci-society",
+      "name": "Cognitive Science Society（CogSci 年会）",
+      "url": "https://cognitivesciencesociety.org/",
+      "search_hint": "",
+      "directions": [
+        "psy"
+      ],
+      "circle": "英文圈",
+      "kind": "官方",
+      "signals": [
+        "frontier",
+        "opportunity"
+      ],
+      "good_for": "认知科学年会征稿、免费论文集和学生奖助信息，是心理、AI、语言学交叉前沿的入口。",
+      "caveat": "会议论文短、审稿较松，质量不一；年会多在欧美，学生参会成本高。",
+      "cadence": "when-needed",
+      "access": "境内直连",
+      "feed": "",
+      "verified": true,
+      "verified_how": "页面 200，最新日期 2026-09-30。"
+    },
+    {
+      "id": "bluesky-academic",
+      "name": "Bluesky 学术圈",
+      "url": "https://bsky.app/",
+      "search_hint": "关注 @psychonomicsociety.bsky.social、@collabrapsychology.bsky.social、@nber.org；NEP 各领域机器人账号如 repec-nep-dev.bsky.social；搜「psychology starter pack」「EconSky」",
+      "directions": [
+        "psy",
+        "econ"
+      ],
+      "circle": "英文圈",
+      "kind": "社交媒体",
+      "signals": [
+        "frontier",
+        "opportunity",
+        "review"
+      ],
+      "good_for": "2024 年后大量心理、神经和经济学者从 X 迁来，论文发布、招生和学术争论在这里更集中。",
+      "caveat": "用户政治立场明显偏左、圈子小，AI 和工业界声音少；只看 Bluesky 会漏掉仍留在 X 的学者。",
+      "cadence": "daily",
+      "access": "需要 VPN",
+      "feed": "https://public.api.bsky.app/xrpc/app.bsky.feed.getAuthorFeed?actor=nber.org&limit=20",
+      "verified": true,
+      "verified_how": "个人页免登录 200；公共 API 匿名返回 JSON：nber.org 最新帖 2026-10-02、psychonomicsociety 2026-09-04、collabrapsychology 2026-09-29；迁移情况见 PsyPost 报道和 arXiv 2505.24801。"
+    },
+    {
+      "id": "acta-psych-sinica",
+      "name": "《心理学报》",
+      "url": "https://journal.psych.ac.cn/xlxb/CN/home",
+      "search_hint": "",
+      "directions": [
+        "psy"
+      ],
+      "circle": "中文圈",
+      "kind": "官方",
+      "signals": [
+        "frontier"
+      ],
+      "good_for": "国内心理学顶级中文期刊，网站提供 PDF 全文，能看到国内实验室在研究什么、用中国被试得到什么结果。",
+      "caveat": "发表周期长，预注册和开放数据比例普遍低于英文期刊，国际引用影响有限。",
+      "cadence": "when-needed",
+      "access": "境内直连",
+      "feed": "",
+      "verified": true,
+      "verified_how": "首页 200，显示 2026 年第 58 卷第 10 期，页面有 OA 声明和 PDF 链接。"
+    },
+    {
+      "id": "cosn",
+      "name": "中文开放科学网络（COSN）",
+      "url": "https://open-sci.cn/",
+      "search_hint": "微信搜公众号「OpenScience」；B站搜「OpenScience_CN」",
+      "directions": [
+        "psy"
+      ],
+      "circle": "中文圈",
+      "kind": "公众号",
+      "signals": [
+        "tutorial",
+        "review",
+        "opportunity"
+      ],
+      "good_for": "国内青年学者推动开放科学的社区，有中文读书会、可重复性讲座和合作研究招募。",
+      "caveat": "志愿者运营，网站更新不规律，活动主要发在公众号和 B站；成员以心理学和认知神经为主。",
+      "cadence": "weekly",
+      "access": "境内直连",
+      "feed": "",
+      "verified": true,
+      "verified_how": "open-sci.cn 200；GitHub 组织 OpenSci-CN 最新 issue 2026-07-10（问卷招募）；公众号「OpenScience」和 B站「OpenScience_CN」来自官方介绍，未直接访问。"
+    },
+    {
+      "id": "r4psy",
+      "name": "R4Psy（胡传鹏《R语言在心理学研究中的应用》）",
+      "url": "https://github.com/hcp4715/R4Psy",
+      "search_hint": "",
+      "directions": [
+        "psy"
+      ],
+      "circle": "中文圈",
+      "kind": "数据/代码",
+      "signals": [
+        "tutorial",
+        "code"
+      ],
+      "good_for": "南师大研究生课程的全套开源讲义、代码和 B站录像，从原始数据讲到可重复的论文手稿。",
+      "caveat": "针对问卷、实验、元分析等常见设计，计算建模和神经数据涉及少；2026 版引入 AI 辅助编程，旧录像与新讲义可能不一致。",
+      "cadence": "when-needed",
+      "access": "境内直连",
+      "feed": "",
+      "verified": true,
+      "verified_how": "GitHub API 最新提交 2026-06-18；在线书 bookdown.org/hcp4715/R4PsyBook 见搜索结果。"
+    },
+    {
+      "id": "zhihu-psy",
+      "name": "知乎 · 心理学 / 认知神经",
+      "url": "https://www.zhihu.com/",
+      "search_hint": "搜「心理学 本科 进实验室」「认知神经科学 读博」「<效应名> 重复 失败」",
+      "directions": [
+        "psy"
+      ],
+      "circle": "中文圈",
+      "kind": "问答",
+      "signals": [
+        "experience",
+        "tutorial"
+      ],
+      "good_for": "国内心理学和认知神经学生分享进实验室、保研和出国经验，偶有研究者科普自己的论文。",
+      "caveat": "心理咨询、情感话题和通俗「心理学效应」远多于科研内容，常引用已重复失败的经典效应。",
+      "cadence": "weekly",
+      "access": "需登录才能看全",
+      "feed": "",
+      "verified": true,
+      "verified_how": "搜索结果显示知乎专栏「Nature系列期刊神经科学研究汇编（2025–2026）」等 2026 年内容；话题页需登录。"
+    },
+    {
+      "id": "pku-psy",
+      "name": "北京大学心理与认知科学学院",
+      "url": "https://www.psy.pku.edu.cn/",
+      "search_hint": "",
+      "directions": [
+        "psy"
+      ],
+      "circle": "中文圈",
+      "kind": "官方",
+      "signals": [
+        "opportunity",
+        "frontier"
+      ],
+      "good_for": "本院学术报告、实验室新闻和科研训练通知，找北大本地心理/认知实验室和导师的直接入口。",
+      "caveat": "新闻偏宣传，不写实验室是否招本科生、组内氛围如何，这些要问师兄师姐或发邮件。",
+      "cadence": "weekly",
+      "access": "境内直连",
+      "feed": "",
+      "verified": true,
+      "verified_how": "首页和新闻页 200，最新日期 2026-09-30。"
+    },
+    {
+      "id": "nber-wp",
+      "name": "NBER Working Papers",
+      "url": "https://www.nber.org/papers",
+      "search_hint": "",
+      "directions": [
+        "econ"
+      ],
+      "circle": "英文圈",
+      "kind": "预印本",
+      "signals": [
+        "frontier"
+      ],
+      "good_for": "美国顶尖经济学者的工作论文，比期刊发表早 1–3 年，是经济学真正的前沿。",
+      "caveat": "只有 NBER 成员能发，偏美国精英院校和美国问题；工作论文结论到发表时可能改变。",
+      "cadence": "weekly",
+      "access": "境内直连",
+      "feed": "https://back.nber.org/rss/new.xml",
+      "verified": true,
+      "verified_how": "论文页 200 含 2026；RSS（www 重定向到 back.nber.org）200，条目为最新工作论文但无日期字段。"
+    },
+    {
+      "id": "nep-repec",
+      "name": "NEP（RePEc 新论文分领域推送）",
+      "url": "https://nep.repec.org/",
+      "search_hint": "",
+      "directions": [
+        "econ"
+      ],
+      "circle": "英文圈",
+      "kind": "预印本",
+      "signals": [
+        "frontier"
+      ],
+      "good_for": "把全球各机构新挂出的经济学工作论文按约百个子领域编辑筛选，覆盖 NBER 之外的欧洲和发展中国家机构。",
+      "caveat": "志愿编辑维护，各领域更新频率和筛选质量不一；只是索引，全文要跳回原机构。",
+      "cadence": "weekly",
+      "access": "境内直连",
+      "feed": "https://nep.repec.org/rss/nep-dev.rss.xml",
+      "verified": true,
+      "verified_how": "首页 200（显示 2026-10-02 更新）；nep-dev RSS 200，dc:date 2026-09-28；把 nep-dev 换成其他领域代码即可。"
+    },
+    {
+      "id": "voxeu",
+      "name": "VoxEU（CEPR）",
+      "url": "https://cepr.org/voxeu",
+      "search_hint": "",
+      "directions": [
+        "econ"
+      ],
+      "circle": "英文圈",
+      "kind": "博客",
+      "signals": [
+        "frontier",
+        "review"
+      ],
+      "good_for": "研究者本人用短文讲清自己工作论文的发现和政策含义，适合快速挑出值得精读的论文。",
+      "caveat": "作者写自己的研究，倾向放大政策含义、少谈局限；欧洲宏观和贸易话题占比高。",
+      "cadence": "weekly",
+      "access": "境内直连",
+      "feed": "https://cepr.org/rss/vox-content",
+      "verified": true,
+      "verified_how": "RSS 200，最新 pubDate 2026-10-02。"
+    },
+    {
+      "id": "marginal-revolution",
+      "name": "Marginal Revolution",
+      "url": "https://marginalrevolution.com/",
+      "search_hint": "",
+      "directions": [
+        "econ"
+      ],
+      "circle": "英文圈",
+      "kind": "博客",
+      "signals": [
+        "frontier",
+        "review"
+      ],
+      "good_for": "每天多条链接和短评，覆盖新论文、学界争论和学者动态，是美国经济学圈的信息流。",
+      "caveat": "两位作者有鲜明的自由市场立场和个人趣味，选题跳跃、链接多评论少。",
+      "cadence": "daily",
+      "access": "境内直连",
+      "feed": "https://marginalrevolution.com/feed",
+      "verified": true,
+      "verified_how": "首页对 curl 返回 403（反爬）；RSS 200，最新 pubDate 2026-10-02。"
+    },
+    {
+      "id": "ejmr",
+      "name": "EJMR（Economics Job Market Rumors）",
+      "url": "https://www.econjobrumors.com/",
+      "search_hint": "",
+      "directions": [
+        "econ"
+      ],
+      "circle": "英文圈",
+      "kind": "论坛",
+      "signals": [
+        "opportunity",
+        "experience"
+      ],
+      "good_for": "求职季面试、飞出和 offer 的实时汇报，了解经济学学术劳动力市场的真实残酷程度。",
+      "caveat": "匿名论坛，性别歧视、种族歧视和人身攻击严重，大量帖子与经济学无关，只应看求职汇总帖。",
+      "cadence": "when-needed",
+      "access": "境内直连",
+      "feed": "",
+      "verified": true,
+      "verified_how": "首页 200，含「Nobel Prize 2026 predictions」等帖子，同页可见大量无关和攻击性标题。"
+    },
+    {
+      "id": "wb-dev-impact",
+      "name": "World Bank Development Impact 博客",
+      "url": "https://blogs.worldbank.org/en/impactevaluations",
+      "search_hint": "",
+      "directions": [
+        "econ"
+      ],
+      "circle": "英文圈",
+      "kind": "博客",
+      "signals": [
+        "tutorial",
+        "review",
+        "opportunity"
+      ],
+      "good_for": "发展经济学家讨论随机实验和因果推断的实操细节（样本量、溢出、伦理），并定期汇总新论文和职位信息。",
+      "caveat": "世界银行和 RCT 派视角，对宏观、理论和非实验方法着墨少。",
+      "cadence": "weekly",
+      "access": "境内直连",
+      "feed": "",
+      "verified": true,
+      "verified_how": "页面 200，含 2026-10-02 文章。"
+    },
+    {
+      "id": "reddit-academiceconomics",
+      "name": "Reddit r/AcademicEconomics",
+      "url": "https://www.reddit.com/r/AcademicEconomics/",
+      "search_hint": "",
+      "directions": [
+        "econ"
+      ],
+      "circle": "英文圈",
+      "kind": "论坛",
+      "signals": [
+        "experience",
+        "opportunity"
+      ],
+      "good_for": "讨论经济学 PhD 申请、pre-doc RA、数学准备和方向选择，比 EJMR 友善得多。",
+      "caveat": "用户量小，以美国本科申请者为主，回答者资历不明。",
+      "cadence": "weekly",
+      "access": "需要 VPN",
+      "feed": "https://www.reddit.com/r/AcademicEconomics/.rss",
+      "verified": true,
+      "verified_how": ".rss 200，含 2026 年帖子。"
+    },
+    {
+      "id": "lianxh",
+      "name": "连享会（lianxh.cn）",
+      "url": "https://www.lianxh.cn/",
+      "search_hint": "",
+      "directions": [
+        "econ"
+      ],
+      "circle": "中文圈",
+      "kind": "博客",
+      "signals": [
+        "tutorial",
+        "code"
+      ],
+      "good_for": "连玉君团队的计量、Stata、Python 实操推文和论文复现，覆盖 DID、合成控制、断点回归等常用方法的代码细节。",
+      "caveat": "很多内容为付费培训引流，偏「怎么跑」，对识别假设是否成立讨论少。",
+      "cadence": "weekly",
+      "access": "境内直连",
+      "feed": "",
+      "verified": true,
+      "verified_how": "首页 200，含大量 2026 年文章日期。"
+    },
+    {
+      "id": "nsd-pku",
+      "name": "北京大学国家发展研究院（NSD）",
+      "url": "https://www.nsd.pku.edu.cn/",
+      "search_hint": "",
+      "directions": [
+        "econ"
+      ],
+      "circle": "中文圈",
+      "kind": "官方",
+      "signals": [
+        "frontier",
+        "opportunity"
+      ],
+      "good_for": "国发院的学术讲座、工作论文、政策研究和夏令营/RA 信息，北大经济学本科生找导师和科研机会的本地入口。",
+      "caveat": "官网偏政策影响力宣传，学术活动要在栏目里翻，不同项目的招生信息分散。",
+      "cadence": "weekly",
+      "access": "境内直连",
+      "feed": "",
+      "verified": true,
+      "verified_how": "首页 200，含 2026 年内容。"
+    },
+    {
+      "id": "zhihu-econ",
+      "name": "知乎 · 经济学",
+      "url": "https://www.zhihu.com/",
+      "search_hint": "搜「经济学 PhD 申请 RA」「如何评价 <诺奖/论文>」「<方法> 识别策略 问题」",
+      "directions": [
+        "econ"
+      ],
+      "circle": "中文圈",
+      "kind": "问答",
+      "signals": [
+        "experience",
+        "review",
+        "tutorial"
+      ],
+      "good_for": "国内经济学学生和学者对诺奖、热门论文和国内政策研究的中文讨论，以及出国读博、pre-doc 经验。",
+      "caveat": "宏观政策话题容易变成立场之争，「经济学」话题混入大量理财和财经营销号。",
+      "cadence": "weekly",
+      "access": "需登录才能看全",
+      "feed": "",
+      "verified": true,
+      "verified_how": "搜索结果显示 2025-10 多篇关于 2025 年诺贝尔经济学奖的知乎专栏；话题页需登录。"
+    },
+    {
+      "id": "predoc",
+      "name": "PREDOC.org（经济学 pre-doc RA 职位）",
+      "url": "https://www.predoc.org/",
+      "search_hint": "",
+      "directions": [
+        "econ",
+        "career"
+      ],
+      "circle": "英文圈",
+      "kind": "官方",
+      "signals": [
+        "opportunity"
+      ],
+      "good_for": "汇总北美高校和研究机构的全职研究助理职位，是本科毕业后进顶级经济学组、拿推荐信再申 PhD 的主渠道。",
+      "caveat": "岗位集中在美国顶尖院校和美联储系统，申请者极多，看重编程能力和推荐人网络；国际学生签证支持因岗而异。",
+      "cadence": "when-needed",
+      "access": "境内直连",
+      "feed": "",
+      "verified": true,
+      "verified_how": "页面 200（UChicago Booth 托管，© 2004–2026，有 2026 课程链接）；另查 NBER RA 职位页 nber.org/career-resources/research-assistant-positions-not-nber 200，含 2026-08 日期。"
+    },
+    {
+      "id": "arxiv-cs-se",
+      "name": "arXiv cs.SE（系统方向加订 cs.OS / cs.DC）",
+      "url": "https://arxiv.org/list/cs.SE/recent",
+      "search_hint": "",
+      "directions": [
+        "se"
+      ],
+      "circle": "英文圈",
+      "kind": "预印本",
+      "signals": [
+        "frontier"
+      ],
+      "good_for": "软件工程新论文（LLM 写代码、测试、程序修复等）的第一现场。",
+      "caveat": "OSDI/SOSP 等系统顶会论文很多不先挂 arXiv，只看 arXiv 会漏掉系统方向的重要工作；LLM4Code 基准刷分多。",
+      "cadence": "daily",
+      "access": "境内直连",
+      "feed": "https://rss.arxiv.org/rss/cs.SE",
+      "verified": true,
+      "verified_how": "RSS 200，含 2026-10 条目。"
+    },
+    {
+      "id": "lobsters",
+      "name": "Lobsters",
+      "url": "https://lobste.rs/",
+      "search_hint": "",
+      "directions": [
+        "se"
+      ],
+      "circle": "英文圈",
+      "kind": "论坛",
+      "signals": [
+        "review",
+        "tutorial"
+      ],
+      "good_for": "邀请制技术社区，讨论编程语言、操作系统、形式化方法等底层话题，信噪比高于 HN。",
+      "caveat": "用户群小而同质（开源、函数式、Unix 爱好者），对工业界和 AI 工具普遍怀疑。",
+      "cadence": "weekly",
+      "access": "境内直连",
+      "feed": "https://lobste.rs/hottest.json",
+      "verified": true,
+      "verified_how": "hottest.json 200，最新 created_at 2026-10-02。"
+    },
+    {
+      "id": "stackoverflow",
+      "name": "Stack Overflow",
+      "url": "https://stackoverflow.com/",
+      "search_hint": "",
+      "directions": [
+        "se"
+      ],
+      "circle": "英文圈",
+      "kind": "问答",
+      "signals": [
+        "code",
+        "tutorial"
+      ],
+      "good_for": "具体报错和 API 用法的问答库，复现论文代码时多数环境问题都能搜到。",
+      "caveat": "AI 助手普及后提问量大幅下降，新框架新版本的答案少，旧答案常过时。",
+      "cadence": "when-needed",
+      "access": "境内直连",
+      "feed": "https://api.stackexchange.com/2.3/questions?site=stackoverflow&order=desc&sort=creation",
+      "verified": true,
+      "verified_how": "API 匿名返回 JSON，最新提问时间戳 2026-10-02。"
+    },
+    {
+      "id": "usenix",
+      "name": "USENIX（OSDI / NSDI / ATC / FAST / Security）",
+      "url": "https://www.usenix.org/conferences",
+      "search_hint": "",
+      "directions": [
+        "se"
+      ],
+      "circle": "英文圈",
+      "kind": "官方",
+      "signals": [
+        "frontier",
+        "tutorial"
+      ],
+      "good_for": "系统顶会论文、幻灯片和报告视频全部免费开放，是读系统方向原始论文的主入口。",
+      "caveat": "只能看到被接收的工作，看不到评审过程；论文多是大厂和顶尖组的大规模系统，本科生难以复现。",
+      "cadence": "when-needed",
+      "access": "境内直连",
+      "feed": "",
+      "verified": true,
+      "verified_how": "会议列表页 200 含 2026；OSDI '26 technical sessions 页 200。"
+    },
+    {
+      "id": "murat-blog",
+      "name": "Metadata（Murat Demirbas 博客）",
+      "url": "https://muratbuffalo.blogspot.com/",
+      "search_hint": "",
+      "directions": [
+        "se"
+      ],
+      "circle": "英文圈",
+      "kind": "博客",
+      "signals": [
+        "review",
+        "tutorial"
+      ],
+      "good_for": "分布式系统教授逐篇点评 OSDI、SOSP、VLDB 等论文的贡献和弱点，是学读系统论文的范本。",
+      "caveat": "集中在分布式系统、数据库和共识协议，作者偏好（如 TLA+ 形式化建模）明显。",
+      "cadence": "weekly",
+      "access": "需要 VPN",
+      "feed": "https://muratbuffalo.blogspot.com/feeds/posts/default",
+      "verified": true,
+      "verified_how": "Atom feed 200，最新 published 2026-09-23（blogspot 境内通常无法直连）。"
+    },
+    {
+      "id": "llvm-discourse",
+      "name": "LLVM Discourse",
+      "url": "https://discourse.llvm.org/",
+      "search_hint": "",
+      "directions": [
+        "se"
+      ],
+      "circle": "英文圈",
+      "kind": "论坛",
+      "signals": [
+        "open_problem",
+        "code",
+        "opportunity"
+      ],
+      "good_for": "编译器开发者公开讨论 RFC、设计争议和 GSoC 项目点子，能看到工业级编译器还有什么没解决。",
+      "caveat": "讨论高度工程化，默认读者熟悉 LLVM 内部；研究问题需要自己从工程讨论里提炼。",
+      "cadence": "weekly",
+      "access": "境内直连",
+      "feed": "https://discourse.llvm.org/latest.json",
+      "verified": true,
+      "verified_how": "latest.json 200，最新 last_posted_at 2026-10-02。"
+    },
+    {
+      "id": "lore-kernel",
+      "name": "Linux 内核邮件列表归档（lore.kernel.org）",
+      "url": "https://lore.kernel.org/lkml/",
+      "search_hint": "",
+      "directions": [
+        "se"
+      ],
+      "circle": "英文圈",
+      "kind": "论坛",
+      "signals": [
+        "review",
+        "code"
+      ],
+      "good_for": "内核补丁的逐行评审完全公开，能看到顶级开发者如何质疑设计、要求数据，是代码评审的真实现场。",
+      "caveat": "流量极大、语气直接，新手难找入口；只适合跟踪少数子系统列表。",
+      "cadence": "when-needed",
+      "access": "境内直连",
+      "feed": "https://lore.kernel.org/lkml/new.atom",
+      "verified": true,
+      "verified_how": "new.atom 200，含 2026 年邮件。"
+    },
+    {
+      "id": "v2ex",
+      "name": "V2EX",
+      "url": "https://www.v2ex.com/",
+      "search_hint": "",
+      "directions": [
+        "se"
+      ],
+      "circle": "中文圈",
+      "kind": "论坛",
+      "signals": [
+        "industry",
+        "experience"
+      ],
+      "good_for": "国内程序员社区，讨论工具、职业、大厂与实习的真实情况，补上英文社区看不到的国内工程环境。",
+      "caveat": "以互联网从业者闲聊为主，学术讨论少；职场抱怨帖多，对读研和科研的价值判断偏功利。",
+      "cadence": "weekly",
+      "access": "境内直连",
+      "feed": "https://www.v2ex.com/api/topics/hot.json",
+      "verified": true,
+      "verified_how": "首页 200 含 2026；官方 API hot.json 返回 JSON，最新话题时间戳为 2026-10-02。"
+    },
+    {
+      "id": "juejin",
+      "name": "稀土掘金",
+      "url": "https://juejin.cn/",
+      "search_hint": "",
+      "directions": [
+        "se"
+      ],
+      "circle": "中文圈",
+      "kind": "博客",
+      "signals": [
+        "tutorial",
+        "industry"
+      ],
+      "good_for": "国内大厂工程师的中文技术文章，后端、前端和 AI 应用实践多，适合快速补工程技能。",
+      "caveat": "面试八股和标题党多，原创与搬运混杂，几乎不涉及研究问题。",
+      "cadence": "when-needed",
+      "access": "境内直连",
+      "feed": "",
+      "verified": true,
+      "verified_how": "首页 200（标题「稀土掘金」，含 2026 字样）；文章排行接口可匿名访问但未公开文档，未列入 feed。"
+    },
+    {
+      "id": "infoq-cn",
+      "name": "InfoQ 中文站",
+      "url": "https://www.infoq.cn/",
+      "search_hint": "",
+      "directions": [
+        "se"
+      ],
+      "circle": "中文圈",
+      "kind": "博客",
+      "signals": [
+        "industry"
+      ],
+      "good_for": "国内外架构实践和技术大会（QCon、ArchSummit）演讲整理，了解工业界系统怎么设计和演进。",
+      "caveat": "大量企业供稿和会议宣传，偏成功案例，失败经验和量化对比少。",
+      "cadence": "weekly",
+      "access": "境内直连",
+      "feed": "",
+      "verified": true,
+      "verified_how": "首页 200，含 2026 年内容。"
+    },
+    {
+      "id": "bilibili-jyy",
+      "name": "B站 · 蒋炎岩（南京大学操作系统）",
+      "url": "https://space.bilibili.com/202224425",
+      "search_hint": "",
+      "directions": [
+        "se"
+      ],
+      "circle": "中文圈",
+      "kind": "视频",
+      "signals": [
+        "tutorial"
+      ],
+      "good_for": "国内口碑最好的操作系统课全程录像，配 jyywiki.cn 讲义，2026 版结合 AI 工具重新设计。",
+      "caveat": "难度高、节奏快，不做课后实验很难真正掌握；对国内科研评价体系的个人批评观点鲜明。",
+      "cadence": "when-needed",
+      "access": "境内直连",
+      "feed": "",
+      "verified": true,
+      "verified_how": "B站 card API 确认账号名「绿导师原谅你了」（约 15.9 万粉丝）；搜索结果显示「[2026 南京大学操作系统原理]」系列视频。"
+    },
+    {
+      "id": "zhihu-se",
+      "name": "知乎 · 系统 / 软件工程",
+      "url": "https://www.zhihu.com/",
+      "search_hint": "搜「<会议> 2026 有哪些值得关注的文章」（OSDI、SOSP、ICSE）「系统方向 读博」「<开源项目> 源码 解读」",
+      "directions": [
+        "se"
+      ],
+      "circle": "中文圈",
+      "kind": "问答",
+      "signals": [
+        "review",
+        "experience"
+      ],
+      "good_for": "国内系统和软工研究者对顶会论文的点评和读博经验，有「OSDI 2026 有哪些值得关注的文章」这类汇总问题。",
+      "caveat": "面试和职业焦虑内容远多于研究讨论，部分高赞答主是课程或培训推广者。",
+      "cadence": "weekly",
+      "access": "需登录才能看全",
+      "feed": "",
+      "verified": true,
+      "verified_how": "搜索结果显示知乎问题「2026年操作系统设计与实现研讨会（OSDI）有哪些值得关注的文章？」；话题页需登录。"
+    },
+    {
+      "id": "eeban",
+      "name": "保研论坛（eeban.com）",
+      "url": "https://www.eeban.com/",
+      "search_hint": "",
+      "directions": [
+        "career"
+      ],
+      "circle": "中文圈",
+      "kind": "论坛",
+      "signals": [
+        "opportunity",
+        "experience"
+      ],
+      "good_for": "各院校夏令营、预推免通知和入营名单按学科汇总，保研季信息最集中的中文网站。",
+      "caveat": "经验帖幸存者偏差明显，「内部消息」无法核实；付费辅导广告多。",
+      "cadence": "weekly",
+      "access": "境内直连",
+      "feed": "",
+      "verified": true,
+      "verified_how": "首页 200，含大量 2026 年帖子；搜索结果有「北大国发研究院…夏令营入营名单」帖。"
+    },
+    {
+      "id": "cs-baoyan-ddl",
+      "name": "CS-BAOYAN-DDL（计算机保研截止日汇总）",
+      "url": "https://github.com/CS-BAOYAN/CS-BAOYAN-DDL",
+      "search_hint": "",
+      "directions": [
+        "career"
+      ],
+      "circle": "中文圈",
+      "kind": "数据/代码",
+      "signals": [
+        "opportunity"
+      ],
+      "good_for": "计算机和 AI 相关院系夏令营、预推免截止日期的社区维护列表，按时间排序，防止错过 DDL。",
+      "caveat": "只覆盖计算机相关院系，依赖志愿者提交，偶有遗漏或时间错误，以官方通知为准。",
+      "cadence": "weekly",
+      "access": "境内直连",
+      "feed": "https://api.github.com/repos/CS-BAOYAN/CS-BAOYAN-DDL/commits?per_page=10",
+      "verified": true,
+      "verified_how": "仓库页 200；commits API 最新提交 2026-08-24。"
+    },
+    {
+      "id": "awesome-summer-camp",
+      "name": "awesome-summer-camp-2026（全学科夏令营通知合集）",
+      "url": "https://github.com/shenyanpai/awesome-summer-camp-2026",
+      "search_hint": "",
+      "directions": [
+        "career"
+      ],
+      "circle": "中文圈",
+      "kind": "数据/代码",
+      "signals": [
+        "opportunity"
+      ],
+      "good_for": "各学科保研夏令营通知和截止时间合集，覆盖经济、数学、心理等非计算机院系（如北大经院、国发院、光华）。",
+      "caveat": "按年份新建仓库，明年要找新仓库；个人维护，完整性没有保证。",
+      "cadence": "when-needed",
+      "access": "境内直连",
+      "feed": "https://api.github.com/repos/shenyanpai/awesome-summer-camp-2026/commits?per_page=10",
+      "verified": true,
+      "verified_how": "commits API 最新提交 2026-09-23，约 260 star；搜索结果显示收录北大经院、国发院、光华 2026 夏令营通知。"
+    },
+    {
+      "id": "chsi-tm",
+      "name": "研招网 · 推免服务系统",
+      "url": "https://yz.chsi.com.cn/tm/",
+      "search_hint": "",
+      "directions": [
+        "career"
+      ],
+      "circle": "中文圈",
+      "kind": "官方",
+      "signals": [
+        "opportunity"
+      ],
+      "good_for": "全国推免的官方系统和政策通知，确认资格、填报志愿和接收待录取的唯一正式渠道。",
+      "caveat": "只有流程和政策，没有院系偏好、导师信息等真正影响决策的内容；系统开放集中在 9 月下旬。",
+      "cadence": "when-needed",
+      "access": "境内直连",
+      "feed": "",
+      "verified": true,
+      "verified_how": "页面 200，含 2026 年通知。"
+    },
+    {
+      "id": "pku-dean",
+      "name": "北京大学教务部通知（本科生科研训练等）",
+      "url": "https://dean.pku.edu.cn/web/notice.php",
+      "search_hint": "",
+      "directions": [
+        "career"
+      ],
+      "circle": "中文圈",
+      "kind": "官方",
+      "signals": [
+        "opportunity"
+      ],
+      "good_for": "本科生科研训练立项、双学位和推免办法等官方通知，大一大二申请本科生科研项目进组的正式入口。",
+      "caveat": "只写流程和时间，项目质量和导师投入差异大；很多院系另有自己的科研项目通知。",
+      "cadence": "when-needed",
+      "access": "境内直连",
+      "feed": "",
+      "verified": true,
+      "verified_how": "通知页 200，最新 2026-09-24；搜索结果显示「关于2026年本科生科研训练立项的通知」。"
+    },
+    {
+      "id": "pku-treehole",
+      "name": "北大树洞",
+      "url": "https://treehole.pku.edu.cn/",
+      "search_hint": "北大账号登录后搜「夏令营」「保研」「进组」「<老师名>」",
+      "directions": [
+        "career"
+      ],
+      "circle": "中文圈",
+      "kind": "论坛",
+      "signals": [
+        "experience",
+        "opportunity"
+      ],
+      "good_for": "北大同学匿名讨论具体导师、实验室氛围、保研和出国结果，信息颗粒度最细。",
+      "caveat": "匿名无法核实，负面经历和极端个案被放大；内容不应外传。",
+      "cadence": "when-needed",
+      "access": "需登录才能看全",
+      "feed": "",
+      "verified": false,
+      "verified_how": "未核实内容：URL 可达（200，跳转 /ch/web/），内容需北大统一认证，按要求未登录。"
+    },
+    {
+      "id": "zhihu-career",
+      "name": "知乎 · 保研 / 进组 / 申请",
+      "url": "https://www.zhihu.com/",
+      "search_hint": "搜「2026届 保研 经验贴 <学科>」「大一 如何进实验室」「套磁 邮件 怎么写」",
+      "directions": [
+        "career"
+      ],
+      "circle": "中文圈",
+      "kind": "问答",
+      "signals": [
+        "experience"
+      ],
+      "good_for": "各学科保研、夏令营、套磁和进组经验长文最多的地方，能看到院系面试的具体问题。",
+      "caveat": "经验帖几乎都是成功者写的，「四非逆袭」类标题吸流量，付费咨询引流常见。",
+      "cadence": "weekly",
+      "access": "需登录才能看全",
+      "feed": "",
+      "verified": true,
+      "verified_how": "搜索结果显示「2025年（2026届）计算机保研经验贴（北大计算机…）」等多篇 2025–2026 专栏；话题页需登录。"
+    },
+    {
+      "id": "xhs-career",
+      "name": "小红书 · 保研 / 进组 / 暑研",
+      "url": "https://www.xiaohongshu.com/",
+      "search_hint": "搜「保研 夏令营 <学科> 2026」「大一 进组」「暑研 套磁」「<学校> RA」",
+      "directions": [
+        "career"
+      ],
+      "circle": "中文圈",
+      "kind": "社交媒体",
+      "signals": [
+        "experience",
+        "opportunity"
+      ],
+      "good_for": "同龄人的即时经验和情绪反馈，入营/优营结果和面试题回忆常最早出现在这里。",
+      "caveat": "笔记碎片化、无法核实，伪装成学长学姐的中介号极多，算法推送会放大焦虑。",
+      "cadence": "when-needed",
+      "access": "需登录才能看全",
+      "feed": "",
+      "verified": false,
+      "verified_how": "无法核实：网页版搜索需登录；site 搜索只返回小红书聚合问答页（如「推荐信怎么写」），未看到具体 2025–2026 笔记。"
+    },
+    {
+      "id": "1point3acres",
+      "name": "一亩三分地（研究生申请 / 招生广告版）",
+      "url": "https://www.1point3acres.com/bbs/forum-27-1.html",
+      "search_hint": "",
+      "directions": [
+        "career"
+      ],
+      "circle": "中文圈",
+      "kind": "论坛",
+      "signals": [
+        "opportunity",
+        "experience"
+      ],
+      "good_for": "中文留学申请最大的论坛，有录取汇报数据和教授本人发的 PhD/RA 招生广告版（forum-173）。",
+      "caveat": "很多帖子要登录和积分才能看全；数据自报且偏 CS 和工程，经济、心理等学科覆盖少。",
+      "cadence": "weekly",
+      "access": "需登录才能看全",
+      "feed": "",
+      "verified": true,
+      "verified_how": "curl 返回 403（反爬）；搜索结果显示招生广告版有「2026 SIU CS PhD招生广告（2026秋季-2027）」等帖子。"
+    },
+    {
+      "id": "gradcafe",
+      "name": "The GradCafe 录取结果",
+      "url": "https://www.thegradcafe.com/survey/",
+      "search_hint": "",
+      "directions": [
+        "career"
+      ],
+      "circle": "英文圈",
+      "kind": "论坛",
+      "signals": [
+        "experience",
+        "opportunity"
+      ],
+      "good_for": "北美研究生项目录取、拒信的自报时间线，能看到各项目往年何时发面试和 offer。",
+      "caveat": "录取者更爱报，选择偏差明显；国际学生背景常缺失，不能当录取概率。",
+      "cadence": "when-needed",
+      "access": "境内直连",
+      "feed": "",
+      "verified": true,
+      "verified_how": "页面 200，最新条目 2026-10-02。"
+    },
+    {
+      "id": "reddit-gradadmissions",
+      "name": "Reddit r/gradadmissions",
+      "url": "https://www.reddit.com/r/gradadmissions/",
+      "search_hint": "",
+      "directions": [
+        "career"
+      ],
+      "circle": "英文圈",
+      "kind": "论坛",
+      "signals": [
+        "experience"
+      ],
+      "good_for": "英文圈申请者讨论 SOP、推荐信、面试和结果，申请季每天有大量一手汇报。",
+      "caveat": "焦虑情绪浓，美国本土申请者视角为主，背景评估帖样本有偏。",
+      "cadence": "weekly",
+      "access": "需要 VPN",
+      "feed": "https://www.reddit.com/r/gradadmissions/.rss",
+      "verified": true,
+      "verified_how": ".rss 首次 429 限流，间隔后 200，<updated> 2026-10-02。"
+    },
+    {
+      "id": "ccfddl",
+      "name": "CCF Deadlines（会议截稿日）",
+      "url": "https://ccfddl.com/",
+      "search_hint": "",
+      "directions": [
+        "career"
+      ],
+      "circle": "中文圈",
+      "kind": "数据/代码",
+      "signals": [
+        "opportunity"
+      ],
+      "good_for": "计算机各领域会议截稿倒计时并标注 CCF 分级，社区实时更新，规划第一篇论文投稿必备。",
+      "caveat": "CCF 分级是国内评价体系，与国际社区对会议的认可度不完全一致；时间以会议官网为准。",
+      "cadence": "when-needed",
+      "access": "境内直连",
+      "feed": "https://api.github.com/repos/ccfddl/ccf-deadlines/commits?per_page=10",
+      "verified": true,
+      "verified_how": "站点为 JS 单页（200）；GitHub 仓库 ccfddl/ccf-deadlines 最新提交 2026-10-02。"
+    },
+    {
+      "id": "mitacs-globalink",
+      "name": "Mitacs Globalink 暑期研究实习",
+      "url": "https://www.mitacs.ca/our-programs/globalink-research-internship-students/",
+      "search_hint": "",
+      "directions": [
+        "career"
+      ],
+      "circle": "英文圈",
+      "kind": "官方",
+      "signals": [
+        "opportunity"
+      ],
+      "good_for": "加拿大高校面向国际本科生的 12 周带资助暑研，中国学生经国家留学基金委合作申请，是少数公开有组织的海外暑研通道。",
+      "caveat": "按项目排序匹配，不保证拿到首选导师；每年秋季集中申请，错过就要等一年。",
+      "cadence": "when-needed",
+      "access": "境内直连",
+      "feed": "",
+      "verified": true,
+      "verified_how": "页面 200，显示 2027 夏季申请已截止，列有「China - 2027 Cohort Eligibility, Partner: China Scholarship Council」。"
+    },
+    {
+      "id": "csrankings",
+      "name": "CSRankings",
+      "url": "https://csrankings.org/",
+      "search_hint": "",
+      "directions": [
+        "career"
+      ],
+      "circle": "英文圈",
+      "kind": "数据/代码",
+      "signals": [
+        "opportunity"
+      ],
+      "good_for": "按顶会论文数统计各校各方向教师，能快速列出某子方向全球最活跃的组，用于挑暑研和读博目标。",
+      "caveat": "只计少数顶会发表数，偏向高产组，不反映指导质量；不覆盖 CS 以外学科。",
+      "cadence": "when-needed",
+      "access": "境内直连",
+      "feed": "",
+      "verified": true,
+      "verified_how": "页面 200；GitHub 仓库 emeryberger/CSrankings 最新提交 2026-09-28。"
+    }
+  ]
+}

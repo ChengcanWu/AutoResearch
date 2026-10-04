@@ -21,6 +21,13 @@ server/         FastAPI 单体（Python 3.11+）
   planner.py    规则版 Planner（阶段判定 + 方向卡 + NBA）
   workbench.py  任务模板库 + 提交 + 启发式反馈 + UM 真实写回
   pku_adapter.py course.search（uv 子进程调 skills/pku-course，真实检索）
+  arxiv.py      arXiv 官方接口 + arxiv.org/html 正文（串行 ≥3 秒、缓存到 server/data/papers/）
+  quotes.py     引文逐字定位（只抹排版噪声，不模糊匹配），报告所在节
+  reading.py    研读层：每日分拣、阅读卡评阅、综合矩阵、交给学生 Agent 的 AGENTS.md 简报
+  positioning.py 定位层：边清单、竞争地图、定位陈述检查、冲 / 稳 / 保、每日微调（全规则）
+  kit_momentum.py 离线脚本：给工具包的开放问题算 arXiv 势头，写回 kit
+knowledge/kits/      领域工具包（论文、数据集、逐字核对的开放问题、矩阵维度），见 docs/READING_POSITIONING.md
+knowledge/channels.json 各方向的信息源地图（中文圈 / 英文圈、信号、偏差、可达性）
 skills/pku-course/   北大搜课工具（原 pku-course-skill-main 原样迁入，不改契约）
 knowledge/           disciplines.json 等
 ```
@@ -112,6 +119,27 @@ GET  /api/projects/{pid}       ?uid → Project（含 reviews）
 GET  /api/projects/{pid}/readme ?uid → README 模板（markdown）
 GET  /api/projects/{pid}/sample.zip ?uid → 示例成果压缩包
 POST /api/projects/{pid}/submit ?uid  body=.zip → Review                  # 同时写回 behavior 事实
+GET  /api/kits                  → {kits}                                   # 研读层（docs/READING_POSITIONING.md）
+GET  /api/kits/{kit_id}         → Kit
+GET  /api/daily                ?uid&kit → {items, done_today, goal, recent_keeps, error, tweak}   # arXiv 新论文分拣 + 一次定位微调
+POST /api/daily/triage          {uid, kit, arxiv_id, verdict: keep|skip, why, title} → 同上
+GET  /api/papers/{arxiv_id}     → {id, title, source: html|abstract, text, url, sections[{name,label,at}]}
+GET  /api/cards                ?uid&kit → {cards（每篇最新版）, fields}
+GET  /api/cards/{arxiv_id}/history ?uid&kit → {versions}
+POST /api/cards                 {uid, kit, arxiv_id, fields, dims, decision_log} → Card（含 review；首次过线写回 behavior 事实）
+GET  /api/matrix               ?uid&kit → {dimensions, rows, flags{empty_cells, empty_columns, conflicts}, ready, need_more}
+GET  /api/brief                ?kit&arxiv_id → AGENTS.md（交给学生自己的 Agent）
+GET  /api/edges                ?uid → {kinds, edges[已证明来自账本 + 自述], suggest, proven, declared}   # 定位层
+POST /api/edges                 {uid, kind, text, evidence_url?} → 同上
+DELETE /api/edges/{edge_id}    ?uid → 同上（账本里的不能删）
+GET  /api/channels             ?uid&direction → {channels[read, band], summary, blind_spot, other_circle_unread}   # 信息源地图
+POST /api/channels/toggle       {uid, id, on, direction} → 同上（「我常看」= 一条信息源边）
+GET  /api/map                  ?uid&kit → {rows[需求/供给/势头/你的相关边], formula, base, rarity, pool_enough}
+GET  /api/statement            ?uid&kit → {statement|null}
+POST /api/statement             {uid, kit, x_ref, x_text, y[edge ids], dry_run?} → 检查结果（dry_run）或新一版陈述
+GET  /api/bets                 ?uid → {active, closed, checks, max}
+POST /api/bets                  {uid, name, kind, tier: reach|match|safety, kit?, niche?} → 同上（同时最多 3 个）
+POST /api/bets/{bet_id}/close   {uid, outcome: got|missed|dropped, reason} → 同上
 GET  /api/health
 ```
 
