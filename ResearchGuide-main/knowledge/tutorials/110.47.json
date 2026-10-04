@@ -1,0 +1,409 @@
+{
+  "id": "110.47",
+  "name": "偏微分方程",
+  "format": "tutorial-tree-v2",
+  "status": "ok",
+  "goal": "能对一阶方程用特征线写出初值问题的解，能对一维波动和热传导用 d’Alembert 公式、基本解或分离变量交可核对的习题，并能对 Laplace/Poisson 写出极值原理或矩形上的分离变量解。停在三类经典方程的本科入门，不进入 Sobolev、弱解或研究级存在性。",
+  "sources": [
+    {
+      "title": "Syllabus | Introduction to Partial Differential Equations | Mathematics | MIT OpenCourseWare",
+      "url": "https://ocw.mit.edu/courses/18-152-introduction-to-partial-differential-equations-fall-2011/pages/syllabus/",
+      "kind": "ocw",
+      "used_for": "本科入门目标：先会把现象写成 PDE，再分析解；三类对象是 elliptic、diffusive、hyperbolic；作业几乎每周一份，按正确性和论证质量评分"
+    },
+    {
+      "title": "Calendar | Introduction to Partial Differential Equations | Mathematics | MIT OpenCourseWare",
+      "url": "https://ocw.mit.edu/courses/18-152-introduction-to-partial-differential-equations-fall-2011/pages/calendar/",
+      "kind": "ocw",
+      "used_for": "18.152 课历顺序：热方程 → Laplace/Poisson → 波动方程 → 二阶分类 → 傅里叶变换；输运与 Burgers 在 L24。与 Berkeley/Toronto 的一阶-先路径写入 conflicts"
+    },
+    {
+      "title": "Assignments | Introduction to Partial Differential Equations | Mathematics | MIT OpenCourseWare",
+      "url": "https://ocw.mit.edu/courses/18-152-introduction-to-partial-differential-equations-fall-2011/pages/assignments/",
+      "kind": "ocw",
+      "used_for": "作业形态：Problem Set 1 对应 Lec #3（热方程 uniqueness），PS2 对应 Lec #5（基本解与 Cauchy 问题），其后 PS3–6 覆盖 Poisson 与波动"
+    },
+    {
+      "title": "Lecture Notes | Introduction to Partial Differential Equations | Mathematics | MIT OpenCourseWare",
+      "url": "https://ocw.mit.edu/courses/18-152-introduction-to-partial-differential-equations-fall-2011/pages/lecture-notes/",
+      "kind": "ocw",
+      "used_for": "讲义目录：L2–L5 热方程，L6–L9 Laplace/Poisson，L10–L14 波动，L15 二阶分类"
+    },
+    {
+      "title": "Intro to PDEs, Lecture Note 2 — The Diffusion (aka Heat) Equation (MIT 18.152)",
+      "url": "https://ocw.mit.edu/courses/18-152-introduction-to-partial-differential-equations-fall-2011/8547cf4208529f2a7f3ce6d881f1f3c2_MIT18_152F11_lec_02.pdf",
+      "kind": "lecture_notes",
+      "used_for": "热方程定义 ∂t u = DΔu、Fourier 定律导出、well-posedness 与 Dirichlet 边值"
+    },
+    {
+      "title": "Intro to PDEs, Lecture Note 3 — The Heat Equation: Uniqueness (MIT 18.152)",
+      "url": "https://ocw.mit.edu/courses/18-152-introduction-to-partial-differential-equations-fall-2011/72acb1d573d168e731bdaae43de5f568_MIT18_152F11_lec_03.pdf",
+      "kind": "lecture_notes",
+      "used_for": "有限区间热方程 uniqueness；能量方法"
+    },
+    {
+      "title": "Intro to PDEs, Lecture Note 4 — The Weak Maximum Principle (MIT 18.152)",
+      "url": "https://ocw.mit.edu/courses/18-152-introduction-to-partial-differential-equations-fall-2011/da093b7265d1fc4fe9c6edf3e7825661_MIT18_152F11_lec_04.pdf",
+      "kind": "lecture_notes",
+      "used_for": "弱极值原理与比较原理；最大值在抛物边界上取到"
+    },
+    {
+      "title": "Intro to PDEs, Lecture Note 5 — The Fundamental Solution for the Heat Equation (MIT 18.152)",
+      "url": "https://ocw.mit.edu/courses/18-152-introduction-to-partial-differential-equations-fall-2011/9acdeff6449529106ac254f7ada967da_MIT18_152F11_lec_05.pdf",
+      "kind": "lecture_notes",
+      "used_for": "热核 ΓD、平移与抛物伸缩不变性、全空间 Cauchy 问题"
+    },
+    {
+      "title": "Math 126: Introduction to Partial Differential Equations (UC Berkeley, Fall 2022)",
+      "url": "https://math.berkeley.edu/~zworski/126_22F.html",
+      "kind": "syllabus",
+      "used_for": "主干顺序：一阶方程与特征线 → 波动（1D/3D 与能量）→ 分离变量 → 热方程 → 傅里叶级数 → Laplace 极值原理；作业为双周 homework。变分与 Laplacian 特征值排在最后，本树不收入"
+    },
+    {
+      "title": "Partial Differential Equations — Table of Contents (Victor Ivrii, University of Toronto)",
+      "url": "https://www.math.utoronto.ca/ivrii/PDE-textbook/contents.html",
+      "kind": "open_textbook",
+      "used_for": "公开教材目录：引言与分类 → 一阶与一维波动 → 一维热方程 → 分离变量与傅里叶 → Laplace；第 10 章以后的变分、分布与弱解不进入本树"
+    },
+    {
+      "title": "1.1. PDE Motivations and Context (Ivrii)",
+      "url": "https://www.math.utoronto.ca/ivrii/PDE-textbook/Chapter1/S1.1.html",
+      "kind": "open_textbook",
+      "used_for": "什么是 PDE、来源与例子；说明本科课几乎不证一般存在唯一性定理"
+    },
+    {
+      "title": "1.3. Classification of equations (Ivrii)",
+      "url": "https://www.math.utoronto.ca/ivrii/PDE-textbook/Chapter1/S1.3.html",
+      "kind": "open_textbook",
+      "used_for": "线性/半线性/拟线性；椭圆、双曲、抛物；本书范围是线性、适定、常系数"
+    },
+    {
+      "title": "1.P. Problems to Chapter 1 (Ivrii)",
+      "url": "https://www.math.utoronto.ca/ivrii/PDE-textbook/Chapter1/S1.P.html",
+      "kind": "open_textbook",
+      "used_for": "节点 classify 的交卷：Problem 1–2 判别线性齐/非齐、半线性、拟线性与阶数"
+    },
+    {
+      "title": "2.1. First order PDEs (Ivrii)",
+      "url": "https://www.math.utoronto.ca/ivrii/PDE-textbook/Chapter2/S2.1.html",
+      "kind": "open_textbook",
+      "used_for": "常系数与变系数特征线、行波、拟线性（Burgers）何时破缺、一阶 IBVP 何时需要边界条件"
+    },
+    {
+      "title": "2.3. Homogeneous 1D Wave equation (Ivrii)",
+      "url": "https://www.math.utoronto.ca/ivrii/PDE-textbook/Chapter2/S2.3.html",
+      "kind": "open_textbook",
+      "used_for": "一维齐次波动、左右行波叠加、d’Alembert 公式"
+    },
+    {
+      "title": "3.1. 1D Heat equation (Ivrii)",
+      "url": "https://www.math.utoronto.ca/ivrii/PDE-textbook/Chapter3/S3.1.html",
+      "kind": "open_textbook",
+      "used_for": "自相似解得到热核、Gauss–Weierstrass 卷积、无限传播速度、负时间不适定"
+    },
+    {
+      "title": "4.1. Separation of variables (the first blood) (Ivrii)",
+      "url": "https://www.math.utoronto.ca/ivrii/PDE-textbook/Chapter4/S4.1.html",
+      "kind": "open_textbook",
+      "used_for": "有限弦波动 IBVP 的分离变量、Sturm–Liouville 特征值、正弦傅里叶级数"
+    },
+    {
+      "title": "7.1. General properties of Laplace equation (Ivrii)",
+      "url": "https://www.math.utoronto.ca/ivrii/PDE-textbook/Chapter7/S7.1.html",
+      "kind": "open_textbook",
+      "used_for": "Laplace/Poisson 的 Dirichlet/Neumann 适定性；纯 Neumann 需相容条件"
+    },
+    {
+      "title": "Introduction to Partial Differential Equations (Herman) — LibreTexts",
+      "url": "https://math.libretexts.org/Bookshelves/Differential_Equations/Introduction_to_Partial_Differential_Equations_(Herman)",
+      "kind": "open_textbook",
+      "used_for": "UNCW 公开教材总目录：一阶 → 二阶（含分类、分离变量、d’Alembert、2D Laplace）→ 傅里叶；数值方法在第 10 章，不作为平行选修轨"
+    },
+    {
+      "title": "1: First Order Partial Differential Equations (Herman)",
+      "url": "https://math.libretexts.org/Bookshelves/Differential_Equations/Introduction_to_Partial_Differential_Equations_(Herman)/01%3A_First_Order_Partial_Differential_Equations",
+      "kind": "open_textbook",
+      "used_for": "一阶章顺序：常系数线性 → 拟线性特征线 → 应用 → 1.8 习题"
+    },
+    {
+      "title": "1.8: Problems (Herman Ch. 1)",
+      "url": "https://math.libretexts.org/Bookshelves/Differential_Equations/Introduction_to_Partial_Differential_Equations_(Herman)/01%3A_First_Order_Partial_Differential_Equations/1.08%3A_Problems",
+      "kind": "open_textbook",
+      "used_for": "特征线初值题（Exercise 3–4）；Burgers 破缺只作选做，不要求冲击波理论"
+    },
+    {
+      "title": "2: Second Order Partial Differential Equations (Herman)",
+      "url": "https://math.libretexts.org/Bookshelves/Differential_Equations/Introduction_to_Partial_Differential_Equations_(Herman)/02%3A_Second_Order_Partial_Differential_Equations",
+      "kind": "open_textbook",
+      "used_for": "二阶章：1D 波动/热的导出、边值问题、分离变量、2D Laplace、二阶分类、d’Alembert"
+    },
+    {
+      "title": "2.6: Classification of Second Order PDEs (Herman)",
+      "url": "https://math.libretexts.org/Bookshelves/Differential_Equations/Introduction_to_Partial_Differential_Equations_(Herman)/02%3A_Second_Order_Partial_Differential_Equations/2.06%3A_Classification_of_Second_Order_PDEs",
+      "kind": "open_textbook",
+      "used_for": "判别式 b²−ac：双曲/抛物/椭圆；波动、热、Laplace 为三类原型"
+    },
+    {
+      "title": "2.7: d’Alembert’s Solution of the Wave Equation (Herman)",
+      "url": "https://math.libretexts.org/Bookshelves/Differential_Equations/Introduction_to_Partial_Differential_Equations_(Herman)/02%3A_Second_Order_Partial_Differential_Equations/2.07%3A_dAlemberts_Solution_of_the_Wave_Equation",
+      "kind": "open_textbook",
+      "used_for": "d’Alembert 公式、依赖域/影响域、半无限与有限弦的奇偶延拓"
+    },
+    {
+      "title": "2.8: Problems (Herman Ch. 2)",
+      "url": "https://math.libretexts.org/Bookshelves/Differential_Equations/Introduction_to_Partial_Differential_Equations_(Herman)/02%3A_Second_Order_Partial_Differential_Equations/2.08%3A_Problems",
+      "kind": "open_textbook",
+      "used_for": "分类题 Exercise 8；波动有限弦 Exercise 12；Laplace 乘积解 Exercise 6"
+    },
+    {
+      "title": "3: Trigonometric Fourier Series (Herman)",
+      "url": "https://math.libretexts.org/Bookshelves/Differential_Equations/Introduction_to_Partial_Differential_Equations_(Herman)/03%3A_Trigonometric_Fourier_Series",
+      "kind": "open_textbook",
+      "used_for": "傅里叶三角级数、正弦/余弦级数、再用级数解热方程与有限弦"
+    },
+    {
+      "title": "3.5: Solution of the Heat Equation (Herman)",
+      "url": "https://math.libretexts.org/Bookshelves/Differential_Equations/Introduction_to_Partial_Differential_Equations_(Herman)/03%3A_Trigonometric_Fourier_Series/3.05%3A_Solution_of_the_Heat_Equation",
+      "kind": "open_textbook",
+      "used_for": "两端温度为零的有限杆：分离变量 + 正弦系数积分写出 u(x,t)"
+    },
+    {
+      "title": "3.8: Problems (Herman Ch. 3)",
+      "url": "https://math.libretexts.org/Bookshelves/Differential_Equations/Introduction_to_Partial_Differential_Equations_(Herman)/03%3A_Trigonometric_Fourier_Series/3.08%3A_Problems",
+      "kind": "open_textbook",
+      "used_for": "傅里叶展开题；Exercise 15 热方程 IBVP；Exercise 16 波动 IBVP；Exercise 19 单位正方形 Laplace"
+    },
+    {
+      "title": "Syllabus — A First Course in Partial Differential Equations (R. L. Herman, UNCW)",
+      "url": "https://people.uncw.edu/hermanr/pde1/syllabus.htm",
+      "kind": "syllabus",
+      "used_for": "本科结果：特征线、二阶分类、傅里叶展开、分离变量解 IBVP；作业占 50%；数值是同课后段 group project，不是分叉选修轨"
+    },
+    {
+      "title": "偏微分方程 — 北京大学数学学院",
+      "url": "https://math.pku.edu.cn/bks/sykc/148707.htm",
+      "kind": "syllabus",
+      "used_for": "三类基本方程（调和、热、波）的来源、解的表示与基本性质；成绩为平时作业+考试。该大纲以调和方程开头并以 Sobolev 收束，顺序与终点写入 conflicts；本树只用前三类、不用 Sobolev"
+    }
+  ],
+  "trunk": ["classify", "wave", "heat", "fourier", "laplace"],
+  "forks": [],
+  "join": null,
+  "nodes": {
+    "classify": {
+      "name": "分类与特征线",
+      "why": "Berkeley Math 126 把 first order equations 与 method of characteristics 放在波动之前。Toronto 第 1 章先做初边值与椭圆/双曲/抛物分类，第 2.1 节再用特征线解一阶方程。Herman 第 1 章同样从一阶与特征线起手；UNCW 学习结果要求能 classify 热/波/Laplace 并能用特征线解一阶方程。",
+      "learn": [
+        "PDE 与初边值问题",
+        "线性 / 半线性 / 拟线性",
+        "二阶：椭圆、双曲、抛物（b²−ac）",
+        "一阶特征线与行波"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "交两份手写解答并标节号：(1) Toronto Chapter 1 Problems 的 Problem 1 与 Problem 2，把每条方程标成线性齐/非齐、半线性、拟线性或非线性，并写出阶数；(2) Herman 1.8 Exercise 4 中任选 3 道一阶初值题，用特征线写出 u。不要做冲击波构造。",
+        "from": "Ivrii 1.P Problem 1–2；Herman 1.8 Exercise 4；分类定义见 Ivrii 1.3 与 Herman 2.6"
+      },
+      "resources": [
+        {
+          "url": "https://www.math.utoronto.ca/ivrii/PDE-textbook/Chapter1/S1.3.html",
+          "title": "1.3. Classification of equations (Ivrii)",
+          "use": "先读线性/拟线性与椭圆–双曲–抛物"
+        },
+        {
+          "url": "https://www.math.utoronto.ca/ivrii/PDE-textbook/Chapter1/S1.P.html",
+          "title": "1.P. Problems to Chapter 1",
+          "use": "做 Problem 1–2 的分类表"
+        },
+        {
+          "url": "https://www.math.utoronto.ca/ivrii/PDE-textbook/Chapter2/S2.1.html",
+          "title": "2.1. First order PDEs (Ivrii)",
+          "use": "对照常系数特征线与 IBVP 何时要边界条件"
+        },
+        {
+          "url": "https://math.libretexts.org/Bookshelves/Differential_Equations/Introduction_to_Partial_Differential_Equations_(Herman)/02%3A_Second_Order_Partial_Differential_Equations/2.06%3A_Classification_of_Second_Order_PDEs",
+          "title": "2.6: Classification of Second Order PDEs (Herman)",
+          "use": "用 b²−ac 把热、波、Laplace 对上三类"
+        },
+        {
+          "url": "https://math.libretexts.org/Bookshelves/Differential_Equations/Introduction_to_Partial_Differential_Equations_(Herman)/01%3A_First_Order_Partial_Differential_Equations/1.08%3A_Problems",
+          "title": "1.8: Problems (Herman)",
+          "use": "做 Exercise 4 的特征线初值题"
+        }
+      ]
+    },
+    "wave": {
+      "name": "一维波动方程",
+      "why": "Berkeley 在特征线之后立刻是 wave equation（一维与三维、能量方法）。Toronto 第 2 章在一阶之后进入齐次一维波动与 d’Alembert。Herman 2.7 用特征坐标推出左右行波，并处理半无限/有限弦的奇偶延拓。北大也把一维波的特征线法列为波方程核心。",
+      "learn": [
+        "一维波动 u_tt = c² u_xx",
+        "d’Alembert 公式",
+        "左右行波与有限传播速度",
+        "依赖域；固定端的奇延拓"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "对照 Herman 2.7 写出无限弦的 d’Alembert 公式推导（从特征坐标到公式），再做 2.8 Exercise 12：对给定分段初值、零初速、两端固定的有限弦，用适当周期奇延拓画出或写出若干时刻的 u(x,t)，并标出依赖区间。",
+        "from": "Herman 2.7 + 2.8 Exercise 12；公式对照 Ivrii 2.3"
+      },
+      "resources": [
+        {
+          "url": "https://www.math.utoronto.ca/ivrii/PDE-textbook/Chapter2/S2.3.html",
+          "title": "2.3. Homogeneous 1D Wave equation (Ivrii)",
+          "use": "先读左右行波与 d’Alembert 公式"
+        },
+        {
+          "url": "https://math.libretexts.org/Bookshelves/Differential_Equations/Introduction_to_Partial_Differential_Equations_(Herman)/02%3A_Second_Order_Partial_Differential_Equations/2.07%3A_dAlemberts_Solution_of_the_Wave_Equation",
+          "title": "2.7: d’Alembert’s Solution of the Wave Equation",
+          "use": "读公式推导、依赖域与奇偶延拓例子"
+        },
+        {
+          "url": "https://math.libretexts.org/Bookshelves/Differential_Equations/Introduction_to_Partial_Differential_Equations_(Herman)/02%3A_Second_Order_Partial_Differential_Equations/2.08%3A_Problems",
+          "title": "2.8: Problems (Herman)",
+          "use": "做 Exercise 12 的有限弦初边值"
+        },
+        {
+          "url": "https://math.berkeley.edu/~zworski/126_22F.html",
+          "title": "Math 126 syllabus (Berkeley)",
+          "use": "核对本步对应课纲第 3–4 条：wave + energy，三维公式可先不写"
+        }
+      ]
+    },
+    "heat": {
+      "name": "热传导与极值原理",
+      "why": "Toronto 第 3 章在波动之后单独讲一维热核与无限传播。MIT 18.152 用 L2–L5 把热方程、uniqueness、弱极值原理和基本解写成连续作业（PS1/PS2）。Berkeley 第 6 条是 heat equation。北大热方程一章也列极值原理。本步只做全直线/有限杆的古典性质，不做负时间适定性的反例构造。",
+      "learn": [
+        "热/扩散方程 u_t = k u_xx",
+        "热核与全直线 Cauchy 问题",
+        "弱极值原理与 uniqueness",
+        "无限传播；负时间不适定（只记结论）"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "对照 Ivrii 3.1 或 MIT Lecture Note 5，写出一维热核并说明它如何卷积出 Cauchy 问题的解；再任选其一交卷：把 Herman 3.5 Example 2 的系数积分自己算一遍并写出 u(x,t) 的级数；或从 18.152 Assignments 打开 Problem Set 1 或 2，完整做完并注明对应 L3/L5。",
+        "from": "Ivrii 3.1；Herman 3.5；MIT 18.152 Lecture Notes L2–L5 与 Assignments PS1/PS2",
+        "alternatives": [
+          {
+            "kind": "problem_set",
+            "prompt": "打开 18.152 Assignments 页的 Problem Set 1（Lec #3）或 Problem Set 2（Lec #5），按讲义 L3 uniqueness 或 L5 基本解交一份完整解答。",
+            "from": "MIT 18.152 Assignments + Calendar L3/L5"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://www.math.utoronto.ca/ivrii/PDE-textbook/Chapter3/S3.1.html",
+          "title": "3.1. 1D Heat equation (Ivrii)",
+          "use": "读自相似解、热核与卷积公式"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/18-152-introduction-to-partial-differential-equations-fall-2011/da093b7265d1fc4fe9c6edf3e7825661_MIT18_152F11_lec_04.pdf",
+          "title": "Lecture Note 4 — Weak Maximum Principle",
+          "use": "读弱极值原理与比较原理"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/18-152-introduction-to-partial-differential-equations-fall-2011/9acdeff6449529106ac254f7ada967da_MIT18_152F11_lec_05.pdf",
+          "title": "Lecture Note 5 — Fundamental Solution",
+          "use": "对照热核与全空间 Cauchy 问题"
+        },
+        {
+          "url": "https://math.libretexts.org/Bookshelves/Differential_Equations/Introduction_to_Partial_Differential_Equations_(Herman)/03%3A_Trigonometric_Fourier_Series/3.05%3A_Solution_of_the_Heat_Equation",
+          "title": "3.5: Solution of the Heat Equation (Herman)",
+          "use": "有限杆两端为零时，把正弦系数算出来"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/18-152-introduction-to-partial-differential-equations-fall-2011/pages/assignments/",
+          "title": "18.152 Assignments",
+          "use": "若走 PS 轨，从这里打开 Problem Set 1 或 2"
+        }
+      ]
+    },
+    "fourier": {
+      "name": "分离变量与傅里叶级数",
+      "why": "Toronto 第 4 章把有限区间波动 IBVP 写成 X(x)T(t)，得到正弦特征函数再叠成傅里叶级数。Herman 第 2.4 节先用分离变量解热方程，第 3 章专讲三角级数并在 3.5–3.6 回到热与有限弦。Berkeley 把 separation of variables 与 Fourier series 列为第 5、7 条。UNCW 期中覆盖 Ch 1–3，学习结果要求能展开傅里叶级数并用分离变量解线性二阶 PDE。",
+      "learn": [
+        "分离变量与 Sturm–Liouville 特征值",
+        "正弦 / 余弦傅里叶系数",
+        "有限区间热或波动 IBVP 的级数解",
+        "驻波与节点（Toronto 4.1）"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "先对照 Ivrii 4.1 或 Herman 3.2，对一个分段或多项式初值算出正弦（或余弦）系数。再做 Herman 3.8 Exercise 15 或 16 中的一题：写出满足给定边值的通解，代入初值定出全部系数，并写出 u(x,t) 的前三项。",
+        "from": "Ivrii 4.1；Herman 3.8 Exercise 15 或 16"
+      },
+      "resources": [
+        {
+          "url": "https://www.math.utoronto.ca/ivrii/PDE-textbook/Chapter4/S4.1.html",
+          "title": "4.1. Separation of variables (Ivrii)",
+          "use": "跟完有限弦：特征值、驻波、正弦级数"
+        },
+        {
+          "url": "https://math.libretexts.org/Bookshelves/Differential_Equations/Introduction_to_Partial_Differential_Equations_(Herman)/03%3A_Trigonometric_Fourier_Series",
+          "title": "3: Trigonometric Fourier Series (Herman)",
+          "use": "读正弦/余弦级数与区间变换"
+        },
+        {
+          "url": "https://math.libretexts.org/Bookshelves/Differential_Equations/Introduction_to_Partial_Differential_Equations_(Herman)/03%3A_Trigonometric_Fourier_Series/3.08%3A_Problems",
+          "title": "3.8: Problems (Herman)",
+          "use": "做 Exercise 15（热）或 16（波）"
+        },
+        {
+          "url": "https://people.uncw.edu/hermanr/pde1/syllabus.htm",
+          "title": "UNCW PDE syllabus",
+          "use": "核对本步对应学习结果：Fourier series + separation of variables"
+        }
+      ]
+    },
+    "laplace": {
+      "name": "Laplace 方程",
+      "why": "三类经典方程里椭圆型最后收束：Berkeley 第 8 条是 Laplace 与 maximum principle；Toronto 第 7 章讲 Laplace 的 Dirichlet/Neumann 适定性；MIT L6–L9 专讲 Laplace/Poisson、基本解与 Green。Herman 2.5/2.8 与 3.8 Exercise 19 用分离变量解矩形上的 Dirichlet 问题。北大把调和方程、平均值与极值原理列为三类基本方程之一。停在这些古典性质，不进入 Sobolev。",
+      "learn": [
+        "Laplace / Poisson 与调和函数",
+        "Dirichlet 与 Neumann 边值",
+        "极值原理；纯 Neumann 的相容条件",
+        "矩形上的分离变量"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "做 Herman 3.8 Exercise 19：在单位正方形上解 u_xx+u_yy=0，边值 u(0,y)=0、u(1,y)=y(1−y)、u(x,0)=u(x,1)=0，写出分离变量级数并算出系数。另用 Ivrii 7.1 的语言写三句话：本题是哪类边值、解为何唯一、若四边都改成 Neumann 还要什么相容条件。",
+        "from": "Herman 3.8 Exercise 19；Ivrii 7.1；也可对照 Herman 2.8 Exercise 6 的乘积解"
+      },
+      "resources": [
+        {
+          "url": "https://www.math.utoronto.ca/ivrii/PDE-textbook/Chapter7/S7.1.html",
+          "title": "7.1. General properties of Laplace equation (Ivrii)",
+          "use": "读 uniqueness 与 Neumann 相容条件"
+        },
+        {
+          "url": "https://math.libretexts.org/Bookshelves/Differential_Equations/Introduction_to_Partial_Differential_Equations_(Herman)/03%3A_Trigonometric_Fourier_Series/3.08%3A_Problems",
+          "title": "3.8: Problems (Herman)",
+          "use": "做 Exercise 19 的正方形 Dirichlet 问题"
+        },
+        {
+          "url": "https://math.libretexts.org/Bookshelves/Differential_Equations/Introduction_to_Partial_Differential_Equations_(Herman)/02%3A_Second_Order_Partial_Differential_Equations/2.08%3A_Problems",
+          "title": "2.8: Problems (Herman)",
+          "use": "需要乘积解模板时看 Exercise 6"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/18-152-introduction-to-partial-differential-equations-fall-2011/pages/lecture-notes/",
+          "title": "18.152 Lecture Notes",
+          "use": "选读 L6–L9 的 Laplace/Poisson 标题，Green 公式不必整节做完"
+        },
+        {
+          "url": "https://math.pku.edu.cn/bks/sykc/148707.htm",
+          "title": "偏微分方程 — 北京大学数学学院",
+          "use": "核对本步对应「调和方程：极值原理、解的表示」；不要做第 4 章 Sobolev"
+        }
+      ]
+    }
+  },
+  "conflicts": [
+    "MIT 18.152 日历是热 → Laplace/Poisson → 波 → 二阶分类，输运/Burgers 放到 L24。Berkeley、Toronto、Herman 把一阶特征线放最前，且波动紧接其后。取更靠前、三份来源一致的「分类+特征线 → 波 → 热」。",
+    "北大大纲以调和方程开篇，热、波随后，并以 Sobolev 空间收束。本树按 Berkeley/Toronto 把 Laplace 放在分离变量之后，且终点停在三类古典方程，不收 Sobolev。",
+    "Herman 第 2 章在傅里叶专章之前已写分离变量和 2D Laplace；Toronto 把 Laplace 放到第 7 章。Laplace 节点放在分离变量之后，与 Berkeley 第 8 条、Toronto 第 7 章一致。",
+    "UNCW 大纲有 10% 的数值 group project，但是同一门课的后段作业，不是并行选修轨，故不分叉。"
+  ],
+  "missing": "",
+  "checked_at": "2026-10-04"
+}

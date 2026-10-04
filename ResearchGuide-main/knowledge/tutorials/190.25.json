@@ -1,0 +1,349 @@
+{
+  "id": "190.25",
+  "name": "实验心理",
+  "format": "tutorial-tree-v2",
+  "status": "ok",
+  "goal": "能分清描述、相关与实验，指出自变量/因变量、随机分配和测量是否撑得起因果结论，并对照公开作业交一份短评或设计草案。不承诺独立完成可发表实验。",
+  "sources": [
+    {
+      "title": "Science & Research | Introduction to Psychology | MIT OpenCourseWare (9.00SC, Fall 2011)",
+      "url": "https://ocw.mit.edu/courses/9-00sc-introduction-to-psychology-fall-2011/pages/science-research/",
+      "kind": "ocw",
+      "used_for": "主干第一步：Lecture 2 把 folk psychology、三种设计（descriptive / correlational / experimental）、random assignment 与效度放在同一讲；Short Essay 作业形态"
+    },
+    {
+      "title": "Syllabus | Introduction to Psychology | MIT OpenCourseWare (9.00SC, Fall 2011)",
+      "url": "https://ocw.mit.edu/courses/9-00sc-introduction-to-psychology-fall-2011/pages/syllabus/syllabus/",
+      "kind": "ocw",
+      "used_for": "课程终点：critically evaluate psychological evidence 的 validity；Writing Assignment 是对争议主题做最佳解释的短文"
+    },
+    {
+      "title": "Research Designs | Noba (Christie Napa Scollon)",
+      "url": "https://nobaproject.com/modules/research-designs",
+      "kind": "open_textbook",
+      "used_for": "实验 vs 相关、independent / dependent variable、random assignment、operational definitions、confounds / placebo / double-blind、quasi-experimental；伦理写成后段权衡；Discussion Questions"
+    },
+    {
+      "title": "Research Methods in Psychology - 4th American Edition - Open Textbook Library",
+      "url": "https://open.umn.edu/opentextbooks/textbooks/research-methods-in-psychology-3rd-american-edition",
+      "kind": "open_textbook",
+      "used_for": "确认公开教材身份与出版社（Kwantlen Polytechnic University / Washington State University）；正文目录在 KPU Pressbooks"
+    },
+    {
+      "title": "Table of Contents – Research Methods in Psychology",
+      "url": "https://kpu.pressbooks.pub/psychmethods4e/table-of-contents/",
+      "kind": "open_textbook",
+      "used_for": "主干顺序：Science of Psychology → Scientific Method → Research Ethics → Psychological Measurement → Experimental Research；其后非实验/调查/准实验/因素设计不进本方向主干"
+    },
+    {
+      "title": "The Science of Psychology – Research Methods in Psychology",
+      "url": "https://kpu.pressbooks.pub/psychmethods4e/part/the-science-of-psychology/",
+      "kind": "open_textbook",
+      "used_for": "节点 science：科学心理学 vs common sense / folk psychology"
+    },
+    {
+      "title": "Key Takeaways and Exercises – The Science of Psychology",
+      "url": "https://kpu.pressbooks.pub/psychmethods4e/chapter/key-takeaways-and-exercises/",
+      "kind": "open_textbook",
+      "used_for": "节点 science 的教材交卷：知识来源分类；对直觉信念列正反理由"
+    },
+    {
+      "title": "Overview of the Scientific Method – Research Methods in Psychology",
+      "url": "https://kpu.pressbooks.pub/psychmethods4e/part/overview-of-the-scientific-method/",
+      "kind": "open_textbook",
+      "used_for": "节点 science / writeup：问题→假设→设计→分析→报告的循环；实验 vs 非实验与 IV/DV"
+    },
+    {
+      "title": "Key Takeaways and Exercise – Overview of the Scientific Method",
+      "url": "https://kpu.pressbooks.pub/psychmethods4e/chapter/key-takeaways-and-exercise/",
+      "kind": "open_textbook",
+      "used_for": "节点 writeup 的教材交卷：用循环模型写一篇实证报告；标出实验/非实验与 IV/DV"
+    },
+    {
+      "title": "Research Ethics – Research Methods in Psychology",
+      "url": "https://kpu.pressbooks.pub/psychmethods4e/part/research-ethics/",
+      "kind": "open_textbook",
+      "used_for": "节点 ethics 的位置：伦理在测量与实验之前"
+    },
+    {
+      "title": "Key Takeaways and Exercises – Research Ethics",
+      "url": "https://kpu.pressbooks.pub/psychmethods4e/chapter/key-takeaways-and-exercises-2/",
+      "kind": "open_textbook",
+      "used_for": "节点 ethics 交卷：知情同意书（Standard 8.02）；IRB 式讨论"
+    },
+    {
+      "title": "Psychological Measurement – Research Methods in Psychology",
+      "url": "https://kpu.pressbooks.pub/psychmethods4e/part/psychological-measurement/",
+      "kind": "open_textbook",
+      "used_for": "节点 measure：构念必须被测量；Rosenberg Self-Esteem Scale 示例"
+    },
+    {
+      "title": "Reliability and Validity of Measurement – Research Methods in Psychology",
+      "url": "https://kpu.pressbooks.pub/psychmethods4e/chapter/reliability-and-validity-of-measurement/",
+      "kind": "open_textbook",
+      "used_for": "节点 measure 术语：test-retest / internal consistency / interrater；face / content / criterion validity"
+    },
+    {
+      "title": "Key Takeaways and Exercises – Psychological Measurement",
+      "url": "https://kpu.pressbooks.pub/psychmethods4e/chapter/key-takeaways-and-exercises-3/",
+      "kind": "open_textbook",
+      "used_for": "节点 measure 交卷：一个构念写三条操作定义；说明信效度证据"
+    },
+    {
+      "title": "Experiment Basics – Research Methods in Psychology",
+      "url": "https://kpu.pressbooks.pub/psychmethods4e/chapter/experiment-basics/",
+      "kind": "open_textbook",
+      "used_for": "节点 experiment：操纵 IV、控制 extraneous variables；confound；treatment / control / placebo"
+    },
+    {
+      "title": "Key Takeaways and Exercises – Experimental Research",
+      "url": "https://kpu.pressbooks.pub/psychmethods4e/chapter/key-takeaways-and-exercises-4/",
+      "kind": "open_textbook",
+      "used_for": "节点 experiment 交卷：哪些变量能操纵；between- vs within-subjects；标准化程序；internal / external validity"
+    },
+    {
+      "title": "实验心理学I Experimental Psychology I｜北京师范大学心理学院",
+      "url": "https://psych.bnu.edu.cn/rcpy/bkspy/kcjsa/c1a5bd02ea4a40d5b21baaa8691d32b6.htm",
+      "kind": "syllabus",
+      "used_for": "中文课顺序：绪论（方法比较与研究过程）→伦理→变量控制→实验设计→研究报告；实验心理学II 才进入心理物理法/信号检测/反应时，不进本方向主干"
+    }
+  ],
+  "trunk": ["science", "ethics", "measure", "experiment", "writeup"],
+  "forks": [],
+  "join": null,
+  "nodes": {
+    "science": {
+      "name": "科学方法与三种设计",
+      "why": "MIT 9.00 Lecture 2 把 folk psychology 和 descriptive / correlational / experimental 放在同一讲；教材第 I–II 部分先分清科学与常识，再进入研究循环；Noba 从「看见不等于系统研究」起讲三种设计。分不清设计，后面谈因果会串台。",
+      "learn": [
+        "systematic empiricism、empirical questions、public knowledge",
+        "folk psychology / confirmation bias",
+        "descriptive / correlational / experimental research",
+        "correlation does not mean causation",
+        "independent vs dependent variable 的初步区分"
+      ],
+      "task": {
+        "kind": "writeup",
+        "prompt": "对照 MIT 9.00 Lecture 2 Short Essay：各用一段话说明描述、相关、实验三种设计的定义、一条优点、一条缺点，并各给一个研究例子（可用 Noba 的 Dunn 花钱实验与相关调查，须标明设计类型）。",
+        "from": "MIT 9.00SC Lecture 2 Short Essay",
+        "alternatives": [
+          {
+            "kind": "exercise",
+            "prompt": "对照教材 The Science of Psychology 章末练习：列出三件「你以为自己知道」的事，各标知识来源（authority / intuition / rationalism / empiricism / scientific method）；再对一条直觉信念写出「可能对的三点、可能错的三点」。",
+            "from": "Research Methods in Psychology — Key Takeaways and Exercises（The Science of Psychology）"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://ocw.mit.edu/courses/9-00sc-introduction-to-psychology-fall-2011/pages/science-research/",
+          "title": "Science & Research — MIT 9.00SC Lecture 2",
+          "use": "看这一讲并做 Short Essay：三种研究设计"
+        },
+        {
+          "url": "https://kpu.pressbooks.pub/psychmethods4e/part/the-science-of-psychology/",
+          "title": "The Science of Psychology",
+          "use": "读这一部分，对照 folk psychology / common sense"
+        },
+        {
+          "url": "https://kpu.pressbooks.pub/psychmethods4e/chapter/key-takeaways-and-exercises/",
+          "title": "Key Takeaways and Exercises — The Science of Psychology",
+          "use": "做知识来源分类与直觉信念正反理由练习"
+        },
+        {
+          "url": "https://kpu.pressbooks.pub/psychmethods4e/part/overview-of-the-scientific-method/",
+          "title": "Overview of the Scientific Method",
+          "use": "读研究循环：问题→假设→设计→分析→报告"
+        },
+        {
+          "url": "https://nobaproject.com/modules/research-designs",
+          "title": "Research Designs — Noba",
+          "use": "对照实验 vs 相关，以及 Dunn 花钱例子"
+        }
+      ]
+    },
+    "ethics": {
+      "name": "伦理先于动手",
+      "why": "教材把 Research Ethics 放在 Psychological Measurement 和 Experimental Research 之前；北师大《实验心理学I》第三章伦理也在变量与设计之前。Noba 把伦理写成后段权衡——步骤取更靠前的位置。",
+      "learn": [
+        "informed consent、deception、debriefing、IRB",
+        "APA Ethics Code Standard 8",
+        "风险与收益权衡",
+        "被试反应倾向与实验者效应（北师大第三章）"
+      ],
+      "task": {
+        "kind": "writeup",
+        "prompt": "对照教材 Research Ethics 章末练习：找一篇专业期刊实证研究，按 Standard 8.02 列出知情同意须告知的要素（目的、程序、风险、自愿、保密）；或对一条 IRB 式讨论题写出你会提的顾虑并标出对应伦理标准。",
+        "from": "Research Methods in Psychology — Key Takeaways and Exercises（Research Ethics）",
+        "alternatives": [
+          {
+            "kind": "writeup",
+            "prompt": "对照北师大《实验心理学I》第三章作业：写一页——知情同意书为什么必要；再举一个公开讨论过的违背实验伦理的案例，标出它触犯了哪一条原则。",
+            "from": "北师大《实验心理学I》第三章作业（知情同意书 / 违背伦理案例）"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://kpu.pressbooks.pub/psychmethods4e/part/research-ethics/",
+          "title": "Research Ethics",
+          "use": "先读这一部分，看伦理为何排在测量与实验之前"
+        },
+        {
+          "url": "https://kpu.pressbooks.pub/psychmethods4e/chapter/key-takeaways-and-exercises-2/",
+          "title": "Key Takeaways and Exercises — Research Ethics",
+          "use": "按 Standard 8.02 写知情同意要素或 IRB 讨论"
+        },
+        {
+          "url": "https://psych.bnu.edu.cn/rcpy/bkspy/kcjsa/c1a5bd02ea4a40d5b21baaa8691d32b6.htm",
+          "title": "实验心理学I｜北京师范大学心理学院",
+          "use": "对照第三章伦理位置与作业（知情同意 / 案例）"
+        },
+        {
+          "url": "https://kpu.pressbooks.pub/psychmethods4e/table-of-contents/",
+          "title": "Table of Contents — Research Methods in Psychology",
+          "use": "核对照目录：伦理在测量、实验之前"
+        }
+      ]
+    },
+    "measure": {
+      "name": "操作定义与测量",
+      "why": "教材第 IV 部分在实验之前专讲 Psychological Measurement；Noba 在 Dunn 实验里插入 operational definitions。没有这一步，因变量只是口号，后面的对照也无从检查。",
+      "learn": [
+        "conceptual vs operational definition",
+        "self-report / behavioral / physiological measures",
+        "reliability：test-retest、internal consistency、interrater",
+        "measurement validity：face、content、criterion"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "对照教材 Psychological Measurement 章末练习：给一个构念（如 social anxiety 或 self-confidence）写出概念定义，并各写一条 self-report、behavioral、physiological 操作定义；再写明你会收集哪一种信度证据和哪一种效度证据来检查这套测量。",
+        "from": "Research Methods in Psychology — Key Takeaways and Exercises（Psychological Measurement）"
+      },
+      "resources": [
+        {
+          "url": "https://kpu.pressbooks.pub/psychmethods4e/part/psychological-measurement/",
+          "title": "Psychological Measurement",
+          "use": "读这一部分，看 Rosenberg Self-Esteem Scale 如何把构念写成分数"
+        },
+        {
+          "url": "https://kpu.pressbooks.pub/psychmethods4e/chapter/reliability-and-validity-of-measurement/",
+          "title": "Reliability and Validity of Measurement",
+          "use": "读信效度类型，准备写你会收集哪一种证据"
+        },
+        {
+          "url": "https://kpu.pressbooks.pub/psychmethods4e/chapter/key-takeaways-and-exercises-3/",
+          "title": "Key Takeaways and Exercises — Psychological Measurement",
+          "use": "做三条操作定义与信效度练习"
+        },
+        {
+          "url": "https://nobaproject.com/modules/research-designs",
+          "title": "Research Designs — Noba",
+          "use": "对照 Dunn 实验里 happiness 的 operational definition"
+        }
+      ]
+    },
+    "experiment": {
+      "name": "操纵、对照与随机分配",
+      "why": "MIT 选择题把 random assignment 写成正确实验保证因果的条件；Noba 称 random assignment 是实验最重要的事；教材 Experiment Basics 把操纵 IV 和控制 extraneous variables 写成实验的两个根本特征。北师大第四、五章对应变量控制与实验设计。",
+      "learn": [
+        "manipulation vs control；conditions",
+        "extraneous vs confounding variables",
+        "random assignment",
+        "treatment / no-treatment / placebo / wait-list control",
+        "between-subjects vs within-subjects",
+        "internal vs external validity"
+      ],
+      "task": {
+        "kind": "writeup",
+        "prompt": "对照教材 Experimental Research 章末练习交一页设计：选定一个可操纵的题目，写清 IV（含 conditions）、DV、如何随机分配、一条你控制的额外变量、一条若没控制会变成 confound 的东西；并判断 between- vs within-subjects 及理由。题目不能操纵时，按练习要求写明为何做不了实验。",
+        "from": "Research Methods in Psychology — Key Takeaways and Exercises（Experimental Research）",
+        "alternatives": [
+          {
+            "kind": "writeup",
+            "prompt": "对照北师大《实验心理学I》第五章作业：独立选题，采用一种真实验设计类型写一份实验草案（IV/DV、控制与设计类型），研究你感兴趣的问题。",
+            "from": "北师大《实验心理学I》第五章作业（独立选题设计实验）"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://kpu.pressbooks.pub/psychmethods4e/chapter/experiment-basics/",
+          "title": "Experiment Basics",
+          "use": "读操纵 IV、控制额外变量、confound、placebo"
+        },
+        {
+          "url": "https://kpu.pressbooks.pub/psychmethods4e/chapter/key-takeaways-and-exercises-4/",
+          "title": "Key Takeaways and Exercises — Experimental Research",
+          "use": "做可操纵变量、between/within、标准化程序练习"
+        },
+        {
+          "url": "https://nobaproject.com/modules/research-designs",
+          "title": "Research Designs — Noba",
+          "use": "对照 random assignment、confound、double-blind"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/9-00sc-introduction-to-psychology-fall-2011/pages/science-research/",
+          "title": "Science & Research — MIT 9.00SC Lecture 2",
+          "use": "核对照选择题：random assignment 保证因果"
+        },
+        {
+          "url": "https://psych.bnu.edu.cn/rcpy/bkspy/kcjsa/c1a5bd02ea4a40d5b21baaa8691d32b6.htm",
+          "title": "实验心理学I｜北京师范大学心理学院",
+          "use": "对照第四、五章：变量控制与真实验设计作业"
+        }
+      ]
+    },
+    "writeup": {
+      "name": "评价证据并交卷",
+      "why": "MIT 学期写作是对争议主题做「最佳解释」短文；教材科学循环的最后一步是 reporting results；Noba 终点是当 savvy consumer。本科停在能读、能核对设计、能写小结，不承诺新结果。",
+      "learn": [
+        "用三种设计、测量信效度、internal / external validity 去读一篇公开研究或媒体因果声称",
+        "实验或非实验、IV/DV 的标注",
+        "争议要点与你更信哪一边的依据"
+      ],
+      "task": {
+        "kind": "writeup",
+        "prompt": "对照 MIT 9.00 Writing Assignment：选一则心理学科争议或媒体因果声称，写不超过 2 页——争议要点、你更信哪一边、依据是设计/测量/随机分配中的哪一条。可用课表给出的争议题（如 recovered memories），也可自选一则能公开核对的报道。",
+        "from": "MIT 9.00SC Syllabus — Writing Assignments",
+        "alternatives": [
+          {
+            "kind": "exercise",
+            "prompt": "对照教材 Scientific Method 章末练习：找一篇期刊实证报告，标出实验或非实验、IV/DV（若有），并按循环模型各用 1–2 句写问题、方法、结论。",
+            "from": "Research Methods in Psychology — Key Takeaways and Exercise（Overview of the Scientific Method）"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://ocw.mit.edu/courses/9-00sc-introduction-to-psychology-fall-2011/pages/syllabus/syllabus/",
+          "title": "Syllabus — MIT 9.00SC",
+          "use": "按 Writing guidelines 写不超过 2 页的最佳解释短文"
+        },
+        {
+          "url": "https://kpu.pressbooks.pub/psychmethods4e/chapter/key-takeaways-and-exercise/",
+          "title": "Key Takeaways and Exercise — Overview of the Scientific Method",
+          "use": "用循环模型标注一篇实证报告"
+        },
+        {
+          "url": "https://nobaproject.com/modules/research-designs",
+          "title": "Research Designs — Noba",
+          "use": "对照终点：当 savvy consumer，不把相关当因果"
+        },
+        {
+          "url": "https://kpu.pressbooks.pub/psychmethods4e/chapter/key-takeaways-and-exercises-4/",
+          "title": "Key Takeaways and Exercises — Experimental Research",
+          "use": "用 internal / external validity 检查你评价的那篇研究"
+        }
+      ]
+    }
+  },
+  "conflicts": [
+    "北师大《实验心理学I》在变量与设计之后，实验心理学II 继续心理物理法、信号检测、反应时和感知/注意/记忆专题实验；Open Textbook 的 Research Methods 则走向非实验、调查、准实验、因素设计和统计。两边都要求的只有：科学 vs 常识、方法分类、伦理、测量/变量、实验控制。心理物理法与领域实验只有北师大后半段要求，不进主干。",
+    "Noba 把伦理写成设计权衡（靠后）；教材第 III 章和北师大把伦理放在测量/实验之前。步骤取更靠前的伦理位置。",
+    "MIT 9.00 是导论课一讲加两篇评价短文；教材和北师大是整学期研究方法/实验心理学课。终点取「能评价 / 能写设计草案」，不取完成可发表实验。",
+    "同一关的两种交卷方式（MIT 短评 或 教材习题；教材设计练习 或 北师大独立选题）写在 task.alternatives，不长成树枝。"
+  ],
+  "missing": "",
+  "checked_at": "2026-10-04"
+}

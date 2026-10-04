@@ -1,0 +1,361 @@
+{
+  "id": "190.30",
+  "name": "发展心理",
+  "format": "tutorial-tree-v2",
+  "status": "ok",
+  "goal": "能指出一项发展研究比较的是哪两个（或哪几个）年龄、用的是横断 / 纵向 / 序列哪一种设计，并能对照皮亚杰阶段作业或陌生情境程序交习题或一页短评。不承诺独立完成可发表的发展研究，也不写临床评估或治疗手册。",
+  "sources": [
+    {
+      "title": "发展心理学 Developmental Psychology｜北京师范大学心理学院",
+      "url": "https://psych.bnu.edu.cn/rcpy/bkspy/kcjsa/0dc784da65ad4f51975d57609a1581f8.htm",
+      "kind": "syllabus",
+      "used_for": "主干顺序：绪论（横断 / 纵向 / 聚合交叉）→ 天性教养等理论问题 → 弗洛伊德 / 埃里克森 / 皮亚杰 / 维果斯基 → 出生前 → 婴儿 → 幼儿 → 小学 → 青少年；作业形态是文献阅读、行为观察与总结、随堂测验"
+    },
+    {
+      "title": "1.5 Lifespan Development as a Science: Research Methods - Lifespan Development | OpenStax",
+      "url": "https://openstax.org/books/lifespan-development/pages/1-5-lifespan-development-as-a-science-research-methods",
+      "kind": "open_textbook",
+      "used_for": "发展心理特有的时间设计：longitudinal / cross-sectional / cross-sequential；陌生情境作 structured observation；知情同意与儿童被试"
+    },
+    {
+      "title": "Ch. 1 Review Questions - Lifespan Development | OpenStax",
+      "url": "https://openstax.org/books/lifespan-development/pages/1-review-questions",
+      "kind": "open_textbook",
+      "used_for": "第 1 章可交卷选择题：连续 vs 阶段、Piaget/Erikson、生态系统、纵向研究损耗、知情同意"
+    },
+    {
+      "title": "1.2 Themes of Development - Lifespan Development | OpenStax",
+      "url": "https://openstax.org/books/lifespan-development/pages/1-2-themes-of-development",
+      "kind": "open_textbook",
+      "used_for": "阶段理论、nature and nurture、critical / sensitive period；排在各年龄章之前"
+    },
+    {
+      "title": "1.3 Major Theories and Theorists - Lifespan Development | OpenStax",
+      "url": "https://openstax.org/books/lifespan-development/pages/1-3-major-theories-and-theorists",
+      "kind": "open_textbook",
+      "used_for": "Erikson 八阶段表、Piaget 四阶段表（感知运动 / 前运算 / 具体运算 / 形式运算）、Vygotsky 最近发展区与脚手架"
+    },
+    {
+      "title": "Lifespan Development (OpenStax) - Social Sci LibreTexts",
+      "url": "https://socialsci.libretexts.org/Bookshelves/Human_Development/Lifespan_Development_(OpenStax)",
+      "kind": "open_textbook",
+      "used_for": "全书编年顺序：理论 → 遗传产前 → 婴儿身体/认知与社会情绪 → 幼儿 → 小学 → 青少年 → 成年；与北师大在青少年之后分道"
+    },
+    {
+      "title": "3: Physical and Cognitive Development in Infants and Toddlers (Birth to Age 3) - Social Sci LibreTexts",
+      "url": "https://socialsci.libretexts.org/Bookshelves/Human_Development/Lifespan_Development_(OpenStax)/03%3A_Physical_and_Cognitive_Development_in_Infants_and_Toddlers_(Birth_to_Age_3)",
+      "kind": "open_textbook",
+      "used_for": "婴儿章目录：动作与感知 → 认知与记忆（含 A-not-B、同化）→ 语言"
+    },
+    {
+      "title": "3.8: Review Questions - Social Sci LibreTexts",
+      "url": "https://socialsci.libretexts.org/Bookshelves/Human_Development/Lifespan_Development_(OpenStax)/03%3A_Physical_and_Cognitive_Development_in_Infants_and_Toddlers_(Birth_to_Age_3)/3.08%3A_Review_Questions",
+      "kind": "open_textbook",
+      "used_for": "婴儿认知过关题：同化、延迟模仿、A-not-B error、Vygotsky 社会互动解释"
+    },
+    {
+      "title": "4: Social and Emotional Development in Infants and Toddlers (Birth to Age 3) - Social Sci LibreTexts",
+      "url": "https://socialsci.libretexts.org/Bookshelves/Human_Development/Lifespan_Development_(OpenStax)/04%3A_Social_and_Emotional_Development_in_Infants_and_Toddlers_(Birth_to_Age_3)",
+      "kind": "open_textbook",
+      "used_for": "婴儿社会情绪：气质（Thomas & Chess）、Bowlby / Ainsworth 依恋类型与陌生情境"
+    },
+    {
+      "title": "Research Methods in Developmental Psychology | Noba",
+      "url": "https://nobaproject.com/modules/research-methods-in-developmental-psychology",
+      "kind": "open_textbook",
+      "used_for": "习惯化 / 去习惯化、违反预期、纵向 / 横断 / 序列设计的优劣；Discussion Question 5 要求自选设计"
+    },
+    {
+      "title": "Cognitive Development in Childhood | Noba",
+      "url": "https://nobaproject.com/modules/cognitive-development-in-childhood",
+      "kind": "open_textbook",
+      "used_for": "天性教养与连续/阶段两个核心问题；Piaget 四阶段与客体永久性、守恒、钟摆作业；3 岁 vs 6 岁的外表–真实区分"
+    },
+    {
+      "title": "Attachment Through the Life Course | Noba",
+      "url": "https://nobaproject.com/modules/attachment-through-the-life-course",
+      "kind": "open_textbook",
+      "used_for": "Bowlby 依恋行为系统；Ainsworth 陌生情境；secure / anxious-resistant / avoidant"
+    },
+    {
+      "title": "Adolescent Development | Noba",
+      "url": "https://nobaproject.com/modules/adolescent-development",
+      "kind": "open_textbook",
+      "used_for": "青春期起止、抽象思维、奖赏寻求先于认知控制、Erikson / Marcia 同一性状态；讨论题 2 要求写脑发育与同伴影响"
+    },
+    {
+      "title": "Syllabus | Infant and Early Childhood Cognition | MIT OpenCourseWare (9.85, Fall 2012)",
+      "url": "https://ocw.mit.edu/courses/9-85-infant-and-early-childhood-cognition-fall-2012/pages/syllabus/",
+      "kind": "ocw",
+      "used_for": "作业形态：methods assignment、critical response、研究设计提案；课历 Piaget → 争论 → Methods → 感知 / 客体 / 数 → 心理理论。与导论课「方法在前」的顺序写入 conflicts"
+    },
+    {
+      "title": "Child Development | Introduction to Psychology | MIT OpenCourseWare (9.00SC, Fall 2011)",
+      "url": "https://ocw.mit.edu/courses/9-00sc-introduction-to-psychology-fall-2011/pages/child-development/",
+      "kind": "ocw",
+      "used_for": "第 17 讲：感知运动、前运算、心理理论；Check Yourself：前运算选择题 + 四种依恋类型各举一例"
+    },
+    {
+      "title": "PSYC 355 Developmental Psychology Syllabus (University of Maryland, Spring 2021)",
+      "url": "https://psyc.umd.edu/sites/psyc.umd.edu/files/syllabi/PSYC%20355%20Syllabus%20Spring%202021%20FINAL.pdf",
+      "kind": "syllabus",
+      "used_for": "本科发展课从 conception to adolescence；Week 1 Themes & Methods，其后产前 / 认知理论 / 感知运动 / 依恋 / 同一性；阅读测验 + 书面作业"
+    },
+    {
+      "title": "Lifespan Development - Open Textbook Library",
+      "url": "https://open.umn.edu/opentextbooks/textbooks/1734",
+      "kind": "open_textbook",
+      "used_for": "确认 OpenStax 公开教材身份与 17 章编年目录"
+    }
+  ],
+  "trunk": ["methods", "theories", "infancy", "childhood", "adolescence"],
+  "forks": [],
+  "join": null,
+  "nodes": {
+    "methods": {
+      "name": "比较年龄的研究设计",
+      "why": "北师大绪论先要求识别横断、纵向和聚合交叉；OpenStax 1.5 把 Time as a Variable 写成发展心理特有的设计；Noba 方法模块和马里兰 PSYC 355 第 1 周都是 Themes & Methods。分不清比较的是哪两个年龄、用哪张蓝图，后面阶段作业会对不上号。",
+      "learn": [
+        "横断设计 vs 纵向设计 vs 序列 / 聚合交叉设计",
+        "年龄相关差异不等于同一个体的发展",
+        "习惯化 / 去习惯化和违反预期",
+        "儿童被试的知情同意与 assent"
+      ],
+      "task": {
+        "kind": "writeup",
+        "prompt": "对照 Noba 方法模块 Discussion Question 5：设计一项研究，检验「学前藏得好的孩子高中认知是否更超前」。交一页：比较的是哪两个年龄、用横断 / 纵向 / 序列哪一种、各写一条优势和一条局限（须用模块里的 attrition、practice effect 或 cohort effect 中至少一词）。",
+        "from": "Noba Research Methods in Developmental Psychology, Discussion Question 5；设计名称对照 OpenStax 1.5 与北师大绪论",
+        "alternatives": [
+          {
+            "kind": "exercise",
+            "prompt": "做完 OpenStax 第 1 章 Review Questions 第 15–17 题（纵向研究最常见问题、自然观察、知情同意），每题写下你选的字母，并在 15 题旁用一句话说明 attrition 为什么会让「随年龄怎么变」说不清。",
+            "from": "OpenStax Lifespan Development, Ch. 1 Review Questions 15–17"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://nobaproject.com/modules/research-methods-in-developmental-psychology",
+          "title": "Research Methods in Developmental Psychology | Noba",
+          "use": "先读 Research Design 三节和 Discussion Question 5，再写设计"
+        },
+        {
+          "url": "https://openstax.org/books/lifespan-development/pages/1-5-lifespan-development-as-a-science-research-methods",
+          "title": "OpenStax 1.5 Research Methods",
+          "use": "对照 Time as a Variable：longitudinal / cross-sectional / cross-sequential"
+        },
+        {
+          "url": "https://openstax.org/books/lifespan-development/pages/1-review-questions",
+          "title": "OpenStax Ch. 1 Review Questions",
+          "use": "备选：做第 15–17 题"
+        },
+        {
+          "url": "https://psych.bnu.edu.cn/rcpy/bkspy/kcjsa/0dc784da65ad4f51975d57609a1581f8.htm",
+          "title": "北师大《发展心理学》课程介绍",
+          "use": "核对绪论要求：能识别研究报告用的是横断、纵向还是聚合交叉"
+        }
+      ]
+    },
+    "theories": {
+      "name": "天性教养与阶段理论",
+      "why": "北师大把天性–教养、连续–阶段放在理论章之前，再用 12 学时讲弗洛伊德 / 埃里克森、皮亚杰、维果斯基。OpenStax 1.2–1.3 同样排在各年龄章之前；Noba Siegler 把「天性教养如何一起工作」和「是否质变阶段」写成认知发展的两个主问题。",
+      "learn": [
+        "nature and nurture / 天性–教养",
+        "连续发展 vs 阶段（质变）发展",
+        "皮亚杰四阶段：感知运动、前运算、具体运算、形式运算",
+        "埃里克森心理社会危机（至少 trust、identity）",
+        "维果斯基最近发展区与脚手架"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "做完 OpenStax 第 1 章 Review Questions 第 5–11 题（连续/阶段、敏感期、谁提出阶段论、斯金纳 vs 维果斯基、生态系统）。每题记下选项；第 7 题须写出 Piaget 与 Erikson 各自用阶段解释的是认知还是心理社会。",
+        "from": "OpenStax Lifespan Development, Ch. 1 Review Questions 5–11；阶段名称对照 1.3 两张表",
+        "alternatives": [
+          {
+            "kind": "writeup",
+            "prompt": "书面回答 Noba Cognitive Development in Childhood 的 Discussion Questions 1–3：为何会有多种认知发展理论、差异是否只来自经验、你把发展看成更连续还是更阶段。每题 4–8 句，须点名 Piaget 或 Vygotsky 中至少一人。",
+            "from": "Noba Cognitive Development in Childhood, Discussion Questions 1–3"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://openstax.org/books/lifespan-development/pages/1-2-themes-of-development",
+          "title": "OpenStax 1.2 Themes of Development",
+          "use": "先读 stage theories、nature and nurture、sensitive period"
+        },
+        {
+          "url": "https://openstax.org/books/lifespan-development/pages/1-3-major-theories-and-theorists",
+          "title": "OpenStax 1.3 Major Theories and Theorists",
+          "use": "对照 Table 1.1 Erikson 与 Table 1.2 Piaget，以及 Vygotsky 的 ZPD / scaffolding"
+        },
+        {
+          "url": "https://openstax.org/books/lifespan-development/pages/1-review-questions",
+          "title": "OpenStax Ch. 1 Review Questions",
+          "use": "做第 5–11 题"
+        },
+        {
+          "url": "https://nobaproject.com/modules/cognitive-development-in-childhood",
+          "title": "Cognitive Development in Childhood | Noba",
+          "use": "备选：回答文末 Discussion Questions 1–3"
+        },
+        {
+          "url": "https://psych.bnu.edu.cn/rcpy/bkspy/kcjsa/0dc784da65ad4f51975d57609a1581f8.htm",
+          "title": "北师大《发展心理学》课程介绍",
+          "use": "核对第二章：能对精神分析、皮亚杰、维果斯基做联系性评价"
+        }
+      ]
+    },
+    "infancy": {
+      "name": "婴儿：感知、客体与依恋",
+      "why": "北师大在理论之后接出生前与婴儿期：视觉偏好、习惯化、视崖、感知运动、气质与依恋。OpenStax 第 3–4 章、马里兰课历的产前 / 新生儿 / 感知运动、MIT 9.00 第 17 讲和 9.85 的 Perception / Object knowledge 都把这一段放在童年表征之前。",
+      "learn": [
+        "习惯化–去习惯化与视觉偏好",
+        "感知运动阶段与客体永久性",
+        "A-not-B error",
+        "陌生情境与安全 / 抗拒 / 回避依恋",
+        "气质类型（easy / difficult / slow-to-warm-up）"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "对照 MIT 9.00SC Child Development 的 Check Yourself：先完成关于 Piaget 阶段的选择题并写下选项；再按页面 Sample Answers 的格式，用自己的话写出四种依恋类型（secure、ambivalent/resistant、avoidant、disorganized）在分离与重聚时各会看到什么行为。不要写干预方案。",
+        "from": "MIT 9.00SC Lecture 17 Check Yourself；依恋程序对照 Noba Attachment 与 OpenStax 第 4 章目录",
+        "alternatives": [
+          {
+            "kind": "exercise",
+            "prompt": "做 LibreTexts / OpenStax 婴儿章 Review Questions 第 12–15 题（同化、延迟模仿、Vygotsky 解释、A-not-B error）。每题记下选项，并在第 15 题旁写清：比较的是婴儿在两次藏玩具之间的哪两次搜索。",
+            "from": "OpenStax / LibreTexts 3.8 Review Questions 12–15"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://ocw.mit.edu/courses/9-00sc-introduction-to-psychology-fall-2011/pages/child-development/",
+          "title": "MIT 9.00SC Child Development",
+          "use": "看 Piaget and the Sensorimotor Stage 一节，再做 Check Yourself"
+        },
+        {
+          "url": "https://nobaproject.com/modules/attachment-through-the-life-course",
+          "title": "Attachment Through the Life Course | Noba",
+          "use": "读 Individual Differences in Infant Attachment，对照陌生情境三种（加 9.00 的 disorganized）写法"
+        },
+        {
+          "url": "https://socialsci.libretexts.org/Bookshelves/Human_Development/Lifespan_Development_(OpenStax)/03%3A_Physical_and_Cognitive_Development_in_Infants_and_Toddlers_(Birth_to_Age_3)/3.08%3A_Review_Questions",
+          "title": "LibreTexts 3.8 Review Questions",
+          "use": "备选：做第 12–15 题"
+        },
+        {
+          "url": "https://socialsci.libretexts.org/Bookshelves/Human_Development/Lifespan_Development_(OpenStax)/04%3A_Social_and_Emotional_Development_in_Infants_and_Toddlers_(Birth_to_Age_3)",
+          "title": "LibreTexts OpenStax 第 4 章目录",
+          "use": "打开 4.2 气质与 4.4 依恋，核对类型名称"
+        },
+        {
+          "url": "https://psych.bnu.edu.cn/rcpy/bkspy/kcjsa/0dc784da65ad4f51975d57609a1581f8.htm",
+          "title": "北师大《发展心理学》课程介绍",
+          "use": "核对婴儿期要求：感知觉范式、感知运动、依恋类型及经典程序"
+        }
+      ]
+    },
+    "childhood": {
+      "name": "幼儿到小学：表征、守恒与心理理论",
+      "why": "北师大幼儿期要求前运算经典实验和心理理论，小学期要求具体运算、信息加工与元认知。Noba Siegler 用 3 岁 vs 6 岁的外表–真实和 7 岁前后的守恒把这两段连起来；MIT 9.00 在感知运动之后紧接前运算与 Theory of Mind。",
+      "learn": [
+        "前运算阶段：单一维度、自我中心、守恒失败",
+        "心理理论 / 外表–真实区分",
+        "具体运算阶段：守恒与具体逻辑",
+        "信息加工与元认知（北师大小学段）"
+      ],
+      "task": {
+        "kind": "writeup",
+        "prompt": "对照 Noba Cognitive Development in Childhood：选 DeVries 的「猫戴狗面具」（文中 3–6 岁）或一杯水倒进细高杯的守恒题。交一页：比较的是哪两个年龄、每个年龄按 Piaget 会怎样回答、你用阶段解释还是连续解释（须点出文中 Diamond 等待时间或墨西哥陶工经验任一条）。",
+        "from": "Noba Cognitive Development in Childhood（DeVries 1969 例与 conservation problems）；年龄分段对照北师大幼儿 / 小学两章",
+        "alternatives": [
+          {
+            "kind": "writeup",
+            "prompt": "按北师大平时考核「行为观察与总结」：观察一名幼儿或小学儿童的一项可观察行为（假装游戏、守恒相关操作或观点采择），写一页：儿童大约几岁、该行为更像前运算还是具体运算、你看到了哪一条可核对的举动。不要写咨询建议。",
+            "from": "北师大《发展心理学》平时考核：行为观察与总结 10 分；阶段名称对照 OpenStax Table 1.2"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://nobaproject.com/modules/cognitive-development-in-childhood",
+          "title": "Cognitive Development in Childhood | Noba",
+          "use": "读 Piaget 四阶段、守恒与 3 岁 vs 6 岁外表–真实那一段，再写短评"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/9-00sc-introduction-to-psychology-fall-2011/pages/child-development/",
+          "title": "MIT 9.00SC Child Development",
+          "use": "看 Piaget and the Preoperational Stage 与 Theory of Mind 两节"
+        },
+        {
+          "url": "https://openstax.org/books/lifespan-development/pages/1-3-major-theories-and-theorists",
+          "title": "OpenStax 1.3 Major Theories and Theorists",
+          "use": "用 Table 1.2 核对比前运算（2–6）与具体运算（7–11）的 Developmental Issues"
+        },
+        {
+          "url": "https://psych.bnu.edu.cn/rcpy/bkspy/kcjsa/0dc784da65ad4f51975d57609a1581f8.htm",
+          "title": "北师大《发展心理学》课程介绍",
+          "use": "核对该课第五、六章：前运算经典实验、心理理论、具体运算与元认知"
+        }
+      ]
+    },
+    "adolescence": {
+      "name": "青少年：形式运算与同一性",
+      "why": "北师大把青少年放在儿童段之后：形式运算、自我同一性与分化。OpenStax 第 9–10 章、Noba Adolescent Development、马里兰课历的 Identity development 同样接在童年社会性之后。OpenStax 与 Noba 还会继续写成年，但北师大、马里兰 PSYC 355 和 MIT 9.85 都停在儿童 / 青少年，主干在此收束。",
+      "learn": [
+        "形式运算阶段与抽象 / 系统推理",
+        "青春期作为生理起点",
+        "Erikson 的 identity versus confusion",
+        "Marcia 四种同一性状态：foreclosure / diffusion / moratorium / achievement",
+        "奖赏寻求先于前额叶认知控制（Noba 对冒险的机制）"
+      ],
+      "task": {
+        "kind": "writeup",
+        "prompt": "对照 Noba Adolescent Development Discussion Question 2：用 8–12 句说明脑发育与认知变化如何让青少年更容易受同伴影响。必须写清比较的是儿童、青少年、成人中的哪两端，并点出文中「奖赏动机先于认知控制」这一条。再为 Marcia 四种 identity status 各写一个可观察例子（说了什么或做了什么）。不要写治疗步骤或处方。",
+        "from": "Noba Adolescent Development, Discussion Question 2 + Identity formation 一节；Erikson 阶段名对照 OpenStax Table 1.1",
+        "alternatives": [
+          {
+            "kind": "writeup",
+            "prompt": "按 MIT 9.85 Critical Response 的格式（先一段复述问题与设计，其余评设计是否测到问题、解释是否站得住、你会怎样改），对一篇你已打开的青少年认知或同一性公开报告写不超过 2 页。不要编造没打开过的篇名；课上没指定篇目就用 Noba 本模块当被评文本。",
+            "from": "MIT 9.85 Syllabus, One 2-page Critical Response Paper"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://nobaproject.com/modules/adolescent-development",
+          "title": "Adolescent Development | Noba",
+          "use": "读 Cognitive Changes 与 Identity formation，再答 Discussion Question 2"
+        },
+        {
+          "url": "https://openstax.org/books/lifespan-development/pages/1-3-major-theories-and-theorists",
+          "title": "OpenStax 1.3 Major Theories and Theorists",
+          "use": "用 Table 1.1 第 5 行 Identity versus Confusion、Table 1.2 Formal operational 核对立论用语"
+        },
+        {
+          "url": "https://psych.bnu.edu.cn/rcpy/bkspy/kcjsa/0dc784da65ad4f51975d57609a1581f8.htm",
+          "title": "北师大《发展心理学》课程介绍",
+          "use": "核对第七章：形式运算、自我同一性；该课另有「情绪困扰建议」不纳入本节点任务"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/9-85-infant-and-early-childhood-cognition-fall-2012/pages/syllabus/",
+          "title": "MIT 9.85 Syllabus",
+          "use": "备选：按 Critical Response Paper 的段落要求写短评"
+        },
+        {
+          "url": "https://psyc.umd.edu/sites/psyc.umd.edu/files/syllabi/PSYC%20355%20Syllabus%20Spring%202021%20FINAL.pdf",
+          "title": "UMD PSYC 355 Syllabus",
+          "use": "核对课历把 Identity development 放在 Attachment 之后、课程终点停在 adolescence"
+        }
+      ]
+    }
+  },
+  "conflicts": [
+    "OpenStax 与 Noba 在青少年之后继续写成年、衰老与死亡；北师大写明「内容集中在儿童青少年」，马里兰 PSYC 355 的目标是 conception to adolescence，MIT 9.85 停在婴幼儿认知。主干取更靠前的收束：做到青少年为止。",
+    "MIT 9.85 课历把 Piaget 放在 Methods 之前；北师大绪论、OpenStax 第 1 章、马里兰 Week 1 和 Noba 方法模块都先讲设计。顺序取方法在前。",
+    "北师大第七章有「常见情绪困扰的改善建议」和主题班会；本方向停在可观察的同一性状态与冒险机制，不写咨询或干预手册。"
+  ],
+  "missing": "",
+  "checked_at": "2026-10-04"
+}

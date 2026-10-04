@@ -1,0 +1,367 @@
+{
+  "id": "110.64",
+  "name": "概率论",
+  "format": "tutorial-tree-v2",
+  "status": "ok",
+  "goal": "能按本科概率论课序：用公理与条件概率算出事件概率，能对常用离散/连续分布写出分布并求数字特征，能处理联合分布与协方差，并能用大数定律和中心极限定理做极限近似习题。停在极限定理，不进入假设检验，不承诺随机过程或新结果。",
+  "sources": [
+    {
+      "title": "Syllabus | Probability and Random Variables | Mathematics | MIT OpenCourseWare",
+      "url": "https://ocw.mit.edu/courses/18-600-probability-and-random-variables-fall-2019/pages/syllabus/",
+      "kind": "ocw",
+      "used_for": "18.600 课程目标与主题表：分布函数、二项/几何/超几何/泊松、均匀/指数/正态/伽马/贝塔、条件概率、Bayes、联合分布、Chebyshev、LLN、CLT；作业形态是 10 份 Problem Set；指定 Ross，并推荐免费书 Grinstead–Snell"
+    },
+    {
+      "title": "Lecture Notes | Probability and Random Variables | Mathematics | MIT OpenCourseWare",
+      "url": "https://ocw.mit.edu/courses/18-600-probability-and-random-variables-fall-2019/pages/lecture-notes/",
+      "kind": "ocw",
+      "used_for": "主干讲次顺序：计数与公理（1–5）→ 条件/Bayes/独立（6–7）→ 离散随机变量与常用分布（8–14）→ 连续分布（17–20）→ 联合、和、协方差、条件期望（21–25）→ WLLN（27）→ CLT（30）；其后 Markov/鞅不进入主干"
+    },
+    {
+      "title": "Problem Sets | Probability and Random Variables | Mathematics | MIT OpenCourseWare",
+      "url": "https://ocw.mit.edu/courses/18-600-probability-and-random-variables-fall-2019/resources/problem-sets/",
+      "kind": "ocw",
+      "used_for": "作业入口：Problem Set 1–10 可下载；各节点对照其中一份交卷"
+    },
+    {
+      "title": "18.600 Probability and Random Variables F2019, Problem Set 1",
+      "url": "https://ocw.mit.edu/courses/18-600-probability-and-random-variables-fall-2019/resources/mit18_600f19_pset1/",
+      "kind": "ocw",
+      "used_for": "节点 axioms 的交卷选项：第一份 Problem Set"
+    },
+    {
+      "title": "18.600 F2019 Lecture 1: Permutations and combinations",
+      "url": "https://ocw.mit.edu/courses/18-600-probability-and-random-variables-fall-2019/resources/mit18_600f19_lec1/",
+      "kind": "lecture_notes",
+      "used_for": "节点 axioms：排列与组合讲义"
+    },
+    {
+      "title": "18.600 F2019 Lecture 2: Multinomial coefficients",
+      "url": "https://ocw.mit.edu/courses/18-600-probability-and-random-variables-fall-2019/f93ebd9c3d95877a28a34ec793d3c3bb_MIT18_600F19_lec2.pdf",
+      "kind": "lecture_notes",
+      "used_for": "节点 axioms：多项式系数与整数分拆计数"
+    },
+    {
+      "title": "18.600 F2019 Lecture 8: Discrete random variables",
+      "url": "https://ocw.mit.edu/courses/18-600-probability-and-random-variables-fall-2019/resources/mit18_600f19_lec8/",
+      "kind": "lecture_notes",
+      "used_for": "节点 rvs：离散随机变量讲义入口"
+    },
+    {
+      "title": "18.600 Probability and Random Variables F2019, Problem Set 5",
+      "url": "https://ocw.mit.edu/courses/18-600-probability-and-random-variables-fall-2019/21cee055af2a72b7b20c77aeaa8d02ce_MIT18_600F19_Pset5.pdf",
+      "kind": "ocw",
+      "used_for": "节点 rvs：Poisson 随机变量、均匀分布的期望/方差与 Y=X^3 密度；含 Ross 第 4 章 Theoretical Exercise 25"
+    },
+    {
+      "title": "18.600 Probability and Random Variables F2019, Problem Set 8",
+      "url": "https://ocw.mit.edu/courses/18-600-probability-and-random-variables-fall-2019/669980ae9995e374dc9d086d830fb312_MIT18_600F19_Pset8.pdf",
+      "kind": "ocw",
+      "used_for": "节点 joints：相关、回归与悖论；Ross 第 7 章 Problem 51 由联合密度算条件期望"
+    },
+    {
+      "title": "18.600 Probability and Random Variables F2019, Problem Set 9",
+      "url": "https://ocw.mit.edu/courses/18-600-probability-and-random-variables-fall-2019/resources/mit18_600f19_pset9/",
+      "kind": "ocw",
+      "used_for": "节点 limits 的下载页"
+    },
+    {
+      "title": "18.600 Probability and Random Variables F2019, Problem Set 9 (PDF)",
+      "url": "https://ocw.mit.edu/courses/18-600-probability-and-random-variables-fall-2019/56c7b74babc1e33346864722ead29a2e_MIT18_600F19_Pset9.pdf",
+      "kind": "ocw",
+      "used_for": "节点 limits：标题为 Central limit theorem and strong law of large numbers；用 i.i.d. 样本均值的正态近似。文中出现的 p-value 叙述不单独成节点"
+    },
+    {
+      "title": "Syllabus - Stat 134",
+      "url": "https://stat134.berkeley.edu/fall-2025/syllabus/",
+      "kind": "syllabus",
+      "used_for": "独立来源的主题表：公理、条件概率、Bayes、离散/连续随机变量、独立、矩与 MGF、联合/边缘/条件分布、条件期望、协方差、变换、CLT、LLN、尾概率；Maybe concentration / convergence / Markov chains。主教材 Blitzstein–Hwang；考核含 weekly homework 与 discussion worksheets"
+    },
+    {
+      "title": "Stats 116: Introduction to Probability",
+      "url": "https://web.stanford.edu/class/stats116/syllabus.html",
+      "kind": "syllabus",
+      "used_for": "周次主干：Counting → Axioms → Independence/conditional/Bayes → Random variables → Continuous distributions → Joint → Covariance/conditional expectation → Inequalities/MGF → LLN → CLT；阅读 Ross 与 Blitzstein–Hwang 对应章"
+    },
+    {
+      "title": "Stats 117: Introduction to Probability",
+      "url": "https://web.stanford.edu/class/stats117/courseinfo.html",
+      "kind": "syllabus",
+      "used_for": "冲突记录：2026 秋大纲列到 Counting/Axioms/条件独立/随机变量/联合/连续变量，未写 LLN/CLT；作业是 weekly problem sets。主干跟同系列 Stats 116 的完整极限段"
+    },
+    {
+      "title": "《概率论》教学大纲（上海海洋大学，课程编号 1106401）",
+      "url": "https://xxxy.shou.edu.cn/_upload/article/files/17/ea/c7c93f37492390d8151239c49f06/6a71c378-b24d-4fa1-ab4e-c84c99b64d36.pdf",
+      "kind": "syllabus",
+      "used_for": "国内独立《概率论》课序：第一章事件与概率（作业 1.x）→ 第二章一维分布（作业 2.x）→ 第三章多维简介 → 第四章数字特征与切比雪夫（作业 4.x）→ 第五章大数定律与中心极限定理（作业 5.1–5.8）。考核以作业+闭卷考试。后续课是统计学基础，本课不含假设检验"
+    },
+    {
+      "title": "Introductory Probability (Grinstead and Snell) — LibreTexts",
+      "url": "https://stats.libretexts.org/Bookshelves/Probability_Theory/Introductory_Probability_(Grinstead_and_Snell)",
+      "kind": "open_textbook",
+      "used_for": "公开教材目录：离散/连续密度、组合、条件概率、常用分布、期望方差、随机变量之和、LLN、CLT；其后 Generating Functions / Markov / Random Walks 不进入主干"
+    },
+    {
+      "title": "3: Combinatorics - Introductory Probability (Grinstead and Snell)",
+      "url": "https://stats.libretexts.org/Bookshelves/Probability_Theory/Introductory_Probability_(Grinstead_and_Snell)/03%3A_Combinatorics",
+      "kind": "open_textbook",
+      "used_for": "节点 axioms：排列、组合；PDF 第 3 章有对应 Exercises"
+    },
+    {
+      "title": "4: Conditional Probability - Introductory Probability (Grinstead and Snell)",
+      "url": "https://stats.libretexts.org/Bookshelves/Probability_Theory/Introductory_Probability_(Grinstead_and_Snell)/04%3A_Conditional_Probability",
+      "kind": "open_textbook",
+      "used_for": "节点 axioms：离散/连续条件概率"
+    },
+    {
+      "title": "5: Distributions and Densities - Introductory Probability (Grinstead and Snell)",
+      "url": "https://stats.libretexts.org/Bookshelves/Probability_Theory/Introductory_Probability_(Grinstead_and_Snell)/05%3A_Distributions_and_Densities",
+      "kind": "open_textbook",
+      "used_for": "节点 rvs：常用离散分布与连续密度"
+    },
+    {
+      "title": "6: Expected Value and Variance - Introductory Probability (Grinstead and Snell)",
+      "url": "https://stats.libretexts.org/Bookshelves/Probability_Theory/Introductory_Probability_(Grinstead_and_Snell)/06%3A_Expected_Value_and_Variance",
+      "kind": "open_textbook",
+      "used_for": "节点 joints：期望、离散方差、连续随机变量的数字特征"
+    },
+    {
+      "title": "8: Law of Large Numbers - Introductory Probability (Grinstead and Snell)",
+      "url": "https://stats.libretexts.org/Bookshelves/Probability_Theory/Introductory_Probability_(Grinstead_and_Snell)/08%3A_Law_of_Large_Numbers",
+      "kind": "open_textbook",
+      "used_for": "节点 limits：大数定律（离散与连续）"
+    },
+    {
+      "title": "9: Central Limit Theorem - Introductory Probability (Grinstead and Snell)",
+      "url": "https://stats.libretexts.org/Bookshelves/Probability_Theory/Introductory_Probability_(Grinstead_and_Snell)/09%3A_Central_Limit_Theorem",
+      "kind": "open_textbook",
+      "used_for": "节点 limits：Bernoulli / 离散独立试验 / 连续独立试验的 CLT"
+    },
+    {
+      "title": "Introduction to Probability | Open Textbook Initiative (Grinstead and Snell)",
+      "url": "https://textbooks.aimath.org/textbooks/approved-textbooks/grinstead-snell/",
+      "kind": "open_textbook",
+      "used_for": "确认全书 12 章顺序与「600+ exercises」；第 11–12 章 Markov / Random Walks 标为需矩阵的后续，不作主干"
+    },
+    {
+      "title": "Introduction to Probability (Grinstead and Snell) — full PDF",
+      "url": "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.pdf",
+      "kind": "open_textbook",
+      "used_for": "各章 Exercises 原文：第 3 章排列组合题、第 4 章条件概率题、第 5 章分布题；前言写明标准一学期课覆盖离散与连续概率"
+    },
+    {
+      "title": "Statistics 110: Probability | Harvard",
+      "url": "https://stat110.hsites.harvard.edu/",
+      "kind": "syllabus",
+      "used_for": "确认 Blitzstein–Hwang《Introduction to Probability》是本科概率课教材（Berkeley Stat 134 / Stanford Stats 116 指定阅读）。本页无展开目录，不作节点唯一依据"
+    }
+  ],
+  "trunk": ["axioms", "rvs", "joints", "limits"],
+  "forks": [],
+  "join": null,
+  "nodes": {
+    "axioms": {
+      "name": "计数、公理与条件概率",
+      "why": "MIT 18.600 第 1–7 讲从排列组合、样本空间、公理走到条件概率、Bayes 与独立。Stanford Stats 116 前两周同样是 Counting → Axioms → Conditional/Bayes/Independence。Berkeley Stat 134 主题表以公理、条件概率、Bayes 起。上海海洋大学第一章是随机事件、古典概型、条件概率与独立性，并布置作业 1.1–1.36。",
+      "learn": [
+        "排列、组合与多项式系数",
+        "样本空间、事件运算与概率公理",
+        "等可能概型",
+        "条件概率、全概率与 Bayes 公式",
+        "事件独立性"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "打开 Grinstead–Snell 第 3 章 Exercises，交第 1–6 题（四人排队、颜色组合、32 位字、环形排列等计数）。再交第 4 章 Exercises 第 1–5 题（条件概率定义、三硬币、两骰、从牌堆抽牌）。每题注明用的是乘法计数、公理还是 P(F|E)=P(E∩F)/P(E)。",
+        "from": "Grinstead & Snell Ch. 3–4 Exercises；讲次对照 18.600 Lectures 1–7 与上海海洋大学第一章",
+        "alternatives": [
+          {
+            "kind": "problem_set",
+            "prompt": "下载并书面完成 18.600 Problem Set 1，交排列组合与公理题的完整解答。",
+            "from": "MIT 18.600 Problem Set 1"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://ocw.mit.edu/courses/18-600-probability-and-random-variables-fall-2019/pages/lecture-notes/",
+          "title": "18.600 Lecture Notes",
+          "use": "先读第 1–7 讲标题与讲义：计数 → 公理 → 条件概率 / Bayes"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/18-600-probability-and-random-variables-fall-2019/resources/mit18_600f19_lec1/",
+          "title": "18.600 Lecture 1: Permutations and combinations",
+          "use": "对照这一讲做排列组合例题"
+        },
+        {
+          "url": "https://stats.libretexts.org/Bookshelves/Probability_Theory/Introductory_Probability_(Grinstead_and_Snell)/03%3A_Combinatorics",
+          "title": "Grinstead–Snell Ch. 3 Combinatorics",
+          "use": "读排列与组合两节，再翻 PDF 做第 3 章 Exercises"
+        },
+        {
+          "url": "https://stats.libretexts.org/Bookshelves/Probability_Theory/Introductory_Probability_(Grinstead_and_Snell)/04%3A_Conditional_Probability",
+          "title": "Grinstead–Snell Ch. 4 Conditional Probability",
+          "use": "读离散条件概率，再做第 4 章 Exercises 1–5"
+        },
+        {
+          "url": "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.pdf",
+          "title": "Grinstead–Snell 全书 PDF",
+          "use": "第 3–4 章 Exercises 原文在此"
+        },
+        {
+          "url": "https://web.stanford.edu/class/stats116/syllabus.html",
+          "title": "Stanford Stats 116 syllabus",
+          "use": "核对本段阅读：Ross Ch. 1–3、Blitzstein–Hwang Ch. 1–2"
+        }
+      ]
+    },
+    "rvs": {
+      "name": "随机变量与常用分布",
+      "why": "18.600 大纲把分布函数和二项/几何/超几何/泊松、均匀/指数/正态/伽马/贝塔列为课程主题；讲义第 8–14 讲离散、第 17–20 讲连续。Stat 134 与 Stats 116 都在公理之后进入 discrete then continuous random variables。上海海洋大学第二章是一维随机变量、分布律、分布函数、密度与函数的分布，作业 2.x。Grinstead 第 5 章专写 Important Distributions / Densities。",
+      "learn": [
+        "离散随机变量与概率质量函数",
+        "连续随机变量、密度与分布函数",
+        "二项、几何、泊松",
+        "均匀、指数、正态",
+        "简单随机变量函数的分布"
+      ],
+      "task": {
+        "kind": "problem_set",
+        "prompt": "完成 18.600 Problem Set 5：Ross 第 4 章 Theoretical Exercise 25（泊松计数的独立稀释仍是泊松），以及正文里 X~Uniform[0,1] 时 X^n 的期望与方差、Y=X^3 的密度。书面交推导。不要把作业里的 Poisson process 故事扩成随机过程单元。",
+        "from": "MIT 18.600 Problem Set 5",
+        "alternatives": [
+          {
+            "kind": "exercise",
+            "prompt": "做 Grinstead 第 5 章 Exercises 第 1–5 题（哪些试验适于均匀分布、置换是否均匀、可数支撑不能均匀等），并再交上海海洋大学大纲所列作业 2.1、2.2、2.3、2.4、2.5 中你手头教材能对上的 3 道。",
+            "from": "Grinstead Ch. 5 Exercises；上海海洋大学《概率论》第二章作业编号"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://ocw.mit.edu/courses/18-600-probability-and-random-variables-fall-2019/resources/mit18_600f19_lec8/",
+          "title": "18.600 Lecture 8: Discrete random variables",
+          "use": "从这一讲进入离散随机变量，再按讲义目录读到第 20 讲连续分布"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/18-600-probability-and-random-variables-fall-2019/21cee055af2a72b7b20c77aeaa8d02ce_MIT18_600F19_Pset5.pdf",
+          "title": "18.600 Problem Set 5",
+          "use": "交 Poisson 与均匀变换题"
+        },
+        {
+          "url": "https://stats.libretexts.org/Bookshelves/Probability_Theory/Introductory_Probability_(Grinstead_and_Snell)/05%3A_Distributions_and_Densities",
+          "title": "Grinstead–Snell Ch. 5 Distributions and Densities",
+          "use": "读常用离散分布与连续密度，再翻 PDF 做习题"
+        },
+        {
+          "url": "https://xxxy.shou.edu.cn/_upload/article/files/17/ea/c7c93f37492390d8151239c49f06/6a71c378-b24d-4fa1-ab4e-c84c99b64d36.pdf",
+          "title": "上海海洋大学《概率论》教学大纲",
+          "use": "对照第二章节标题与作业题号"
+        }
+      ]
+    },
+    "joints": {
+      "name": "联合分布、期望与协方差",
+      "why": "18.600 第 21–25 讲是联合分布、独立和、期望、协方差与条件期望。Stats 116 在连续分布之后连续安排 Joint distributions、Covariance、Conditional expectation。Stat 134 把 joint/marginal/conditional distributions、conditional expectations、covariance and correlation 列在极限定理之前。上海海洋大学用第 3 章简介多维、第 4 章讲期望、方差、协方差与切比雪夫，作业 4.x。Grinstead 第 6 章是期望与方差。",
+      "learn": [
+        "数学期望与线性性",
+        "方差",
+        "联合、边缘与条件分布",
+        "协方差与相关系数",
+        "条件期望"
+      ],
+      "task": {
+        "kind": "problem_set",
+        "prompt": "完成 18.600 Problem Set 8 的 Textbook Chapter Seven Problem 51：联合密度 f(x,y)=e^{-y}（0<x<y, 0<y<∞）时计算 E[X^3 | Y=y]。再从 Pset 8 正文或 Grinstead 第 6 章 Exercises 另交 2 道期望/方差或相关系数计算，每题写出联合或边缘步骤。",
+        "from": "MIT 18.600 Problem Set 8；Grinstead Ch. 6 Exercises",
+        "alternatives": [
+          {
+            "kind": "exercise",
+            "prompt": "按上海海洋大学大纲交作业 4.2、4.5、4.6、4.7、4.11、4.12 中能对上教材的 4 道（期望、方差、协方差/相关系数）。",
+            "from": "上海海洋大学《概率论》第四章作业编号"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://ocw.mit.edu/courses/18-600-probability-and-random-variables-fall-2019/pages/lecture-notes/",
+          "title": "18.600 Lecture Notes",
+          "use": "读第 21–25 讲：Joint distribution functions → Covariance → Conditional expectation"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/18-600-probability-and-random-variables-fall-2019/669980ae9995e374dc9d086d830fb312_MIT18_600F19_Pset8.pdf",
+          "title": "18.600 Problem Set 8",
+          "use": "交联合密度上的条件期望题，并选做协方差计算"
+        },
+        {
+          "url": "https://stats.libretexts.org/Bookshelves/Probability_Theory/Introductory_Probability_(Grinstead_and_Snell)/06%3A_Expected_Value_and_Variance",
+          "title": "Grinstead–Snell Ch. 6 Expected Value and Variance",
+          "use": "读期望与方差两节，做该章 Exercises"
+        },
+        {
+          "url": "https://web.stanford.edu/class/stats116/syllabus.html",
+          "title": "Stanford Stats 116 syllabus",
+          "use": "核对本段阅读：Ross Ch. 6–7、Blitzstein–Hwang Ch. 7、9"
+        }
+      ]
+    },
+    "limits": {
+      "name": "不等式、大数定律与中心极限定理",
+      "why": "18.600 大纲把 Chebyshev、law of large numbers、central limit theorem 列为收束主题；讲义第 27 讲 WLLN、第 30 讲 CLT。Stats 116 最后两周是 Laws of large numbers and the central limit theorem。Stat 134 写 limit theorems including the CLT, Law of large numbers。上海海洋大学第五章是大数定律与中心极限定理，作业 5.1–5.8，课程目标 5 要求用相关定理近似计算概率。Grinstead 第 8–9 章专写 LLN 与 CLT。各来源在此之后或标 Maybe Markov，或另开统计学。",
+      "learn": [
+        "切比雪夫不等式",
+        "大数定律",
+        "中心极限定理",
+        "用正态近似样本均值"
+      ],
+      "task": {
+        "kind": "problem_set",
+        "prompt": "完成 18.600 Problem Set 9 中用中心极限定理或强大数定律处理 i.i.d. 样本均值的计算（均值 μ、标准差 σ/√N、正态近似区间）。书面写出近似分布与数值。不要把该讲义里出现的 p-value / null hypothesis 叙述做成假设检验作业。",
+        "from": "MIT 18.600 Problem Set 9",
+        "alternatives": [
+          {
+            "kind": "exercise",
+            "prompt": "做 Grinstead 第 8 章（大数定律）与第 9 章（中心极限定理）各至少 2 道 Exercises；若手头有盛骤《概率论与数理统计》，再交上海海洋大学所列 5.1、5.2、5.3、5.4、5.7、5.8 中的 3 道。",
+            "from": "Grinstead Ch. 8–9 Exercises；上海海洋大学《概率论》第五章作业编号"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://ocw.mit.edu/courses/18-600-probability-and-random-variables-fall-2019/56c7b74babc1e33346864722ead29a2e_MIT18_600F19_Pset9.pdf",
+          "title": "18.600 Problem Set 9",
+          "use": "交 CLT / SLLN 样本均值近似题"
+        },
+        {
+          "url": "https://stats.libretexts.org/Bookshelves/Probability_Theory/Introductory_Probability_(Grinstead_and_Snell)/08%3A_Law_of_Large_Numbers",
+          "title": "Grinstead–Snell Ch. 8 Law of Large Numbers",
+          "use": "读离散与连续情形的大数定律"
+        },
+        {
+          "url": "https://stats.libretexts.org/Bookshelves/Probability_Theory/Introductory_Probability_(Grinstead_and_Snell)/09%3A_Central_Limit_Theorem",
+          "title": "Grinstead–Snell Ch. 9 Central Limit Theorem",
+          "use": "读 Bernoulli 与独立试验的 CLT，再做习题"
+        },
+        {
+          "url": "https://xxxy.shou.edu.cn/_upload/article/files/17/ea/c7c93f37492390d8151239c49f06/6a71c378-b24d-4fa1-ab4e-c84c99b64d36.pdf",
+          "title": "上海海洋大学《概率论》教学大纲",
+          "use": "对照第五章节与作业 5.1–5.8；本课后续才是统计学基础"
+        },
+        {
+          "url": "https://stat134.berkeley.edu/fall-2025/syllabus/",
+          "title": "Berkeley Stat 134 syllabus",
+          "use": "核对本段属于极限定理，Markov chains 仅标 Maybe"
+        }
+      ]
+    }
+  },
+  "conflicts": [
+    "Grinstead–Snell 把离散/连续密度放在组合与条件概率之前；MIT 18.600、Stanford Stats 116、Berkeley Stat 134、上海海洋大学都从计数/公理/条件概率起。主干取大学课表顺序。",
+    "18.600 在离散分布中插入 Poisson processes（第 13 讲），期末还有 Markov、熵与鞅；Stat 134 写 Maybe Markov chains；Stats 116 与上海海洋大学停在 LLN/CLT。主干在极限定理收束，不把过程做成必做节点。",
+    "上海海洋大学把多维随机变量写成 2 学时简介、把数字特征放在其后；18.600 与 Stats 116 先讲一维期望/方差再讲联合。主干按 MIT/Stanford：先会一维分布，再做联合与协方差。",
+    "18.600 Problem Set 9 在 CLT 叙述里提到 p-value / null hypothesis；18.600 大纲主题停在 CLT，上海海洋大学后续课才是统计学基础。作业只交 CLT/SLLN 计算，不把假设检验写成节点。",
+    "Stanford Stats 117（2026 秋）大纲列到连续/联合变量，未写 LLN/CLT；同系列 Stats 116（2022）写到 LLN/CLT。主干跟 116 的完整概率课序。"
+  ],
+  "missing": "",
+  "checked_at": "2026-10-04"
+}

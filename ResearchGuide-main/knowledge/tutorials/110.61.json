@@ -1,0 +1,374 @@
+{
+  "id": "110.61",
+  "name": "计算数学",
+  "format": "tutorial-tree-v2",
+  "status": "ok",
+  "goal": "能把浮点舍入和条件数写成可核对的误差说明，会用牛顿法求根、用带行主元的 LU 解 Ax=b，会用分段插值和梯形/Simpson 公式做数值微积分，并用 Euler 法交一份常微初值问题的收敛记录。不承诺偏微分方程或新算法。",
+  "sources": [
+    {
+      "title": "Syllabus | Introduction to Numerical Analysis | Mathematics | MIT OpenCourseWare",
+      "url": "https://ocw.mit.edu/courses/18-330-introduction-to-numerical-analysis-spring-2012/pages/syllabus/",
+      "kind": "ocw",
+      "used_for": "本科课目标：把函数、导数、积分和微分方程当成计算机上的数字串；作业是理论题加数值实验；明确不讲 PDE、线性代数比 18.06 少"
+    },
+    {
+      "title": "Assignments | Introduction to Numerical Analysis | Mathematics | MIT OpenCourseWare",
+      "url": "https://ocw.mit.edu/courses/18-330-introduction-to-numerical-analysis-spring-2012/pages/assignments/",
+      "kind": "ocw",
+      "used_for": "作业形态：8 份 Assignment，理论与数值实验一起交"
+    },
+    {
+      "title": "18.330 — Introduction to Numerical Analysis (MIT, Spring 2012)",
+      "url": "https://math.mit.edu/icg/resources/teaching/18.330/",
+      "kind": "syllabus",
+      "used_for": "课历主题顺序：级数 → 积分/差分 → 插值 → ODE → 求根 → Fourier/谱方法；作业含数值实验"
+    },
+    {
+      "title": "18.330 Spring 2012 Introduction to numerical analysis Class notes (Draft April 2, 2012)",
+      "url": "https://math.mit.edu/icg/resources/teaching/18.330/18.330-Apr2.pdf",
+      "kind": "lecture_notes",
+      "used_for": "讲义章节：Ch.1 Series → Ch.2 Integrals as sums / derivatives as differences → Ch.3 Interpolation → Ch.4 Nonlinear equations → Ch.5 ODE IVP → Ch.6 Fourier"
+    },
+    {
+      "title": "Math 128A Syllabus (UC Berkeley, Persson, Fall 2026)",
+      "url": "https://popersson.github.io/math128a/",
+      "kind": "syllabus",
+      "used_for": "第一门数值分析主干：误差 → 单变量求根 → 插值 → 数值微分积分 → ODE 初值 → 线性方程组直接法；每周 Homework + 4 次 Programming Assignment"
+    },
+    {
+      "title": "Math 128A Syllabus (UC Berkeley, Ming Gu)",
+      "url": "https://math.berkeley.edu/~mgu/MA128A/syllabus.html",
+      "kind": "syllabus",
+      "used_for": "同一门课的 Burden 题号与顺序：Ch.1 误差 → Ch.2 非线性方程 → Ch.3 插值 → Ch.4 数值微积分 → Ch.5 ODE → Ch.6 LU；Programming Homework"
+    },
+    {
+      "title": "Fundamentals of Numerical Computation — Contents (Driscoll & Braun)",
+      "url": "https://tobydriscoll.net/book/fnc/index.html",
+      "kind": "open_textbook",
+      "used_for": "计算数学本科教材：一学期用前半 Ch.1–6（浮点 → 方阵线性组 → 超定组 → 求根 → 分段插值与微积分 → ODE IVP）；后半是加深"
+    },
+    {
+      "title": "1. Introduction — Fundamentals of Numerical Computation",
+      "url": "https://tobydriscoll.net/fnc-julia/intro/overview.html",
+      "kind": "open_textbook",
+      "used_for": "节点 error：先把实数换成浮点，再讲条件数与算法稳定性"
+    },
+    {
+      "title": "1.1. Floating-point numbers — Fundamentals of Numerical Computation",
+      "url": "https://tobydriscoll.net/fnc-julia/intro/floating-point.html",
+      "kind": "open_textbook",
+      "used_for": "节点 error：machine epsilon、双精度、浮点算术；习题 1–4"
+    },
+    {
+      "title": "1.2. Problems and conditioning — Fundamentals of Numerical Computation",
+      "url": "https://tobydriscoll.net/fnc-julia/intro/conditioning.html",
+      "kind": "open_textbook",
+      "used_for": "节点 error：相消、相对条件数 κ_f；习题 1–3 手算条件数"
+    },
+    {
+      "title": "4. Roots of nonlinear equations — Fundamentals of Numerical Computation",
+      "url": "https://tobydriscoll.net/fnc-julia/nonlineqn/overview.html",
+      "kind": "open_textbook",
+      "used_for": "节点 roots：在线性代数之后处理非线性代数；用一串可解的线性问题逼近"
+    },
+    {
+      "title": "4.3. Newton’s method — Fundamentals of Numerical Computation",
+      "url": "https://tobydriscoll.net/fnc-julia/nonlineqn/newton.html",
+      "kind": "open_textbook",
+      "used_for": "节点 roots：牛顿迭代、二次收敛、Function 4.3.6；习题 1–3 改写成 f(x)=0 并画图求根"
+    },
+    {
+      "title": "2. Linear systems of equations — Fundamentals of Numerical Computation",
+      "url": "https://tobydriscoll.net/fnc-julia/linsys/overview.html",
+      "kind": "open_textbook",
+      "used_for": "节点 linsys：科学计算里最常见的任务是解 Ax=b；高斯消元加条件数"
+    },
+    {
+      "title": "2.4. LU factorization — Fundamentals of Numerical Computation",
+      "url": "https://tobydriscoll.net/fnc-julia/linsys/lu.html",
+      "kind": "open_textbook",
+      "used_for": "节点 linsys：A=LU、先向前再向后代换；习题 1 手算分解"
+    },
+    {
+      "title": "2.6. Row pivoting — Fundamentals of Numerical Computation",
+      "url": "https://tobydriscoll.net/fnc-julia/linsys/pivoting.html",
+      "kind": "open_textbook",
+      "used_for": "节点 linsys：无主元 LU 不稳定；列主元；习题 1 手算 PLU"
+    },
+    {
+      "title": "2.8. Conditioning of linear systems — Fundamentals of Numerical Computation",
+      "url": "https://tobydriscoll.net/fnc-julia/linsys/condition-number.html",
+      "kind": "open_textbook",
+      "used_for": "节点 linsys：κ(A)=‖A⁻¹‖‖A‖；残差是反向误差；习题 1 Hilbert 条件数表"
+    },
+    {
+      "title": "5. Piecewise interpolation — Fundamentals of Numerical Computation",
+      "url": "https://tobydriscoll.net/fnc-julia/localapprox/overview.html",
+      "kind": "open_textbook",
+      "used_for": "节点 interp：把函数离散化，再定义数值微分与积分；微积分变成代数"
+    },
+    {
+      "title": "5.2. Piecewise linear interpolation — Fundamentals of Numerical Computation",
+      "url": "https://tobydriscoll.net/fnc-julia/localapprox/pwlin.html",
+      "kind": "open_textbook",
+      "used_for": "节点 interp：分段线性、帽函数、O(h²)；习题 1 对数误差图"
+    },
+    {
+      "title": "5.6. Numerical integration — Fundamentals of Numerical Computation",
+      "url": "https://tobydriscoll.net/fnc-julia/localapprox/integration.html",
+      "kind": "open_textbook",
+      "used_for": "节点 interp：梯形公式、Simpson/外推、Romberg；习题 1 核对二阶"
+    },
+    {
+      "title": "6. Initial-value problems for ODEs — Fundamentals of Numerical Computation",
+      "url": "https://tobydriscoll.net/fnc-julia/ivp/overview.html",
+      "kind": "open_textbook",
+      "used_for": "节点 ode：从已知初值往前走；Runge–Kutta 与线性多步是两大类"
+    },
+    {
+      "title": "6.2. Euler’s method — Fundamentals of Numerical Computation",
+      "url": "https://tobydriscoll.net/fnc-julia/ivp/euler.html",
+      "kind": "open_textbook",
+      "used_for": "节点 ode：Euler 格式、局部截断误差、全局误差 O(h)；习题 1–2 两步手算加收敛图"
+    },
+    {
+      "title": "数值分析 — 教学大纲（电子科技大学）",
+      "url": "https://i.study.uestc.edu.cn/NumericalAnalysis/menu/teaching-programme",
+      "kind": "syllabus",
+      "used_for": "国内本科顺序：误差 → 非线性求根 → 线性组直接法/迭代法 → 特征值 → 插值 → 拟合 → 数值积分微分 → 常微数值解"
+    }
+  ],
+  "trunk": ["error", "roots", "linsys", "interp", "ode"],
+  "forks": [],
+  "join": null,
+  "nodes": {
+    "error": {
+      "name": "浮点、条件数与稳定性",
+      "why": "FNC 第 1 章把「把实数换成有限浮点集」放在全书最前，并立刻引入条件数与算法稳定性。Berkeley 128A 课历 Lecture 4–6 是 Burden 1.1–1.3（微积分复习、舍入、算法与收敛），HW 1 就交在这里。电子科技大学大纲第 1 章先讲截断/舍入误差和数值稳定性。MIT 18.330 用级数收敛速度给后面的离散化垫底。",
+      "learn": [
+        "浮点数、机精度 machine epsilon",
+        "绝对误差与相对误差",
+        "相消（subtractive cancellation）",
+        "问题的条件数与算法稳定性"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "对照 FNC §1.1 习题 1（d=4 的浮点集：数出 [1/2,4] 里有多少个浮点数、找出最接近 1/10 的元素、找出不在该集合里的最小正整数）和 §1.2 习题 1（用 κ_f=|x f'/f| 手算 x^p、log x、cos x、e^x 的相对条件数）。每题写所用节号；再在机器上打印 eps()（或等价量）并注明对应 2^{-52}。",
+        "from": "FNC 1.1 Exercises 1–2；FNC 1.2 Exercise 1",
+        "alternatives": [
+          {
+            "kind": "problem_set",
+            "prompt": "按 Gu 的 128A 课表做 Burden §1.1 指定题（1d, 4d, 6, 8, 12, 18, 20, 24, 26）和 §1.2 指定题（1ace, 2, 4, 5ace, 6ace, 10, 12ab, 15ab, 16ab, 18, 20），再补 §1.3：1a, 2cd, 6, 8, 13, 16。交手写或扫描 PDF。",
+            "from": "Berkeley Math 128A (Gu) Lecture 01–02 Exercises"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://tobydriscoll.net/fnc-julia/intro/overview.html",
+          "title": "1. Introduction — FNC",
+          "use": "先读本章导语：浮点、条件数、稳定性三件套"
+        },
+        {
+          "url": "https://tobydriscoll.net/fnc-julia/intro/floating-point.html",
+          "title": "1.1. Floating-point numbers — FNC",
+          "use": "读定义与 Demo，做习题 1–2"
+        },
+        {
+          "url": "https://tobydriscoll.net/fnc-julia/intro/conditioning.html",
+          "title": "1.2. Problems and conditioning — FNC",
+          "use": "读相消与 κ_f 表，做习题 1"
+        },
+        {
+          "url": "https://popersson.github.io/math128a/",
+          "title": "Math 128A Syllabus (Persson)",
+          "use": "对照 Lecture 4–6 / HW 1 在整门课里的位置"
+        }
+      ]
+    },
+    "roots": {
+      "name": "非线性方程求根",
+      "why": "Berkeley 128A 在误差之后立刻进入 Ch.2（二分、不动点、牛顿及其推广、迭代误差）。电子科技大学大纲第 2 章同样把简单迭代、不动点理论和牛顿法放在线性方程组之前。FNC 第 4 章把非线性问题写成「一串可解的线性问题」。MIT 18.330 讲义第 4 章也是 Nonlinear equations，但排在插值与 ODE 之后，见 conflicts。",
+      "learn": [
+        "二分法",
+        "不动点迭代",
+        "牛顿法与二次收敛",
+        "残差、迭代停机与简单根"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "按 FNC §4.3 习题 1–3 的统一五步交卷：把方程改写成 f(x)=0 并写出 f'；在指定区间画 f 并数根；用参考求解器（页上的 nlsolve，ftol=1e-15）给出对照根；调用书中 Function 4.3.6 的牛顿迭代求每个根；对其中一个根用误差序列判断是否大致二次收敛。三道方程是 x²=e^{-x}（[-2,2]）、2x=tan x（[-0.2,1.4]）、e^{x+1}=2+x（[-2,2]）。",
+        "from": "FNC 4.3 Exercises 1–3",
+        "alternatives": [
+          {
+            "kind": "problem_set",
+            "prompt": "按 Gu 的 128A 课表交 Burden §2.1：2b, 10, 12, 14；§2.2：1, 2, 4, 6, 8, 12, 18, 22, 23, 24；§2.3：2, 4, 6ab, 8ab, 16, 26, 28；§2.4：2, 4, 6, 10, 14。",
+            "from": "Berkeley Math 128A (Gu) Lecture 03–04 Exercises"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://tobydriscoll.net/fnc-julia/nonlineqn/overview.html",
+          "title": "4. Roots of nonlinear equations — FNC",
+          "use": "读本章导语：非线性约束用线性模型序列逼近"
+        },
+        {
+          "url": "https://tobydriscoll.net/fnc-julia/nonlineqn/newton.html",
+          "title": "4.3. Newton’s method — FNC",
+          "use": "读 Algorithm 4.3.2 与 Function 4.3.6，做习题 1–3"
+        },
+        {
+          "url": "https://popersson.github.io/math128a/",
+          "title": "Math 128A Syllabus (Persson)",
+          "use": "对照 Lecture 7–10（二分、不动点、牛顿、迭代误差）和 HW 2"
+        },
+        {
+          "url": "https://i.study.uestc.edu.cn/NumericalAnalysis/menu/teaching-programme",
+          "title": "电子科技大学《数值分析》教学大纲",
+          "use": "核对该校第 2 章对二分、割线、牛顿收敛阶的要求"
+        }
+      ]
+    },
+    "linsys": {
+      "name": "线性方程组与 LU",
+      "why": "FNC 把方阵线性组写成科学计算里最常见的任务，第 2 章紧接浮点之后：高斯消元、LU、行主元、κ(A)。电子科技大学大纲用 20 学时讲直接法与迭代法，放在求根之后、插值之前。Berkeley 128A 把 Direct methods for linear systems 写进同一门课，但排在学期末。MIT 18.330 大纲说线性代数比 18.06 少，不另开选修轨。",
+      "learn": [
+        "高斯消元与 LU 分解",
+        "向前 / 向后代换",
+        "列主元（row pivoting）",
+        "矩阵条件数 κ(A) 与残差"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "三件都交：（1）FNC §2.4 习题 1，对题面两个矩阵手算 LU；（2）§2.6 习题 1，对题面两个矩阵手算带主元的分解；（3）§2.8 习题 1，对 n=2…16 的 Hilbert 矩阵列表 κ(H_n)（2-范数），并写一句为什么从 n=13 起增长看起来变慢。代码可按书中 Julia，或改写成 Python/MATLAB，把打印表贴进同一份 PDF。",
+        "from": "FNC 2.4 Exercise 1；2.6 Exercise 1；2.8 Exercise 1",
+        "alternatives": [
+          {
+            "kind": "problem_set",
+            "prompt": "按 Gu 的 128A 课表做 Burden §6.1：6.a, 10；§6.2：10a, 32；§6.3：2.bd, 6, 13。交手写推导。",
+            "from": "Berkeley Math 128A (Gu) Lecture 24–25 Exercises"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://tobydriscoll.net/fnc-julia/linsys/overview.html",
+          "title": "2. Linear systems of equations — FNC",
+          "use": "读本章导语：有限步解 Ax=b，再用范数谈条件数"
+        },
+        {
+          "url": "https://tobydriscoll.net/fnc-julia/linsys/lu.html",
+          "title": "2.4. LU factorization — FNC",
+          "use": "跟 Demo 2.4.4 走一遍外积消元，做习题 1"
+        },
+        {
+          "url": "https://tobydriscoll.net/fnc-julia/linsys/pivoting.html",
+          "title": "2.6. Row pivoting — FNC",
+          "use": "看无主元失败的例子，做习题 1"
+        },
+        {
+          "url": "https://tobydriscoll.net/fnc-julia/linsys/condition-number.html",
+          "title": "2.8. Conditioning of linear systems — FNC",
+          "use": "读 κ(A) 与残差，做 Hilbert 条件数表"
+        }
+      ]
+    },
+    "interp": {
+      "name": "插值与数值微积分",
+      "why": "FNC 第 5 章把函数离散化后立刻定义数值微分与积分，并写明「很多计算就是把微积分变成代数」。Berkeley 128A 在求根之后连续讲 Lagrange/均差/Hermite/三次样条，再讲数值微分、复化求积、Romberg、Gauss。MIT 18.330 讲义第 2–3 章是「积分当求和、导数当差分」再加插值。电子科技大学大纲第 6、8 章对应插值与数值积分微分。",
+      "learn": [
+        "多项式插值与分段线性插值",
+        "插值误差的代数收敛阶",
+        "梯形公式及其二阶精度",
+        "外推 / Simpson 公式"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "两块都交。（1）FNC §5.2 习题 1：对题面三个函数，用等距节点 n=10,20,40,80,160,320 做分段线性插值，在区间内 1600 个点上估计 ‖f-p‖_∞，画 log-log 的 E(n) 并加上一条 E=C n^{-2}。（2）§5.6 习题 1：对题面五个积分，用梯形公式 n=10·2^k（k=1…10）估计积分，画误差的 log-log 图，对照或反驳二阶精度。",
+        "from": "FNC 5.2 Exercise 1；FNC 5.6 Exercise 1",
+        "alternatives": [
+          {
+            "kind": "problem_set",
+            "prompt": "按 Gu 的 128A 课表交插值题（§3.1：2, 4, 6.a, 8.a, 25, 32；§3.3：2ab, 6, 10, 11；§3.5：3a, 4, 5）和求积题（§4.3：2, 14, 16, 18, 20；§4.4：12, 24, 26；§4.5：14, 15）。",
+            "from": "Berkeley Math 128A (Gu) Lecture 06–14 Exercises"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://tobydriscoll.net/fnc-julia/localapprox/overview.html",
+          "title": "5. Piecewise interpolation — FNC",
+          "use": "读离散化导语：先表示函数，再做微分积分"
+        },
+        {
+          "url": "https://tobydriscoll.net/fnc-julia/localapprox/pwlin.html",
+          "title": "5.2. Piecewise linear interpolation — FNC",
+          "use": "读帽函数与 Theorem 5.2.7，做习题 1"
+        },
+        {
+          "url": "https://tobydriscoll.net/fnc-julia/localapprox/integration.html",
+          "title": "5.6. Numerical integration — FNC",
+          "use": "读梯形公式、Simpson 外推，做习题 1"
+        },
+        {
+          "url": "https://math.mit.edu/icg/resources/teaching/18.330/18.330-Apr2.pdf",
+          "title": "18.330 Class notes (Apr 2, 2012)",
+          "use": "对照第 2–3 章：积分当求和、插值后再做高阶求积"
+        }
+      ]
+    },
+    "ode": {
+      "name": "常微初值问题",
+      "why": "FNC 把 Ch.6 IVP 写成前半教材的收束：从已知初值往前走，主方法是 Runge–Kutta 与线性多步。Berkeley 128A 在数值积分之后进入 Euler、Taylor、RK、多步与稳定性，并布置 Programming Assignment。MIT 18.330 大纲与讲义第 5 章都是 ODE 初值问题；电子科技大学大纲第 9 章要求掌握 Euler、改进 Euler、RK 与局部截断误差。三边都不把 PDE 放进这门第一课。",
+      "learn": [
+        "初值问题与步长",
+        "Euler 法",
+        "局部截断误差与全局误差",
+        "Runge–Kutta 与线性多步（作为同一类推进格式）"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "按 FNC §6.2 习题 1：对题面四个 IVP，用给定 h 手算两步 Euler，并用页上给出的精确解算出这两步的误差。再做习题 2 中至少 (a)(b) 两题：用书中 Function 6.2.2（或等价实现）在 n=320 画数值解；对 n=10·2^k（k=2…10）计算终点误差，画 log-log 收敛图并加上一阶参考线。把手算、代码、图和终点误差表订成一份记录。",
+        "from": "FNC 6.2 Exercises 1–2",
+        "alternatives": [
+          {
+            "kind": "lab",
+            "prompt": "对照 Persson 128A 课历在 Euler / RK 段交一份 Programming Assignment 式报告：写明所用公式、步长、图和误差表。页面要求 PDF 报告含代码、图和注释；本步做到 Euler 或经典 RK 对一个有精确解的标量 IVP 即可。",
+            "from": "Berkeley Math 128A (Persson) Programming Assignments；课历 Lecture 26–29"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://tobydriscoll.net/fnc-julia/ivp/overview.html",
+          "title": "6. Initial-value problems for ODEs — FNC",
+          "use": "读 IVP 定义与 RK / 多步两条主线"
+        },
+        {
+          "url": "https://tobydriscoll.net/fnc-julia/ivp/euler.html",
+          "title": "6.2. Euler’s method — FNC",
+          "use": "读格式、LTE 与全局误差定理，做习题 1–2"
+        },
+        {
+          "url": "https://popersson.github.io/math128a/",
+          "title": "Math 128A Syllabus (Persson)",
+          "use": "对照 Lecture 26–32（IVP、Euler、RK、多步、稳定性）和 PA 交卷方式"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/18-330-introduction-to-numerical-analysis-spring-2012/pages/assignments/",
+          "title": "18.330 Assignments",
+          "use": "看作业形态：理论题与数值实验一起交，不另开研究题"
+        }
+      ]
+    }
+  },
+  "conflicts": [
+    "MIT 18.330 讲义把 Nonlinear equations 放在 Interpolation 与 ODE 之后；Berkeley 128A、电子科技大学大纲和 FNC 第 4 章都把求根放在 ODE 之前。取更靠前的：先求根。",
+    "FNC 把方阵线性组放在求根之前；电子科技大学大纲放在求根之后、插值之前；Berkeley 128A 把 Direct methods 放在学期末。取更靠前且两所学校都写入同一门课的折中：求根之后、插值之前。",
+    "MIT 18.330 大纲写明线性代数比 18.06 少、不讲 PDE；FNC / Berkeley / 电子科技大学都把 Ax=b 写进第一门课。不省略线性组，也不为此分叉。",
+    "FNC 后半（Krylov、BVP、PDE）和 18.330 后半（Fourier、谱方法、PCA）是同一门课的加深，来源没有写成并行选修轨。主干停在 IVP。"
+  ],
+  "missing": "",
+  "checked_at": "2026-10-04"
+}

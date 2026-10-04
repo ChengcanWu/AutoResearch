@@ -1,0 +1,356 @@
+{
+  "id": "190.20",
+  "name": "社会心理",
+  "format": "tutorial-tree-v2",
+  "status": "ok",
+  "goal": "能用情境 vs 特质、归因偏差、态度/说服和从众/服从的本科概念，对照 OpenStax Psychology 2e 第 12 章复习题或批判题交出可核对的答题纸或短评；终点是读懂公开教材并复现课内分析，不承诺新实验、不承诺临床或咨询干预。",
+  "sources": [
+    {
+      "title": "Syllabus | Social Psychology | MIT OpenCourseWare (9.70, Spring 2013)",
+      "url": "https://ocw.mit.edu/courses/9-70-social-psychology-spring-2013/pages/syllabus/",
+      "kind": "ocw",
+      "used_for": "本科课目标：个体的思想、情感、行动如何被大小群体影响；作业形态是小组 minutes、journal、term project，不是习题集"
+    },
+    {
+      "title": "Calendar | Social Psychology | MIT OpenCourseWare (9.70, Spring 2013)",
+      "url": "https://ocw.mit.edu/courses/9-70-social-psychology-spring-2013/pages/calendar/",
+      "kind": "ocw",
+      "used_for": "主干顺序：先 What is Social Psychology / 科学与伦理，再 conformity and obedience，再 persuasion，再 social cognition / attribution，再 aggression、prejudice、liking；每周 Meeting minutes due"
+    },
+    {
+      "title": "Assignments | Social Psychology | MIT OpenCourseWare (9.70, Spring 2013)",
+      "url": "https://ocw.mit.edu/courses/9-70-social-psychology-spring-2013/pages/assignments/",
+      "kind": "ocw",
+      "used_for": "交卷形态：每周 1–2 页 study group meeting minutes，写共识/分歧、对指定阅读的评论，不是逐字记录"
+    },
+    {
+      "title": "Readings | Social Psychology | MIT OpenCourseWare (9.70, Spring 2013)",
+      "url": "https://ocw.mit.edu/courses/9-70-social-psychology-spring-2013/pages/readings/",
+      "kind": "ocw",
+      "used_for": "指定教材 The Social Animal 按讲次推进；第 2 讲把服从研究的伦理材料放在科学导论里。只采用本页列出的讲次顺序，不把未打开的篇名当已读论文"
+    },
+    {
+      "title": "Ch. 12 Introduction - Psychology 2e | OpenStax",
+      "url": "https://openstax.org/books/psychology-2e/pages/12-introduction",
+      "kind": "open_textbook",
+      "used_for": "第 12 章目录顺序：What Is Social Psychology → Self-presentation → Attitudes and Persuasion → Conformity, Compliance, and Obedience → Prejudice → Aggression → Prosocial Behavior"
+    },
+    {
+      "title": "12.1 What Is Social Psychology? - Psychology 2e | OpenStax",
+      "url": "https://openstax.org/books/psychology-2e/pages/12-1-what-is-social-psychology",
+      "kind": "open_textbook",
+      "used_for": "主干第 1–2 步：situationism vs dispositionism、fundamental attribution error、actor-observer bias、self-serving bias、just-world hypothesis、个人主义/集体主义"
+    },
+    {
+      "title": "12.2 Self-presentation - Psychology 2e | OpenStax",
+      "url": "https://openstax.org/books/psychology-2e/pages/12-2-self-presentation",
+      "kind": "open_textbook",
+      "used_for": "主干第 2 步：social roles、social norms、scripts；Stanford prison experiment 作为角色/规范示例，并写明后续批评"
+    },
+    {
+      "title": "12.3 Attitudes and Persuasion - Psychology 2e | OpenStax",
+      "url": "https://openstax.org/books/psychology-2e/pages/12-3-attitudes-and-persuasion",
+      "kind": "open_textbook",
+      "used_for": "主干第 3 步：attitude 三成分、cognitive dissonance、justification of effort、Yale attitude change、elaboration likelihood（central/peripheral）、foot-in-the-door"
+    },
+    {
+      "title": "12.4 Conformity, Compliance, and Obedience - Psychology 2e | OpenStax",
+      "url": "https://openstax.org/books/psychology-2e/pages/12-4-conformity-compliance-and-obedience",
+      "kind": "open_textbook",
+      "used_for": "主干第 4 步：Asch effect、normative vs informational social influence、Milgram 服从程序与变式、groupthink、group polarization、social loafing、deindividuation"
+    },
+    {
+      "title": "12.5 Prejudice and Discrimination - Psychology 2e | OpenStax",
+      "url": "https://openstax.org/books/psychology-2e/pages/12-5-prejudice-and-discrimination",
+      "kind": "open_textbook",
+      "used_for": "主干第 5 步：stereotype / prejudice / discrimination 三分、explicit vs implicit attitudes"
+    },
+    {
+      "title": "12.6 Aggression - Psychology 2e | OpenStax",
+      "url": "https://openstax.org/books/psychology-2e/pages/12-6-aggression",
+      "kind": "open_textbook",
+      "used_for": "主干第 5 步：hostile vs instrumental aggression、bystander effect、diffusion of responsibility；减少偏见的 superordinate goals / jigsaw classroom 写在教材本节"
+    },
+    {
+      "title": "12.7 Prosocial Behavior - Psychology 2e | OpenStax",
+      "url": "https://openstax.org/books/psychology-2e/pages/12-7-prosocial-behavior",
+      "kind": "open_textbook",
+      "used_for": "主干第 5 步：prosocial / altruism、proximity、similarity、reciprocity、triangular theory of love、social exchange theory"
+    },
+    {
+      "title": "Ch. 12 Review Questions - Psychology 2e | OpenStax",
+      "url": "https://openstax.org/books/psychology-2e/pages/12-review-questions",
+      "kind": "open_textbook",
+      "used_for": "各节点过关：第 1–28 题对应归因、角色规范、态度说服、从众群体、偏见、攻击、亲社会"
+    },
+    {
+      "title": "Ch. 12 Critical Thinking Questions - Psychology 2e | OpenStax",
+      "url": "https://openstax.org/books/psychology-2e/pages/12-critical-thinking-questions",
+      "kind": "open_textbook",
+      "used_for": "各节点短评：Q29–30 情境/文化归因；Q33–34 失调与两条说服路径；Q35 groupthink；Q36–41 偏见、攻击、关系"
+    },
+    {
+      "title": "An Introduction to the Science of Social Psychology | Noba (Robert Biswas-Diener)",
+      "url": "https://nobaproject.com/modules/an-introduction-to-the-science-of-social-psychology",
+      "kind": "open_textbook",
+      "used_for": "与 OpenStax 并行的导论：定义、levels of analysis、need to belong；五大块 attraction / attitudes / peace & conflict / social influence / social cognition；页末 Discussion Questions"
+    },
+    {
+      "title": "Social Cognition and Attitudes | Noba",
+      "url": "https://nobaproject.com/modules/social-cognition-and-attitudes",
+      "kind": "open_textbook",
+      "used_for": "社会认知与态度：judgmental heuristics、explicit vs implicit attitudes；不能单独当顺序依据，补第 2–3 步术语"
+    },
+    {
+      "title": "中国社会科学院大学《社会心理学概论》课程大纲",
+      "url": "https://jw.ucass.edu.cn/kcdg/zyk/shymz/H7shehuixinlixue.pdf",
+      "kind": "syllabus",
+      "used_for": "本科课历：导论→方法与伦理→社会中的自我→社会认知与归因→态度与行为→从众与服从→群际/偏见→攻击与亲社会；考核是平时 30% + 课程论文/考试 70%"
+    },
+    {
+      "title": "课程大纲 | 社会心理学（中国科学院大学）",
+      "url": "https://jwba.ucas.ac.cn/sc/course/courseplan/278189",
+      "kind": "syllabus",
+      "used_for": "只作顺序冲突对照：该课是面向心理学专硕的核心课，把社会影响（从众/服从/顺从）放在第十三章，晚于偏见与攻击。不采用其专硕深度，也不把幸福/道德宗教写进主干"
+    }
+  ],
+  "trunk": ["intro", "cognition", "attitudes", "influence", "intergroup"],
+  "forks": [],
+  "join": null,
+  "nodes": {
+    "intro": {
+      "name": "对象、情境与方法伦理",
+      "why": "OpenStax 12.1 和 Noba 导论都先定义社会心理学：他人在场如何改变思想、情感与行为，并强调情境力量。MIT 9.70 日历第 2–3 讲是 What is Social Psychology、科学进路与伦理；中国社科大大纲第 1–2 周是导论与研究方法（含伦理）。先能说出对象和方法，后面的实验程序才有落点。",
+      "learn": [
+        "社会心理学：他人实际、想象或隐含在场如何影响思想、情感、行为",
+        "situationism vs dispositionism",
+        "Noba 的 levels of analysis 与 need to belong",
+        "研究伦理：知情、伤害风险、对服从类程序的争议（停在课纲表述，不复刻伤害性程序）"
+      ],
+      "task": {
+        "kind": "reading",
+        "prompt": "对照 OpenStax 12.1 与 Noba 导论各做一页笔记：写下教材给出的定义、情境论 vs 特质论各举一个教材里的例子；再回答 Noba Discussion Question 1（列出你的几类关系，各写一条可观察的行为如何因对方在场而不同）。不写未打开论文的篇名。",
+        "from": "OpenStax 12.1；Noba An Introduction to the Science of Social Psychology（含 Discussion Questions）"
+      },
+      "resources": [
+        {
+          "url": "https://openstax.org/books/psychology-2e/pages/12-1-what-is-social-psychology",
+          "title": "12.1 What Is Social Psychology?",
+          "use": "先抄定义、situationism / dispositionism，以及 intra- vs interpersonal 主题表"
+        },
+        {
+          "url": "https://nobaproject.com/modules/an-introduction-to-the-science-of-social-psychology",
+          "title": "Noba: An Introduction to the Science of Social Psychology",
+          "use": "读定义、levels of analysis、五大研究块；做页末 Discussion Question 1"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/9-70-social-psychology-spring-2013/pages/calendar/",
+          "title": "MIT 9.70 Calendar",
+          "use": "核对第 2–3 讲把「作为科学的社会心理学」和伦理放在最前"
+        },
+        {
+          "url": "https://jw.ucass.edu.cn/kcdg/zyk/shymz/H7shehuixinlixue.pdf",
+          "title": "社科大《社会心理学概论》大纲",
+          "use": "对照第 1–2 周：定义、学科取向、方法与伦理"
+        }
+      ]
+    },
+    "cognition": {
+      "name": "自我、角色与归因",
+      "why": "OpenStax 把归因偏差写在 12.1，紧接着 12.2 讲 social roles / norms / scripts。Noba 把 social cognition 和 social attribution（含 fundamental attribution error）列为核心块。社科大大纲第四周「社会中的自我」、第五周「社会认知 / 印象 / 归因」。先会解释「谁因情境、谁因性格」，后面的态度和从众才有同一套语言。",
+      "learn": [
+        "fundamental attribution error、actor-observer bias、self-serving bias、just-world hypothesis",
+        "个人主义文化 vs 集体主义文化对归因的影响",
+        "social role、social norm、script",
+        "教材对 Stanford prison experiment 的角色/规范解读，以及页面写明的批评（伦理、可推广性、期望效应）"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "交 OpenStax Review Questions 1–8 的答题纸（每题写选项 + 一句依据，标节号）。再写 Critical Thinking Q29 和 Q30：各给一个教材外的日常例子，标明你用的是情境解释还是特质解释，以及个人主义/集体主义会怎样解释同一场胜利。",
+        "from": "OpenStax Ch. 12 Review Questions 1–8；Critical Thinking Questions 29–30",
+        "alternatives": [
+          {
+            "kind": "writeup",
+            "prompt": "按 MIT 9.70 Assignments 对 minutes 的要求，写 1–2 页过程笔记：对 12.1–12.2 或 Noba 导论里归因段落，列出组内（或你与另一位读者）的共识与分歧，不要逐字记录谁说了什么。",
+            "from": "MIT 9.70 Assignments：study group meeting minutes"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://openstax.org/books/psychology-2e/pages/12-1-what-is-social-psychology",
+          "title": "12.1 What Is Social Psychology?",
+          "use": "读 quizmaster study、Table 12.1 文化对照、三类偏差"
+        },
+        {
+          "url": "https://openstax.org/books/psychology-2e/pages/12-2-self-presentation",
+          "title": "12.2 Self-presentation",
+          "use": "读 roles / norms / scripts；监狱实验只作角色示例，同时读页面上的批评"
+        },
+        {
+          "url": "https://openstax.org/books/psychology-2e/pages/12-review-questions",
+          "title": "Ch. 12 Review Questions",
+          "use": "做第 1–8 题"
+        },
+        {
+          "url": "https://openstax.org/books/psychology-2e/pages/12-critical-thinking-questions",
+          "title": "Ch. 12 Critical Thinking Questions",
+          "use": "写 Q29–30"
+        },
+        {
+          "url": "https://nobaproject.com/modules/an-introduction-to-the-science-of-social-psychology",
+          "title": "Noba 导论（Social Cognition 节）",
+          "use": "对照 social attribution 与 fundamental attribution error 的公路超车例子"
+        }
+      ]
+    },
+    "attitudes": {
+      "name": "态度、失调与说服",
+      "why": "OpenStax 12.3 在自我呈现之后进入 attitude、cognitive dissonance 和两条说服路径。Noba 导论把 attitudes 列为五大块之一，并单独有 Social Cognition and Attitudes 模块。社科大大纲第七周是「态度与行为 / 态度和说服」。MIT 日历把 propaganda and persuasion 放在第 6 讲。先能拆一条广告的中心/外周路径，再看从众才不会把「被说服」和「跟群体走」混成一件事。",
+      "learn": [
+        "attitude 的情感、行为、认知三成分",
+        "cognitive dissonance 与 justification of effort",
+        "elaboration likelihood：central route vs peripheral route",
+        "foot-in-the-door；Noba 里的 reciprocity 小费例子"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "交 OpenStax Review Questions 9–12。再完成 Critical Thinking Q33 和 Q34：Q33 给一个教材未用过的失调例子并写出三种化解方式（改行为 / 改认知 / 加新认知）；Q34 为同一产品各写一则中心路径广告和一则外周路径广告，标出用了 12.3 的哪一条线索。",
+        "from": "OpenStax 12.3；Review Questions 9–12；Critical Thinking Questions 33–34"
+      },
+      "resources": [
+        {
+          "url": "https://openstax.org/books/psychology-2e/pages/12-3-attitudes-and-persuasion",
+          "title": "12.3 Attitudes and Persuasion",
+          "use": "读失调、effort justification、ELM 两条路径、foot-in-the-door"
+        },
+        {
+          "url": "https://nobaproject.com/modules/social-cognition-and-attitudes",
+          "title": "Noba: Social Cognition and Attitudes",
+          "use": "补 explicit / implicit attitudes；不要把未打开的参考文献当已读论文"
+        },
+        {
+          "url": "https://openstax.org/books/psychology-2e/pages/12-review-questions",
+          "title": "Ch. 12 Review Questions",
+          "use": "做第 9–12 题"
+        },
+        {
+          "url": "https://openstax.org/books/psychology-2e/pages/12-critical-thinking-questions",
+          "title": "Ch. 12 Critical Thinking Questions",
+          "use": "写 Q33–34"
+        },
+        {
+          "url": "https://jw.ucass.edu.cn/kcdg/zyk/shymz/H7shehuixinlixue.pdf",
+          "title": "社科大大纲第七周",
+          "use": "核对本周在自我/社会认知之后、从众之前"
+        }
+      ]
+    },
+    "influence": {
+      "name": "从众、服从与群体过程",
+      "why": "OpenStax 12.4 把 conformity / compliance / obedience 和 groupthink、social loafing 放在态度之后。Noba 写 social influence 是社会心理学的「heart and soul」，并区分 conformity 与 obedience。社科大第十周专讲从众与服从、社会促进/惰化、去个体化、群体思维。MIT 第 5 讲是 group norms、conformity and deviance、obedience。这一关只分析教材里的程序与变式，不设计或复刻伤害性服从程序。",
+      "learn": [
+        "conformity、compliance；normative vs informational social influence",
+        "OpenStax 12.4 所写 Asch 线段判断与多数规模、异议者、公开/私下作答",
+        "OpenStax 12.4 所写 Milgram 程序、65% 数字及现场/距离等变式（只读教材转述）",
+        "groupthink、group polarization、social loafing、deindividuation（Table 12.2）"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "交 OpenStax Review Questions 13–16。再写 Critical Thinking Q35：用 12.4 列出的 groupthink 症状，说明「征求组外意见」如何打断其中至少两条。答题纸须点名教材中的条件（多数规模、异议者、公开作答），不要复述未打开的原始报告篇名。",
+        "from": "OpenStax 12.4；Review Questions 13–16；Critical Thinking Question 35",
+        "alternatives": [
+          {
+            "kind": "writeup",
+            "prompt": "按 MIT 9.70 minutes 格式写 1–2 页：对照 12.4 的 Table 12.2，区分你读到的是从众、依从还是服从；列出一条共识和一条分歧。不设计电击或伤害性角色扮演。",
+            "from": "MIT 9.70 Assignments minutes；OpenStax Table 12.2"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://openstax.org/books/psychology-2e/pages/12-4-conformity-compliance-and-obedience",
+          "title": "12.4 Conformity, Compliance, and Obedience",
+          "use": "读 Asch / Milgram 的教材转述、群体过程、Table 12.2"
+        },
+        {
+          "url": "https://openstax.org/books/psychology-2e/pages/12-review-questions",
+          "title": "Ch. 12 Review Questions",
+          "use": "做第 13–16 题"
+        },
+        {
+          "url": "https://openstax.org/books/psychology-2e/pages/12-critical-thinking-questions",
+          "title": "Ch. 12 Critical Thinking Questions",
+          "use": "写 Q35"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/9-70-social-psychology-spring-2013/pages/calendar/",
+          "title": "MIT 9.70 Calendar 第 5 讲",
+          "use": "核对 Self and society / group norms / conformity / obedience 的位置"
+        },
+        {
+          "url": "https://jw.ucass.edu.cn/kcdg/zyk/shymz/H7shehuixinlixue.pdf",
+          "title": "社科大大纲第十周",
+          "use": "对照从众与服从、社会惰化、去个体化、群体思维"
+        }
+      ]
+    },
+    "intergroup": {
+      "name": "偏见、攻击与亲社会",
+      "why": "OpenStax 在影响之后连续安排 12.5–12.7：先区分 stereotype / prejudice / discrimination，再讲攻击与旁观者，最后是亲社会与关系。Noba 导论把 stereotyping、prejudice、discrimination 放在 Attitudes，把冲突/攻击放在 Peace & Conflict，把吸引放在 Attraction。社科大第 11–13 周是群际、偏见、攻击与亲社会。MIT 第 9–11 讲是 aggression、prejudice、liking/loving。收束停在能用教材概念分析一则可观察的公开事件，不写治疗手册。",
+      "learn": [
+        "stereotype（认知）、prejudice（情感）、discrimination（行为）及 Table 12.3",
+        "explicit vs implicit attitudes",
+        "hostile vs instrumental aggression；bystander effect 与 diffusion of responsibility",
+        "prosocial / altruism；proximity、similarity、reciprocity；Sternberg 三角爱；social exchange"
+      ],
+      "task": {
+        "kind": "writeup",
+        "prompt": "先交 OpenStax Review Questions 17–28。再选 Critical Thinking Q36、Q39、Q41 中任意两题作答。另外写一页短评：选一则你能指出时间/场合的公开事件（新闻标题即可），用 Table 12.3 标出其中哪些是刻板印象、偏见或歧视；若涉及不帮助，用 12.6 的 diffusion of responsibility 标出可观察的旁观者条件。只分析可观察行为，不写诊断、处方或咨询步骤。",
+        "from": "OpenStax 12.5–12.7；Review Questions 17–28；Critical Thinking Questions 36–41"
+      },
+      "resources": [
+        {
+          "url": "https://openstax.org/books/psychology-2e/pages/12-5-prejudice-and-discrimination",
+          "title": "12.5 Prejudice and Discrimination",
+          "use": "读 Table 12.3 与 explicit / implicit"
+        },
+        {
+          "url": "https://openstax.org/books/psychology-2e/pages/12-6-aggression",
+          "title": "12.6 Aggression",
+          "use": "读两种攻击、bystander effect；superordinate goals 只作教材里的减少偏见例子"
+        },
+        {
+          "url": "https://openstax.org/books/psychology-2e/pages/12-7-prosocial-behavior",
+          "title": "12.7 Prosocial Behavior",
+          "use": "读亲社会、邻近/相似、三角爱、社会交换"
+        },
+        {
+          "url": "https://openstax.org/books/psychology-2e/pages/12-review-questions",
+          "title": "Ch. 12 Review Questions",
+          "use": "做第 17–28 题"
+        },
+        {
+          "url": "https://openstax.org/books/psychology-2e/pages/12-critical-thinking-questions",
+          "title": "Ch. 12 Critical Thinking Questions",
+          "use": "从 Q36、Q39、Q41 里选两题"
+        },
+        {
+          "url": "https://nobaproject.com/modules/an-introduction-to-the-science-of-social-psychology",
+          "title": "Noba 导论（Attitudes / Peace & Conflict / Attraction）",
+          "use": "对照刻板印象 vs 偏见 vs 歧视的定义，以及 culture of honor 的教材转述"
+        }
+      ]
+    }
+  },
+  "conflicts": [
+    "MIT 9.70 第 5 讲先讲 conformity / obedience，第 6 讲才是 persuasion；OpenStax 与社科大大纲都是态度/说服在前、从众服从在后。取更常见、也更靠前的教材顺序：态度 → 社会影响。",
+    "国科大专硕大纲把社会影响放到第十三章，晚于偏见与攻击。该课不是本科调查课，主干不跟它的后置顺序。",
+    "社科大第三周有「人格心理学」，OpenStax 第 12 章和 MIT 9.70 都不把它插在自我之前。人格不进本树。",
+    "MIT 第 4 讲是家庭系统与神经性厌食的 participatory action research 演示，属临床情境。按规则丢掉，不写诊断或治疗。",
+    "社科大第 14–16 周是健康心理、社会变迁、社会心态与治理；OpenStax / Noba / MIT 调查主干在偏见、攻击、亲社会处收束。后半不进树。",
+    "同一关的交卷：OpenStax 复习题/批判题，或 MIT minutes 短评。写在 task.alternatives，不分叉。"
+  ],
+  "missing": "",
+  "checked_at": "2026-10-04"
+}

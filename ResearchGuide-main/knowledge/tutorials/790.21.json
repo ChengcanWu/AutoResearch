@@ -1,0 +1,367 @@
+{
+  "id": "790.21",
+  "name": "发展经济",
+  "format": "tutorial-tree-v2",
+  "status": "ok",
+  "goal": "能按本科发展经济学课历度量收入与贫困、说明用什么证据判断干预是否有效，并对照 14.73 短评或 14.74 习题交出营养/教育/家庭金融与一份政策短评。不承诺新的政策评估或发表论文。",
+  "sources": [
+    {
+      "title": "14.73: The Challenge of World Poverty Syllabus Fall 2022 (MIT)",
+      "url": "https://economics.mit.edu/sites/default/files/inline-files/14.73%20Syllabus%20Fall%202022.pdf",
+      "kind": "syllabus",
+      "used_for": "一年级无先修入口；主干顺序：introduction → evidence → food → health → education → risk/insurance → credit → savings → entrepreneurship → psychology；作业是 weekly memo、case、两篇 essay、一份 policy brief"
+    },
+    {
+      "title": "Syllabus | The Challenge of World Poverty | 14.73 (MIT OCW, Spring 2011)",
+      "url": "https://ocw.mit.edu/courses/14-73-the-challenge-of-world-poverty-spring-2011/pages/syllabus/",
+      "kind": "ocw",
+      "used_for": "本科无先修；10 个主题：Introduction, Consumption, Education, Health, Family, Insurance, Credit, Savings, Entrepreneurship, Political economy；过关是短评 + 期末"
+    },
+    {
+      "title": "Calendar | The Challenge of World Poverty | 14.73 (MIT OCW, Spring 2011)",
+      "url": "https://ocw.mit.edu/courses/14-73-the-challenge-of-world-poverty-spring-2011/pages/calendar/",
+      "kind": "ocw",
+      "used_for": "课历顺序：poverty trap → experiments → food → health → education → family → risk/insurance → credit → savings → entrepreneurship → political economy"
+    },
+    {
+      "title": "Lecture Notes | The Challenge of World Poverty | 14.73 (MIT OCW, Spring 2011)",
+      "url": "https://ocw.mit.edu/courses/14-73-the-challenge-of-world-poverty-spring-2011/pages/lecture-notes/",
+      "kind": "lecture_notes",
+      "used_for": "各讲 PDF：Lec 2 poverty trap、Lec 3 social experiments、Lec 5–6 nutrition trap、Lec 8 health、Lec 9–11 education、Lec 15–21 risk/credit/savings、Lec 24–26 politics"
+    },
+    {
+      "title": "Assignments | The Challenge of World Poverty | 14.73 (MIT OCW, Spring 2011)",
+      "url": "https://ocw.mit.edu/courses/14-73-the-challenge-of-world-poverty-spring-2011/pages/assignments/",
+      "kind": "ocw",
+      "used_for": "按主题交约 500 词短评：Introduction / Consumption / Health / Education / Insurance / Credit / Savings / Political Economy"
+    },
+    {
+      "title": "Readings | The Challenge of World Poverty | 14.73 (MIT OCW, Spring 2011)",
+      "url": "https://ocw.mit.edu/courses/14-73-the-challenge-of-world-poverty-spring-2011/pages/readings/",
+      "kind": "ocw",
+      "used_for": "指定教材 Poor Economics 各章：Lec 2 第1章、食物第2章、健康第3章、教育第4章、保险第6章、信贷第7章、储蓄第8章、制度第10章"
+    },
+    {
+      "title": "Syllabus | Foundations of Development Policy | 14.74 (MIT OCW, Spring 2009)",
+      "url": "https://ocw.mit.edu/courses/14-74-foundations-of-development-policy-spring-2009/pages/syllabus/",
+      "kind": "ocw",
+      "used_for": "另一门本科课：先修微观+统计；目标是量化政策权衡；教材 Debraj Ray Development Economics；6 次 problem set + 课程报告"
+    },
+    {
+      "title": "Calendar | Foundations of Development Policy | 14.74 (MIT OCW, Spring 2009)",
+      "url": "https://ocw.mit.edu/courses/14-74-foundations-of-development-policy-spring-2009/pages/calendar/",
+      "kind": "ocw",
+      "used_for": "顺序：vicious circle of poverty → nutrition → education → health →（性别/家庭/土地）→ savings → insurance → credit → institutions"
+    },
+    {
+      "title": "Assignments | Foundations of Development Policy | 14.74 (MIT OCW, Spring 2009)",
+      "url": "https://ocw.mit.edu/courses/14-74-foundations-of-development-policy-spring-2009/pages/assignments/",
+      "kind": "ocw",
+      "used_for": "PS1 贫困面容与 Stata；PS2 教育回报；PS3 健康；PS4–6 土地/储蓄、保险、信贷；Ses 15–16 program proposal 报告"
+    },
+    {
+      "title": "Readings | Foundations of Development Policy | 14.74 (MIT OCW, Spring 2009)",
+      "url": "https://ocw.mit.edu/courses/14-74-foundations-of-development-policy-spring-2009/pages/readings/",
+      "kind": "ocw",
+      "used_for": "Ray 营养/土地/保险/信贷章节位置；引言指定读 A Quiet Violence 第12章"
+    },
+    {
+      "title": "Essentials of Development Economics — Preface / Contents (Taylor & Lybbert, RebelText)",
+      "url": "https://www.rebeltext.org/economics-book/EoDE_preface.pdf",
+      "kind": "open_textbook",
+      "used_for": "初版目录：What DE Is All About → Income → Poverty → Inequality → Human Development → Growth → Agriculture → Transformation → Markets → Credit and Risk → What Works"
+    },
+    {
+      "title": "What Development Economics Is All About (RebelText Ch.1)",
+      "url": "https://www.rebeltext.org/economics-book/EoDE_Ch-1.pdf",
+      "kind": "open_textbook",
+      "used_for": "节点 poverty：低收入经济与高收入经济的假设如何不同；第2–5章先讲 Income / Poverty / Inequality / Human Development，增长在第6章"
+    },
+    {
+      "title": "Income (RebelText Ch.2)",
+      "url": "https://www.rebeltext.org/economics-book/EoDE_Ch-2.pdf",
+      "kind": "open_textbook",
+      "used_for": "节点 poverty：GDP 市场价与要素成本、GNP/GNI、GDP 里没有什么"
+    },
+    {
+      "title": "RebelText: Essentials of Development Economics (book page)",
+      "url": "https://www.rebeltext.org/economics-book/index.html",
+      "kind": "open_textbook",
+      "used_for": "UC Davis 高年级本科发展经济学教材定位；可自学"
+    },
+    {
+      "title": "Essentials of Development Economics, Third Edition — Table of Contents (UC Press)",
+      "url": "https://www.ucpress.edu/books/essentials-of-development-economics-third-edition/paper",
+      "kind": "open_textbook",
+      "used_for": "第三版把 What Works and What Doesn’t 提前到第2章，随后 Income / Poverty / Inequality / Human Development / Growth / Institutions / Finance"
+    },
+    {
+      "title": "Dollar Street (Gapminder)",
+      "url": "https://www.gapminder.org/dollar-street/matrix",
+      "kind": "other",
+      "used_for": "14.73 Fall 2022 Case 1：对照不同收入档的家庭照片，写「贫困意味着什么」"
+    },
+    {
+      "title": "Esther Duflo: Social experiments to fight poverty (TED, 2010)",
+      "url": "https://www.ted.com/talks/esther_duflo_social_experiments_to_fight_poverty",
+      "kind": "other",
+      "used_for": "14.73 Lecture 2 / OCW Lec 3 指定观看：用随机试验判断哪类减贫办法有效"
+    },
+    {
+      "title": "北京大学经济学院本科生教学手册（2003）— 发展经济学",
+      "url": "https://file.cineseitalia.com/bbs/1212882440/Fid_42/42_43111_d564995127de286.pdf",
+      "kind": "syllabus",
+      "used_for": "冲突：北大本科先讲古典增长、二元经济、现代增长、结构主义，最后才是制度；作业+讨论+闭卷考试"
+    }
+  ],
+  "trunk": ["poverty", "evidence", "human", "markets", "policy"],
+  "forks": [],
+  "join": null,
+  "nodes": {
+    "poverty": {
+      "name": "贫困、收入与贫困陷阱",
+      "why": "14.73 从 What does it mean to be poor / What is a poverty trap 起讲；14.74 课历 Ses 1–2 是 vicious circle of poverty。RebelText 第1章后先度量 Income 与 Poverty，再进入人类发展。",
+      "learn": [
+        "贫困陷阱",
+        "一天一美元生活与「贫困意味着什么」",
+        "GDP（市场价 / 要素成本）与 GNP/GNI",
+        "低收入经济里市场、信息、交易成本假设如何不同于高收入经济"
+      ],
+      "task": {
+        "kind": "writeup",
+        "prompt": "对照 14.73 Assignments 的 Introduction essay：先读 Poor Economics 第1章（Readings Lec 2 标星）和 RebelText 第1–2章，再用 Dollar Street 选两个收入档家庭，写不超过 500 词短评：提出论点、说明读者为何该关心、用课上度量语言（贫困陷阱 / GDP 或不在 GDP 里的东西）论证。不要写成读书报告。",
+        "from": "14.73 Introduction essay assignment；Fall 2022 Case 1 / Poor Economics Ch.1；RebelText Ch.1–2",
+        "alternatives": [
+          {
+            "kind": "problem_set",
+            "prompt": "对照 14.74 Assignment 1（World Bank development report data / faces of poverty）：用课上提供的 wbdr.dta 完成 Stata 练习，并按该 PDF 的 essay exercise 交一页「贫困面容」短答。",
+            "from": "14.74 Assignments, Assignment 1"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://ocw.mit.edu/courses/14-73-the-challenge-of-world-poverty-spring-2011/pages/lecture-notes/",
+          "title": "14.73 Lecture Notes — Lec 2 What is a poverty trap?",
+          "use": "先打开 Lec 2 PDF，记下贫困陷阱的定义与图示"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/14-73-the-challenge-of-world-poverty-spring-2011/pages/readings/",
+          "title": "14.73 Readings — Lec 2 Poor Economics Ch.1",
+          "use": "读 Lec 2 标星的 Poor Economics 第1章（及第2章 pp.19–22）"
+        },
+        {
+          "url": "https://www.rebeltext.org/economics-book/EoDE_Ch-2.pdf",
+          "title": "RebelText Chapter 2 Income",
+          "use": "用手算或标注：同一张 IO 表分别用最终需求与增加值算出 GDP"
+        },
+        {
+          "url": "https://www.gapminder.org/dollar-street/matrix",
+          "title": "Gapminder Dollar Street",
+          "use": "按 14.73 Fall 2022 Case 1 浏览不同收入档家庭，作为短评证据"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/14-73-the-challenge-of-world-poverty-spring-2011/pages/assignments/",
+          "title": "14.73 Assignments — Introduction essay",
+          "use": "按 Introduction essay PDF 的题面交卷"
+        }
+      ]
+    },
+    "evidence": {
+      "name": "证据：什么有效",
+      "why": "14.73 把 The Role of Evidence / Learning what works 紧挨在引言之后（Fall 2022 Module 2；OCW Lec 3）。RebelText 第三版把 What Works and What Doesn’t 提前到第2章。14.74 写明这是 empirical class，要能说出作者用什么方法得到结论。",
+      "learn": [
+        "社会实验 / 随机试验为什么能回答「什么有效」",
+        "干预评估与「什么有效、什么无效」",
+        "读经验研究时要能指出识别方法，而不只复述结论"
+      ],
+      "task": {
+        "kind": "reading",
+        "prompt": "观看 Duflo 的 TED「Social experiments to fight poverty」，对照 14.73 Lecture Notes Lec 3。交一份 Fall 2022 那种 weekly memo（课前、短）：写出你认为最重要的一点，以及它为什么重要；并各举一个「适合随机试验」和「不适合」的减贫问题。",
+        "from": "14.73 Fall 2022 Lecture 2 / OCW Lec 3；TED talk",
+        "alternatives": [
+          {
+            "kind": "writeup",
+            "prompt": "按 14.73 Syllabus 的短评规则（先立论、说明为何重要、论证），就「援助是否必须先有好治理」或大纲里同类题目写不超过 500 词。论点必须提到实验或识别，不能只复述口号。",
+            "from": "14.73 OCW Syllabus, Examples of Potential Paper Topics / Written Assignments"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://www.ted.com/talks/esther_duflo_social_experiments_to_fight_poverty",
+          "title": "Esther Duflo: Social experiments to fight poverty",
+          "use": "14.73 指定观看，作为 memo 的主材料"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/14-73-the-challenge-of-world-poverty-spring-2011/pages/lecture-notes/",
+          "title": "14.73 Lecture Notes — Lec 3 Social experiments",
+          "use": "打开 Lec 3 PDF，对照 TED 记下「为什么做实验、怎么做」"
+        },
+        {
+          "url": "https://economics.mit.edu/sites/default/files/inline-files/14.73%20Syllabus%20Fall%202022.pdf",
+          "title": "14.73 Fall 2022 Syllabus — Weekly memos",
+          "use": "按 Weekly memos 一节的篇幅与截止习惯交 memo"
+        },
+        {
+          "url": "https://www.ucpress.edu/books/essentials-of-development-economics-third-edition/paper",
+          "title": "Essentials of Development Economics, 3rd ed. TOC",
+          "use": "核对第2章 What Works and What Doesn’t 在收入/贫困之前"
+        }
+      ]
+    },
+    "human": {
+      "name": "营养、健康与教育",
+      "why": "14.73 在证据之后连续讲 Food、Health、Education（Poor Economics 第2–4章）。14.74 在引言后同样是 nutrition → education → health，并配 PS2/PS3。RebelText 把 Human Development 放在 Income / Poverty / Inequality 之后。",
+      "learn": [
+        "营养贫困陷阱与食物/热量需求",
+        "医疗行为与「低垂果实」",
+        "如何向穷人交付有质量的教育",
+        "人类发展（健康、教育、劳动条件）"
+      ],
+      "task": {
+        "kind": "writeup",
+        "prompt": "从 14.73 Assignments 的 Consumption、Health、Education 三份 essay 里选两份交卷。每份对照 Readings 上该主题标星的 Poor Economics 章节（第2 / 3 / 4章）和对应 Lecture Notes，按大纲写成约 500 词、先立论的短评，不是章节摘要。",
+        "from": "14.73 Assignments: Consumption / Health / Education essays；Readings Lec 5–11",
+        "alternatives": [
+          {
+            "kind": "problem_set",
+            "prompt": "对照 14.74 Assignment 2（returns to schooling）或 Assignment 3（worms / health）：按该 PDF 做完估计题，并回答附带的 essay question。交软件日志与一页文字。",
+            "from": "14.74 Assignments, Assignment 2 or 3"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://ocw.mit.edu/courses/14-73-the-challenge-of-world-poverty-spring-2011/pages/calendar/",
+          "title": "14.73 Calendar — Food / Health / Education",
+          "use": "按 Lec 4–11 的主题顺序读，不要跳到信贷"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/14-73-the-challenge-of-world-poverty-spring-2011/pages/lecture-notes/",
+          "title": "14.73 Lecture Notes — Lec 5–6, 8, 9–11",
+          "use": "读 nutrition trap、low hanging fruit、education 三组 PDF"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/14-73-the-challenge-of-world-poverty-spring-2011/pages/assignments/",
+          "title": "14.73 Assignments — Consumption / Health / Education",
+          "use": "打开对应 essay PDF，按题面交两篇"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/14-74-foundations-of-development-policy-spring-2009/pages/assignments/",
+          "title": "14.74 Assignments — PS2 / PS3",
+          "use": "若走 problem set 轨，做教育或健康那一套"
+        },
+        {
+          "url": "https://www.rebeltext.org/economics-book/EoDE_preface.pdf",
+          "title": "RebelText Contents — Human Development",
+          "use": "对照初版第5章 Human Development 在 Inequality 之后、Growth 之前"
+        }
+      ]
+    },
+    "markets": {
+      "name": "风险、信贷与储蓄",
+      "why": "14.73 在人力资本之后进入 Risk and Insurance、Credit、Savings（Poor Economics 第6–8章）。14.74 在土地之后同样是 savings → insurance → credit markets。RebelText 用 Credit and Risk（初版第10章；第三版 Finance）收束家庭金融。",
+      "learn": [
+        "风险与保险（正式与非市场安排）",
+        "向穷人放贷为何不容易、小额信贷承诺与限度",
+        "穷人如何储蓄、储蓄工具是否可得"
+      ],
+      "task": {
+        "kind": "writeup",
+        "prompt": "从 14.73 的 Insurance、Credit、Savings 三份 essay 里选两份。每份对照 Readings 上 Poor Economics 第6 / 7 / 8章和 Lecture Notes Lec 15–21，写约 500 词短评：必须回答「市场缺了哪一块」以及课上给出的一种应对（保险、信贷或储蓄工具），并引用讲义或教材页码。",
+        "from": "14.73 Assignments: Insurance / Credit / Savings；Readings Lec 14–20",
+        "alternatives": [
+          {
+            "kind": "problem_set",
+            "prompt": "对照 14.74 Assignment 5（insurance and incentives / credit as insurance）或 Assignment 6（credit market models）：按 PDF 做完理论或实证题并交书面解答。",
+            "from": "14.74 Assignments, Assignment 5 or 6"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://ocw.mit.edu/courses/14-73-the-challenge-of-world-poverty-spring-2011/pages/readings/",
+          "title": "14.73 Readings — Insurance / Credit / Savings",
+          "use": "读 Poor Economics 第6–8章（Lec 15、17–18、20 标星）"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/14-73-the-challenge-of-world-poverty-spring-2011/pages/lecture-notes/",
+          "title": "14.73 Lecture Notes — Lec 15–21",
+          "use": "打开 risk/insurance、lending to the poor、microfinance、savings 的 PDF"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/14-73-the-challenge-of-world-poverty-spring-2011/pages/assignments/",
+          "title": "14.73 Assignments — Insurance / Credit / Savings",
+          "use": "按这三份 essay PDF 选两份交卷"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/14-74-foundations-of-development-policy-spring-2009/pages/calendar/",
+          "title": "14.74 Calendar — Savings / Insurance / Credit",
+          "use": "核对 Ses 19–23 把这三块放在人力资本之后"
+        },
+        {
+          "url": "https://www.rebeltext.org/economics-book/EoDE_preface.pdf",
+          "title": "RebelText Contents — Credit and Risk",
+          "use": "对照初版第10章 Credit and Risk 的位置"
+        }
+      ]
+    },
+    "policy": {
+      "name": "制度与政策短评",
+      "why": "14.73 用 Political economy / Policies, politics 和一份 policy brief 收束。14.74 最后是 Formal and informal institutions，并要求全年做完一份 program proposal。RebelText 第三版有独立的 Institutions 章。终点是交得出短评或方案，不是新结果。",
+      "learn": [
+        "正式与非正式制度",
+        "证据能否进入减贫政策",
+        "政策短评 / program proposal：问题、原因、方案、如何评估"
+      ],
+      "task": {
+        "kind": "writeup",
+        "prompt": "对照 14.73 Fall 2022 的 Policy Brief（约 2000 词）或 OCW Political economy essay（约 500 词）：从本学期已做的食物/教育/信贷等主题里选一个，按 J-PAL 式政策备忘写出问题、已有证据、一项可操作建议。必须引用 Lecture Notes Lec 24–26 或 Poor Economics 第10章的一处具体说法。",
+        "from": "14.73 Fall 2022 Policy Brief；OCW Political economy essay；Lec 24–26",
+        "alternatives": [
+          {
+            "kind": "project",
+            "prompt": "按 14.74 Presentations 指南：从课表主题中选一个问题，读至少三篇该课 Readings 列出的材料，写出问题与可能原因、三个备选方案、选定方案的实施对象，以及你打算如何评估（随机或其他）。交两页摘要或详细幻灯。",
+            "from": "14.74 Assignments, Presentations guidelines"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://ocw.mit.edu/courses/14-73-the-challenge-of-world-poverty-spring-2011/pages/lecture-notes/",
+          "title": "14.73 Lecture Notes — Lec 24–26",
+          "use": "读 Policies, politics 与 Five thoughts 两份 PDF，作为短评收束"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/14-73-the-challenge-of-world-poverty-spring-2011/pages/assignments/",
+          "title": "14.73 Assignments — Political economy essay",
+          "use": "若走短评轨，按 Political economy essay PDF 交卷"
+        },
+        {
+          "url": "https://economics.mit.edu/sites/default/files/inline-files/14.73%20Syllabus%20Fall%202022.pdf",
+          "title": "14.73 Fall 2022 Syllabus — Policy Brief",
+          "use": "若走政策备忘轨，按 Written assignments 一节的 Policy Brief 要求写"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/14-74-foundations-of-development-policy-spring-2009/pages/assignments/",
+          "title": "14.74 Assignments — Presentations",
+          "use": "若走 project 轨，按 Presentations 的 6 步指南交方案"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/14-74-foundations-of-development-policy-spring-2009/pages/calendar/",
+          "title": "14.74 Calendar — Institutions",
+          "use": "核对 Ses 24 Formal and informal institutions 放在家庭金融之后"
+        }
+      ]
+    }
+  },
+  "conflicts": [
+    "北京大学经济学院本科《发展经济学》先讲古典增长、二元经济、现代增长与结构主义，最后才是制度。14.73 与 RebelText 先讲贫困/收入/人类发展。面向一、二年级取更靠前的 14.73 / RebelText 顺序，不把增长理论做成主干。",
+    "RebelText 初版把 What Works 放在全书最后；第三版和 14.73 把证据放在人力资本之前。取证据靠前。",
+    "14.73 / 14.74 在教育与风险之间插入家庭、性别或土地；RebelText 没有独立家庭章。不把家庭/土地做成必做主干节点。",
+    "同一关的交卷：14.73 用 memo/短评，14.74 用 problem set 或 program proposal。写在 task.alternatives，不分叉。"
+  ],
+  "missing": "",
+  "checked_at": "2026-10-04"
+}

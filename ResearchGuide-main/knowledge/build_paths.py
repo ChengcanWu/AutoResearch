@@ -17,8 +17,7 @@ DOCS = ROOT / "docs" / "paths"
 OUT = ROOT / "knowledge" / "paths.json"
 
 # 文件名 → 方向树代码（与 web/js/app.js 的 FIELD_TREES、server/planner.py 的 DIRECTIONS 一致）
-CODES = {"数学": "math", "人工智能": "ai", "认知": "psy", "经济": "econ"}
-
+CODES = {"数学": "math", "人工智能": "ai", "认知": "psy", "经济": "econ", "基础医学": "med"}
 # 路径第几步 → 项目阶段（0 只学了概念 · 1 做过小任务 · 2 学完一块 · 3 做过项目）
 STEP_TO_STAGE = {1: 0, 2: 1, 3: 2, 4: 2, 5: 3, 6: 3}
 

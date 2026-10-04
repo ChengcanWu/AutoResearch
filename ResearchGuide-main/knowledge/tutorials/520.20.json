@@ -1,0 +1,228 @@
+{
+  "id": "520.20",
+  "name": "人工智能",
+  "format": "tutorial-tree-v2",
+  "status": "ok",
+  "goal": "能用线代和 Python 把监督学习写成可训练的模型，能解释过拟合，并对照 6.390 的 Exercise/Lab 完成回归或分类实验；表示学习只跟卷积或 Transformer 一条。不承诺训练大模型或发表论文。",
+  "sources": [
+    {
+      "title": "6.390 Introduction to Machine Learning — Course Information (MIT, Fall 2026)",
+      "url": "https://introml.mit.edu/fall26/info",
+      "kind": "syllabus",
+      "used_for": "主干先修（Python、线代、梯度）和课程目标：从优化角度看监督学习；作业形态是 Exercise + Lab + Homework"
+    },
+    {
+      "title": "6.390 Introduction to Machine Learning — Calendar (MIT, Fall 2026)",
+      "url": "https://introml.mit.edu/fall26/calendar",
+      "kind": "syllabus",
+      "used_for": "主干顺序：回归与正则 → 梯度下降 → 线性分类 → 神经网络；其后并列加深：Convolutional Neural Networks 与 Transformers"
+    },
+    {
+      "title": "Mathematics for Machine Learning — Table of Contents (Deisenroth, Faisal, Ong)",
+      "url": "https://mml-book.com/",
+      "kind": "open_textbook",
+      "used_for": "主干数学：线性代数、向量微积分、连续优化（梯度下降）再进入回归与分类；第 5.6 节有反向传播。不含卷积或 Transformer"
+    }
+  ],
+  "trunk": ["prereq", "regression", "classify", "nn"],
+  "forks": [
+    {
+      "id": "repr",
+      "after": "nn",
+      "pick": 1,
+      "why": "6.390 日历在 Features & Neural Networks 之后连续安排 Convolutional Neural Networks、Representation Learning、Transformers，第二次期中覆盖到 Transformer；两者同属「表示」加深，不是另一门课。MML 第二部分停在回归 / PCA / GMM / SVM，没有这两块。本科入口不要求两周都做完，对照课历上其中一讲的 Lab/Exercise 交记录。",
+      "source_urls": [
+        "https://introml.mit.edu/fall26/calendar",
+        "https://mml-book.com/"
+      ],
+      "branches": [
+        { "id": "cnn", "name": "卷积", "nodes": ["cnn"] },
+        { "id": "transformer", "name": "Transformer", "nodes": ["transformer"] }
+      ]
+    }
+  ],
+  "join": {
+    "after_fork": "repr",
+    "node": "wrap",
+    "why": "6.390 用每周 Exercise + Lab + Homework 检查，而不是另开研究题目。两条表示轨交完后，用同一份可复现实验记录收束。"
+  },
+  "nodes": {
+    "prereq": {
+      "name": "先修：线代、梯度、Python",
+      "why": "6.390 Course Information 写明线代（秩、乘法、逆、高维空间中的点与平面、梯度）和中级 Python 是课上一直用、但课里不教的东西。MML 把线性代数、向量微积分放在任何学习算法之前。",
+      "learn": [
+        "矩阵运算与秩",
+        "高维空间中的点与平面",
+        "标量函数的梯度",
+        "能读伪代码并写成 Python"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "对照 MML 线性代数 / 向量微积分章节的习题，交 3 道手算（含一次梯度），再用 Python 实现同一处矩阵乘法；每道题注明用了书中哪一节。",
+        "from": "MML 线性代数、向量微积分章节 Exercises；先修标准见 6.390 Course Information"
+      },
+      "resources": [
+        {
+          "url": "https://introml.mit.edu/fall26/info",
+          "title": "6.390 Course Information",
+          "use": "先读 Prerequisites，核对自己缺的是线代还是 Python"
+        },
+        {
+          "url": "https://mml-book.com/",
+          "title": "Mathematics for Machine Learning — 目录",
+          "use": "打开线性代数、向量微积分两章，做习题并记下节号"
+        }
+      ]
+    },
+    "regression": {
+      "name": "回归、正则与梯度下降",
+      "why": "6.390 日历第 2–3 讲就是 Regression & Regularization、Gradient Descent。MML 第 7 章把梯度下降放在连续优化里，第 9 章才是线性回归。先会把损失变小，后面的分类和网络才有同一套语言。",
+      "learn": [
+        "线性回归",
+        "正则化在惩罚什么",
+        "梯度下降何时下降、何时不下降或发散"
+      ],
+      "task": {
+        "kind": "lab",
+        "prompt": "不用机器学习库，用手写梯度下降拟合一个小回归（数据可来自教材例题），画出损失曲线，并写清：哪一次步长让曲线下降、哪一次不下降或发散。",
+        "from": "6.390 日历第 2–3 讲的 Exercise / Lab 形态；MML 第 7、9 章"
+      },
+      "resources": [
+        {
+          "url": "https://introml.mit.edu/fall26/calendar",
+          "title": "6.390 Calendar",
+          "use": "对照第 2–3 讲 Regression & Regularization / Gradient Descent 的 Exercise 与 Lab"
+        },
+        {
+          "url": "https://mml-book.com/",
+          "title": "Mathematics for Machine Learning — 目录",
+          "use": "读连续优化（梯度下降）和线性回归两章，数据可用章内例题"
+        }
+      ]
+    },
+    "classify": {
+      "name": "线性分类：怎样算分对",
+      "why": "6.390 第 4 讲是 Linear Classification，第一次期中覆盖到这一周。课程概述把过拟合与泛化写成核心词。MML「模型碰上数据」要求分清数据和假设。",
+      "learn": [
+        "把分类写成带损失的优化问题",
+        "准确率为什么不够",
+        "过拟合与泛化"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "在一个二维或表格小数据集上做一次线性分类，交：划分方式、一张按类看的对错表、一句「如果全猜多数类会怎样」。",
+        "from": "6.390 第 4 讲 Linear Classification 的 Exercise 形态"
+      },
+      "resources": [
+        {
+          "url": "https://introml.mit.edu/fall26/calendar",
+          "title": "6.390 Calendar",
+          "use": "对照第 4 讲 Linear Classification 与第一次期中覆盖范围"
+        },
+        {
+          "url": "https://introml.mit.edu/fall26/info",
+          "title": "6.390 Course Information",
+          "use": "核对照课程概述里 overfitting / generalization 的说法来写对错表旁的一句"
+        }
+      ]
+    },
+    "nn": {
+      "name": "特征与神经网络",
+      "why": "6.390 在线性分类之后紧接 Features & Neural Networks I/II，然后才是卷积网络。课从优化视角引入网络。MML 5.6 有反向传播与自动微分。",
+      "learn": [
+        "特征变换",
+        "一层与两层网络",
+        "反向传播与梯度"
+      ],
+      "task": {
+        "kind": "lab",
+        "prompt": "用课上允许的框架或手写一个最小网络，跑通 6.390 日历里 Neural Networks 那一周对应的练习：交训练/验证曲线，并指出过拟合出现在哪一段。",
+        "from": "6.390 Features & Neural Networks I/II 的 Lab / Exercise"
+      },
+      "resources": [
+        {
+          "url": "https://introml.mit.edu/fall26/calendar",
+          "title": "6.390 Calendar",
+          "use": "对照 Neural Networks I/II 那一周的 Lab / Exercise"
+        },
+        {
+          "url": "https://mml-book.com/",
+          "title": "Mathematics for Machine Learning — 目录",
+          "use": "读 5.6 反向传播与自动微分，用来解释曲线，不另开一章深度学习"
+        }
+      ]
+    },
+    "cnn": {
+      "name": "卷积：图像上的表示",
+      "why": "6.390 在网络之后安排 Convolutional Neural Networks，属于同一条表示线的图像一侧。MML 没有这一章，所以本节点只跟 6.390 课历，不要求两边都做。",
+      "learn": [
+        "卷积在图像上复用什么",
+        "数据如何被变成特征",
+        "模型的输入与输出"
+      ],
+      "task": {
+        "kind": "lab",
+        "prompt": "对照 6.390 课历上 Convolutional Neural Networks 那一讲，交一页图：数据如何被变成特征、模型输入输出是什么；再交一次该周 Lab/Exercise 能对上的最小实验记录（命令、曲线或错误率）。",
+        "from": "6.390 Calendar 上 CNN 那一周的 Lab / Exercise"
+      },
+      "resources": [
+        {
+          "url": "https://introml.mit.edu/fall26/calendar",
+          "title": "6.390 Calendar",
+          "use": "只做 Convolutional Neural Networks 那一周，不要同时做 Transformer 周"
+        }
+      ]
+    },
+    "transformer": {
+      "name": "Transformer：序列上的表示",
+      "why": "6.390 把 Transformers 放在 Representation Learning 之后，第二次期中覆盖到这里。与 CNN 同属表示加深。MML 没有这一章。",
+      "learn": [
+        "Transformer 在课上被放在表示学习之后",
+        "数据如何被变成特征",
+        "模型的输入与输出"
+      ],
+      "task": {
+        "kind": "lab",
+        "prompt": "对照 6.390 课历上 Transformers 那一讲，交一页图：数据如何被变成特征、模型输入输出是什么；再交一次该周 Lab/Exercise 能对上的最小实验记录（命令、曲线或错误率）。",
+        "from": "6.390 Calendar 上 Transformers 那一周的 Lab / Exercise"
+      },
+      "resources": [
+        {
+          "url": "https://introml.mit.edu/fall26/calendar",
+          "title": "6.390 Calendar",
+          "use": "只做 Transformers 那一周，不要同时做 CNN 周"
+        }
+      ]
+    },
+    "wrap": {
+      "name": "用课上的作业形态收束",
+      "why": "6.390 用每周 Exercise + Lab + Homework 检查，而不是自己想一个研究题目。MML 每章有 Exercises。不进入课历后半的 MDP / 强化学习，除非主干和所选表示轨已经交齐。",
+      "learn": [
+        "一份别人能复现的记录：数据、超参、曲线、你改过的一处"
+      ],
+      "task": {
+        "kind": "writeup",
+        "prompt": "交一份 3 页以内的实验记录：复现课历上你做过的任意一周 Lab 的设置（写清是哪一讲），报告数字，并写一处失败或没变好的改动。不写未打开的论文篇名。",
+        "from": "6.390 Exercise + Lab + Homework 形态；MML 章末 Exercises 可作数据来源"
+      },
+      "resources": [
+        {
+          "url": "https://introml.mit.edu/fall26/calendar",
+          "title": "6.390 Calendar",
+          "use": "选定你已经做过的那一周 Lab，按课历上的设置复现"
+        },
+        {
+          "url": "https://introml.mit.edu/fall26/info",
+          "title": "6.390 Course Information",
+          "use": "按课上的作业形态写记录，不要另开研究题目"
+        }
+      ]
+    }
+  },
+  "conflicts": [
+    "6.390 后半有 MDP 与强化学习；MML 第二部分停在回归、PCA、GMM、SVM。蒸馏取两者都有的前半作主干，表示轨只跟 6.390，强化学习不进树。",
+    "6.390 日历把 CNN 和 Transformer 写成连续两周并都进第二次期中，不是培养方案里的两门选修。分叉是本科入口的压缩：MML 不含这两块，不把两周都写成必做。"
+  ],
+  "missing": "",
+  "checked_at": "2026-10-04"
+}

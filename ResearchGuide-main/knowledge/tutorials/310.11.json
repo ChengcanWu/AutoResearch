@@ -1,0 +1,433 @@
+{
+  "id": "310.11",
+  "name": "医学生化",
+  "format": "tutorial-tree-v2",
+  "status": "ok",
+  "goal": "能把水与缓冲、蛋白质/核酸结构、酶促反应，以及糖、脂、氨基酸与核苷酸代谢写成可核对的反应、计算或标记追踪，并对照 5.07SC Problem Set 与 OpenStax 复习题交卷；基因信息传递停在复制、转录、翻译的分子步骤。不写诊断、处方或临床操作。",
+  "sources": [
+    {
+      "title": "Syllabus | General Biochemistry | Biology | MIT OpenCourseWare (7.05, Spring 2020)",
+      "url": "https://ocw.mit.edu/courses/7-05-general-biochemistry-spring-2020/pages/syllabus/",
+      "kind": "ocw",
+      "used_for": "课程目标：细胞组分结构 → 酶学与反应机制 → 糖/脂/氮代谢；作业形态是 11 份 Problem Set + 考试"
+    },
+    {
+      "title": "Readings | General Biochemistry (7.05) — lecture-by-lecture topics",
+      "url": "https://ocw.mit.edu/courses/7-05-general-biochemistry-spring-2020/pages/readings/",
+      "kind": "ocw",
+      "used_for": "顺序：pH/缓冲与氨基酸蛋白质 → 酶 → 糖/膜 → 核酸与翻译 → 代谢（糖酵解、TCA、脂、氧化磷酸化、磷酸戊糖、氨基酸、核苷酸）"
+    },
+    {
+      "title": "Assignments | General Biochemistry (7.05) — metabolism problem sets",
+      "url": "https://ocw.mit.edu/courses/7-05-general-biochemistry-spring-2020/pages/assignments/",
+      "kind": "ocw",
+      "used_for": "后半代谢的 Problem Set 8–11；与 5.07SC 代谢作业并列的交卷方式"
+    },
+    {
+      "title": "Syllabus | Biological Chemistry I | MIT OpenCourseWare (5.07SC, Fall 2013)",
+      "url": "https://ocw.mit.edu/courses/5-07sc-biological-chemistry-i-fall-2013/pages/syllabus/",
+      "kind": "ocw",
+      "used_for": "三模块：Basic Biochemistry → Production of Energy → Using Energy to Make Macromolecules；每讲有 Problem Set"
+    },
+    {
+      "title": "Resource Index | Biological Chemistry I (5.07SC)",
+      "url": "https://ocw.mit.edu/courses/5-07sc-biological-chemistry-i-fall-2013/pages/resource-index/",
+      "kind": "ocw",
+      "used_for": "三模块课历与 PS1–10 索引；主干不采用 Session 16 的临床标题"
+    },
+    {
+      "title": "Session 1: What is Biochemistry? (5.07SC)",
+      "url": "https://ocw.mit.edu/courses/5-07sc-biological-chemistry-i-fall-2013/pages/module-i/session-1/",
+      "kind": "ocw",
+      "used_for": "节点 biomolecules：水、氨基酸、手性；Problem Set 1"
+    },
+    {
+      "title": "Session 2: Protein Structure and Function (5.07SC)",
+      "url": "https://ocw.mit.edu/courses/5-07sc-biological-chemistry-i-fall-2013/pages/module-i/session-2/",
+      "kind": "ocw",
+      "used_for": "节点 biomolecules：肽键与一级到四级结构，血红蛋白为例"
+    },
+    {
+      "title": "Session 3: Enzymes and Catalysis (5.07SC)",
+      "url": "https://ocw.mit.edu/courses/5-07sc-biological-chemistry-i-fall-2013/pages/module-i/session-3/",
+      "kind": "ocw",
+      "used_for": "节点 enzymes：催化剂、过渡态、活化能、专一性；PS2 一级结构题"
+    },
+    {
+      "title": "Session 4: Enzyme Kinetics and Enzyme Inhibition (5.07SC)",
+      "url": "https://ocw.mit.edu/courses/5-07sc-biological-chemistry-i-fall-2013/pages/module-i/session-4/",
+      "kind": "ocw",
+      "used_for": "节点 enzymes：动力学与抑制；Problem Set 3"
+    },
+    {
+      "title": "Session 8: Introduction to Sugar Chemistry and Carbohydrate Catabolism (5.07SC)",
+      "url": "https://ocw.mit.edu/courses/5-07sc-biological-chemistry-i-fall-2013/pages/module-ii/session-8/",
+      "kind": "ocw",
+      "used_for": "节点 carb-energy：糖化学与糖酵解概览；Problem Set 6"
+    },
+    {
+      "title": "Session 10: Respiration: TCA Cycle (5.07SC)",
+      "url": "https://ocw.mit.edu/courses/5-07sc-biological-chemistry-i-fall-2013/pages/module-ii/session-10/",
+      "kind": "ocw",
+      "used_for": "节点 carb-energy：TCA、标记追踪、回补途径；Problem Set 7"
+    },
+    {
+      "title": "Session 12: Respiration: Electron Transport and Oxidative Phosphorylation (5.07SC)",
+      "url": "https://ocw.mit.edu/courses/5-07sc-biological-chemistry-i-fall-2013/pages/module-ii/session-12/",
+      "kind": "ocw",
+      "used_for": "节点 carb-energy：电子传递、质子梯度、ATP 合成；Problem Set 8"
+    },
+    {
+      "title": "Session 14: Lipid Catabolism: Fatty Acid Beta-Oxidation (5.07SC)",
+      "url": "https://ocw.mit.edu/courses/5-07sc-biological-chemistry-i-fall-2013/pages/module-ii/session-14/",
+      "kind": "ocw",
+      "used_for": "节点 other-metab：脂作为储能、β-氧化到乙酰 CoA、酮体化学"
+    },
+    {
+      "title": "Session 21: Regulation of Metabolism (5.07SC)",
+      "url": "https://ocw.mit.edu/courses/5-07sc-biological-chemistry-i-fall-2013/pages/module-iii/session-21/",
+      "kind": "ocw",
+      "used_for": "节点 other-metab：变构、共价修饰、受体控制；器官与激素对燃料代谢的整合（只写通路，不写诊疗）"
+    },
+    {
+      "title": "“生物化学”课程教学大纲 BICH300840 — 西安交通大学医学部",
+      "url": "https://yxbpyc.xjtu.edu.cn/info/1086/1574.htm",
+      "kind": "syllabus",
+      "used_for": "医学生化三大块：大分子结构 → 物质代谢与生物氧化 → 基因信息传递；实验：蛋白质定量、电泳、碱性磷酸酶动力学"
+    },
+    {
+      "title": "《生物化学》教学大纲（中西医结合临床医学专业）— 安徽中医药大学",
+      "url": "https://gjjk.ahtcm.edu.cn/info/1023/1676.htm",
+      "kind": "syllabus",
+      "used_for": "蛋白质化学 → 核酸化学 → 酶动力学 → 生物氧化与糖/脂/氨基酸/核苷酸代谢 → 代谢调节；闭卷 + 实验报告"
+    },
+    {
+      "title": "Ch. 2 Introduction — Anatomy and Physiology 2e (OpenStax)",
+      "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/2-introduction",
+      "kind": "open_textbook",
+      "used_for": "节点 biomolecules：水、盐、酸/碱与四类有机物（蛋白质、糖、脂、核酸）"
+    },
+    {
+      "title": "2.4 Inorganic Compounds Essential to Human Functioning — OpenStax A&P 2e",
+      "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/2-4-inorganic-compounds-essential-to-human-functioning",
+      "kind": "open_textbook",
+      "used_for": "节点 biomolecules：水、脱水缩合/水解、酸/碱、pH、缓冲"
+    },
+    {
+      "title": "2.5 Organic Compounds Essential to Human Functioning — OpenStax A&P 2e",
+      "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/2-5-organic-compounds-essential-to-human-functioning",
+      "kind": "open_textbook",
+      "used_for": "节点 biomolecules：四类有机物单体/聚合物、蛋白质结构层次、核酸与 ATP"
+    },
+    {
+      "title": "Ch. 2 Review Questions — OpenStax A&P 2e",
+      "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/2-review-questions",
+      "kind": "open_textbook",
+      "used_for": "节点 biomolecules：第 23–32 题（盐、pH、单糖、氨基酸、双螺旋、尿嘧啶、酶特异性）"
+    },
+    {
+      "title": "Ch. 24 Introduction — Metabolism and Nutrition (OpenStax A&P 2e)",
+      "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/24-introduction",
+      "kind": "open_textbook",
+      "used_for": "节点 carb-energy / other-metab：合成与分解、糖/脂/蛋白质代谢步骤"
+    },
+    {
+      "title": "24.2 Carbohydrate Metabolism — OpenStax A&P 2e",
+      "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/24-2-carbohydrate-metabolism",
+      "kind": "open_textbook",
+      "used_for": "节点 carb-energy：糖酵解、Krebs、电子传递的步骤与产物"
+    },
+    {
+      "title": "24.4 Protein Metabolism — OpenStax A&P 2e",
+      "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/24-4-protein-metabolism",
+      "kind": "open_textbook",
+      "used_for": "节点 other-metab：转氨基、尿素循环、生糖/生酮氨基酸；只用通路化学，不用病例处置"
+    },
+    {
+      "title": "Ch. 24 Review Questions — OpenStax A&P 2e",
+      "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/24-review-questions",
+      "kind": "open_textbook",
+      "used_for": "节点 carb-energy 第 1–9 题；节点 other-metab 第 10–21 题"
+    },
+    {
+      "title": "Ch. 14 Introduction — DNA Structure and Replication (OpenStax Biology 2e)",
+      "url": "https://openstax.org/books/biology-2e/pages/14-introduction",
+      "kind": "open_textbook",
+      "used_for": "节点 gene-info：DNA 结构、复制、修复的章目录"
+    },
+    {
+      "title": "Ch. 14 Review Questions — OpenStax Biology 2e",
+      "url": "https://openstax.org/books/biology-2e/pages/14-review-questions",
+      "kind": "open_textbook",
+      "used_for": "节点 gene-info：碱基互补、半保留复制、引物、5'→3'、端粒酶"
+    },
+    {
+      "title": "Ch. 15 Introduction — Genes and Proteins (OpenStax Biology 2e)",
+      "url": "https://openstax.org/books/biology-2e/pages/15-introduction",
+      "kind": "open_textbook",
+      "used_for": "节点 gene-info：遗传密码、原核/真核转录、RNA 加工、核糖体与翻译"
+    },
+    {
+      "title": "Ch. 15 Review Questions — OpenStax Biology 2e",
+      "url": "https://openstax.org/books/biology-2e/pages/15-review-questions",
+      "kind": "open_textbook",
+      "used_for": "节点 gene-info：密码子简并、启动子、加帽/剪接、氨酰-tRNA 合成酶"
+    }
+  ],
+  "trunk": ["biomolecules", "enzymes", "carb-energy", "other-metab", "gene-info"],
+  "forks": [],
+  "join": null,
+  "nodes": {
+    "biomolecules": {
+      "name": "水、缓冲与生物大分子",
+      "why": "5.07SC Session 1–2 从水、氨基酸、手性再进入肽键与蛋白质层次；7.05 第 1–2 讲是 pH/缓冲与氨基酸蛋白质。西交大第一章、安中医「蛋白质化学/核酸化学」同样把 L-α-氨基酸、肽键和 DNA 双螺旋放在代谢之前。OpenStax A&P 第 2 章先写水与缓冲，再写四类有机物。没有这套结构语言，后面的酶和代谢写不成反应。",
+      "learn": [
+        "水、酸/碱、pH 与缓冲",
+        "脱水缩合与水解",
+        "20 种 L-α-氨基酸与肽键",
+        "蛋白质一至四级结构（血红蛋白为例）",
+        "DNA 双螺旋、碱基配对、RNA 三类",
+        "糖、脂作为单体/聚合物"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "做 OpenStax A&P 2e 第 2 章 Review Questions 第 23–32 题，交题号与答案。再对照 5.07SC Session 2，画一张「一级→二级→三级→四级」表，每级写一条定义并用血红蛋白举例。另列 20 种氨基酸的三字母缩写（西交大第一章要求）。",
+        "from": "OpenStax A&P 2e Ch.2 Review Q23–32；5.07SC Session 2；西交大第一章；安中医蛋白质/核酸化学",
+        "alternatives": [
+          {
+            "kind": "problem_set",
+            "prompt": "做 5.07SC Problem Set 1（Session 1 页：尺寸与平衡）中与细胞尺度/平衡相关的题，对照 Solutions 自批并记下题号。",
+            "from": "5.07SC Session 1 Problem Set 1"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/2-4-inorganic-compounds-essential-to-human-functioning",
+          "title": "OpenStax A&P 2e §2.4",
+          "use": "先读水、pH、缓冲与脱水缩合/水解"
+        },
+        {
+          "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/2-5-organic-compounds-essential-to-human-functioning",
+          "title": "OpenStax A&P 2e §2.5",
+          "use": "读四类有机物、蛋白质层次、核酸与 ATP"
+        },
+        {
+          "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/2-review-questions",
+          "title": "OpenStax A&P 2e Ch.2 Review Questions",
+          "use": "做第 23–32 题"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/5-07sc-biological-chemistry-i-fall-2013/pages/module-i/session-2/",
+          "title": "5.07SC Session 2",
+          "use": "对照肽键与血红蛋白结构层次讲义画表"
+        },
+        {
+          "url": "https://yxbpyc.xjtu.edu.cn/info/1086/1574.htm",
+          "title": "西交大生物化学大纲 第一、二章",
+          "use": "核对自己的氨基酸缩写和双螺旋要点是否覆盖大纲条目"
+        }
+      ]
+    },
+    "enzymes": {
+      "name": "酶促反应与动力学",
+      "why": "5.07SC 在蛋白质之后立刻进入 Session 3–4（催化、动力学、抑制），并布置 Problem Set 3。7.05 第 8–11 讲是 Enzyme Chemistry → Kinetics。西交大第三章与安中医酶动力学都要求米氏方程、Km 和三种可逆抑制。酶是后面每条代谢途径的「可检查步骤」。",
+      "learn": [
+        "催化剂与过渡态、活化能",
+        "酶的专一性、活性中心、辅酶/辅基、全酶",
+        "米氏方程、Km 与 Vmax",
+        "不可逆抑制与三种可逆抑制",
+        "酶原激活与同工酶（LDH 为例，只写分子定义）"
+      ],
+      "task": {
+        "kind": "problem_set",
+        "prompt": "做 5.07SC Problem Set 3（Session 4 页提供的 PDF），至少完成与动力学或抑制有关的题；用题面数据判断抑制类型（对 Km/Vmax 的影响），对照 Solutions 自批。另交一张表：Km 定义 + 竞争性抑制 / 非竞争 / 反竞争 对 Km、Vmax 的改变（术语用西交大第三章或安中医大纲）。",
+        "from": "5.07SC Session 4 Problem Set 3；西交大第三章；安中医酶动力学",
+        "alternatives": [
+          {
+            "kind": "lab",
+            "prompt": "若有教学实验室，按西交大实践环节 3 做「温度、pH、抑制剂对碱性磷酸酶活性的影响」，交原始数据表和一条 Km 或最适 pH 的计算；没有实验室则不做此条，改交 Problem Set 3。",
+            "from": "西交大大纲「实践环节」第 3 项"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://ocw.mit.edu/courses/5-07sc-biological-chemistry-i-fall-2013/pages/module-i/session-3/",
+          "title": "5.07SC Session 3 Enzymes and Catalysis",
+          "use": "先读过渡态与专一性讲义"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/5-07sc-biological-chemistry-i-fall-2013/pages/module-i/session-4/",
+          "title": "5.07SC Session 4 Enzyme Kinetics and Inhibition",
+          "use": "下载 Problem Set 3 并做抑制题"
+        },
+        {
+          "url": "https://yxbpyc.xjtu.edu.cn/info/1086/1574.htm",
+          "title": "西交大生物化学大纲 第三章 酶",
+          "use": "对照 Km、米氏方程、三种可逆抑制的掌握条目填表"
+        },
+        {
+          "url": "https://gjjk.ahtcm.edu.cn/info/1023/1676.htm",
+          "title": "安中医生物化学大纲 酶动力学",
+          "use": "核对自己的抑制分类表是否覆盖大纲重点"
+        }
+      ]
+    },
+    "carb-energy": {
+      "name": "糖代谢与生物氧化",
+      "why": "5.07SC Module II 从 Session 8 糖酵解进入 Session 10 TCA、Session 12 电子传递与氧化磷酸化，并配 PS6–8。7.05 Part II 第 19–23、25 讲同一条能量抽取顺序。西交大第四、六章与安中医糖代谢/生物氧化都要求酵解、有氧氧化、磷酸戊糖、呼吸链与 P/O。OpenStax A&P 24.2 把糖酵解→Krebs→电子传递写成连续步骤。",
+      "learn": [
+        "糖酵解步骤、底物水平磷酸化、有/无氧终点",
+        "丙酮酸脱氢酶复合体与乙酰 CoA",
+        "TCA（Krebs）循环与回补",
+        "呼吸链顺序、质子梯度、氧化磷酸化与 P/O",
+        "磷酸戊糖途径、糖原合成/分解、糖异生的关键酶"
+      ],
+      "task": {
+        "kind": "problem_set",
+        "prompt": "做 5.07SC Problem Set 6（糖酵解机制）和 Problem Set 7（同位素标记追踪 TCA），对照 Solutions 自批。再做 OpenStax A&P 24 Review Questions 第 1–9 题。另画一张「葡萄糖→2 丙酮酸→乙酰 CoA→TCA→ETC」简图，标出 NADH/FADH2/ATP 出现的位置（不写临床血糖管理）。",
+        "from": "5.07SC Session 8/10/12 与 PS6–8；OpenStax A&P 24.2 与 Ch.24 Review Q1–9；7.05 Readings lec 19–23、25；西交大第四、六章",
+        "alternatives": [
+          {
+            "kind": "problem_set",
+            "prompt": "若更想用 7.05 代谢作业，做 Assignments 页的 Problem Set 8 或 9（代谢后半），对照 Solutions 自批，并同样交葡萄糖到 ETC 的简图。",
+            "from": "7.05 Assignments Problem Set 8–9"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://ocw.mit.edu/courses/5-07sc-biological-chemistry-i-fall-2013/pages/module-ii/session-8/",
+          "title": "5.07SC Session 8 Sugar Chemistry / Glycolysis",
+          "use": "读糖酵解概览并做 Problem Set 6"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/5-07sc-biological-chemistry-i-fall-2013/pages/module-ii/session-10/",
+          "title": "5.07SC Session 10 TCA Cycle",
+          "use": "做 Problem Set 7 标记追踪"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/5-07sc-biological-chemistry-i-fall-2013/pages/module-ii/session-12/",
+          "title": "5.07SC Session 12 Electron Transport / OxPhos",
+          "use": "读质子梯度与 ATP 合成；可加做 Problem Set 8"
+        },
+        {
+          "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/24-2-carbohydrate-metabolism",
+          "title": "OpenStax A&P 2e §24.2",
+          "use": "对照糖酵解 / Krebs / 电子传递步骤画简图"
+        },
+        {
+          "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/24-review-questions",
+          "title": "OpenStax A&P 2e Ch.24 Review Questions",
+          "use": "做第 1–9 题"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/7-05-general-biochemistry-spring-2020/pages/readings/",
+          "title": "7.05 Readings Part II",
+          "use": "核对自己的简图是否覆盖 lec 19–23、25 的途径名"
+        }
+      ]
+    },
+    "other-metab": {
+      "name": "脂、氨基酸、核苷酸与代谢整合",
+      "why": "5.07SC Session 14 把脂写成储能并进入 β-氧化；Session 21 用变构、共价修饰和受体控制收束哺乳动物燃料代谢。7.05 第 24、30–32 讲是脂氧化、氨基酸与核苷酸代谢。西交大第五、七、八、九章与安中医脂/蛋白质分解/核苷酸/代谢调节同一顺序。OpenStax 24.4 写转氨基与尿素循环。",
+      "learn": [
+        "脂肪动员与脂肪酸 β-氧化到乙酰 CoA",
+        "酮体作为代谢中间物（只写生成/利用化学）",
+        "氮平衡、必需氨基酸、转氨基与尿素循环",
+        "一碳单位；嘌呤/嘧啶核苷酸从头合成原料与分解终产物",
+        "代谢交汇（乙酰 CoA、草酰乙酸）与三级调节：变构、共价修饰、酶量"
+      ],
+      "task": {
+        "kind": "problem_set",
+        "prompt": "对照 5.07SC Session 14，写出软脂酸一次 β-氧化循环的四步反应和乙酰 CoA 去向。做 OpenStax A&P 24 Review Questions 第 10–21 题，并按 24.4 画转氨基→尿素循环简图（标出氨与尿素，不写降氨或处方）。再按西交大第九章和 5.07SC Session 21，交一张「糖–脂–氨基酸」交汇表：共享中间物 + 至少两种调节方式（变构 / 共价修饰）。",
+        "from": "5.07SC Session 14、21；OpenStax A&P 24.4 与 Ch.24 Review Q10–21；西交大第五、七、八、九章；安中医代谢调节"
+      },
+      "resources": [
+        {
+          "url": "https://ocw.mit.edu/courses/5-07sc-biological-chemistry-i-fall-2013/pages/module-ii/session-14/",
+          "title": "5.07SC Session 14 Fatty Acid Beta-Oxidation",
+          "use": "写出 β-氧化四步与乙酰 CoA"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/5-07sc-biological-chemistry-i-fall-2013/pages/module-iii/session-21/",
+          "title": "5.07SC Session 21 Regulation of Metabolism",
+          "use": "填交汇表里的变构、共价修饰、受体控制"
+        },
+        {
+          "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/24-4-protein-metabolism",
+          "title": "OpenStax A&P 2e §24.4",
+          "use": "只读转氨基、尿素循环、生糖/生酮氨基酸；跳过病例处置段"
+        },
+        {
+          "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/24-review-questions",
+          "title": "OpenStax A&P 2e Ch.24 Review Questions",
+          "use": "做第 10–21 题"
+        },
+        {
+          "url": "https://yxbpyc.xjtu.edu.cn/info/1086/1574.htm",
+          "title": "西交大生物化学大纲 第五、七、八、九章",
+          "use": "核对接汇表是否覆盖脂、氨基酸、核苷酸与代谢联系条目"
+        }
+      ]
+    },
+    "gene-info": {
+      "name": "复制、转录与翻译",
+      "why": "西交大把课程第三块写成「基因信息传递」：第十至十二章依次是 DNA、RNA、蛋白质生物合成。7.05 Readings 第 16–18 讲是 Nucleic Acids、tRNAs and Protein Translation、Translation and the Ribosome。OpenStax Biology 第 14 章是复制与修复，第 15 章是密码、转录、加工与翻译。5.07SC 与安中医学时表停在代谢，不反对把信息流放在代谢之后。",
+      "learn": [
+        "复制：5'→3'、引物、半保留、端粒酶（概念）",
+        "DNA 损伤修复的主要方式（西交大第十章条目）",
+        "转录：RNA 聚合酶、启动子、真核加工（加帽、剪接、poly-A）",
+        "翻译：遗传密码简并、tRNA、核糖体 A/P/E、肽键形成",
+        "中心法则与反转录作为分子步骤（不写临床基因操作）"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "做 OpenStax Biology 2e 第 14 章 Review Questions 第 4–16 题和第 15 章 Review Questions 第 4–18 题，交题号与答案。再按西交大第十至十二章和 7.05 Readings lec 16–18，交一张「复制 / 转录 / 翻译」对照表：模板、关键酶、方向、产物各写一列。不写基因治疗、疫苗流程或临床检测。",
+        "from": "OpenStax Biology 2e Ch.14–15 Review；西交大第十至十二章；7.05 Readings lec 16–18"
+      },
+      "resources": [
+        {
+          "url": "https://openstax.org/books/biology-2e/pages/14-introduction",
+          "title": "OpenStax Biology 2e Ch.14 Introduction",
+          "use": "按目录读复制与修复各节"
+        },
+        {
+          "url": "https://openstax.org/books/biology-2e/pages/14-review-questions",
+          "title": "OpenStax Biology 2e Ch.14 Review Questions",
+          "use": "做第 4–16 题"
+        },
+        {
+          "url": "https://openstax.org/books/biology-2e/pages/15-introduction",
+          "title": "OpenStax Biology 2e Ch.15 Introduction",
+          "use": "按目录读密码、转录、加工、翻译"
+        },
+        {
+          "url": "https://openstax.org/books/biology-2e/pages/15-review-questions",
+          "title": "OpenStax Biology 2e Ch.15 Review Questions",
+          "use": "做第 4–18 题"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/7-05-general-biochemistry-spring-2020/pages/readings/",
+          "title": "7.05 Readings lec 16–18",
+          "use": "对照核酸与翻译讲次填对照表"
+        },
+        {
+          "url": "https://yxbpyc.xjtu.edu.cn/info/1086/1574.htm",
+          "title": "西交大生物化学大纲 第十至十二章",
+          "use": "核对照表是否覆盖复制、转录、翻译的掌握条目"
+        }
+      ]
+    }
+  },
+  "conflicts": [
+    "核酸与翻译的位置：7.05 把 lec 16–18（核酸、翻译）放在酶之后、代谢之前；西交大把核酸结构放在第二章、把复制/转录/翻译放在代谢之后；5.07SC 与安中医学时表没有独立的信息流模块。按「更靠前的结构、更保守的信息流」处理：核酸结构进 biomolecules，信息流放在代谢之后。",
+    "生物氧化的位置：安中医学时表把生物氧化排在糖代谢之前；西交大第六章在脂代谢之后；5.07SC / 7.05 都是糖酵解 → TCA → 电子传递。取能量抽取顺序（carb-energy）。",
+    "西交大第十四章「血液的生物化学」和安中医「血液/肝的生物化学」在 MIT 与 OpenStax 核心课历中没有对应并行课，不写成叉，也不收入主干。",
+    "5.07SC Session 16 标题含 Diabetes and Starvation，只采用 Session 14 的酮体化学，不用该讲的临床标题。7.05 光合讲次不属于医学生化主干。",
+    "同一关的交卷：5.07SC Problem Set 与 7.05 代谢 Problem Set、OpenStax 复习题写在 alternatives，不分叉。"
+  ],
+  "missing": "",
+  "checked_at": "2026-10-04"
+}

@@ -1,0 +1,331 @@
+{
+  "id": "790.13",
+  "name": "宏观",
+  "format": "tutorial-tree-v2",
+  "status": "ok",
+  "goal": "能用支出法算出名义/实际 GDP，写出核算恒等式并把它和产品市场均衡分开；对照 MIT 14.02 Problem Set 或 OpenStax 习题交一份 IS-LM 或 AD-AS 作业，再做一次财政或货币政策图。不承诺预测或开政策药方。",
+  "sources": [
+    {
+      "title": "Topics and Readings | Principles of Macroeconomics | 14.02 (MIT OCW, Spring 2023)",
+      "url": "https://ocw.mit.edu/courses/14-02-principles-of-macroeconomics-spring-2023/pages/topics-and-readings/",
+      "kind": "ocw",
+      "used_for": "主干顺序：Economic Measurement → Goods and Financial Markets → IS-LM → Labor Markets → Phillips / AS-AD → 开放经济 → Growth（Quiz 2 之后）→ 预期与财政政策"
+    },
+    {
+      "title": "Syllabus | Principles of Macroeconomics | 14.02 (MIT OCW, Spring 2023)",
+      "url": "https://ocw.mit.edu/courses/14-02-principles-of-macroeconomics-spring-2023/pages/syllabus/",
+      "kind": "ocw",
+      "used_for": "无先修；成绩为 8 次 problem sets + 3 次 quiz；Quiz 1 在 lecture 10 后"
+    },
+    {
+      "title": "Problem Sets | Principles of Macroeconomics | 14.02 (MIT OCW, Spring 2023)",
+      "url": "https://ocw.mit.edu/courses/14-02-principles-of-macroeconomics-spring-2023/pages/problem-sets/",
+      "kind": "ocw",
+      "used_for": "过关形态：Problem Set 1–8 及解答 PDF"
+    },
+    {
+      "title": "14.02 Principles of Macroeconomics Problem Set 1 (MIT OCW, Spring 2023)",
+      "url": "https://ocw.mit.edu/courses/14-02-principles-of-macroeconomics-spring-2023/mit14_02_s23_pset1.pdf",
+      "kind": "ocw",
+      "used_for": "节点 measure：Q1 经济数据 / Q2 名义与实际 GDP；节点 goods：Q3 产品市场，Z≡C+I+G 恒等式、消费函数、均衡条件、私人储蓄恒等式"
+    },
+    {
+      "title": "14.02 Principles of Macroeconomics Problem Set 3 (MIT OCW, Spring 2023)",
+      "url": "https://ocw.mit.edu/courses/14-02-principles-of-macroeconomics-spring-2023/mit14_02_s23_pset3.pdf",
+      "kind": "ocw",
+      "used_for": "节点 islm：Q2 Basic IS-LM；节点 policy 备选：同一题第 5–6 问货币/财政应对"
+    },
+    {
+      "title": "Preface - Principles of Macroeconomics 3e | OpenStax",
+      "url": "https://openstax.org/books/principles-macroeconomics-3e/pages/preface",
+      "kind": "open_textbook",
+      "used_for": "全书分块：Ch.6–10 宏观视角与目标（测量）→ Ch.11–13 分析框架（AD-AS / Keynesian / Neoclassical）→ Ch.14–18 货币与财政政策；支出-产出模型在附录"
+    },
+    {
+      "title": "Ch. 6 Introduction to the Macroeconomic Perspective - Principles of Macroeconomics 3e | OpenStax",
+      "url": "https://openstax.org/books/principles-macroeconomics-3e/pages/6-introduction-to-the-macroeconomic-perspective",
+      "kind": "open_textbook",
+      "used_for": "宏观从测量开始；目标是增长、低失业、低通胀；框架是 AD/AS；政策工具是货币与财政"
+    },
+    {
+      "title": "6.1 Measuring the Size of the Economy: Gross Domestic Product - Principles of Macroeconomics 3e | OpenStax",
+      "url": "https://openstax.org/books/principles-macroeconomics-3e/pages/6-1-measuring-the-size-of-the-economy-gross-domestic-product",
+      "kind": "open_textbook",
+      "used_for": "节点 measure：GDP=C+I+G+(X-M)；需求侧与生产侧必须相等；最终产品、避免重复计算；收入法"
+    },
+    {
+      "title": "Ch. 6 Problems - Principles of Macroeconomics 3e | OpenStax",
+      "url": "https://openstax.org/books/principles-macroeconomics-3e/pages/6-problems",
+      "kind": "open_textbook",
+      "used_for": "节点 measure 备选习题：题 28 最终产品/GDP，题 31 人均 GDP"
+    },
+    {
+      "title": "Ch. 8 Introduction to Unemployment - Principles of Macroeconomics 3e | OpenStax",
+      "url": "https://openstax.org/books/principles-macroeconomics-3e/pages/8-introduction-to-unemployment",
+      "kind": "open_textbook",
+      "used_for": "失业率与劳动力参与率是测量指标；先定义再谈短期/长期原因"
+    },
+    {
+      "title": "8.1 How Economists Define and Compute Unemployment Rate - Principles of Macroeconomics 3e | OpenStax",
+      "url": "https://openstax.org/books/principles-macroeconomics-3e/pages/8-1-how-economists-define-and-compute-unemployment-rate",
+      "kind": "open_textbook",
+      "used_for": "节点 measure：employed / unemployed / out of the labor force；失业率=失业人数/劳动力"
+    },
+    {
+      "title": "Ch. 11 Introduction to the Aggregate Supply–Aggregate Demand Model - Principles of Macroeconomics 3e | OpenStax",
+      "url": "https://openstax.org/books/principles-macroeconomics-3e/pages/11-introduction-to-the-aggregate-supply-aggregate-demand-model",
+      "kind": "open_textbook",
+      "used_for": "测量之后才建模型；AD-AS 把增长、失业、通胀连在一起；随后分 Keynesian（短期）与 Neoclassical（长期）"
+    },
+    {
+      "title": "11.2 Building a Model of Aggregate Demand and Aggregate Supply - Principles of Macroeconomics 3e | OpenStax",
+      "url": "https://openstax.org/books/principles-macroeconomics-3e/pages/11-2-building-a-model-of-aggregate-demand-and-aggregate-supply",
+      "kind": "open_textbook",
+      "used_for": "节点 adas：SRAS、潜在产出/LRAS、AD=C+I+G+X-M 为计划支出；均衡价格水平与实际 GDP"
+    },
+    {
+      "title": "Ch. 11 Problems - Principles of Macroeconomics 3e | OpenStax",
+      "url": "https://openstax.org/books/principles-macroeconomics-3e/pages/11-problems",
+      "kind": "open_textbook",
+      "used_for": "节点 adas：题 59 画 AD/AS、找均衡、税收削减后的新均衡"
+    },
+    {
+      "title": "Ch. 12 Introduction to the Keynesian Perspective - Principles of Macroeconomics 3e | OpenStax",
+      "url": "https://openstax.org/books/principles-macroeconomics-3e/pages/12-introduction-to-the-keynesian-perspective",
+      "kind": "open_textbook",
+      "used_for": "短期波动与凯恩斯分析；章目标含 Phillips Curve；接在 AD-AS 之后"
+    },
+    {
+      "title": "Ch. 15 Introduction to Monetary Policy and Bank Regulation - Principles of Macroeconomics 3e | OpenStax",
+      "url": "https://openstax.org/books/principles-macroeconomics-3e/pages/15-introduction-to-monetary-policy-and-bank-regulation",
+      "kind": "open_textbook",
+      "used_for": "节点 policy：央行通过利率与信贷条件做货币政策；与财政政策并列"
+    },
+    {
+      "title": "Ch. 17 Introduction to Government Budgets and Fiscal Policy - Principles of Macroeconomics 3e | OpenStax",
+      "url": "https://openstax.org/books/principles-macroeconomics-3e/pages/17-introduction-to-government-budgets-and-fiscal-policy",
+      "kind": "open_textbook",
+      "used_for": "节点 policy：财政是联邦税收与支出；自动稳定器；用 AD 谈衰退/通胀"
+    },
+    {
+      "title": "Ch. 17 Problems - Principles of Macroeconomics 3e | OpenStax",
+      "url": "https://openstax.org/books/principles-macroeconomics-3e/pages/17-problems",
+      "kind": "open_textbook",
+      "used_for": "节点 policy：题 53 判断扩张/紧缩财政并画 AD-AS"
+    },
+    {
+      "title": "《宏观经济学》课程教学大纲（长春大学经济学院）",
+      "url": "https://jjxy.ccu.edu.cn/info/1143/2180.htm",
+      "kind": "syllabus",
+      "used_for": "主干：第1章指标与衡量（含国民收入基本公式）→ 第2章收入—支出决定 → 第3章 IS-LM → 第4章 AD-AS → 第5章失业与通胀 → 第6章政策 → 第7章增长；课外课后习题"
+    }
+  ],
+  "trunk": ["measure", "goods", "islm", "adas", "policy"],
+  "forks": [],
+  "join": null,
+  "nodes": {
+    "measure": {
+      "name": "核算与测量",
+      "why": "OpenStax 6.1 写明宏观是经验学科，第一步是测量。14.02 Topics 把 Economic Measurement 放在 Quiz 1 之前第一块。长春大学第1章是「基本指标及其衡量」，并单列国民收入基本公式。三份来源都先记账，再谈决定。",
+      "learn": [
+        "GDP：一年内一国境内最终产品与服务的价值",
+        "支出法恒等式 GDP = C + I + G + (X - M)",
+        "需求侧合计必须等于生产侧合计（同一交易的买卖两边）",
+        "最终产品与避免重复计算",
+        "名义 GDP 与实际 GDP",
+        "失业率 = 失业人数 / 劳动力（不含不在劳动力者）"
+      ],
+      "task": {
+        "kind": "problem_set",
+        "prompt": "对照 14.02 Problem Set 1 第 1–2 题交卷：用 FRED 画出美国实际 GDP 与失业率序列，算出 COVID 与大衰退的峰谷跌幅；再用三国商品表分别算各年名义 GDP、以 2019 年为基期的实际 GDP 与增长率。图要有标题和坐标轴。",
+        "from": "MIT 14.02 Spring 2023 Problem Set 1 Q1–Q2",
+        "alternatives": [
+          {
+            "kind": "exercise",
+            "prompt": "做 OpenStax 第 6 章 Problems 第 28 题（按最终产品算 GDP）和第 31 题（人均 GDP）；再按 8.1 的公式，用该节 Table 8.1 的人数手算一次失业率和劳动力参与率，写出分子分母。",
+            "from": "OpenStax Principles of Macroeconomics 3e Ch.6 Problems + §8.1"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://openstax.org/books/principles-macroeconomics-3e/pages/6-1-measuring-the-size-of-the-economy-gross-domestic-product",
+          "title": "6.1 Measuring the Size of the Economy: Gross Domestic Product",
+          "use": "先读支出法、收入法、最终产品与重复计算"
+        },
+        {
+          "url": "https://openstax.org/books/principles-macroeconomics-3e/pages/8-1-how-economists-define-and-compute-unemployment-rate",
+          "title": "8.1 How Economists Define and Compute Unemployment Rate",
+          "use": "核对 employed / unemployed / out of the labor force 与失业率公式"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/14-02-principles-of-macroeconomics-spring-2023/mit14_02_s23_pset1.pdf",
+          "title": "14.02 Problem Set 1",
+          "use": "做 Q1 数据题和 Q2 名义/实际 GDP"
+        },
+        {
+          "url": "https://openstax.org/books/principles-macroeconomics-3e/pages/6-problems",
+          "title": "Ch. 6 Problems",
+          "use": "若走教材轨，做题 28 与 31"
+        }
+      ]
+    },
+    "goods": {
+      "name": "产品市场：恒等式到均衡",
+      "why": "长春大学第1章写「国民收入的基本公式」，第2章才是「国民收入的决定：收入—支出模型」。14.02 Problem Set 1 第 3 题先写 Z≡C+I+G，再写消费函数，然后问均衡条件，最后用 S≡Y-T-C 推出储蓄与 I、T、G 的关系。OpenStax 11.2 也提醒 AD 严格说是计划支出，与核算加总不是同一句话。",
+      "learn": [
+        "需求恒等式 Z ≡ C + I + G（封闭经济）",
+        "消费函数 C = c0 + c1(Y - T)，c1 为边际消费倾向",
+        "均衡条件是产出等于需求，不是把恒等式再抄一遍",
+        "外生变量与内生变量",
+        "自主支出乘数",
+        "私人储蓄恒等式 S ≡ Y - T - C"
+      ],
+      "task": {
+        "kind": "problem_set",
+        "prompt": "做完 14.02 Problem Set 1 第 3 题并交手写推导：标明哪一行是恒等式、哪一行是行为方程、哪一行是均衡条件；画出产品市场均衡图（轴要标注）；求出均衡产出与 c0 乘数；用 S≡Y-T-C 把 S 写成 I、T、G 的函数，并回答 G 上升时 S 怎么变。",
+        "from": "MIT 14.02 Spring 2023 Problem Set 1 Q3"
+      },
+      "resources": [
+        {
+          "url": "https://ocw.mit.edu/courses/14-02-principles-of-macroeconomics-spring-2023/mit14_02_s23_pset1.pdf",
+          "title": "14.02 Problem Set 1",
+          "use": "做 Q3 The Goods Market，按题号交推导和图"
+        },
+        {
+          "url": "https://jjxy.ccu.edu.cn/info/1143/2180.htm",
+          "title": "《宏观经济学》课程教学大纲（长春大学）",
+          "use": "对照第1章「基本公式」与第2章「收入—支出模型」的先后，检查自己有没有把恒等式当成乘数故事"
+        },
+        {
+          "url": "https://openstax.org/books/principles-macroeconomics-3e/pages/11-2-building-a-model-of-aggregate-demand-and-aggregate-supply",
+          "title": "11.2 Building a Model of Aggregate Demand and Aggregate Supply",
+          "use": "读 AD 是 planned expenditure 的那一句，和核算加总对照"
+        }
+      ]
+    },
+    "islm": {
+      "name": "IS-LM 与短期波动",
+      "why": "14.02 Topics 在 Goods and Financial Markets 之后立刻是 Short-Run Fluctuations and the IS-LM Model，且排在 Quiz 1 前。长春大学第3章是「国民收入的决定：IS—LM模型」，学时最多。OpenStax 把货币与利率放到第 15 章、主模型用 AD-AS，但不反对先做产品市场加利率。",
+      "learn": [
+        "IS：产品市场均衡下利率与产出的组合",
+        "投资对利率敏感，IS 向下倾斜",
+        "LM / 央行设定利率时的水平利率线",
+        "IS 与 LM 交点决定短期均衡产出",
+        "投资信心下降（b1 下降）如何移动均衡"
+      ],
+      "task": {
+        "kind": "problem_set",
+        "prompt": "对照 14.02 Problem Set 3 第 2 题交卷：由给定方程推出 IS（i 写成 Y 的函数）并判断斜率；画出 IS-LM 并标出均衡；计算 b1 下降后均衡产出的变化并重画；曲线与轴必须标注，移动用箭头。",
+        "from": "MIT 14.02 Spring 2023 Problem Set 3 Q2"
+      },
+      "resources": [
+        {
+          "url": "https://ocw.mit.edu/courses/14-02-principles-of-macroeconomics-spring-2023/pages/topics-and-readings/",
+          "title": "14.02 Topics and Readings",
+          "use": "核对本块在 Quiz 1 前的课序：商品与金融市场 → IS-LM"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/14-02-principles-of-macroeconomics-spring-2023/mit14_02_s23_pset3.pdf",
+          "title": "14.02 Problem Set 3",
+          "use": "做 Q2 Basic IS-LM；需要时先看 Q1 对 IS 斜率的铺垫"
+        },
+        {
+          "url": "https://jjxy.ccu.edu.cn/info/1143/2180.htm",
+          "title": "《宏观经济学》课程教学大纲（长春大学）",
+          "use": "对照第3章：IS、利率决定、LM、IS-LM"
+        }
+      ]
+    },
+    "adas": {
+      "name": "AD-AS 与菲利普斯",
+      "why": "OpenStax 前言把 Ch.11–13 称作宏观的 principal analytic model，第 11 章说明不能再逐个谈指标，要用 AD-AS 把产出、失业、价格连起来。14.02 在 Quiz 1 后接 Phillips Curve, Aggregate Supply, and Aggregate Demand。长春大学第4章 AD-AS、第5章失业与通胀及菲利普斯曲线。",
+      "learn": [
+        "AD：各价格水平上的计划总支出 C+I+G+X-M",
+        "SRAS 向上倾斜；LRAS 在潜在产出处垂直",
+        "AD 与 AS 交点是短期宏观均衡（价格水平与实际 GDP）",
+        "均衡落在 AS 平坦段还是陡峭段，对应失业与通胀压力不同",
+        "凯恩斯视角强调短期总需求；菲利普斯曲线在 OpenStax 第 12 章"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "做 OpenStax 第 11 章 Problems 第 59 题：按表画出 AD/AS，标出原均衡；把每个价格水平上的 AD 提高 50，找出新均衡；用一句话写出产出、价格水平和就业各怎么变（对照 11.2 Work It Out 的判读步骤）。",
+        "from": "OpenStax Principles of Macroeconomics 3e Ch.11 Problems #59"
+      },
+      "resources": [
+        {
+          "url": "https://openstax.org/books/principles-macroeconomics-3e/pages/11-2-building-a-model-of-aggregate-demand-and-aggregate-supply",
+          "title": "11.2 Building a Model of Aggregate Demand and Aggregate Supply",
+          "use": "先跟 Work It Out 把 Xurbia 表画成图并读均衡位置"
+        },
+        {
+          "url": "https://openstax.org/books/principles-macroeconomics-3e/pages/11-problems",
+          "title": "Ch. 11 Problems",
+          "use": "做题 59；需要加练可做 60 或 61"
+        },
+        {
+          "url": "https://openstax.org/books/principles-macroeconomics-3e/pages/12-introduction-to-the-keynesian-perspective",
+          "title": "Ch. 12 Introduction to the Keynesian Perspective",
+          "use": "读章目标里的 Phillips Curve 与短期波动，作为 AD-AS 之后的短期视角"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/14-02-principles-of-macroeconomics-spring-2023/pages/topics-and-readings/",
+          "title": "14.02 Topics and Readings",
+          "use": "核对本块在 Quiz 1 与 Quiz 2 之间"
+        }
+      ]
+    },
+    "policy": {
+      "name": "财政与货币政策",
+      "why": "OpenStax 第 6 章把政策工具写成货币与财政两件；第 15、17 章分别展开。长春大学第6章是宏观经济政策（财政、货币、搭配）。14.02 Problem Set 3 第 2 题后半问：投资疲软后，央行改利率或政府改 G 才能把产出托回原水平。",
+      "learn": [
+        "财政政策：联邦税收与政府购买，作用在总需求",
+        "扩张性与紧缩性财政对应衰退/通胀",
+        "自动稳定器与相机抉择财政",
+        "货币政策：央行改变利率与信贷条件",
+        "同一冲击可用改 i 或改 G 稳住产出（14.02 PS3）"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "做 OpenStax 第 17 章 Problems 第 53 题 a–f：对每种情形写出该用扩张还是紧缩财政，并画一张 AD-AS 草图标明移动方向。另选 14.02 Problem Set 3 第 2 题第 5 问或第 6 问，算出为保持产出不变须改多少 i 或多少 G。",
+        "from": "OpenStax Ch.17 Problems #53；MIT 14.02 Problem Set 3 Q2.5 或 Q2.6",
+        "alternatives": [
+          {
+            "kind": "problem_set",
+            "prompt": "只做 14.02 Problem Set 3 第 2 题第 5–6 问：分别给出把产出维持在原水平所需的 Δi 与 ΔG，重画两张图，并写 b2 在货币政策表达式里起什么作用。",
+            "from": "MIT 14.02 Spring 2023 Problem Set 3 Q2.5–Q2.6"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://openstax.org/books/principles-macroeconomics-3e/pages/17-introduction-to-government-budgets-and-fiscal-policy",
+          "title": "Ch. 17 Introduction to Government Budgets and Fiscal Policy",
+          "use": "先读财政工具、自动稳定器、用 AD 应对衰退与通胀"
+        },
+        {
+          "url": "https://openstax.org/books/principles-macroeconomics-3e/pages/17-problems",
+          "title": "Ch. 17 Problems",
+          "use": "做题 53，六种情形各配一张草图"
+        },
+        {
+          "url": "https://openstax.org/books/principles-macroeconomics-3e/pages/15-introduction-to-monetary-policy-and-bank-regulation",
+          "title": "Ch. 15 Introduction to Monetary Policy and Bank Regulation",
+          "use": "读央行如何执行货币政策，以及零利率下限在章首的例子"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/14-02-principles-of-macroeconomics-spring-2023/mit14_02_s23_pset3.pdf",
+          "title": "14.02 Problem Set 3",
+          "use": "做 Q2 第 5–6 问的货币/财政应对计算"
+        }
+      ]
+    }
+  },
+  "conflicts": [
+    "增长理论的位置不一致：OpenStax 把 Economic Growth 放在第 7 章（GDP 之后、失业通胀之前）；14.02 Spring 2023 把 Theory of Economic Growth 放在 Quiz 2 之后；长春大学第 7 章在政策之后。取更靠后的一条：主干不把增长模型插进核算与短期模型之间；实际 GDP 随时间的轨迹只留在 measure。",
+    "失业与通胀章节的位置不一致：OpenStax 第 8–9 章作为测量目标放在 AD-AS 之前；14.02 把 Labor Markets 放在 IS-LM 之后、Phillips 与 AS-AD 放在一起；长春大学第 5 章在 AD-AS 之后。失业率的定义与计算放进 measure（OpenStax 8.1 与 14.02 PS1 Q1）；菲利普斯与价格—产出因果放进 adas。",
+    "主模型名称不一致：OpenStax 前言写 principal analytic model 是 AD-AS，支出-产出模型在附录；14.02 与长春大学都先 IS-LM 再 AD-AS。主干按两所大学课表，先 IS-LM 后 AD-AS。"
+  ],
+  "missing": "",
+  "checked_at": "2026-10-04"
+}

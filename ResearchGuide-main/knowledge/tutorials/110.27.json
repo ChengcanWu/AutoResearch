@@ -1,0 +1,245 @@
+{
+  "id": "110.27",
+  "name": "几何学",
+  "format": "tutorial-tree-v2",
+  "status": "ok",
+  "goal": "能用向量和坐标把空间直线、平面、柱面与二次曲面写成方程并判断位置关系，再对照一次坐标变换或仿射/等距习题，写出哪些量被保留、哪些只随坐标系改变。不承诺公理化新证明、微分几何或发表结果。",
+  "sources": [
+    {
+      "title": "几何学 — 北京大学数学学院",
+      "url": "https://math.pku.edu.cn/bks/sykc/148695.htm",
+      "kind": "syllabus",
+      "used_for": "数学专业基础课《几何学》顺序：向量代数 → 等距/仿射变换与不变量 → 空间解析几何与二次曲线分类 → 射影几何初步 → 双曲几何初步*；课程目标写明欧氏几何与线性代数的关联，以及空间上可以有不同几何结构"
+    },
+    {
+      "title": "解析几何（Analytic Geometry）课程大纲 B1A09131A — 北京航空航天大学数学科学学院",
+      "url": "https://math.buaa.edu.cn/__local/3/F5/96/4B9D82164AFD12846E98D2551A9_5ACDBED6_327F0.pdf",
+      "kind": "syllabus",
+      "used_for": "一年级主干顺序：向量代数 → 空间平面和直线 → 常见曲面 → 坐标变换 → 二次曲线化简与不变量 → 正交变换和仿射变换；作业形态是每章课后习题 + 期中论文 + 期末笔试；建议后续课才是微分几何"
+    },
+    {
+      "title": "《解析几何》课程教学大纲 — 金陵科技学院理学院",
+      "url": "https://cos.jit.edu.cn/info/1025/2864.htm",
+      "kind": "syllabus",
+      "used_for": "顺序：向量与坐标 → 轨迹与方程 → 平面与空间直线 → 柱面/锥面/旋转面与二次曲面 → 二次曲线的一般理论（化简、不变量、分类）；学生任务写明完成作业与练习、建立直线平面方程、判定位置与度量关系"
+    },
+    {
+      "title": "数学与应用数学（师范）专业课程教学大纲目录 — 华南师范大学《解析几何》",
+      "url": "https://statics.scnu.edu.cn/pics/maths/2023/0922/1695345072272155.pdf",
+      "kind": "syllabus",
+      "used_for": "一年级必修《解析几何》主要内容：空间向量代数，平面与直线，曲线与曲面，二次曲线分类；配套实验单元也按向量代数 → 平面与直线 → 旋转曲面 → 二次曲面"
+    },
+    {
+      "title": "Ch. 2 Introduction — Calculus Volume 3 | OpenStax",
+      "url": "https://openstax.org/books/calculus-volume-3/pages/2-introduction",
+      "kind": "open_textbook",
+      "used_for": "英文公开教材第 2 章目录顺序：Vectors in the Plane → Three Dimensions → Dot Product → Cross Product → Equations of Lines and Planes → Quadric Surfaces"
+    },
+    {
+      "title": "2.1 Vectors in the Plane — Calculus Volume 3 | OpenStax",
+      "url": "https://openstax.org/books/calculus-volume-3/pages/2-1-vectors-in-the-plane",
+      "kind": "open_textbook",
+      "used_for": "向量线性运算、分量与单位向量；Section 2.1 Exercises 作为主干第一步交卷"
+    },
+    {
+      "title": "2.3 The Dot Product — Calculus Volume 3 | OpenStax",
+      "url": "https://openstax.org/books/calculus-volume-3/pages/2-3-the-dot-product",
+      "kind": "open_textbook",
+      "used_for": "内积、垂直判定、方向余弦；Section 2.3 Exercises"
+    },
+    {
+      "title": "2.4 The Cross Product — Calculus Volume 3 | OpenStax",
+      "url": "https://openstax.org/books/calculus-volume-3/pages/2-4-the-cross-product",
+      "kind": "open_textbook",
+      "used_for": "外积、正交向量、面积与 triple scalar product / 平行六面体体积；Section 2.4 Exercises"
+    },
+    {
+      "title": "2.5 Equations of Lines and Planes in Space — Calculus Volume 3 | OpenStax",
+      "url": "https://openstax.org/books/calculus-volume-3/pages/2-5-equations-of-lines-and-planes-in-space",
+      "kind": "open_textbook",
+      "used_for": "直线的向量/参数/对称方程、平面点法式、点到直线/平面距离、两平面夹角；Section 2.5 Exercises（含题 243）"
+    },
+    {
+      "title": "2.6 Quadric Surfaces — Calculus Volume 3 | OpenStax",
+      "url": "https://openstax.org/books/calculus-volume-3/pages/2-6-quadric-surfaces",
+      "kind": "open_textbook",
+      "used_for": "柱面、椭球面、抛物面、双曲面与 traces；Section 2.6 Exercises（含题 303–304 及标准型匹配）"
+    },
+    {
+      "title": "Euclidean plane and its relatives — Anton Petrunin (Penn State)",
+      "url": "https://anton-petrunin.github.io/birkhoff/",
+      "kind": "open_textbook",
+      "used_for": "公理化平面几何学期课目录：公理/全等/平行 → 反演 → 中性与双曲（书中最高点）→ 附加课题仿射与射影；说明与解析几何一年级路线不同"
+    },
+    {
+      "title": "Euclidean plane and its relatives (arXiv:1302.1630)",
+      "url": "https://arxiv.org/pdf/1302.1630v19.pdf",
+      "kind": "open_textbook",
+      "used_for": "第 5 章运动可写成至多三次反射（Exercise 5.8）；第 14 章仿射几何习题 14.1（平行线被保持）、14.5（中点被保持）；前言写明第 14 章才用到向量代数"
+    },
+    {
+      "title": "Syllabus | Geometry and Topology in the Plane | MIT OpenCourseWare 18.900",
+      "url": "https://ocw.mit.edu/courses/18-900-geometry-and-topology-in-the-plane-spring-2023/pages/syllabus/",
+      "kind": "ocw",
+      "used_for": "对照：另一门本科调查课从多边形面积/绕数走到双曲与 Gauss–Bonnet，课历模块化；Problem sets 不对 OCW 开放。不作为解析几何主干依据"
+    }
+  ],
+  "trunk": ["vectors", "lines-planes", "quadrics", "transforms"],
+  "forks": [],
+  "join": null,
+  "nodes": {
+    "vectors": {
+      "name": "向量代数",
+      "why": "北大《几何学》第一部分、北航第一部分、金陵科技第一部分、华南师范《解析几何》都从向量代数起手。OpenStax Calculus Volume 3 第 2 章同样先向量，再 2.3 点积、2.4 叉积与混合积。没有加法和三种乘法，后面的直线、平面方程没有运算。",
+      "learn": [
+        "向量的线性运算（加法、数乘）与分量",
+        "内积 / dot product、夹角与垂直",
+        "外积 / cross product 与正交向量",
+        "混合积 / triple scalar product 与平行六面体体积"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "对照 OpenStax §2.1 Section Exercises 交至少 2 道：把给定点写成向量的分量形式，并做一次加法与数乘。再对照 §2.3、§2.4 Section Exercises 各交 1 道：算一组向量的点积并判定是否垂直；算叉积与 triple scalar product，并写出对应平行六面体的体积。每题注明题号。",
+        "from": "OpenStax Calculus Volume 3 §2.1 / §2.3 / §2.4 Section Exercises；顺序见北大《几何学》第一部分、北航第一部分"
+      },
+      "resources": [
+        {
+          "url": "https://openstax.org/books/calculus-volume-3/pages/2-1-vectors-in-the-plane",
+          "title": "2.1 Vectors in the Plane",
+          "use": "读线性运算与分量，做节末习题"
+        },
+        {
+          "url": "https://openstax.org/books/calculus-volume-3/pages/2-3-the-dot-product",
+          "title": "2.3 The Dot Product",
+          "use": "做一题点积与垂直判定"
+        },
+        {
+          "url": "https://openstax.org/books/calculus-volume-3/pages/2-4-the-cross-product",
+          "title": "2.4 The Cross Product",
+          "use": "做一题叉积与 triple scalar product / 体积"
+        },
+        {
+          "url": "https://math.pku.edu.cn/bks/sykc/148695.htm",
+          "title": "北京大学《几何学》大纲",
+          "use": "核对本步对应「一、向量代数」：加法、内积、外积、混合积"
+        }
+      ]
+    },
+    "lines-planes": {
+      "name": "空间直线与平面",
+      "why": "北航第二部分、金陵科技第三部分、OpenStax §2.5 都在向量之后立刻写直线与平面的方程和位置关系。北大第三部分也从空间直线和平面的方程及位置关系起讲。",
+      "learn": [
+        "直线的向量方程、参数方程、对称方程",
+        "平面的点法式与一般方程",
+        "点到直线、点到平面的距离",
+        "直线与平面、两平面的相关位置与夹角"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "对照 OpenStax Section 2.5 Exercises 交题 243（或同组一题）：写出过两点直线的向量方程、参数方程和对称方程。再交一题：写出过定点、已知法向量的平面方程，并计算一个点到该平面的距离。把平行/相交/垂直判定写在答卷上。",
+        "from": "OpenStax §2.5 Learning Objectives 2.5.1–2.5.5 与 Section Exercises；金陵科技第三部分学生任务「建立满足指定条件的平面和直线的方程」"
+      },
+      "resources": [
+        {
+          "url": "https://openstax.org/books/calculus-volume-3/pages/2-5-equations-of-lines-and-planes-in-space",
+          "title": "2.5 Equations of Lines and Planes in Space",
+          "use": "读方程与距离公式，做题 243 及一题平面距离"
+        },
+        {
+          "url": "https://cos.jit.edu.cn/info/1025/2864.htm",
+          "title": "金陵科技学院《解析几何》大纲",
+          "use": "对照第三部分：法向量、点法式、方向向量、位置与度量关系"
+        },
+        {
+          "url": "https://math.buaa.edu.cn/__local/3/F5/96/4B9D82164AFD12846E98D2551A9_5ACDBED6_327F0.pdf",
+          "title": "北航《解析几何》大纲",
+          "use": "对照第二部分学时表：平面方程、点面距离、直线与平面相关位置"
+        }
+      ]
+    },
+    "quadrics": {
+      "name": "柱面与二次曲面",
+      "why": "北航第三部分「常见曲面」、金陵科技第四部分、华南师范「曲线与曲面 / 二次曲面」、OpenStax §2.6 都在直线平面之后用方程识别柱面、椭球面、双曲面、抛物面，并用截痕画图。北大第三部分同样列出球面、柱面、锥面、旋转面、直纹面。",
+      "learn": [
+        "柱面、母线与 rulings",
+        "椭球面、抛物面、单叶/双叶双曲面的标准方程",
+        "用 traces / 平行截割法认形状",
+        "直纹面例子（单叶双曲面可用直线生成）"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "对照 OpenStax Section 2.6 Exercises：先做圆柱面方程一题（303 或 304），画出并写出母线方向；再做一道二次曲面识别（匹配标准型，或写出名称与对称轴）。交手绘或软件截图，并写清三个坐标面截痕各是哪一种圆锥曲线。",
+        "from": "OpenStax §2.6 Learning Objectives 2.6.1–2.6.3 与 Section Exercises；北航第三部分球面/柱面/锥面/二次曲面/直纹面"
+      },
+      "resources": [
+        {
+          "url": "https://openstax.org/books/calculus-volume-3/pages/2-6-quadric-surfaces",
+          "title": "2.6 Quadric Surfaces",
+          "use": "读柱面与二次曲面定义，做 303/304 及一道识别题"
+        },
+        {
+          "url": "https://math.buaa.edu.cn/__local/3/F5/96/4B9D82164AFD12846E98D2551A9_5ACDBED6_327F0.pdf",
+          "title": "北航《解析几何》大纲",
+          "use": "对照第三部分：球面、旋转面、柱面、锥面、二次曲面、直纹面"
+        },
+        {
+          "url": "https://cos.jit.edu.cn/info/1025/2864.htm",
+          "title": "金陵科技学院《解析几何》大纲",
+          "use": "对照第四部分标准方程与平行截割法"
+        }
+      ]
+    },
+    "transforms": {
+      "name": "变换与不变量",
+      "why": "北大把等距/仿射及其不变量写成《几何学》核心块；北航第四–六部分在曲面之后讲坐标变换、二次曲线化简与不变量、正交/仿射下的度量性质与仿射性质；金陵科技第五部分用坐标变换和不变量化简二次曲线。Petrunin 第 14 章把「平行、中点被仿射保留」写成习题。这一步对应：空间里什么被保留，什么只是坐标系画法。",
+      "learn": [
+        "平面/空间的平移与旋转坐标变换",
+        "等距/正交变换：反射、旋转、平移",
+        "仿射变换保持的平行与中点",
+        "二次曲线的不变量与方程化简/分类"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "对照 Petrunin 第 14 章交 Exercise 14.1（仿射把平行线送到平行线）和 14.5（中点被保持）。另取一条二次曲线一般方程，按北航第五部分做一次坐标变换化简，写出化简后的标准型，并标明哪些是度量不变量、哪些只在仿射下保留。",
+        "from": "Petrunin Chapter 14 Exercises 14.1、14.5；北航第五部分「二次曲线方程的化简与不变量」、第六部分「图形的度量性质和仿射性质」",
+        "alternatives": [
+          {
+            "kind": "exercise",
+            "prompt": "对照 Petrunin Exercise 5.8：证明平面上任意运动可以写成至多三次直线反射的合成；再各写出一个平移、旋转、反射的坐标表示（北大第二部分的例子）。",
+            "from": "Petrunin Chapter 5 Exercise 5.8；北大《几何学》第二部分等距变换"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://arxiv.org/pdf/1302.1630v19.pdf",
+          "title": "Euclidean plane and its relatives (arXiv PDF)",
+          "use": "做第 14 章 14.1、14.5；备选做第 5 章 5.8"
+        },
+        {
+          "url": "https://anton-petrunin.github.io/birkhoff/",
+          "title": "Euclidean plane and its relatives — 目录",
+          "use": "先看 Additional topics 第 14 章 Affine geometry 在全书中的位置"
+        },
+        {
+          "url": "https://math.buaa.edu.cn/__local/3/F5/96/4B9D82164AFD12846E98D2551A9_5ACDBED6_327F0.pdf",
+          "title": "北航《解析几何》大纲",
+          "use": "对照第四–六部分：坐标变换、不变量、度量性质与仿射性质"
+        },
+        {
+          "url": "https://math.pku.edu.cn/bks/sykc/148695.htm",
+          "title": "北京大学《几何学》大纲",
+          "use": "对照第二部分：等距（反射/旋转/平移）与仿射不变量"
+        }
+      ]
+    }
+  },
+  "conflicts": [
+    "北大把等距/仿射放在空间解析几何之前；北航、金陵科技、华南师范、OpenStax 都是向量 → 直线平面 → 曲面，变换或化简在后。取与后四份一致、也更靠后的顺序：先方程与二次曲面，再变换与不变量。",
+    "Petrunin 是公理化平面几何学期课（度量公理、全等、平行，高潮为双曲平面），前言写明第 14 章才用到向量代数。与中文一年级《几何学/解析几何》的向量路线不同，不把公理化全等做成主干第一步。",
+    "北大第五部分双曲几何标 *（教员按进度决定）；Petrunin 把双曲当作书的最高点；MIT 18.900 是另一门平面几何/拓扑调查课，且 Problem sets 不对 OCW 开放。这些不是解析几何课表里的并行必修轨，故不分叉。",
+    "OpenStax 第 2 章之后进入向量值函数与曲率；北航写明建议后续课才是微分几何。不把曲线论写入本学期主干。"
+  ],
+  "missing": "",
+  "checked_at": "2026-10-04"
+}

@@ -6,6 +6,33 @@
 
 ---
 
+## [2026-10-04] [BUILD] 教程蒸馏改为流程树（主干 + 有据才分叉）
+
+- 变更内容：`tutorial-distill` 不再强制 6 步直线。输出 `tutorial-tree-v2`：共用主干，仅当大纲把后面写成并行课/选修轨时才分叉；同一关的两种交卷方式写在 `task.alternatives`。每个节点必须有 `learn` / `task` / `resources`（原链接 + 这一页干什么）。样例：人工智能 `520.20`（卷积 | Transformer）、计算机软件 `520.40`（OS | 编译 | 数据库）。`preview.py` 打 mermaid 和节点卡片。其余 JSON 仍是旧 6 步，校验兼容，等确认后再重跑。未接入 `directions.js`。
+- 影响模块：skills/tutorial-distill/、knowledge/tutorials/520.20.json、knowledge/tutorials/520.40.json、skills/README.md、knowledge/tutorials/README.md
+- 决策来源：邬程灿
+- 登记人：助手
+
+## [2026-10-03] [BUILD] 方向教程蒸馏 Skill（检索公开大纲，不编步骤）
+
+- 变更内容：新增 `skills/tutorial-distill/`：输入一个方向，检索大学大纲/公开教材，蒸馏成 6 步并写入 `knowledge/tutorials/{id}.json`。不够 2 个独立来源就标 `insufficient`。附 `validate.py`。烟测 3 条：人工智能 `520.20`（MIT 6.390 + MML）、系统结构 `520.30`（MIT 6.004 + Berkeley 61C）、基础医学 `310`（OpenStax A&P 2e + MIT 7.01SC）。尚未接入 `directions.js`。
+- 影响模块：skills/tutorial-distill/、knowledge/tutorials/、skills/README.md
+- 决策来源：邬程灿
+- 登记人：助手
+
+## [2026-10-03] [BUILD] 方向树与教程同一页切换
+
+- 变更内容：方向区默认是一棵 GB/T 策展学科树（计算机 / 数学 / 心理 / 经济 / 基础医学），统计挂在数学下，医学只做基础医学；三级只留热门切口。同一页用按钮切到教程，顶部写当前方向名，教程随选中的方向变。原有数学、人工智能、认知、经济、统计、系统教程挂到最近的二级；每个二级另有自己的 6 步教程，系统结构不再共用机器学习树。基础医学补了 6 步路径（`docs/paths/基础医学.md`），后两步不预写论文篇名。后端方向目录增加 `med`，任务/项目仍走原有方向代码。
+- 影响模块：web/js/directions.js、web/js/app.js、web/css/styles.css、web/index.html、server/planner.py、knowledge/build_paths.py、knowledge/paths.json、knowledge/direction_tree.json、docs/paths/基础医学.md
+- 决策来源：邬程灿
+- 登记人：助手
+
+## [2026-10-03] [FIX] 点老师名能打开老师页
+- 变更内容：老师页原先叠在节点页下面（z-index 更低），看起来像点不进去。老师页提到节点页上面，并加「返回」。老师名改成真正的按钮。
+- 影响模块：web/js/app.js、web/css/styles.css、web/index.html
+- 决策来源：邬程灿
+- 登记人：助手
+
 ## [2026-10-03] [BUILD] 当前学期公开课快照：每个节点本地检索，老师可点
 - 变更内容：把 2026-2027-1 全院系公开课翻进 `knowledge/catalog/`（`courses.json` / `teachers.json` / `meta.json`）。检索先读这份快照，不再每次打教务。方向树上每个节点都用节点名做关键词查课，对不上就空着。老师名可点，看到本学期教了哪些课；简介只在 OpenAlex 对上北京大学任职时才写。生成脚本：`server/catalog_build.py`。
 - 影响模块：server/catalog.py、server/catalog_build.py、server/pku_adapter.py、server/main.py、web/js/app.js、web/css/styles.css、knowledge/catalog/、docs/ARCHITECTURE.md

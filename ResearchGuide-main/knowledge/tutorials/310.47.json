@@ -1,0 +1,335 @@
+{
+  "id": "310.47",
+  "name": "药理学",
+  "format": "tutorial-tree-v2",
+  "status": "ok",
+  "goal": "能用受体占领、激动/拮抗和量效曲线说明分子如何改写一条通路、效应怎么被量；能用 ADME 参数（Vd、t1/2、CL）描述药物去向。停在基础科学。不写处方、给药方案或临床治疗规程。",
+  "sources": [
+    {
+      "title": "Principles of Pharmacology — Course Home (MIT HST.151, Spring 2005)",
+      "url": "https://ocw.mit.edu/courses/hst-151-principles-of-pharmacology-spring-2005/",
+      "kind": "ocw",
+      "used_for": "课程目标：不是药典复习，而是药物作用机制、体内分布与代谢的生物物理/生化/生理原则"
+    },
+    {
+      "title": "Syllabus | Principles of Pharmacology | MIT OCW HST.151",
+      "url": "https://ocw.mit.edu/courses/hst-151-principles-of-pharmacology-spring-2005/pages/syllabus/",
+      "kind": "syllabus",
+      "used_for": "作业形态：case discussion + drug evaluation + problem set；主干只取 problem set 与讲义，不用病例处方"
+    },
+    {
+      "title": "Lecture Notes | Principles of Pharmacology | MIT OCW HST.151",
+      "url": "https://ocw.mit.edu/courses/hst-151-principles-of-pharmacology-spring-2005/pages/lecture-notes/",
+      "kind": "ocw",
+      "used_for": "顺序：Lec 1 Introduction + Receptors/Dose-Response → Lec 2 Pharmacokinetics I/II；其后系统药不进主干"
+    },
+    {
+      "title": "Lecture 1 — Principles of Pharmacology: Introduction (Rosow, HST.151)",
+      "url": "https://ocw.mit.edu/courses/hst-151-principles-of-pharmacology-spring-2005/d22c2c245a29ad4681915ce4c8eaab80_0201_1_rosow.pdf",
+      "kind": "lecture_notes",
+      "used_for": "节点 receptors：PD vs PK、agonist/antagonist、dose-response、ED50、potency、efficacy、affinity、therapeutic index"
+    },
+    {
+      "title": "Drug-Receptor Interactions (Strichartz, HST.151)",
+      "url": "https://ocw.mit.edu/courses/hst-151-principles-of-pharmacology-spring-2005/07c6a82fbb6ebe19d469d3feee927e53_ln2hms3565.pdf",
+      "kind": "lecture_notes",
+      "used_for": "节点 receptors / dose-response：占领学说、KD、graded vs quantal、spare receptors、竞争性/非竞争性/不可逆拮抗、Scatchard"
+    },
+    {
+      "title": "Problem Set 2005 | Principles of Pharmacology | MIT OCW HST.151",
+      "url": "https://ocw.mit.edu/courses/hst-151-principles-of-pharmacology-spring-2005/f2b3cb743a5e6cbfd1808913b4d088d3_ps2005.pdf",
+      "kind": "ocw",
+      "used_for": "节点 receptors 与 pk 的可交卷题：Q3 部分激动药、Q6 Scatchard；Q1 电离与清除、Q5 前三问 Vd/k/CL。不用 Q5 给药方案问"
+    },
+    {
+      "title": "Principles of Pharmacokinetics (Walsh, HST.151)",
+      "url": "https://ocw.mit.edu/courses/hst-151-principles-of-pharmacology-spring-2005/b41c9ac2c9d011bdec3fd4debe2b6a4b_ln34hms3275.pdf",
+      "kind": "lecture_notes",
+      "used_for": "节点 pk：跨膜转运、吸收/首过、Vd、t1/2 与 CL 的关系、一级/零级、肾清除与尿 pH"
+    },
+    {
+      "title": "Assignments | Principles of Pharmacology | MIT OCW HST.151",
+      "url": "https://ocw.mit.edu/courses/hst-151-principles-of-pharmacology-spring-2005/pages/assignments/",
+      "kind": "ocw",
+      "used_for": "标明有 Problem Set；病例讨论偏临床，本树不采用"
+    },
+    {
+      "title": "Syllabus | Drugs and the Brain | MIT OCW ES.S10",
+      "url": "https://ocw.mit.edu/courses/es-s10-drugs-and-the-brain-spring-2013/pages/syllabus/",
+      "kind": "ocw",
+      "used_for": "本科顺序：Week 2 Drug Mechanisms → Week 3 Pharmacokinetics → Week 7 Dose-Response Curves"
+    },
+    {
+      "title": "Handouts | Drugs and the Brain | MIT OCW ES.S10",
+      "url": "https://ocw.mit.edu/courses/es-s10-drugs-and-the-brain-spring-2013/pages/handouts/",
+      "kind": "ocw",
+      "used_for": "Week 3 Pharmacokinetics companion；Week 7 Dose-response Handout 1/2"
+    },
+    {
+      "title": "Dose-Response Curves: Handout 1 (Fallows, ES.S10)",
+      "url": "https://ocw.mit.edu/courses/es-s10-drugs-and-the-brain-spring-2013/7268684ac94b9f5fa191508271d5a5cf_MITES_S10S13_Doseresp1w7.pdf",
+      "kind": "lecture_notes",
+      "used_for": "节点 dose-response：横轴可选浓度/剂量，纵轴可选电导、第二信使、受体占领；Michaelis–Menten 饱和"
+    },
+    {
+      "title": "Dose-Response Curves: Handout 2 (Fallows, ES.S10)",
+      "url": "https://ocw.mit.edu/courses/es-s10-drugs-and-the-brain-spring-2013/dd486c2a69420f114f763645166e417b_MITES_S10S13_Doseresp2w7.pdf",
+      "kind": "lecture_notes",
+      "used_for": "节点 dose-response：竞争性 vs 非竞争性拮抗在 log(dose)–response 上的差别"
+    },
+    {
+      "title": "Pharmacokinetics Companion (ES.S10 / SP.236)",
+      "url": "https://ocw.mit.edu/courses/es-s10-drugs-and-the-brain-spring-2013/a34350b03e7d21118e1e58c325e23de9_MITES_S10S13_pharmwk5.pdf",
+      "kind": "lecture_notes",
+      "used_for": "节点 pk：PD vs PK、ADME、生物利用度、首过、尿 pH 与苯丙胺排泄"
+    },
+    {
+      "title": "1. Introduction to Pharmacology — Principles of Pharmacology Study Guide (University of Minnesota)",
+      "url": "https://open.lib.umn.edu/pharmacology/chapter/introduction-to-pharmacology/",
+      "kind": "open_textbook",
+      "used_for": "节点 receptors：Pharmacology / PD（受体、量效、信号转导）/ PK（ADME）三分科"
+    },
+    {
+      "title": "2. Introduction to Drug-Receptor Interactions and Pharmacodynamics (UMN)",
+      "url": "https://open.lib.umn.edu/pharmacology/chapter/introduction-to-drug-receptor-interactions-and-pharmacodynamics/",
+      "kind": "open_textbook",
+      "used_for": "节点 receptors：受体定义、agonist/antagonist、结合方式"
+    },
+    {
+      "title": "3. Factors Contributing to Drug Effect (UMN)",
+      "url": "https://open.lib.umn.edu/pharmacology/chapter/factors-contributing-to-drug-effect/",
+      "kind": "open_textbook",
+      "used_for": "节点 dose-response：efficacy vs potency、spare receptors、受体饱和"
+    },
+    {
+      "title": "4. Pharmacological Descriptors of Drug-Receptor Interactions (UMN)",
+      "url": "https://open.lib.umn.edu/pharmacology/chapter/pharmacological-descriptors-of-drug-receptor-interactions/",
+      "kind": "open_textbook",
+      "used_for": "节点 receptors：KD、Bmax"
+    },
+    {
+      "title": "8. Two Main Classes of Receptor Ligands: Agonists & Antagonists (UMN)",
+      "url": "https://open.lib.umn.edu/pharmacology/chapter/two-main-classes-of-receptor-ligands-in-pharmacology-agonists-antagonists/",
+      "kind": "open_textbook",
+      "used_for": "节点 dose-response：完全/部分/反向激动；竞争性右移 vs 非竞争性降 Emax"
+    },
+    {
+      "title": "12. Introduction to Signal Transduction (UMN)",
+      "url": "https://open.lib.umn.edu/pharmacology/chapter/introduction-to-signal-transduction/",
+      "kind": "open_textbook",
+      "used_for": "节点 signaling：第一/第二信使；四类信号受体"
+    },
+    {
+      "title": "14. G-Protein-Coupled Receptors (UMN)",
+      "url": "https://open.lib.umn.edu/pharmacology/chapter/g-protein-coupled-receptors/",
+      "kind": "open_textbook",
+      "used_for": "节点 signaling：Gs–cAMP、Gi、Gq–IP3/DAG"
+    },
+    {
+      "title": "《药理学》教学大纲（五年制临床医学）— 成都医学院基础医学实验教学示范中心",
+      "url": "https://cbmet.cmc.edu.cn/info/1040/1181.htm",
+      "kind": "syllabus",
+      "used_for": "国内本科顺序：绪论 → 药动学 → 药效学；量效、ED50/LD50/TI、受体四类。只用总论，不用各系统代表药的临床用途"
+    },
+    {
+      "title": "Fundamentals of Pharmacology — MEDS 4029 (University of Cincinnati)",
+      "url": "https://www.med.uc.edu/education/undergraduate-education/undergraduate-program-in-medical-sciences/undergraduate-courses/4029-fundamentals-of-medical-pharmacology",
+      "kind": "syllabus",
+      "used_for": "本科目标：激动/拮抗、量效（potency、efficacy、TI）、t1/2 与 Vd、ADME、受体与 GPCR 信号。后面疾病用药不进树"
+    }
+  ],
+  "trunk": ["receptors", "dose-response", "signaling", "pk"],
+  "forks": [],
+  "join": null,
+  "nodes": {
+    "receptors": {
+      "name": "受体、激动与拮抗",
+      "why": "HST.151 第 1 讲先定义 PD（药物对机体）与 PK（机体对药物），并把位点写成 macromolecular receptor。UMN 第 1–2 章同样先写 Pharmacodynamics：Drug-Receptor Interactions。成都大纲把受体、亲和力、内在活性、激动药/拮抗药放在药效学核心。没有占领语言，后面的量效曲线没有分子落点。",
+      "learn": [
+        "Pharmacology / pharmacodynamics / pharmacokinetics 的划分（UMN 第 1 章；HST.151 Lecture 1）",
+        "受体：能结合配体并引出细胞效应的蛋白（酶、转运体、离子通道）（UMN 第 2 章；Strichartz）",
+        "Agonist（完全/部分）与 antagonist（竞争性、非竞争性、不可逆）（HST.151 Lecture 1；UMN 第 8 章）",
+        "KD（50% 受体被占时的药物浓度）与 Bmax（UMN 第 4 章；Strichartz 式 2）"
+      ],
+      "task": {
+        "kind": "reading",
+        "prompt": "对照 HST.151 Lecture 1 与 UMN 第 1–2、4 章，交一页术语表（至少 8 行）：pharmacology、PD、PK、receptor、agonist、partial agonist、antagonist、KD、Bmax。每行写来源页上的原句或公式，不写临床适应证。再做 HST.151 Problem Set Q3（pindolol 作为部分激动药如何表现为拮抗）和 Q6（用 Scatchard 说明 β1 受体数目减半），只答机制，不写用药方案。",
+        "from": "HST.151 Lecture 1 + Strichartz Drug-Receptor Interactions + Problem Set Q3、Q6；UMN 第 1–2、4 章",
+        "alternatives": [
+          {
+            "kind": "exercise",
+            "prompt": "按 Strichartz 式 (2) 手算：给定 KD 与三个药物浓度，算出 DR/Ro；再按讲义 spare receptors 例子，标出 KD 与 KAp 何时不相等。交演算与一张占领–浓度草图。",
+            "from": "HST.151 Strichartz 讲义 II.D–E"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://ocw.mit.edu/courses/hst-151-principles-of-pharmacology-spring-2005/d22c2c245a29ad4681915ce4c8eaab80_0201_1_rosow.pdf",
+          "title": "HST.151 Lecture 1 Introduction (Rosow)",
+          "use": "先读 PD vs PK 与 agonist / antagonist / affinity 定义"
+        },
+        {
+          "url": "https://open.lib.umn.edu/pharmacology/chapter/introduction-to-pharmacology/",
+          "title": "UMN 第 1 章 Introduction to Pharmacology",
+          "use": "核对照 PD（受体、量效、信号转导）与 PK（ADME）的三分科"
+        },
+        {
+          "url": "https://open.lib.umn.edu/pharmacology/chapter/introduction-to-drug-receptor-interactions-and-pharmacodynamics/",
+          "title": "UMN 第 2 章 Drug-Receptor Interactions",
+          "use": "抄受体定义与 agonist / antagonist"
+        },
+        {
+          "url": "https://open.lib.umn.edu/pharmacology/chapter/pharmacological-descriptors-of-drug-receptor-interactions/",
+          "title": "UMN 第 4 章 KD 与 Bmax",
+          "use": "把 KD、Bmax 写进术语表"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/hst-151-principles-of-pharmacology-spring-2005/07c6a82fbb6ebe19d469d3feee927e53_ln2hms3565.pdf",
+          "title": "HST.151 Drug-Receptor Interactions (Strichartz)",
+          "use": "读占领平衡与 spare receptors；附录 Scatchard 给 Q6 用"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/hst-151-principles-of-pharmacology-spring-2005/f2b3cb743a5e6cbfd1808913b4d088d3_ps2005.pdf",
+          "title": "HST.151 Problem Set 2005",
+          "use": "只做 Q3 与 Q6，跳过处方/给药问"
+        }
+      ]
+    },
+    "dose-response": {
+      "name": "量效：效应怎么被量",
+      "why": "HST.151 把 Dose-Response 写成 drug effect 的 sine qua non，并与 Receptors 同一讲。成都大纲要求掌握量效关系、效能、效价强度、ED50/LD50、治疗指数。UC MEDS 4029 目标写明 agonist dose-response 的 potency、efficacy、therapeutic index。ES.S10 第 7 周专讲曲线怎么画。这一步只回答「效应被量成什么图、哪些数」，不写怎么开药。",
+      "learn": [
+        "Graded（连续变量）与 quantal（群体百分数）量效（Strichartz II.A–B；HST.151 Lecture 1）",
+        "半对数剂量–效应常呈 S 形；ED50 / EC50 / LD50（HST.151 Lecture 1；成都大纲）",
+        "Potency（达指定强度所需浓度）vs efficacy / Emax（最大效应）（HST.151；UMN 第 3 章）",
+        "竞争性拮抗：曲线右移、Emax 可保留；非竞争性/不可逆：Emax 下降（UMN 第 8 章；ES.S10 Handout 2；Strichartz III）",
+        "治疗指数 TI = TD50/ED50 或动物实验 LD50/ED50（HST.151 Lecture 1；成都大纲；UC 目标）"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "交三张自己画的半对数量效图，坐标用语来自 ES.S10 Handout 1（横轴用浓度，纵轴用效应或受体占领）：(1) 完全激动药 vs 部分激动药（标 Emax 与 ED50）；(2) 同一激动药加竞争性拮抗药（右移、Emax 不变）；(3) 加不可逆/非竞争性拮抗药（Emax 下降）。旁注写清 potency 与 efficacy 各看图上哪一段。对照成都大纲写出 ED50、效能、效价强度、TI 的定义各一句。不写给药剂量或疗程。",
+        "from": "HST.151 Lecture 1 + Strichartz II–III；ES.S10 Week 7 Handout 1/2；UMN 第 3、8 章；成都《药理学》药效学量效节"
+      },
+      "resources": [
+        {
+          "url": "https://ocw.mit.edu/courses/hst-151-principles-of-pharmacology-spring-2005/d22c2c245a29ad4681915ce4c8eaab80_0201_1_rosow.pdf",
+          "title": "HST.151 Lecture 1 Introduction",
+          "use": "抄 ED50、potency、efficacy、TI 的原文定义"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/hst-151-principles-of-pharmacology-spring-2005/07c6a82fbb6ebe19d469d3feee927e53_ln2hms3565.pdf",
+          "title": "HST.151 Drug-Receptor Interactions",
+          "use": "对照线性 vs 半对数图、graded vs quantal、竞争性/非竞争性示意图"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/es-s10-drugs-and-the-brain-spring-2013/7268684ac94b9f5fa191508271d5a5cf_MITES_S10S13_Doseresp1w7.pdf",
+          "title": "ES.S10 Dose-Response Handout 1",
+          "use": "选定横轴（浓度）与纵轴（效应或占领）再画图"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/es-s10-drugs-and-the-brain-spring-2013/dd486c2a69420f114f763645166e417b_MITES_S10S13_Doseresp2w7.pdf",
+          "title": "ES.S10 Dose-Response Handout 2",
+          "use": "按讲义区分竞争性与非竞争性拮抗的曲线"
+        },
+        {
+          "url": "https://open.lib.umn.edu/pharmacology/chapter/two-main-classes-of-receptor-ligands-in-pharmacology-agonists-antagonists/",
+          "title": "UMN 第 8 章 Agonists & Antagonists",
+          "use": "核对照右移 vs 降 Emax、spare receptors 未耗尽时 Emax 仍可保留"
+        },
+        {
+          "url": "https://cbmet.cmc.edu.cn/info/1040/1181.htm",
+          "title": "成都医学院《药理学》教学大纲",
+          "use": "只读药效学「剂量和效应的关系」：量反应/质反应、ED50、效能、效价强度、TI"
+        }
+      ]
+    },
+    "signaling": {
+      "name": "信号转导：通路怎么被改写",
+      "why": "UMN 把 Signal Transduction 列为 PD 的第三块，第 12 章写清占领之后细胞内事件才能设计增强或减弱信号的分子；第 14 章用 Gs/Gi/Gq 把结合写成 cAMP 或 IP3/DAG。成都大纲在药效学要求了解第二信使，并列 GPCR、配体门控通道、酪氨酸激酶、细胞内受体。UC MEDS 4029 在量效之后要求 GPCR 信号转导。这一步只画通路，不写某病怎么治。",
+      "learn": [
+        "第一信使（激动药/递质）与第二信使（cAMP、cGMP、IP3、离子）（UMN 第 12 章）",
+        "四类信号受体：酶联、GPCR、配体门控通道、细胞内受体（UMN 第 12 章；成都大纲）",
+        "GPCR：7 次跨膜；Gαs 升 cAMP，Gαi 降 cAMP，Gαq 经 PLC 产生 IP3 与 DAG（UMN 第 14 章）",
+        "信号放大：少量突触递质占领即可引出显著细胞反应（UMN 第 12 章）"
+      ],
+      "task": {
+        "kind": "writeup",
+        "prompt": "对照 UMN 第 12 与 14 章，交一页通路图：选 Gs–腺苷酸环化酶–cAMP–PKA 或 Gq–PLC–IP3/DAG 一条。图上标：激动药、受体、G 蛋白亚基、第二信使、一个效应蛋白。另用成都大纲的四类受体各写一句「结合后第一步改写了什么」。不写适应证、商品名或用法。",
+        "from": "UMN 第 12、14 章；成都大纲药效学「药物与受体」种类；UC MEDS 4029 的 GPCR 目标"
+      },
+      "resources": [
+        {
+          "url": "https://open.lib.umn.edu/pharmacology/chapter/introduction-to-signal-transduction/",
+          "title": "UMN 第 12 章 Signal Transduction",
+          "use": "列出第一/第二信使与四类受体后再画图"
+        },
+        {
+          "url": "https://open.lib.umn.edu/pharmacology/chapter/g-protein-coupled-receptors/",
+          "title": "UMN 第 14 章 GPCRs",
+          "use": "只描 Gs 或 Gq 一条，跳过章内硝酸酯/PDE 抑制剂的治疗段"
+        },
+        {
+          "url": "https://cbmet.cmc.edu.cn/info/1040/1181.htm",
+          "title": "成都医学院《药理学》教学大纲",
+          "use": "核对照受体种类：GPCR、配体门控、酪氨酸激酶、细胞内受体"
+        },
+        {
+          "url": "https://www.med.uc.edu/education/undergraduate-education/undergraduate-program-in-medical-sciences/undergraduate-courses/4029-fundamentals-of-medical-pharmacology",
+          "title": "UC MEDS 4029 Fundamentals of Pharmacology",
+          "use": "对照学习目标里的 GPCR / signal transduction，确认本步停在机制"
+        }
+      ]
+    },
+    "pk": {
+      "name": "药动学：分子怎么到、怎么走",
+      "why": "成都大纲把药动学放在药效学之前，要求掌握体内过程与 t1/2、Vd、CL。HST.151 第 2 讲与 ES.S10 第 3 周在机制之后专讲 ADME。UC 目标要求定量理解半衰期与表观分布容积。本步只量浓度–时间与清除，不用来源里的负荷量、给药间隔或治疗方案。",
+      "learn": [
+        "ADME：吸收、分布、代谢、排泄（UMN 第 1 章；ES.S10 PK companion；成都大纲）",
+        "首过消除与生物利用度（HST.151 Walsh；成都大纲；ES.S10 companion）",
+        "Vd = Dose/C0；t1/2 = ln2 · Vd / CL（Walsh 讲义）",
+        "一级消除（速率与浓度成正比）与载体饱和时的零级（Walsh；成都大纲）",
+        "弱电解质跨膜：未解离型脂溶性更高；尿 pH 可改变肾清除（Walsh；HST.151 PS Q1；ES.S10 companion 末页）"
+      ],
+      "task": {
+        "kind": "problem_set",
+        "prompt": "做 HST.151 Problem Set Q1（弱碱 pKa、电离比–pH 图、尿 pH 会不会改变肾清除；只答转运与清除机制）。再做 Q5 前三问：由静脉单次给药的浓度–时间图求 Vd、速率常数 k、clearance。不要做 Q5 后半的输注稳态给药方案，也不要做成都大纲里的负荷量/首剂加倍。交手算与用到的 Walsh 公式编号或页上原式。",
+        "from": "HST.151 Problem Set Q1 与 Q5 前三问；Walsh Principles of Pharmacokinetics；成都大纲药动学参数定义（不用多次给药方案）"
+      },
+      "resources": [
+        {
+          "url": "https://ocw.mit.edu/courses/hst-151-principles-of-pharmacology-spring-2005/b41c9ac2c9d011bdec3fd4debe2b6a4b_ln34hms3275.pdf",
+          "title": "HST.151 Principles of Pharmacokinetics (Walsh)",
+          "use": "读吸收、Vd、t1/2–CL、肾清除与尿 pH；跳过 infusion / multiple-dose 积累段里的给药设计"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/hst-151-principles-of-pharmacology-spring-2005/f2b3cb743a5e6cbfd1808913b4d088d3_ps2005.pdf",
+          "title": "HST.151 Problem Set 2005",
+          "use": "只交 Q1 与 Q5 前三问"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/es-s10-drugs-and-the-brain-spring-2013/a34350b03e7d21118e1e58c325e23de9_MITES_S10S13_pharmwk5.pdf",
+          "title": "ES.S10 Pharmacokinetics Companion",
+          "use": "核对照 ADME 与首过；末页尿 pH 与苯丙胺排泄可与 Q1 对照"
+        },
+        {
+          "url": "https://cbmet.cmc.edu.cn/info/1040/1181.htm",
+          "title": "成都医学院《药理学》教学大纲",
+          "use": "只读药动学：转运、ADME、t1/2、Vd、CL、0 级/1 级。跳过恒量定时给药与负荷量"
+        },
+        {
+          "url": "https://www.med.uc.edu/education/undergraduate-education/undergraduate-program-in-medical-sciences/undergraduate-courses/4029-fundamentals-of-medical-pharmacology",
+          "title": "UC MEDS 4029",
+          "use": "对照 half-life、volume of distribution、ADME 目标，确认本步是参数不是医嘱"
+        }
+      ]
+    }
+  },
+  "conflicts": [
+    "成都大纲先药动学后药效学；HST.151 与 UMN 先受体/量效（PD）再 PK；ES.S10 是机制 → PK → 第 7 周才专讲量效。蒸馏取更靠前的 PD 入口：先占领与量效，再画通路，最后用 ADME 参数解释分子怎么到、怎么走。",
+    "HST.151 Problem Set Q5 后半与成都「负荷量/首剂加倍」是给药方案，本树不用。NCBI Nursing Pharmacology 与 OpenStax Pharmacology for Nurses 以给药与护理决策为主，不作为节点依据。",
+    "HST.151 后半与成都后半进入各系统代表药与临床用途；UC 后半同样进入疾病用药。本树停在总论机制与测量。"
+  ],
+  "missing": "",
+  "checked_at": "2026-10-04"
+}

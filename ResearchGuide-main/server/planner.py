@@ -84,6 +84,16 @@ DIRECTIONS: dict[str, dict[str, Any]] = {
                     "why": "回答「你写的程序在机器里到底发生了什么」。"},
         "signal_keys": ["interest:system_structure", "interest:build_things"],
     },
+    "med": {
+        "code": "med",
+        "name": "基础医学",
+        "discipline_ref": "基础医学（310）",
+        "blurb": "疾病机制的实验室科学底座：解剖、生理、病理、免疫、药理。不含临床各科。",
+        "course_query": "基础医学",
+        "reading": {"title": "OpenStax《Anatomy and Physiology》第 1 章（约 40 分钟）",
+                    "why": "公开教材，先建立「结构如何对应功能」，不要求医学背景。"},
+        "signal_keys": [],
+    },
 }
 
 

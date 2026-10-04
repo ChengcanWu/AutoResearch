@@ -1,0 +1,281 @@
+{
+  "id": "110.34",
+  "name": "数学分析",
+  "format": "tutorial-tree-v2",
+  "status": "ok",
+  "goal": "能用 ε-N / ε-δ 把数列极限、函数极限与连续写成可核对的证明，并对照 Lebl 或 18.100 的书面作业做完导数、Riemann 积分与一致收敛。不承诺新定理或研究论文。",
+  "sources": [
+    {
+      "title": "Syllabus | Real Analysis | Mathematics | MIT OpenCourseWare (18.100B, Spring 2025)",
+      "url": "https://ocw.mit.edu/courses/18-100b-real-analysis-spring-2025/pages/syllabus/",
+      "kind": "ocw",
+      "used_for": "课程目标：学会写分析证明，并把微积分定理严格证一遍；顺序是实数、极限、收敛、级数、连续，再度量空间、微分、Riemann 积分；作业是每周 Problem set（约十套）"
+    },
+    {
+      "title": "Calendar | Real Analysis | Mathematics | MIT OpenCourseWare (18.100B, Spring 2025)",
+      "url": "https://ocw.mit.edu/courses/18-100b-real-analysis-spring-2025/pages/calendar/",
+      "kind": "ocw",
+      "used_for": "主干讲次：Lec 1–8 实数/数列/级数 → Lec 9–11 连续与 EVT/IVT → Lec 15–17 导数/中值/Taylor → Lec 17–19 积分与 FTC → Lec 20–22 一致收敛；Lec 11–14 度量空间不进主干"
+    },
+    {
+      "title": "Syllabus | Real Analysis | Mathematics | MIT OpenCourseWare (18.100A, Fall 2020)",
+      "url": "https://ocw.mit.edu/courses/18-100a-real-analysis-fall-2020/pages/syllabus/",
+      "kind": "ocw",
+      "used_for": "覆盖：数列与级数收敛、连续、可微、Riemann 积分、函数列与一致、极限运算交换；教材是 Lebl；考核是书面 Homework Assignments 1–12"
+    },
+    {
+      "title": "Lecture Notes and Readings | Real Analysis | Mathematics | MIT OpenCourseWare (18.100A, Fall 2020)",
+      "url": "https://ocw.mit.edu/courses/18-100a-real-analysis-fall-2020/pages/lecture-notes-and-readings/",
+      "kind": "ocw",
+      "used_for": "按周阅读 Lebl 章节并对照讲义：Week 3–6 实数与数列级数；Week 7–9 函数极限与连续；Week 9–11 导数与 Taylor；Week 11–12 积分与 FTC；Week 12–13 一致收敛"
+    },
+    {
+      "title": "Basic Analysis: Introduction to Real Analysis (Jiří Lebl)",
+      "url": "https://www.jirka.org/ra/",
+      "kind": "open_textbook",
+      "used_for": "卷一目录：Real Numbers → Sequences and Series → Continuous Functions → The Derivative → The Riemann Integral → Sequences of Functions；慢课到不了度量空间，以 Picard 收束；539 道书面习题"
+    },
+    {
+      "title": "Basic Analysis I: Introduction to Real Analysis, Volume I (PDF, version 6.3)",
+      "url": "https://www.jirka.org/ra/realanal.pdf",
+      "kind": "open_textbook",
+      "used_for": "各节习题编号与慢课建议：§1.1–§2.5、§3.1–§3.4、§4.1–§4.2、§5.1–§5.3、§6.1–§6.3"
+    },
+    {
+      "title": "Elementary Real Analysis, 2nd ed. (Thomson, Bruckner, Bruckner) — full PDF",
+      "url": "https://classicalrealanalysis.info/documents/TBB-AllChapters-Landscape.pdf",
+      "kind": "open_textbook",
+      "used_for": "18.100B 主教材：Ch 1–3 实数/数列/级数，Ch 5 连续，Ch 7 微分，Ch 8 积分，Ch 9 函数列；各章 Challenging Problems 与节后习题"
+    },
+    {
+      "title": "ClassicalRealAnalysis.com — Elementary Real Analysis table of contents",
+      "url": "https://www.classicalrealanalysis.info/com/TBB-TableOfContents.php",
+      "kind": "open_textbook",
+      "used_for": "核对 TBB 章节顺序与节标题（2.4 Convergence、5.1 Limits、7.6 Mean Value Theorem、8.6 Riemann Integral、9.3 Uniform Limits）"
+    },
+    {
+      "title": "《数学分析》教学大纲（复旦大学数学科学学院）",
+      "url": "https://math.fudan.edu.cn/anal/34382/list.htm",
+      "kind": "syllabus",
+      "used_for": "中文数学分析 I 顺序：集合与映射 → 数列极限 → 函数极限与连续 → 微分 → 中值定理与 Taylor → 不定/定积分；数项级数在积分之后，不按此改主干"
+    }
+  ],
+  "trunk": ["reals-seq", "limits-cont", "derivative", "integral", "uniform"],
+  "forks": [],
+  "join": null,
+  "nodes": {
+    "reals-seq": {
+      "name": "实数、数列与级数",
+      "why": "18.100B 课历前八讲是实数、Archimedean、数列收敛、单调/Cauchy、Bolzano–Weierstrass 再级数。Lebl 把 Ch 1 Real Numbers 与 Ch 2 Sequences and Series 放在任何函数极限之前。复旦大纲第 1–2 章同样从集合、实数系连续性到数列极限与收敛准则。",
+      "learn": [
+        "有序域与最小上界性质",
+        "Archimedean 性质与有理数稠密",
+        "数列的 ε-N 收敛、单调收敛、Cauchy 准则",
+        "Bolzano–Weierstrass、limsup / liminf",
+        "级数、绝对收敛与比较/比值/根值判别"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "打开 Lebl PDF，交三道手写证明并标明题号：① Exercise 2.1.11（补全单调递减数列收敛）；② Exercise 2.2.1 或 2.2.2（极限四则/序性质）；③ Exercise 2.4.1 或 2.4.6（Cauchy）。再从 §2.5 选一题判定一个级数敛散。每题写出所用定义中的 ε 与 N。",
+        "from": "Lebl §1.1–§2.5 Exercises；18.100A Lectures 4–12；18.100B Lectures 1–8 / Problem set 1–3",
+        "alternatives": [
+          {
+            "kind": "exercise",
+            "prompt": "对照 TBB 第 2 章节后习题：交一道 ε-N 收敛、一道单调收敛或 Cauchy、一道 2.14 Challenging Problems；级数从第 3 章 Tests for Convergence 另交一题。",
+            "from": "TBB Ch 2–3；18.100B 主教材"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://ocw.mit.edu/courses/18-100a-real-analysis-fall-2020/pages/lecture-notes-and-readings/",
+          "title": "18.100A Lecture Notes and Readings",
+          "use": "读 Lecture 4–12，对照 [JL] §1.1–§2.6"
+        },
+        {
+          "url": "https://www.jirka.org/ra/realanal.pdf",
+          "title": "Lebl Basic Analysis I (PDF)",
+          "use": "做 §2.1、§2.2、§2.4、§2.5 标明的习题"
+        },
+        {
+          "url": "https://classicalrealanalysis.info/documents/TBB-AllChapters-Landscape.pdf",
+          "title": "Elementary Real Analysis (TBB) PDF",
+          "use": "备选：Ch 1–3 节后习题"
+        },
+        {
+          "url": "https://math.fudan.edu.cn/anal/34382/list.htm",
+          "title": "复旦《数学分析》教学大纲",
+          "use": "核对数列极限与收敛准则的教学要求"
+        }
+      ]
+    },
+    "limits-cont": {
+      "name": "函数极限与连续",
+      "why": "18.100A Week 7–9 从 limits of functions、数列刻画，到连续、最值定理与介值定理。18.100B Lec 9–11 同样是连续函数与 EVT/IVT。Lebl Ch 3 把函数极限放在连续之前。复旦第 3 章要求掌握函数极限与数列极限的关系，以及闭区间上连续函数的基本性质。",
+      "learn": [
+        "函数极限的 ε-δ 定义与数列刻画",
+        "一点连续、单侧极限与间断",
+        "闭区间上的最值定理与介值定理",
+        "一致连续（闭区间上连续则一致连续）"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "对照 Lebl §3.1–§3.4 交三道书面题：① Exercise 3.1.1（用 ε-δ 求极限或证极限不存在）；② Exercise 3.2.1 或 3.2.2（从定义证 x² 或 1/x 连续）；③ 按 Lecture 16 的步骤写出最值定理或介值定理的证明提纲，并指出哪一步用了 Bolzano–Weierstrass 或二分法。",
+        "from": "Lebl §3.1–§3.4；18.100A Lectures 13–17；复旦大纲第 3 章",
+        "alternatives": [
+          {
+            "kind": "exercise",
+            "prompt": "做 TBB §5.1 Introduction to Limits 与 §5.4 Continuity 各一题，再做 §5.7 Extremal Properties 或 §5.8 Darboux Property 一题。",
+            "from": "TBB Ch 5；18.100B Lectures 9–11"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://ocw.mit.edu/courses/18-100a-real-analysis-fall-2020/pages/lecture-notes-and-readings/",
+          "title": "18.100A Lecture Notes and Readings",
+          "use": "读 Lecture 13–17（函数极限、连续、min/max、IVT、一致连续）"
+        },
+        {
+          "url": "https://www.jirka.org/ra/realanal.pdf",
+          "title": "Lebl Basic Analysis I (PDF)",
+          "use": "做 §3.1–§3.4 习题，尤其 3.1.1、3.2.1"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/18-100b-real-analysis-spring-2025/pages/calendar/",
+          "title": "18.100B Calendar",
+          "use": "对照 Lec 9–11 的连续与 EVT/IVT"
+        }
+      ]
+    },
+    "derivative": {
+      "name": "导数、中值定理与 Taylor",
+      "why": "18.100B 在连续之后（中间插入的度量空间不跟）接 Lec 15–17：导数法则、Rolle、中值、L'Hôpital、Taylor 余项。18.100A Lecture 17–20 与 Lebl Ch 4 同一条线。复旦第 4–5 章把微分、中值定理、L'Hospital 与 Taylor 公式连在一起。",
+      "learn": [
+        "导数的极限定义；可微则连续",
+        "求导法则、Rolle 定理与中值定理",
+        "L'Hôpital 法则",
+        "Taylor 多项式与余项"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "对照 Lebl §4.1–§4.3 交三道证明：① Exercise 4.1.1（乘积法则）；② Exercise 4.2.11 或 4.2.15（Rolle / 中值定理）；③ Exercise 4.3.1（写出指数函数在 0 处的 n 次 Taylor 多项式，并标明余项来自哪条定理）。",
+        "from": "Lebl §4.1–§4.3；18.100A Lectures 17–20；18.100B Lectures 15–17；复旦第 4–5 章",
+        "alternatives": [
+          {
+            "kind": "exercise",
+            "prompt": "做 TBB §7.2 The Derivative、§7.6 Mean Value Theorem、§7.12 Taylor Polynomials 各一题；L'Hôpital 可改做 §7.11。",
+            "from": "TBB Ch 7"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://ocw.mit.edu/courses/18-100a-real-analysis-fall-2020/pages/lecture-notes-and-readings/",
+          "title": "18.100A Lecture Notes and Readings",
+          "use": "读 Lecture 17–20（导数定义、Rolle/MVT、Taylor）"
+        },
+        {
+          "url": "https://www.jirka.org/ra/realanal.pdf",
+          "title": "Lebl Basic Analysis I (PDF)",
+          "use": "做 §4.1–§4.3 标明的习题"
+        },
+        {
+          "url": "https://classicalrealanalysis.info/documents/TBB-AllChapters-Landscape.pdf",
+          "title": "Elementary Real Analysis (TBB) PDF",
+          "use": "备选：Ch 7 Differentiation 节后习题"
+        }
+      ]
+    },
+    "integral": {
+      "name": "Riemann 积分与微积分基本定理",
+      "why": "18.100A Lecture 20–22 从 Riemann 和到连续函数可积，再到 FTC、分部与换元。18.100B Lec 17–19 是 Riemann integrals、integrable functions、FTC。Lebl Ch 5 用 Darboux 上和/下和定义积分。复旦第 6–7 章要求掌握不定积分计算，并「牢固掌握」牛顿–莱布尼茨公式。",
+      "learn": [
+        "分划、上和/下和（Darboux）或 Riemann 和",
+        "连续函数在闭区间上可积",
+        "积分的线性与区间可加",
+        "微积分基本定理、分部与换元"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "对照 Lebl §5.1–§5.3：交一道用上和/下和证明可积（或证明某不连续函数可积/不可积），再写出 FTC 一侧的完整证明（标明用了中值定理或一致连续的哪一步），最后按 18.100A Lecture 22 做一道分部或换元，步骤写成可逐行检查的等式。",
+        "from": "Lebl §5.1–§5.3；18.100A Lectures 20–22；18.100B Lectures 17–19；复旦第 6–7 章",
+        "alternatives": [
+          {
+            "kind": "exercise",
+            "prompt": "做 TBB §8.6 The Riemann Integral 与 §8.9 More on the Fundamental Theorem of Calculus 各一题；反常积分可另做 §8.8 一题。",
+            "from": "TBB Ch 8"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://ocw.mit.edu/courses/18-100a-real-analysis-fall-2020/pages/lecture-notes-and-readings/",
+          "title": "18.100A Lecture Notes and Readings",
+          "use": "读 Lecture 20–22（Riemann 和、连续函数可积、FTC）"
+        },
+        {
+          "url": "https://www.jirka.org/ra/realanal.pdf",
+          "title": "Lebl Basic Analysis I (PDF)",
+          "use": "做 §5.1–§5.3 习题"
+        },
+        {
+          "url": "https://math.fudan.edu.cn/anal/34382/list.htm",
+          "title": "复旦《数学分析》教学大纲",
+          "use": "对照第 6–7 章：不定积分计算 + 牛顿–莱布尼茨"
+        }
+      ]
+    },
+    "uniform": {
+      "name": "一致收敛与交换极限",
+      "why": "18.100A 课程说明把 sequences and series of functions、uniformity、interchange of limit operations 列为基本内容；Lecture 23–25 是点态/一致、Weierstrass M-test、幂级数。18.100B Lec 20–22 同一块。Lebl 慢课以 §6.1–§6.3（含 Picard）收束一学期。复旦第 10 章把函数项级数的一致收敛放在一元积分之后。",
+      "learn": [
+        "点态收敛与一致收敛的区别",
+        "一致收敛保持连续；Weierstrass M-检验",
+        "一致收敛下积分/求导与极限可交换的条件",
+        "幂级数的逐项运算（18.100 / Lebl §6 末）"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "对照 Lebl §6.1–§6.2：交一个点态收敛但不一致收敛的例子（写出对每个 x 的极限，并证明不存在与 x 无关的 N），再用 M-检验或一致收敛定义证明一则「极限与积分可交换」或「幂级数可逐项求导」。若时间够，按 Lebl 慢课建议把 Picard 存在唯一性的证明提纲按节号抄成可核对步骤。",
+        "from": "Lebl §6.1–§6.3；18.100A Lectures 23–25；18.100B Lectures 20–22；复旦第 10 章",
+        "alternatives": [
+          {
+            "kind": "exercise",
+            "prompt": "做 TBB §9.2 Pointwise Limits、§9.3 Uniform Limits，再做 §9.5 Uniform Convergence and the Integral 或 §9.6 Uniform Convergence and Derivatives 一题。",
+            "from": "TBB Ch 9"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://ocw.mit.edu/courses/18-100a-real-analysis-fall-2020/pages/lecture-notes-and-readings/",
+          "title": "18.100A Lecture Notes and Readings",
+          "use": "读 Lecture 23–25（点态/一致、M-test、幂级数）"
+        },
+        {
+          "url": "https://www.jirka.org/ra/",
+          "title": "Lebl Basic Analysis 首页",
+          "use": "按慢课路径做完 Ch 6；习题在卷一 PDF"
+        },
+        {
+          "url": "https://www.jirka.org/ra/realanal.pdf",
+          "title": "Lebl Basic Analysis I (PDF)",
+          "use": "做 §6.1–§6.2 习题；可选 §6.3 Picard"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/18-100b-real-analysis-spring-2025/pages/calendar/",
+          "title": "18.100B Calendar",
+          "use": "对照 Lec 20–22 与 Problem set 9–10"
+        }
+      ]
+    }
+  },
+  "conflicts": [
+    "数项级数的位置：18.100A/B、Lebl Ch 2、TBB Ch 3 都把级数放在数列之后、函数极限之前；复旦大纲把数项级数放在定积分与反常积分之后（第 9 章）。取更靠前的安排，并入第一节点。",
+    "度量空间：18.100B 在连续之后、求导之前插入 Lec 12–14；Lebl 明文写慢课（如 UIUC 444）到不了 Ch 7，快课把度量空间放在一致收敛之后；复旦把 Euclid 空间放到数学分析 II 第 11 章。不把度量空间写入主干。",
+    "MIT 的 18.100A / 18.100B / 18.100C 是同一门课的三种版本（A 偏实直线，B 更早用点集与度量空间），不是主干之后的并行选修，故不分叉。"
+  ],
+  "missing": "",
+  "checked_at": "2026-10-04"
+}

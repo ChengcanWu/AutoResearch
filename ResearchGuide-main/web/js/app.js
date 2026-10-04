@@ -13,6 +13,7 @@ const S = {
   lastFeedback: null,
   newFactIds: [],
   portraitTab: "onboarding",
+  cardsPane: "direction",
 };
 
 const $app = document.getElementById("app");
@@ -1079,6 +1080,25 @@ const FIELD_TREES = {
       ]),
     ]), "se"),
   },
+  med: {
+    name: "基础医学",
+    query: "基础医学",
+    root: stampTree(twig("从分子到症状", "基础医学先问结构在哪、反应怎么维持、哪一环偏离，而不是先背病名。本路径不含临床各科。", [
+      twig("结构", "解剖名词是位置和连接，不是病因。先能指到，再谈功能。", [
+        twig("系统与局部", "同一结构可以按功能归进系统，也可以按位置归进局部。两套说法都要能对上。"),
+        twig("连接", "管道、神经、相邻器官：写不清和谁连着，后面的机制没有落点。"),
+      ]),
+      twig("分子", "生化把「能活」写成一串可检查的反应。少了哪一步，要能猜会在哪个结构上先出问题。", [
+        twig("通路", "底物、产物、酶。通路是步骤，不是一个词。"),
+      ]),
+      twig("稳态", "正常是一个范围。身体用反馈把自己拉回来，数字不是对错题。", [
+        twig("反馈", "感受、整合、效应。断在不同位置，先看到的偏离不一样。"),
+      ]),
+      twig("机制", "免疫、微生物、病理是同一条证据链上的三种角色：宿主、外来物或损伤、组织上的偏离。", [
+        twig("三角", "三侧都要能指回结构或分子。只写病名，还没有机制。"),
+      ]),
+    ]), "med"),
+  },
 };
 
 Object.entries(FIELD_TREES).forEach(([code, f]) => { f.code = code; });
@@ -1091,6 +1111,7 @@ const CHAIN_ATTACH = {
   ai: { 2: ["数据", "模型怎么学/评价"], 3: ["模型怎么学/损失"], 6: ["用起来"] },
   psy: { 1: ["知觉/错觉"], 2: ["知觉/注意", "记忆", "决策"] },
   econ: { 1: ["约束"], 2: ["激励"], 3: ["市场"] },
+  med: { 1: ["结构"], 2: ["分子"], 3: ["稳态"], 4: ["机制"] },
 };
 
 function findTwig(root, labelPath) {
@@ -1126,6 +1147,53 @@ function applyPaths(paths) {
     field.chain = true;
     field.sourceDoc = path.source_doc;
   });
+}
+
+const BACKEND_CODES = ["ai", "math", "stat", "psy", "econ", "se", "med"];
+const TUTORIALS = {};
+
+function chainFromSpec(code, spec) {
+  const steps = (spec.steps || []).map((row, i) => ({
+    label: row[0],
+    intro: `先弄懂：${row[1]}`,
+    done_when: row[2],
+    stage: i + 1,
+    main: true,
+    children: [],
+  }));
+  return {
+    code,
+    name: spec.name,
+    query: spec.query,
+    chain: true,
+    root: stampTree({ label: spec.name, intro: spec.goal, virtual: true, children: steps }, code),
+  };
+}
+
+function buildTutorials() {
+  Object.keys(TUTORIALS).forEach((k) => { delete TUTORIALS[k]; });
+  Object.assign(TUTORIALS, FIELD_TREES);
+  const extra = (window.RG_DIR && RG_DIR.extra) || {};
+  Object.entries(extra).forEach(([key, spec]) => {
+    TUTORIALS[key] = chainFromSpec(key, spec);
+  });
+}
+
+function tutorialOf(dirId) {
+  if (window.RG_DIR && dirId) {
+    const key = RG_DIR.tutorialKey(dirId);
+    if (key && TUTORIALS[key]) return TUTORIALS[key];
+  }
+  return FIELD_TREES[dirId] || null;
+}
+
+function activeField(t) {
+  return tutorialOf(t && t.dir) || FIELD_TREES[t && t.code] || null;
+}
+
+function dirTitle(dirId, field) {
+  if (window.RG_DIR && dirId && RG_DIR.displayName(dirId)) return RG_DIR.displayName(dirId);
+  return (field && field.name) || "";
 }
 
 function entryNode(field) {
@@ -1188,14 +1256,17 @@ function trail() {
   try {
     const t = JSON.parse(localStorage.getItem(trailStorageKey()) || "null");
     if (t && typeof t === "object") {
+      const code = t.code || "";
+      const mapped = window.RG_DIR && RG_DIR.legacyDir[code];
       return {
-        code: t.code || "",
+        code,
+        dir: t.dir || mapped || "",
         done: Array.isArray(t.done) ? t.done : [],
         tasks: t.tasks && typeof t.tasks === "object" ? t.tasks : {},
       };
     }
   } catch (_) { /* 坏数据就当没有进度 */ }
-  return { code: "", done: [], tasks: {} };
+  return { code: "", dir: "", done: [], tasks: {} };
 }
 
 function saveTrail(t, force) {
@@ -1213,8 +1284,9 @@ function saveTrail(t, force) {
   }
   localStorage.setItem(trailStorageKey(), JSON.stringify({
     code,
+    dir: t.dir || (force ? "" : prev.dir) || (window.RG_DIR && RG_DIR.legacyDir[code]) || "",
     done,
-    tasks: force ? (t.tasks || {}) : Object.assign({}, prev.code === code ? prev.tasks : {}, t.tasks || {}),
+    tasks: force ? (t.tasks || {}) : Object.assign({}, prev.code === code && prev.dir === (t.dir || prev.dir) ? prev.tasks : {}, t.tasks || {}),
   }));
 }
 
@@ -1236,13 +1308,15 @@ function mergeTrail(code, tasks) {
   const field = FIELD_TREES[code];
   const inferred = inferredDone(code, tasks);
   if (!field) return local;
-  if (local.code !== code) return { code, done: inferred, tasks: {} };
+  if (local.code !== code) {
+    return { code, dir: local.dir || (window.RG_DIR && RG_DIR.legacyDir[code]) || "", done: inferred, tasks: {} };
+  }
   const path = pathNodes(field);
   const localAt = currentOnPath(field, local.done);
   const inferredAt = currentOnPath(field, inferred);
   const localI = localAt ? path.findIndex((n) => n.id === localAt.id) : path.length;
   const inferredI = inferredAt ? path.findIndex((n) => n.id === inferredAt.id) : path.length;
-  if (inferredI > localI) return { code, done: inferred, tasks: local.tasks || {} };
+  if (inferredI > localI) return { code, dir: local.dir, done: inferred, tasks: local.tasks || {} };
   return local;
 }
 
@@ -1255,7 +1329,7 @@ function adoptDirection(facts) {
   const chosen = dirs[dirs.length - 1];
   const code = chosen ? chosen.key.split(":")[1] : "";
   if (!code || !FIELD_TREES[code]) return t;
-  const next = { code, done: [], tasks: {} };
+  const next = { code, dir: (window.RG_DIR && RG_DIR.legacyDir[code]) || "", done: [], tasks: {} };
   saveTrail(next);
   return next;
 }
@@ -1410,7 +1484,7 @@ function openNodeSheet(field, node, ctx) {
     sheet.appendChild(el("div", "why-box", `<b>做完怎样算过了　</b>${esc(node.done_when)}`));
     const find = el("button", "btn secondary", "找能交出这一步的项目");
     find.type = "button";
-    find.onclick = () => { document.getElementById("nodeSheet")?.remove(); findProjectsForStep(field.code, node.stage); };
+    find.onclick = () => { document.getElementById("nodeSheet")?.remove(); findProjectsForStep(field.backend || field.code, node.stage); };
     sheet.appendChild(find);
   }
   if (node.id === entry.id && ctx.why) {
@@ -1447,10 +1521,99 @@ function openNodeSheet(field, node, ctx) {
   sheet.querySelector(".sheet-x").focus({ preventScroll: true });
 }
 
+function cloneDirNode(node) {
+  return {
+    id: node.id,
+    label: node.label,
+    intro: node.blurb || "",
+    query: node.query,
+    name: node.name,
+    children: (node.children || []).map(cloneDirNode),
+  };
+}
+
+function visibleTaxonomy(branch) {
+  const children = ((window.RG_DIR && RG_DIR.tree) || []).map((l1) => {
+    const copy = cloneDirNode(l1);
+    if (l1.id !== branch) copy.children = [];
+    return copy;
+  });
+  return {
+    name: "学科方向",
+    query: "学科",
+    root: { id: "dir-root", label: "学科", intro: "", virtual: true, children },
+  };
+}
+
+function recDirIds(recommended) {
+  const out = new Set();
+  if (!window.RG_DIR) return out;
+  recommended.forEach((code) => {
+    const id = RG_DIR.legacyDir[code];
+    if (id) out.add(id);
+    if (id && RG_DIR.l1Of(id)) out.add(RG_DIR.l1Of(id));
+  });
+  return out;
+}
+
+function openDirSheet(node, ctx) {
+  let sheet = document.getElementById("nodeSheet");
+  if (!sheet) {
+    sheet = el("aside", "node-sheet");
+    sheet.id = "nodeSheet";
+    document.body.appendChild(sheet);
+  }
+  sheet.className = "node-sheet open";
+  sheet.innerHTML = "";
+  const head = el("div", "sheet-head");
+  const x = el("button", "sheet-x", "关闭");
+  x.type = "button";
+  x.onclick = () => sheet.remove();
+  const meta = window.RG_DIR && RG_DIR.byId[node.id];
+  const level = meta ? (["", "一级", "二级", "三级"][meta.depth] || "方向") : "方向";
+  head.append(el("p", "sheet-kicker", `${level}${meta && meta.parent ? ` · 上属${esc(dirTitle(meta.parent))}` : ""}`), x);
+  sheet.appendChild(head);
+  sheet.appendChild(el("h3", "", esc(node.name || node.label)));
+  if (node.name && node.label && node.name !== node.label) {
+    sheet.appendChild(el("p", "sheet-kicker", esc(node.label)));
+  }
+  sheet.appendChild(el("p", "sheet-intro", esc(node.intro || (meta && meta.blurb) || "")));
+  if (ctx.why) sheet.appendChild(el("p", "sheet-why", esc(ctx.why)));
+  if (node.children && node.children.length) {
+    sheet.appendChild(el("p", "sheet-label", "往下"));
+    const row = el("div", "sheet-nexts");
+    node.children.forEach((child) => {
+      const b = el("button", "sheet-next", esc(child.label));
+      b.type = "button";
+      b.onclick = () => ctx.onPick(child.id);
+      row.appendChild(b);
+    });
+    sheet.appendChild(row);
+  }
+  const courses = el("div", "course-block");
+  courses.appendChild(el("h4", "", "课程"));
+  courses.appendChild(el("div", "course-status", "检索中"));
+  sheet.appendChild(courses);
+  loadCourses(courses, (meta && meta.query) || node.query || node.label);
+  if (!ctx.chosen) {
+    const choose = el("button", "btn", ctx.hasCurrent ? "确认切换方向" : "确认这个方向");
+    choose.type = "button";
+    choose.onclick = () => ctx.onChoose();
+    sheet.appendChild(choose);
+  } else {
+    const go = el("button", "btn", "看这个方向的教程");
+    go.type = "button";
+    go.onclick = () => { sheet.remove(); S.cardsPane = "tutorial"; render(); };
+    sheet.appendChild(go);
+  }
+  sheet.querySelector(".sheet-x").focus({ preventScroll: true });
+}
+
 async function renderCards() {
   const seq = S.renderSeq;
   await ensurePortrait();
   if (stale(seq)) return;
+  if (!Object.keys(TUTORIALS).length) buildTutorials();
   let saved = trail();
   let serverTasks = [];
   try {
@@ -1465,107 +1628,242 @@ async function renderCards() {
   if (stale(seq)) return;
   saved = trail();
   let chosenCode = saved.code && FIELD_TREES[saved.code] ? saved.code : "";
+  let chosenDir = saved.dir && window.RG_DIR && RG_DIR.byId[saved.dir]
+    ? saved.dir
+    : ((window.RG_DIR && RG_DIR.legacyDir[chosenCode]) || "");
   let cards = [];
   let recommended = new Set();
-  let current = chosenCode || "ai";
-  let touched = !!chosenCode;
-  let picked = null;
+  let focus = (S.dirFocus && window.RG_DIR && RG_DIR.byId[S.dirFocus])
+    ? S.dirFocus
+    : (chosenDir || "520");
+  let branch = (S.dirBranch && window.RG_DIR && RG_DIR.byId[S.dirBranch])
+    ? S.dirBranch
+    : ((window.RG_DIR && RG_DIR.l1Of(focus)) || "520");
+  let pane = S.cardsPane === "tutorial" ? "tutorial" : "direction";
+  let picked = S.dirPicked || null;
+  let tutPicked = S.tutPicked || null;
+  let touched = !!(chosenDir || chosenCode);
   let grew = true;
 
   $app.innerHTML = "";
-  $app.appendChild(workspaceHead("方向"));
-  const switcher = el("div", "field-switch");
-  switcher.setAttribute("role", "tablist");
+  const head = el("header", "ws-head cards-head");
+  const titles = el("div");
+  titles.appendChild(el("h2", "", pane === "tutorial" ? "教程" : "方向"));
+  head.appendChild(titles);
+  const tabs = el("nav", "ws-tabs");
+  tabs.setAttribute("role", "tablist");
+  [["direction", "方向"], ["tutorial", "教程"]].forEach(([id, label]) => {
+    const b = el("button", `ws-tab${pane === id ? " on" : ""}`, label);
+    b.type = "button";
+    b.setAttribute("role", "tab");
+    b.setAttribute("aria-selected", pane === id ? "true" : "false");
+    b.onclick = () => {
+      S.cardsPane = id;
+      pane = id;
+      document.getElementById("nodeSheet")?.remove();
+      grew = true;
+      paint();
+    };
+    tabs.appendChild(b);
+  });
+  head.appendChild(tabs);
+  $app.appendChild(head);
   const recLine = el("div", "rec-line");
   const confirmBar = el("div", "switch-bar");
   const stage = el("div", "forest-stage");
   const legend = el("div", "tree-legend");
-  $app.append(switcher, recLine, confirmBar, stage, legend);
+  $app.append(recLine, confirmBar, stage, legend);
 
-  const paint = () => {
-    const chain = FIELD_TREES[current].chain;
-    legend.innerHTML = (chain ? '<span class="main"><i>1</i>主干：这一学期走到哪（任务 4 的路径）</span>' : "")
-      + '<span class="now"><i></i>你在这里</span><span class="past"><i></i>已走过</span><span><i></i>还可以去</span>'
-      + `<span>${chain ? "节点：二十分钟一件事；点主干看过关标准" : "点任一节点看说明"}</span>`;
-    switcher.innerHTML = "";
-    Object.entries(FIELD_TREES).forEach(([code, field]) => {
-      const b = el("button", "field-chip" + (code === current ? " on" : ""));
-      b.type = "button";
-      b.setAttribute("role", "tab");
-      b.setAttribute("aria-selected", code === current ? "true" : "false");
-      b.appendChild(el("span", "", field.name));
-      if (code === chosenCode) b.appendChild(el("i", "", "当前"));
-      else if (recommended.has(code)) b.appendChild(el("i", "", "建议"));
-      b.onclick = () => {
-        current = code;
-        touched = true;
-        picked = null;
-        grew = true;
-        document.getElementById("nodeSheet")?.remove();
-        paint();
-      };
-      switcher.appendChild(b);
-    });
-    const hereTrail = trail();
-    const fieldNow = FIELD_TREES[current];
-    const here = hereTrail.code === current ? currentOnPath(fieldNow, hereTrail.done) : null;
-    confirmBar.innerHTML = "";
-    if (!chosenCode || current !== chosenCode) {
-      const note = el("p", "", chosenCode
-        ? `正在预览「${fieldNow.name}」。当前方向仍是「${FIELD_TREES[chosenCode].name}」。`
-        : `正在看「${fieldNow.name}」。确认之后，它才会成为当前方向。`);
-      const ok = el("button", "btn small", chosenCode ? "确认切换方向" : "确认这个方向");
-      ok.type = "button";
-      ok.onclick = () => chooseField();
-      confirmBar.append(note, ok);
-    } else if (here) {
-      const note = el("p", "", `当前方向「${fieldNow.name}」，你在「${here.label}」。`);
-      const go = el("button", "btn small", "去做这一步");
-      go.type = "button";
-      go.onclick = () => setView("workbench");
-      confirmBar.append(note, go);
-    }
-    stage.innerHTML = "";
-    stage.appendChild(drawFieldTree(fieldNow, picked, (node) => show(node.id), {
-      done: hereTrail.code === current ? hereTrail.done : [],
-      here: here && here.id,
-    }, grew));
-    grew = false;
+  const viewName = () => dirTitle(focus) || "未选方向";
+  const recWhy = () => {
+    const backend = window.RG_DIR ? RG_DIR.backendCode(focus) : "";
+    const card = cards.find((c) => c.direction && c.direction.code === backend);
+    return card && card.why_you;
   };
 
-  const chooseField = async () => {
-    const field = FIELD_TREES[current];
+  const chooseFocus = async () => {
+    if (!window.RG_DIR || !RG_DIR.byId[focus]) { toast("先点树上的一个方向"); return; }
+    const backend = RG_DIR.backendCode(focus);
+    const field = tutorialOf(focus) || FIELD_TREES[backend];
     try {
-      await api("POST", "/api/directions/choose", { uid: S.uid, code: current });
-      const switching = !!(chosenCode && chosenCode !== current);
-      saveTrail({ code: current, done: [], tasks: {} }, true);
-      chosenCode = current;
+      await api("POST", "/api/directions/choose", { uid: S.uid, code: backend });
+      const switching = !!(chosenDir && chosenDir !== focus);
+      saveTrail({ code: backend, dir: focus, done: [], tasks: {} }, true);
+      chosenCode = backend;
+      chosenDir = focus;
       toast(switching
-        ? `已切换到「${field.name}」，从「${entryNode(field).label}」重新开始`
-        : `已确认「${field.name}」，从「${entryNode(field).label}」开始`);
+        ? `已切换到「${viewName()}」${field ? `，教程从「${entryNode(field).label}」重新开始` : ""}`
+        : `已确认「${viewName()}」${field ? `，教程从「${entryNode(field).label}」开始` : ""}`);
       document.getElementById("nodeSheet")?.remove();
       picked = null;
+      S.dirPicked = null;
       paint();
     } catch (e) { toast(e.message); }
   };
 
-  const show = (id) => {
-    const field = FIELD_TREES[current];
+  const paintRec = () => {
+    recLine.innerHTML = "";
+    if (pane === "tutorial") return;
+    if (!cards.length) {
+      recLine.appendChild(el("p", "", "这份画像还没有可对照的兴趣。先在画像里把对话做完，建议才会标到树上。"));
+      return;
+    }
+    const names = cards.map((c) => {
+      const code = c.direction && c.direction.code;
+      const id = window.RG_DIR && RG_DIR.legacyDir[code];
+      return (id && RG_DIR.displayName(id)) || (FIELD_TREES[code] && FIELD_TREES[code].name) || (c.direction && c.direction.name) || "";
+    }).filter(Boolean);
+    recLine.appendChild(el("p", "", `这份画像更贴近${names.join("、")}。${cards[0].why_you || ""}`));
+    if (window.innerWidth < 920) {
+      recLine.classList.add("clamp");
+      recLine.onclick = () => recLine.classList.remove("clamp");
+    }
+  };
+
+  const paintBar = (field, here) => {
+    confirmBar.innerHTML = "";
+    const name = viewName();
+    if (pane === "direction") {
+      if (!chosenDir || focus !== chosenDir) {
+        const note = el("p", "", chosenDir
+          ? `正在看「${name}」。当前方向仍是「${dirTitle(chosenDir)}」。`
+          : `正在看「${name}」。确认之后，它才会成为当前方向。`);
+        const ok = el("button", "btn small", chosenDir ? "确认切换方向" : "确认这个方向");
+        ok.type = "button";
+        ok.onclick = () => chooseFocus();
+        confirmBar.append(note, ok);
+      } else {
+        const note = el("p", "", `当前方向「${name}」。切换到教程看这条学习流程。`);
+        const go = el("button", "btn small", "看教程");
+        go.type = "button";
+        go.onclick = () => { S.cardsPane = "tutorial"; pane = "tutorial"; grew = true; paint(); };
+        confirmBar.append(note, go);
+      }
+      return;
+    }
+    titles.querySelector("h2").textContent = "教程";
+    if (!focus || !field) {
+      confirmBar.appendChild(el("p", "", "先在方向页点一个方向，再回到这里看它的学习流程。"));
+      return;
+    }
+    const lead = el("p", "", chosenDir === focus
+      ? (here ? `当前方向「${name}」，你在「${here.label}」。` : `当前方向「${name}」。`)
+      : `教程跟着正在看的「${name}」走。确认之后，任务才会按它开始。`);
+    confirmBar.appendChild(lead);
+    if (chosenDir !== focus) {
+      const ok = el("button", "btn small", chosenDir ? "确认切换方向" : "确认这个方向");
+      ok.type = "button";
+      ok.onclick = () => chooseFocus();
+      confirmBar.appendChild(ok);
+    } else if (here) {
+      const go = el("button", "btn small", "去做这一步");
+      go.type = "button";
+      go.onclick = () => setView("workbench");
+      confirmBar.appendChild(go);
+    }
+  };
+
+  const showDir = (id) => {
+    if (!window.RG_DIR || !RG_DIR.byId[id]) return;
+    focus = id;
+    S.dirFocus = id;
+    branch = RG_DIR.l1Of(id) || branch;
+    S.dirBranch = branch;
+    picked = id;
+    S.dirPicked = id;
+    touched = true;
+    grew = true;
+    paint();
+    const meta = RG_DIR.byId[id];
+    openDirSheet({
+      id: meta.id, label: meta.label, name: meta.name, intro: meta.blurb, query: meta.query,
+      children: meta.children,
+    }, {
+      why: recWhy(),
+      chosen: id === chosenDir,
+      hasCurrent: !!chosenDir,
+      onPick: showDir,
+      onChoose: chooseFocus,
+    });
+  };
+
+  const showTut = (id) => {
+    const field = tutorialView(focus);
+    if (!field) return;
     const node = flattenField(field.root).byId[id];
     if (!node) return;
-    picked = id;
+    tutPicked = id;
+    S.tutPicked = id;
     paint();
     const hereTrail = trail();
-    const here = hereTrail.code === current ? currentOnPath(field, hereTrail.done) : null;
-    const card = cards.find((c) => c.direction && c.direction.code === current);
+    const here = hereTrail.dir === focus ? currentOnPath(field, hereTrail.done) : null;
     openNodeSheet(field, node, {
-      why: card && card.why_you,
-      chosen: current === chosenCode,
-      hasCurrent: !!chosenCode,
+      why: recWhy(),
+      chosen: focus === chosenDir,
+      hasCurrent: !!chosenDir,
       here: here && here.id,
-      onPick: show,
-      onChoose: chooseField,
+      onPick: showTut,
+      onChoose: chooseFocus,
     });
+  };
+
+  function tutorialView(dirId) {
+    const tut = tutorialOf(dirId);
+    if (!tut) return null;
+    const q = (window.RG_DIR && RG_DIR.byId[dirId] && RG_DIR.byId[dirId].query) || tut.query;
+    return { ...tut, name: dirTitle(dirId, tut), query: q, backend: window.RG_DIR ? RG_DIR.backendCode(dirId) : tut.code };
+  }
+
+  const paint = () => {
+    titles.querySelector("h2").textContent = pane === "tutorial" ? "教程" : "方向";
+    if (pane === "tutorial") {
+      const name = viewName();
+      titles.querySelector("p")?.remove();
+      const lead = el("p", "dir-now", name === "未选方向" ? "还没有选方向" : `当前方向 · ${name}`);
+      titles.appendChild(lead);
+    } else {
+      titles.querySelector("p")?.remove();
+      titles.appendChild(el("p", "", "一棵学科树。点一级展开二级，热门方向有三级。统计在数学下面，医学只做基础医学。"));
+    }
+    tabs.querySelectorAll(".ws-tab").forEach((b, i) => {
+      const on = (i === 0 ? "direction" : "tutorial") === pane;
+      b.classList.toggle("on", on);
+      b.setAttribute("aria-selected", on ? "true" : "false");
+    });
+    paintRec();
+    stage.classList.toggle("is-dir", pane === "direction");
+    const hereTrail = trail();
+    if (pane === "direction") {
+      const tax = visibleTaxonomy(branch);
+      paintBar(null, null);
+      legend.innerHTML = '<span class="now"><i></i>正在看</span><span class="past"><i></i>已确认</span><span><i></i>点一级展开</span><span>点节点看说明和课</span>';
+      stage.innerHTML = "";
+      stage.appendChild(drawFieldTree(tax, picked || focus, (node) => showDir(node.id), {
+        done: chosenDir && chosenDir !== focus ? [chosenDir] : [],
+        here: focus,
+      }, grew));
+    } else {
+      const field = tutorialView(focus);
+      const here = field && hereTrail.dir === focus ? currentOnPath(field, hereTrail.done) : null;
+      paintBar(field, here);
+      if (!field) {
+        stage.innerHTML = "";
+        legend.innerHTML = "";
+        stage.appendChild(emptyPanel("先在方向页点一个方向，教程会跟着那个方向走。", "去方向树", "cards"));
+        const btn = stage.querySelector("button");
+        if (btn) btn.onclick = () => { S.cardsPane = "direction"; pane = "direction"; grew = true; paint(); };
+      } else {
+        legend.innerHTML = (field.chain ? '<span class="main"><i>1</i>主干：这一学期走到哪</span>' : "")
+          + '<span class="now"><i></i>你在这里</span><span class="past"><i></i>已走过</span><span><i></i>还可以去</span>'
+          + `<span>${field.chain ? "节点：二十分钟一件事；点主干看过关标准" : "点任一节点看说明"}</span>`;
+        stage.innerHTML = "";
+        stage.appendChild(drawFieldTree(field, tutPicked, (node) => showTut(node.id), {
+          done: hereTrail.dir === focus ? hereTrail.done : [],
+          here: here && here.id,
+        }, grew));
+      }
+    }
+    grew = false;
   };
 
   paint();
@@ -1576,15 +1874,22 @@ async function renderCards() {
     const chosen = dirs[dirs.length - 1];
     const code = chosen ? chosen.key.split(":")[1] : "";
     if (code && FIELD_TREES[code] && !trail().code) {
-      // 第一次在方向区接过服务端已选的方向时，顺手按已交的任务把进度对上
-      saveTrail(mergeTrail(code, serverTasks));
+      const merged = mergeTrail(code, serverTasks);
+      merged.dir = merged.dir || (window.RG_DIR && RG_DIR.legacyDir[code]) || "";
+      saveTrail(merged);
       chosenCode = code;
-      current = code;
+      chosenDir = merged.dir;
+      focus = chosenDir || focus;
+      branch = (window.RG_DIR && RG_DIR.l1Of(focus)) || branch;
+      S.dirFocus = focus;
+      S.dirBranch = branch;
       touched = true;
       grew = true;
       paint();
     } else if (trail().code && trail().code !== chosenCode) {
-      chosenCode = trail().code;
+      const t = trail();
+      chosenCode = t.code;
+      chosenDir = t.dir || chosenDir;
       paint();
     }
   }).catch(() => {});
@@ -1592,21 +1897,17 @@ async function renderCards() {
     if (stale(seq)) return;
     cards = rec.cards || [];
     recommended = new Set(cards.map((c) => c.direction && c.direction.code).filter(Boolean));
-    recLine.innerHTML = "";
-    if (!cards.length) {
-      recLine.appendChild(el("p", "", "这份画像还没有可对照的兴趣。先在画像里把对话做完，建议才会按你分开。"));
-    } else {
-      const names = cards.map((c) => {
-        const code = c.direction && c.direction.code;
-        return (FIELD_TREES[code] && FIELD_TREES[code].name) || (c.direction && c.direction.name) || "";
-      }).filter(Boolean);
-      recLine.appendChild(el("p", "", `这份画像更贴近${names.join("、")}。${cards[0].why_you || ""}`));
-      if (window.innerWidth < 920) {
-        recLine.classList.add("clamp");
-        recLine.onclick = () => recLine.classList.remove("clamp");
+    const marks = recDirIds(recommended);
+    if (!touched && marks.size && window.RG_DIR) {
+      const top = cards[0] && cards[0].direction && cards[0].direction.code;
+      const id = RG_DIR.legacyDir[top];
+      if (id) {
+        focus = id;
+        branch = RG_DIR.l1Of(id);
+        S.dirFocus = focus;
+        S.dirBranch = branch;
+        grew = true;
       }
-      const top = cards[0].direction && cards[0].direction.code;
-      if (!touched && top && FIELD_TREES[top]) { current = top; grew = true; }
     }
     paint();
   }).catch(() => {});
@@ -1627,14 +1928,26 @@ async function loadCourses(box, query) {
     }
     r.items.forEach((it) => {
       const name = it.name || it.courseName || "(未命名课程)";
-      const names = it.teacher_names && it.teacher_names.length ? it.teacher_names : [];
-      const teacher = names.length ? names.map((n) => `<button type="button" class="teacher-link" data-teacher="${esc(n)}">${esc(n)}</button>`).join(" ") : esc(it.teacher || it.teachers || "");
+      const names = (it.teacher_names && it.teacher_names.length)
+        ? it.teacher_names
+        : String(it.teachers || it.teacher || "").split(/[/／、;；,，|]+/).map((n) => n.trim()).filter((n) => n.length >= 2);
       const dept = it.department || it.dept || "";
-      const row = el("div", "course-item",
-        `${esc(name)}<br><span class="meta">${teacher}${teacher && dept ? " · " : ""}${esc(dept)}${r.term ? " · " + esc(r.term) : ""}</span>`);
-      row.querySelectorAll(".teacher-link").forEach((b) => {
-        b.onclick = () => showTeacher(b.dataset.teacher);
+      const row = el("div", "course-item", `${esc(name)}<br>`);
+      const meta = el("span", "meta");
+      names.forEach((n, i) => {
+        if (i) meta.appendChild(document.createTextNode(" "));
+        const b = el("button", "teacher-link", esc(n));
+        b.type = "button";
+        b.addEventListener("click", (ev) => {
+          ev.preventDefault();
+          ev.stopPropagation();
+          showTeacher(n);
+        });
+        meta.appendChild(b);
       });
+      const extra = [dept, r.term].filter(Boolean).join(" · ");
+      if (extra) meta.appendChild(document.createTextNode((names.length ? " · " : "") + extra));
+      row.appendChild(meta);
       box.appendChild(row);
     });
   } catch (e) {
@@ -1643,15 +1956,23 @@ async function loadCourses(box, query) {
 }
 
 async function showTeacher(name) {
+  name = String(name || "").trim();
+  if (!name) return;
   document.getElementById("teacherSheet")?.remove();
   const sheet = el("div", "node-sheet teacher-sheet");
   sheet.id = "teacherSheet";
-  sheet.innerHTML = `<div class="sheet-head"><span class="sheet-kicker">授课老师</span><button class="sheet-x" type="button">关闭</button></div>`;
-  sheet.querySelector(".sheet-x").onclick = () => sheet.remove();
+  const head = el("div", "sheet-head");
+  head.appendChild(el("span", "sheet-kicker", "授课老师"));
+  const back = el("button", "sheet-x", "返回");
+  back.type = "button";
+  back.onclick = () => sheet.remove();
+  head.appendChild(back);
+  sheet.appendChild(head);
   sheet.appendChild(el("h3", "", esc(name)));
   const status = el("p", "sheet-intro", "正在读本学期快照…");
   sheet.appendChild(status);
   document.body.appendChild(sheet);
+  back.focus({ preventScroll: true });
   try {
     const r = await api("GET", `/api/explore/teachers?name=${encodeURIComponent(name)}`);
     if (!r.ok) { status.textContent = r.error || "快照里没有这位老师。"; return; }
@@ -1719,14 +2040,14 @@ async function renderWorkbench() {
     }
   }
   const code = t.code;
-  if (!code || !FIELD_TREES[code]) {
-    wrap.appendChild(emptyPanel("还没有方向。先在方向区选定一棵树，任务会从它的起点开始。", "去方向区", "cards"));
+  const field = activeField(t);
+  if (!code || !field) {
+    wrap.appendChild(emptyPanel("还没有方向。先在方向区选定一个方向，任务会从它的教程起点开始。", "去方向区", "cards"));
     return;
   }
-  const field = FIELD_TREES[code];
   const node = currentOnPath(field, t.done);
   if (!node) {
-    wrap.appendChild(emptyPanel(`「${field.name}」这条路径上的节点都走完了。`, "回方向区换一棵树", "cards"));
+    wrap.appendChild(emptyPanel(`「${dirTitle(t.dir, field)}」这条教程上的节点都走完了。`, "回方向区换一个方向", "cards"));
     return;
   }
   const expect = node.label.slice(0, 40);
@@ -1759,7 +2080,7 @@ async function renderWorkbench() {
   const path = pathNodes(field);
   const stepNo = path.findIndex((n) => n.id === node.id) + 1;
   wrap.appendChild(el("div", "ws-status",
-    `<span>${esc(field.name)}</span><span>第 ${stepNo} / ${path.length} 个节点</span>`));
+    `<span>${esc(dirTitle(t.dir, field))}</span><span>第 ${stepNo} / ${path.length} 个节点</span>`));
   const p = el("div", "panel");
   wrap.appendChild(p);
 
@@ -1975,7 +2296,7 @@ async function renderToday() {
       saved = trail();
     }
   }
-  const field = FIELD_TREES[saved.code];
+  const field = activeField(saved);
   const node = field ? currentOnPath(field, saved.done) : null;
   const facts = (onboard && onboard.facts) || [];
   const talked = onboard && onboard.state && onboard.state.phase === "done";
@@ -1998,7 +2319,7 @@ async function renderToday() {
     primary = goView("去核对", "confirm");
   } else if (!field) {
     title = "选定一个方向";
-    why = "方向区有六棵树，已经按你的画像标出建议。确认其中一棵，任务会从它的起点开始。";
+    why = "方向区是一棵学科树。按你的画像会标出建议。确认一个方向，任务从它的教程起点开始。";
     primary = goView("去方向区", "cards");
   } else if (toFix) {
     let detail = null;
@@ -2034,7 +2355,7 @@ async function renderToday() {
   const wrap = el("div", "stagger");
   wrap.appendChild(workspaceHead("今日"));
   const status = el("div", "ws-status");
-  status.appendChild(el("span", "", field ? esc(field.name) : "还没有方向"));
+  status.appendChild(el("span", "", field ? esc(dirTitle(saved.dir, field)) : "还没有方向"));
   if (node) status.appendChild(el("span", "", `正在「${esc(node.label)}」`));
   if (doneTasks) status.appendChild(el("span", "", `交过 ${doneTasks} 次小任务`));
   if (projects.length) status.appendChild(el("span", "", `${projects.length} 个项目`));
@@ -2147,7 +2468,7 @@ async function renderProjects() {
   if (tab === "mine") { renderMine(mine.projects || []); return; }
 
   const t = trail();
-  const field = FIELD_TREES[t.code];
+  const field = activeField(t);
   const node = field ? currentOnPath(field, t.done) : null;
   const pathsBy = (ctx && ctx.paths) || {};
   const form = S.projectForm || {
@@ -2171,7 +2492,9 @@ async function renderProjects() {
   const dirs = el("div", "field-switch");
   const paintDirs = () => {
     dirs.innerHTML = "";
-    Object.entries(FIELD_TREES).forEach(([code, f]) => {
+    BACKEND_CODES.forEach((code) => {
+      const f = FIELD_TREES[code];
+      if (!f) return;
       const b = el("button", "field-chip" + (code === form.direction ? " on" : ""), `<span>${esc(f.name)}</span>`);
       b.type = "button";
       b.onclick = () => { form.direction = code; paintDirs(); paintStages(); };
@@ -2585,6 +2908,7 @@ document.getElementById("brandHome").addEventListener("click", () => setView("ho
     applyLlmPill(h.llm);
     if (paths) applyPaths(paths.paths);
   } catch (_) { /* 健康检查失败不挡页面 */ }
+  buildTutorials();
   if (S.uid) {
     try {
       const st = await api("GET", `/api/onboard/result?uid=${S.uid}`);

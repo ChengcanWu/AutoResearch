@@ -1,0 +1,232 @@
+{
+  "id": "190.42",
+  "name": "临床与咨询",
+  "format": "tutorial-tree-v2",
+  "status": "ok",
+  "goal": "能把临床/咨询情境里的构念写成可观察、可计数的操作定义，比较自评、知情者与行为取样的偏差，并用信度/效度（含评分者一致）检查一份测量是否站得住。不承诺诊断、处方或治疗能力。",
+  "sources": [
+    {
+      "title": "CLP4302 Introduction to Clinical Psychology — Syllabus (University of Florida, Fall 2024)",
+      "url": "https://phhp.ufl.edu/wordpress/files/2025/01/CLP4302_Fall-2024_Syllabus-1.pdf",
+      "kind": "syllabus",
+      "used_for": "主干顺序：先 Introduction/Evolution 与 scientist-practitioner、伦理，再 Research methods，再 Psychological Assessment I（Overview, Ethics, Interviewing & Observation）。作业形态是 quiz/exam 与 Canvas 短作业。第 4 周 Classification and Diagnosis、第 10 周起 Intervention 不进入本树"
+    },
+    {
+      "title": "History of Psychology | Noba (David B. Baker & Heather Sperry)",
+      "url": "https://nobaproject.com/modules/history-of-psychology",
+      "kind": "open_textbook",
+      "used_for": "节点 scope：Witmer 1896 心理诊所；1949 Boulder scientist-practitioner；1973 Vail scholar-practitioner；Discussion Q3 写应用如何接到日常问题"
+    },
+    {
+      "title": "Personality Assessment | Noba (David Watson)",
+      "url": "https://nobaproject.com/modules/personality-assessment",
+      "kind": "open_textbook",
+      "used_for": "节点 methods：objective self-report、informant ratings、behavioral/performance；行为取样测的是 people do 而不是 think/feel；Discussion Q3 用 honesty 比较方法"
+    },
+    {
+      "title": "Psychological Measurement – Research Methods in Psychology (KPU Pressbooks, 4th American Edition)",
+      "url": "https://kpu.pressbooks.pub/psychmethods4e/part/psychological-measurement/",
+      "kind": "open_textbook",
+      "used_for": "主干把 Psychological Measurement 放在能写操作定义之前；Rosenberg Self-Esteem Scale 作为自评示例"
+    },
+    {
+      "title": "Understanding Psychological Measurement – Research Methods in Psychology",
+      "url": "https://kpu.pressbooks.pub/psychmethods4e/chapter/understanding-psychological-measurement/",
+      "kind": "open_textbook",
+      "used_for": "节点 observe：construct、conceptual vs operational definition；self-report / behavioral / physiological；Bandura 对攻击行为的可计数操作定义；converging operations"
+    },
+    {
+      "title": "Reliability and Validity of Measurement – Research Methods in Psychology",
+      "url": "https://kpu.pressbooks.pub/psychmethods4e/chapter/reliability-and-validity-of-measurement/",
+      "kind": "open_textbook",
+      "used_for": "节点 psychometrics：test-retest / internal consistency / inter-rater；face / content / criterion / convergent / discriminant；食指长度测自尊=可靠但无效"
+    },
+    {
+      "title": "Key Takeaways and Exercises – Psychological Measurement",
+      "url": "https://kpu.pressbooks.pub/psychmethods4e/chapter/key-takeaways-and-exercises-3/",
+      "kind": "open_textbook",
+      "used_for": "节点 observe / psychometrics 过关：给 social anxiety 等写三条操作定义；给考试当测量写 face/content/criterion 证据"
+    },
+    {
+      "title": "心理测量 Psychological Testing｜北京师范大学心理学部",
+      "url": "https://psych.bnu.edu.cn/rcpy/bkspy/kcjsa/8420412fd5f64cb3b4ee1cd4d0e00cdf.htm",
+      "kind": "syllabus",
+      "used_for": "中文独立来源：测验=观察少数代表性行为再推论；第二章要求为构想下操作定义；第四/五章信度（重测/复本/内部一致性/评分者）与效度（内容/效标/构想）。第六–八章施测韦氏/16PF 不进入本树"
+    },
+    {
+      "title": "APA Guidelines for the Undergraduate Psychology Major: Version 3.0",
+      "url": "https://www.apa.org/about/policy/undergraduate-psychology-major.pdf",
+      "kind": "society",
+      "used_for": "本科终点：2.1a operational definitions / measurement；2.2b 基于操作定义写可检验假设；2.4e 测量必须可靠且有效。不规定临床诊疗课序"
+    },
+    {
+      "title": "History of Mental Illness | Noba (Ingrid G. Farreras)",
+      "url": "https://nobaproject.com/modules/history-of-mental-illness",
+      "kind": "open_textbook",
+      "used_for": "打开后确认第三部分落到 diagnosis，不作为节点"
+    },
+    {
+      "title": "Therapeutic Orientations | Noba (Boettcher, Hofmann & Wu)",
+      "url": "https://nobaproject.com/modules/therapeutic-orientations",
+      "kind": "open_textbook",
+      "used_for": "打开后确认是治疗取向手册式概述，按硬限制不进入主干"
+    },
+    {
+      "title": "Sample Syllabi | Psychology (UC Berkeley)",
+      "url": "https://psychology.berkeley.edu/undergraduate/enrollment-course-information/sample-syllabi",
+      "kind": "other",
+      "used_for": "核对有 Psych 130 Clinical Psychology，但页面只有课名、没有公开课历正文，不作顺序依据"
+    }
+  ],
+  "trunk": ["scope", "observe", "psychometrics", "methods"],
+  "forks": [],
+  "join": null,
+  "nodes": {
+    "scope": {
+      "name": "临床与咨询是什么",
+      "why": "UF CLP4302 把 Introduction to and Evolution of Clinical Psychology、scientist-practitioner 和 APA 伦理放在 Assessment 之前；Noba History of Psychology 用 Witmer 1896 诊所和 1949 Boulder 会议交代这门应用如何从实验心理学长出来。先分清职业边界，后面才谈测什么。",
+      "learn": [
+        "clinical psychology 与其他助人职业的区分（UF 目标 #1）",
+        "scientist-practitioner model（Boulder 1949）",
+        "scholar-practitioner / Psy.D.（Vail 1973）",
+        "Witmer 1896 心理诊所：把实验心理学接到学习与行为问题",
+        "APA ethical codes for psychologists（UF 目标 #6，停在认识伦理，不写服务规程）"
+      ],
+      "task": {
+        "kind": "writeup",
+        "prompt": "对照 Noba History of Psychology Discussion Q3 和 UF 目标 #1/#5，交一页短评：① 临床心理学与其他助人职业差在哪一条；② scientist-practitioner 要求同时会什么；③ Witmer 诊所把实验心理学接到哪类可观察问题。每条都标出用了哪一页。不写如何做治疗。",
+        "from": "Noba History of Psychology Discussion Q3；UF CLP4302 Specific Objectives #1/#5/#6"
+      },
+      "resources": [
+        {
+          "url": "https://phhp.ufl.edu/wordpress/files/2025/01/CLP4302_Fall-2024_Syllabus-1.pdf",
+          "title": "CLP4302 Fall 2024 Syllabus",
+          "use": "先读 Purpose、Specific Objectives #1/#5/#6 和第 3 周 Introduction / Evolution"
+        },
+        {
+          "url": "https://nobaproject.com/modules/history-of-psychology",
+          "title": "History of Psychology | Noba",
+          "use": "读 Applied Psychology / Psychology as a Profession；做 Discussion Q3"
+        }
+      ]
+    },
+    "observe": {
+      "name": "构念必须指到可观察行为",
+      "why": "KPU Psychological Measurement 把 construct、conceptual vs operational definition 写成测量的入口；行为测量的例子是 Bandura 把攻击写成 20 分钟内可计数的动作，而不是复述感受。北师大《心理测量》把测验定义为：观察少数有代表性的行为，再对心理特点做推论。APA Guidelines 3.0 的 2.1a/2.2b 也要求本科先会 operational definitions。",
+      "learn": [
+        "psychological construct（不能直接看见的倾向或内部过程）",
+        "conceptual definition vs operational definition",
+        "self-report / behavioral / physiological 三类测量",
+        "Bandura：把 physical aggression 写成可计数动作",
+        "converging operations：同一构念多条操作定义互相核对"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "对照 KPU Psychological Measurement 章末练习：从 sexual jealousy、decisiveness、social anxiety 里选一个（或按同页练习写 self-confidence），先写概念定义，再各写一条 self-report、behavioral、physiological 操作定义。行为定义必须写成可观察、可计数的动作（对照 Bandura 的 mallet/punch/kick 写法），不能只复述感受。",
+        "from": "KPU Key Takeaways and Exercises – Psychological Measurement：Think of three operational definitions…"
+      },
+      "resources": [
+        {
+          "url": "https://kpu.pressbooks.pub/psychmethods4e/chapter/understanding-psychological-measurement/",
+          "title": "Understanding Psychological Measurement",
+          "use": "读 Operational Definitions；对照 Bandura 的计数规则写自己的行为定义"
+        },
+        {
+          "url": "https://kpu.pressbooks.pub/psychmethods4e/chapter/key-takeaways-and-exercises-3/",
+          "title": "Key Takeaways and Exercises – Psychological Measurement",
+          "use": "做 Practice：three operational definitions for social anxiety 等"
+        },
+        {
+          "url": "https://psych.bnu.edu.cn/rcpy/bkspy/kcjsa/8420412fd5f64cb3b4ee1cd4d0e00cdf.htm",
+          "title": "北师大《心理测量》课程介绍",
+          "use": "对照课程简介里「观察少数有代表性的行为」和第二章「为构想下操作定义」"
+        },
+        {
+          "url": "https://www.apa.org/about/policy/undergraduate-psychology-major.pdf",
+          "title": "APA Undergraduate Guidelines 3.0",
+          "use": "核对自己写的操作定义是否满足 2.1a / 2.2b"
+        }
+      ]
+    },
+    "psychometrics": {
+      "name": "信度、效度与评分者一致",
+      "why": "KPU 写明心理学家不假设量表能用，而要用数据证明；并单独列出行为观察的 inter-rater reliability（含 Bandura 攻击计数）。北师大把信度（重测/复本/内部一致性/评分者）和效度（内容/效标/构想）排在编制测验之后、智力/人格施测之前。APA 2.4e 要求本科能说明测量必须既可靠又有效。",
+      "learn": [
+        "reliability：test-retest、internal consistency（split-half / Cronbach α）、inter-rater（Cohen κ）",
+        "validity：face、content、criterion（concurrent / predictive）、convergent、discriminant",
+        "可靠但无效：用食指长度测自尊（KPU 例）",
+        "北师大对应：重测/复本/内部一致性/评分者信度；内容/效标/构想效度"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "对照 KPU 章末 Discussion（把最近一次考试当作心理测量）：写出它要测的构念、一条 face validity、一条 content validity，以及你会收集的一种信度证据和一种 criterion validity 证据。若上一步写了行为观察，必须另写评分者如何取得一致（对照 KPU inter-rater / 北师大评分者信度）。再各用一句话说明「很可靠但无效」为什么过不了关。",
+        "from": "KPU Key Takeaways and Exercises – Psychological Measurement：Think back to the last college exam…；北师大第四章作业形态（信度计算方法）只取概念对照，不要求课堂数据"
+      },
+      "resources": [
+        {
+          "url": "https://kpu.pressbooks.pub/psychmethods4e/chapter/reliability-and-validity-of-measurement/",
+          "title": "Reliability and Validity of Measurement",
+          "use": "读三类信度和 face/content/criterion；记下食指长度例与 Bandura 的评分者一致"
+        },
+        {
+          "url": "https://kpu.pressbooks.pub/psychmethods4e/chapter/key-takeaways-and-exercises-3/",
+          "title": "Key Takeaways and Exercises – Psychological Measurement",
+          "use": "做 Discussion：把一次考试当测量，写 face/content/reliability/criterion"
+        },
+        {
+          "url": "https://psych.bnu.edu.cn/rcpy/bkspy/kcjsa/8420412fd5f64cb3b4ee1cd4d0e00cdf.htm",
+          "title": "北师大《心理测量》第四、五章",
+          "use": "对照重测/评分者信度与内容/效标/构想效度的课序"
+        }
+      ]
+    },
+    "methods": {
+      "name": "比较评估方法，停在概念",
+      "why": "UF 在 Research Methods 之后安排 Psychological Assessment I：Overview, Ethics, Interviewing & Observation，把观察写成评估方法而不是治疗。Noba Personality Assessment 把自评、知情者、行为/表现取样写成可比较的方法，并强调行为取样看的是人做什么。北师大第二章要求先下操作定义，施测手册排在更后、本树不跟。",
+      "learn": [
+        "UF Assessment I：overview、ethics、interviewing、observation（只作方法类别）",
+        "objective self-report 的计分客观 ≠ 回答客观；self-enhancement / high-stakes",
+        "informant ratings：letter of recommendation effect、honeymoon effect",
+        "behavioral/performance：直接取样行为，避开自评偏差，但样本小、计分费力",
+        "北师大：正确认识和使用心理测验；未获资格不解释分数"
+      ],
+      "task": {
+        "kind": "writeup",
+        "prompt": "对照 Noba Personality Assessment Discussion Q3：选 honesty（或你上一步的构念），用一页比较自评、知情者、行为取样各会看见什么、各有哪一条偏差（须点名 self-enhancement 或 letter of recommendation 或「只测到当天样本」之一）。文末写一条限制：本科停在比较方法，不施测、不解释临床测验、不写访谈脚本或治疗计划。",
+        "from": "Noba Personality Assessment Discussion Q3；UF CLP4302 Week 6 Assessment I（Overview, Ethics, Interviewing & Observation）",
+        "alternatives": [
+          {
+            "kind": "writeup",
+            "prompt": "对照北师大《心理测量》第二章课后：为将要编制的测验内容写下操作定义（对象、用途、目标），并说明为什么必须观察代表性行为而不能只复述感受。同样不写施测手册或诊断步骤。",
+            "from": "北师大《心理测量》第二章：根据理论构想为测验内容下操作定义"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://nobaproject.com/modules/personality-assessment",
+          "title": "Personality Assessment | Noba",
+          "use": "读 Self-report / Informant / Behavioral and Performance；做 Discussion Q3"
+        },
+        {
+          "url": "https://phhp.ufl.edu/wordpress/files/2025/01/CLP4302_Fall-2024_Syllabus-1.pdf",
+          "title": "CLP4302 Fall 2024 Syllabus",
+          "use": "对照第 6 周 Assessment I 的主题词：Overview, Ethics, Interviewing & Observation；不要进入 Intervention 周"
+        },
+        {
+          "url": "https://psych.bnu.edu.cn/rcpy/bkspy/kcjsa/8420412fd5f64cb3b4ee1cd4d0e00cdf.htm",
+          "title": "北师大《心理测量》第二章",
+          "use": "若选中文交卷：按「为构想下操作定义」写对象/用途/目标"
+        }
+      ]
+    }
+  },
+  "conflicts": [
+    "UF CLP4302 第 4 周是 Classification and Diagnosis，排在 Assessment 之前。硬限制禁止写诊断程序，本树跳过该周，取 KPU/北师大「先操作定义与信效度」的更靠前路径。",
+    "UF 第 10 周起是 Intervention；Noba Therapeutic Orientations 是治疗取向概述。两边都不进入主干。",
+    "北师大第六–八章含韦氏儿童智力量表、16PF 的施测/计分/解释课堂活动。本树停在操作定义与方法比较，不跟施测手册。",
+    "Noba History of Mental Illness 第三部分落到 diagnosis；Berkeley Sample Syllabi 只有 Psych 130 课名、没有公开课历。两者都不作顺序依据。"
+  ],
+  "missing": "",
+  "checked_at": "2026-10-04"
+}

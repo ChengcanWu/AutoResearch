@@ -1,0 +1,323 @@
+{
+  "id": "790.45",
+  "name": "劳动经济",
+  "format": "tutorial-tree-v2",
+  "status": "ok",
+  "goal": "能用劳动供需图解释参与、工资和雇佣，能把教育、培训与健康写成人力资本投资，并对照公开课习题或一份职业短评交卷。不承诺新的因果估计或政策评估。",
+  "sources": [
+    {
+      "title": "Syllabus | Labor Economics and Public Policy | 14.64 (MIT OCW, Fall 2009)",
+      "url": "https://ocw.mit.edu/courses/14-64-labor-economics-and-public-policy-fall-2009/pages/syllabus/",
+      "kind": "ocw",
+      "used_for": "本科课目标：应用微观与经验分析连到政策；先修中级微观+统计/计量；Course Outline 顺序：就业与收入事实及供需框架 → 劳动供给（EITC、跨期、收入效应、失业保险）→ 家庭生产 → 需求/最低工资/买方垄断 → 人力资本 → 工资结构 → 歧视 → 工会；教材 Borjas；4 次带计算机练习的 problem sets"
+    },
+    {
+      "title": "Readings | Labor Economics and Public Policy | 14.64 (MIT OCW, Fall 2009)",
+      "url": "https://ocw.mit.edu/courses/14-64-labor-economics-and-public-policy-fall-2009/pages/readings/",
+      "kind": "ocw",
+      "used_for": "各块指定 Borjas 章：导论 ch.1+附录与 ch.4；供给 ch.2（UI 用 ch.12）；需求 ch.3；人力资本 ch.6；工资结构 ch.7；歧视 ch.9；工会 ch.10"
+    },
+    {
+      "title": "Assignments | Labor Economics and Public Policy | 14.64 (MIT OCW, Fall 2009)",
+      "url": "https://ocw.mit.edu/courses/14-64-labor-economics-and-public-policy-fall-2009/pages/assignments/",
+      "kind": "ocw",
+      "used_for": "过关形态：Review problems + Problem sets 1–4（约两周一份，共 26 讲）；PS2–4 带 .dta"
+    },
+    {
+      "title": "14.64 Labor Economics and Public Policy, Problem Set 1 (MIT OCW, Fall 2009)",
+      "url": "https://ocw.mit.edu/courses/14-64-labor-economics-and-public-policy-fall-2009/7d2a9e52b8e9cf0649e1e0de54dc0d6f_MIT14_64F09_ps1.pdf",
+      "kind": "ocw",
+      "used_for": "A：Borjas 4-4、4-6（市场均衡）与 2-3、2-6、2-8、2-14（劳动供给）；B：工资增长与 GDP 增长的作图与回归；C：弹性供给下减税与税收、移民冲击图"
+    },
+    {
+      "title": "William & Mary ECON 451 Labor Market Analysis Syllabus (Spring 2025)",
+      "url": "https://pmchenry.people.wm.edu/assets/ECON451_syllabus2025spring.pdf",
+      "kind": "syllabus",
+      "used_for": "先修中级微观；课表：Borjas 1 → 2 劳动供给 → 3 需求 → 4 均衡与 5 补偿性工资 → 6 人力资本 → 7 工资结构 → 最低工资 → 12 失业 → 8 流动/移民 → 9 歧视 → 10 工会；35% 职业分析写作（头脑风暴 / 部分稿 / 终稿）"
+    },
+    {
+      "title": "Economics 443 Labor Economics Syllabus (University of Washington, Spring 2025)",
+      "url": "https://econ.washington.edu/sites/econ/files/documents/syllabi/2025/spring/Econ443_Syllabus_Spr25_31Mar25b.pdf",
+      "kind": "syllabus",
+      "used_for": "先修 ECON 300；5 次 Homework + 项目；课表：度量劳动力与供给 → 需求 → 均衡/最低工资 → 买方垄断/移民 → 人力资本（学校教育再培训）→ 补偿性差异与种族/性别"
+    },
+    {
+      "title": "中国社会科学院大学《劳动经济学》课程大纲",
+      "url": "https://jw.ucass.edu.cn/kcdg/zyk/jj/laodongjingjixue20230921.pdf?d=0.8801677666314378",
+      "kind": "syllabus",
+      "used_for": "先修微观；周次：导论 → 人口/参与率/工时 → 劳动力供给 → 人力资本（教育、培训、营养、健康）→ 需求 → 工资决定与买方/双边垄断 → 工资差异与收入分配 → 流动 → 歧视 → 工会 → 失业 → 最低工资等规制"
+    },
+    {
+      "title": "劳动经济学（4021020002002）教学大纲（青岛大学 iCourse）",
+      "url": "http://mooc1-api.icourses.qdu.edu.cn/course/199159.html",
+      "kind": "syllabus",
+      "used_for": "章序：供给 → 需求 → 人力资本 → 流动 → 工资 → 歧视 → 收入差距 → 失业；每章有可交卷思考题（推导个人供给曲线、派生需求、普通/特殊培训、歧视类型）"
+    },
+    {
+      "title": "Ch. 14 Introduction to Labor Markets and Income — Principles of Economics 3e (OpenStax)",
+      "url": "https://openstax.org/books/principles-economics-3e/pages/14-introduction-to-labor-markets-and-income",
+      "kind": "open_textbook",
+      "used_for": "公开教材劳动章目标：劳动市场理论、不完全竞争工资、工会、双边垄断、就业歧视、移民"
+    },
+    {
+      "title": "14.1 The Theory of Labor Markets — Principles of Economics 3e (OpenStax)",
+      "url": "https://openstax.org/books/principles-economics-3e/pages/14-1-the-theory-of-labor-markets",
+      "kind": "open_textbook",
+      "used_for": "竞争性劳动需求：VMP=MPL×P、MRP=MPL×MR；利润最大化雇到 W=VMP/MRP；市场工资由供需相交"
+    },
+    {
+      "title": "14.2 Wages and Employment in an Imperfectly Competitive Labor Market — Principles of Economics 3e (OpenStax)",
+      "url": "https://openstax.org/books/principles-economics-3e/pages/14-2-wages-and-employment-in-an-imperfectly-competitive-labor-market",
+      "kind": "open_textbook",
+      "used_for": "买方垄断：边际劳动成本高于工资，雇到 DL=MCL，就业与工资低于竞争均衡；并列出最低工资等美国劳动法规"
+    },
+    {
+      "title": "Ch. 14 Self-Check Questions — Principles of Economics 3e (OpenStax)",
+      "url": "https://openstax.org/books/principles-economics-3e/pages/14-self-check-questions",
+      "kind": "open_textbook",
+      "used_for": "Table 14.10–14.13：VMP、MRP、工会工资与超额供给、买方垄断 MCL"
+    },
+    {
+      "title": "Ch. 14 Review Questions — Principles of Economics 3e (OpenStax)",
+      "url": "https://openstax.org/books/principles-economics-3e/pages/14-review-questions",
+      "kind": "open_textbook",
+      "used_for": "Q12–14 劳动需求与竞争市场；Q15–26 工会、买方垄断、双边垄断；Q27–32 收入差距与歧视；Q33 低技能移民"
+    },
+    {
+      "title": "Econ 3100-001 Labor Economics Syllabus (University of Utah, Spring 2026)",
+      "url": "https://class-tools.app.utah.edu/syllabus/1264/8943/Econ+3100+Spring+2026+Syllabus.pdf",
+      "kind": "syllabus",
+      "used_for": "顺序冲突：先供需建模与度量，再失业/搜寻，再需求与最低工资，家庭分工与劳动供给放到后半；每周 quiz + application problem。主干不跟这条把供给放到需求之后的排法"
+    }
+  ],
+  "trunk": ["intro", "supply", "demand", "human-capital", "wages-inst"],
+  "forks": [],
+  "join": null,
+  "nodes": {
+    "intro": {
+      "name": "事实、度量与供需框架",
+      "why": "MIT 14.64 Outline 第 1 条就是 Introduction: facts about employment and earnings; the supply and demand framework。UW 443 Session 1 是 Introduction + Measuring the Labor Force（Borjas 1 与 2.0–2.2）。社科大第 1–2 周先导论再人口、劳动参与率与工作时间。OpenStax 14.1 用同一套供需图定市场工资。没有口径和框架，后面的供给弹性与最低工资只是口号。",
+      "learn": [
+        "劳动力、就业与劳动参与率的度量",
+        "就业与收入事实（MIT Outline 1；UW Measuring the Labor Force）",
+        "竞争性劳动市场：市场供给与市场需求相交定工资",
+        "派生需求：劳动需求来自产品需求（OpenStax 14.1；青大第三章）"
+      ],
+      "task": {
+        "kind": "reading",
+        "prompt": "对照 MIT Outline 第 1 条、UW Session 1 与社科大第 1–2 周，交一页笔记：写出劳动力 / 就业 / 劳动参与率三个口径；再按 OpenStax 14.1 画一张竞争性劳动力市场图，标出均衡工资与就业，并用一句话写清派生需求。",
+        "from": "MIT 14.64 Syllabus Outline 1；UW 443 Session 1；社科大第 1–2 周；OpenStax 14.1"
+      },
+      "resources": [
+        {
+          "url": "https://ocw.mit.edu/courses/14-64-labor-economics-and-public-policy-fall-2009/pages/syllabus/",
+          "title": "14.64 Syllabus",
+          "use": "先读 Description、Prerequisites 与 Course Outline 第 1 条"
+        },
+        {
+          "url": "https://econ.washington.edu/sites/econ/files/documents/syllabi/2025/spring/Econ443_Syllabus_Spr25_31Mar25b.pdf",
+          "title": "UW Econ 443 Syllabus",
+          "use": "看 Session 1：Introduction / Measuring the Labor Force"
+        },
+        {
+          "url": "https://jw.ucass.edu.cn/kcdg/zyk/jj/laodongjingjixue20230921.pdf?d=0.8801677666314378",
+          "title": "社科大《劳动经济学》大纲",
+          "use": "读第 1–2 周：导论与参与率、工作时间"
+        },
+        {
+          "url": "https://openstax.org/books/principles-economics-3e/pages/14-1-the-theory-of-labor-markets",
+          "title": "OpenStax 14.1 The Theory of Labor Markets",
+          "use": "对照 Figure 14.7 画供需均衡，记下 VMP 与派生需求"
+        }
+      ]
+    },
+    "supply": {
+      "name": "劳动供给与参与",
+      "why": "MIT Outline 第 2–3 条在需求之前专讲 Labor Supply（EITC、跨期、收入效应）和 Home production / economics of the family。W&M 在 Intro 之后就是 Section II Labor Supply（Borjas 2）。UW Sessions 2–6 连续 Labor Supply I–III 再估供给弹性。社科大第 3 周、青大第二章都是工作—闲暇、收入/替代效应与家庭供给。Utah 把供给放到后半，见 conflicts；主干跟更靠前的四份课表。",
+      "learn": [
+        "工作—闲暇：无差异曲线、预算线、保留工资",
+        "工资变化的收入效应与替代效应；劳动供给弹性",
+        "劳动参与率与生命周期供给",
+        "家庭生产与联合供给（MIT Outline 3；青大家庭生产）",
+        "EITC / 福利与所得税对供给的应用（MIT Outline 2；W&M Hoynes 阅读周；青大政策应用）"
+      ],
+      "task": {
+        "kind": "problem_set",
+        "prompt": "做 MIT 14.64 Problem Set 1 的 A 组劳动供给题：Borjas 2-3、2-6、2-8、2-14。每题写下用的是收入效应、替代效应还是参与决策。若手边没有 Borjas，改交青大第二章思考题书面答：如何推导个人劳动供给曲线；分析所得税对劳动力供给的影响（必须同时写出收入效应与替代效应）。",
+        "from": "MIT 14.64 Problem Set 1 A（Labor supply）；青大第二章思考题",
+        "alternatives": [
+          {
+            "kind": "exercise",
+            "prompt": "做 MIT PS1 C.1：证明若劳动供给有弹性，降低税率有可能提高税收。交一张图（税楔与供给弹性）和三行代数或文字推导。",
+            "from": "MIT 14.64 Problem Set 1 C.1"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://ocw.mit.edu/courses/14-64-labor-economics-and-public-policy-fall-2009/7d2a9e52b8e9cf0649e1e0de54dc0d6f_MIT14_64F09_ps1.pdf",
+          "title": "14.64 Problem Set 1",
+          "use": "做 A 组 Labor supply 四题；备选做 C.1"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/14-64-labor-economics-and-public-policy-fall-2009/pages/readings/",
+          "title": "14.64 Readings",
+          "use": "Labor supply 栏：先读指定的 Borjas chapter 2，再看 EITC / 收入效应应用标题"
+        },
+        {
+          "url": "https://pmchenry.people.wm.edu/assets/ECON451_syllabus2025spring.pdf",
+          "title": "W&M ECON 451 Syllabus",
+          "use": "对照 Section II（1/29 起 Borjas Chapter 2）核对供给排在需求之前"
+        },
+        {
+          "url": "http://mooc1-api.icourses.qdu.edu.cn/course/199159.html",
+          "title": "青大《劳动经济学》大纲",
+          "use": "第二章：工作时间决策、家庭供给；用页内思考题作无教材时的交卷"
+        }
+      ]
+    },
+    "demand": {
+      "name": "需求、均衡、最低工资与买方垄断",
+      "why": "MIT Outline 第 4 条把 The demand for labor, minimum wages, monopsony 放在供给之后、人力资本之前。UW Sessions 7–10：Labor Demand → Equilibrium / Minimum Wage → Monopsony / Immigration。W&M Sections III–IV 是 Borjas 3 再 4。OpenStax 14.1–14.2 先 VMP/MRP 再买方垄断。青大第三章比较完全竞争、卖方垄断与买方垄断。W&M 把最低工资整块挪到人力资本之后，见 conflicts。",
+      "learn": [
+        "短期/长期劳动需求；VMP 与 MRP",
+        "劳动需求弹性",
+        "竞争性均衡工资与就业",
+        "最低工资：对就业的竞争市场预测（MIT / UW 把它和需求放在一起）",
+        "买方垄断：MCL > W，就业与工资低于竞争均衡"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "做 OpenStax Self-Check：Table 14.10 算出每一就业水平的 VMP，并在市场工资 $12 时写出利润最大化雇佣；Table 14.11 算 MRP，市场工资 $20 时的雇佣；Table 14.13 算每一就业的 MCL，在 MRP=$13 时写出雇佣量与工资。再交 MIT PS1 A 的市场均衡题 Borjas 4-4、4-6（或青大第三章思考题：为何劳动需求是派生需求；比较完全竞争、卖方垄断、买方垄断三家企业的需求）。",
+        "from": "OpenStax Ch.14 Self-Check Tables 14.10–14.13；MIT PS1 A Market equilibrium；青大第三章思考题"
+      },
+      "resources": [
+        {
+          "url": "https://openstax.org/books/principles-economics-3e/pages/14-1-the-theory-of-labor-markets",
+          "title": "OpenStax 14.1",
+          "use": "先读 VMP / MRP 表与 W=VMP 的雇佣规则"
+        },
+        {
+          "url": "https://openstax.org/books/principles-economics-3e/pages/14-2-wages-and-employment-in-an-imperfectly-competitive-labor-market",
+          "title": "OpenStax 14.2",
+          "use": "读 Table 14.5 与 Figure 14.9：买方垄断的 MCL 与 Wm、Lm"
+        },
+        {
+          "url": "https://openstax.org/books/principles-economics-3e/pages/14-self-check-questions",
+          "title": "Ch. 14 Self-Check Questions",
+          "use": "做 Table 14.10、14.11、14.13"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/14-64-labor-economics-and-public-policy-fall-2009/7d2a9e52b8e9cf0649e1e0de54dc0d6f_MIT14_64F09_ps1.pdf",
+          "title": "14.64 Problem Set 1",
+          "use": "做 A 组 Market equilibrium：4-4、4-6"
+        },
+        {
+          "url": "https://econ.washington.edu/sites/econ/files/documents/syllabi/2025/spring/Econ443_Syllabus_Spr25_31Mar25b.pdf",
+          "title": "UW Econ 443 Syllabus",
+          "use": "对照 Sessions 7–10：需求、均衡与最低工资、买方垄断"
+        }
+      ]
+    },
+    "human-capital": {
+      "name": "人力资本：教育、培训与健康",
+      "why": "MIT Outline 第 5 条在需求之后是 Human capital, education, and training；Readings 指定 Borjas chapter 6。W&M Section V、UW Sessions 11–13（先学校教育再培训）同一位置。社科大第 4 周把教育、培训、营养、健康写成劳动力素质。青大第四章要求做教育成本收益，并区分普通/特殊培训与信号功能。UCASS 把这一周插在需求之前，见 conflicts；主干跟 MIT / W&M / UW。",
+      "learn": [
+        "人力资本投资：教育、在职培训、健康/营养、迁徙（社科大第 4 周；青大投资渠道）",
+        "教育的成本（直接成本+放弃收入）与收益流",
+        "普通培训 vs 特殊培训：谁付费（青大第四章）",
+        "教育的生产功能 vs 信号功能（青大第二节）"
+      ],
+      "task": {
+        "kind": "writeup",
+        "prompt": "对照 MIT Readings 的 Human capital 栏（Borjas chapter 6）、W&M Section V 与 UW Sessions 11–13，交一页：列出上学一年的成本（学费等直接成本、放弃的工资）和预期收益流；用两段区分普通培训与特殊培训谁付费；再用 3–5 句回答青大思考题「人力资本投资的信号功能是什么」。数字用教材或公开工资例子，不编论文结果。",
+        "from": "MIT 14.64 Readings（Borjas ch.6）；W&M Section V；UW Sessions 11–13；青大第四章思考题"
+      },
+      "resources": [
+        {
+          "url": "https://ocw.mit.edu/courses/14-64-labor-economics-and-public-policy-fall-2009/pages/readings/",
+          "title": "14.64 Readings",
+          "use": "打开 Human capital, education, and training：先读指定的 Borjas chapter 6"
+        },
+        {
+          "url": "https://pmchenry.people.wm.edu/assets/ECON451_syllabus2025spring.pdf",
+          "title": "W&M ECON 451 Syllabus",
+          "use": "看 Section V（2/26 Borjas Chapter 6 Human Capital）"
+        },
+        {
+          "url": "https://econ.washington.edu/sites/econ/files/documents/syllabi/2025/spring/Econ443_Syllabus_Spr25_31Mar25b.pdf",
+          "title": "UW Econ 443 Syllabus",
+          "use": "对照 Sessions 11–13：Schooling 然后 Training / general vs specific"
+        },
+        {
+          "url": "https://jw.ucass.edu.cn/kcdg/zyk/jj/laodongjingjixue20230921.pdf?d=0.8801677666314378",
+          "title": "社科大《劳动经济学》大纲",
+          "use": "第 4 周：教育、培训、营养、健康及其他人力资本投资"
+        },
+        {
+          "url": "http://mooc1-api.icourses.qdu.edu.cn/course/199159.html",
+          "title": "青大《劳动经济学》大纲",
+          "use": "第四章思考题：普通/特殊培训；信号功能"
+        }
+      ]
+    },
+    "wages-inst": {
+      "name": "工资结构、歧视与工会",
+      "why": "MIT Outline 在人力资本之后连续是 The wage structure、Discrimination、Unions and bargaining。W&M 后半是工资结构、歧视、工会（失业与流动插在中间，见 conflicts）。UW 在人力资本之后是 Race/Gender（Borjas 9）。社科大第 8–12 周：工资差异、收入分配、歧视、工会。OpenStax 14 章后半是工会、双边垄断、歧视与移民。来源都写成同一门课的收束块，不是并行选修轨。",
+      "learn": [
+        "工资结构与收入不平等的度量（MIT Outline 6；社科大第 8–9 周；青大库兹涅茨倒 U）",
+        "劳动力市场歧视：定义、偏见/统计性歧视（青大第七章；OpenStax Review 29：差距本身不证明歧视）",
+        "工会相对工资与雇佣量（OpenStax Review 20；MIT Outline 8）",
+        "双边垄断：工会对买方垄断（OpenStax Review 25–26）"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "书面回答 OpenStax Review 20（工会对员工工资与雇主雇佣量）、24（买方垄断如何改变均衡工资与就业）、29（男女或种族平均工资差距是否证明雇主歧视，必须说明为什么）。再做 Self-Check Table 14.12：无工会时的均衡工资与数量；工会把工资抬高 $4 后是超额需求还是超额供给。最后用青大第七章思考题 1 写清歧视的含义与主要类型。",
+        "from": "OpenStax Ch.14 Review 20/24/29 + Self-Check Table 14.12；青大第七章思考题 1",
+        "alternatives": [
+          {
+            "kind": "writeup",
+            "prompt": "按 W&M ECON 451 的 Writing Assignment：选一个职业，用本课的供给/需求/人力资本/歧视概念和公开劳动数据写短评。大纲要求分头脑风暴、部分稿、终稿；自学按同一结构交终稿即可，并注明数据出处。",
+            "from": "W&M ECON 451 Writing Assignment: Analysis of an occupation in a changing environment"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://openstax.org/books/principles-economics-3e/pages/14-review-questions",
+          "title": "Ch. 14 Review Questions",
+          "use": "做 Q20、Q24、Q29；需要时再看 Q15–19 工会、Q27–32 歧视"
+        },
+        {
+          "url": "https://openstax.org/books/principles-economics-3e/pages/14-self-check-questions",
+          "title": "Ch. 14 Self-Check Questions",
+          "use": "做 Table 14.12 工会工资与超额供给"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/14-64-labor-economics-and-public-policy-fall-2009/pages/syllabus/",
+          "title": "14.64 Syllabus",
+          "use": "对照 Outline 6–8：工资结构、歧视、工会"
+        },
+        {
+          "url": "https://pmchenry.people.wm.edu/assets/ECON451_syllabus2025spring.pdf",
+          "title": "W&M ECON 451 Syllabus",
+          "use": "看 Writing Assignment 要求；Sections VI / X / XI 对应工资结构、歧视、工会"
+        },
+        {
+          "url": "http://mooc1-api.icourses.qdu.edu.cn/course/199159.html",
+          "title": "青大《劳动经济学》大纲",
+          "use": "第七章思考题：歧视含义与类型"
+        }
+      ]
+    }
+  },
+  "conflicts": [
+    "社科大第 4 周就把人力资本（教育、培训、营养、健康）放在劳动力需求（第 5 周）之前；MIT 14.64、W&M 451、UW 443、青大都是供给之后先需求/均衡，再人力资本。主干取更靠前且三所英语课表一致的：需求在人力资本之前。",
+    "Utah Econ 3100 把失业与工作搜寻放在需求之前（Modules 4–5），劳动供给整块放到 Modules 10–12。MIT / W&M / UW / 社科大 / 青大均先供给（或供需框架）再需求。主干不跟 Utah 把供给放到后半的排法。",
+    "W&M 把 Minimum Wage Laws 整节放在人力资本与工资结构之后；MIT Outline 4 与 UW Sessions 9–10 把最低工资和买方垄断跟需求/均衡写在一起。取更靠前：写进 demand。",
+    "失业与劳动力流动：MIT 把失业保险放在供给应用里，W&M 与社科大/青大把失业、流动放在后半。不单开节点，也不为此分叉；需要时在 supply 读 MIT 的 UI 应用，或在职业短评里用 W&M Section VIII–IX。",
+    "补偿性工资：W&M 在均衡之后、人力资本之前读 Borjas 5；UW 把它放在人力资本之后。不单开节点，并入 demand 的均衡或 wages-inst 的工资差别。"
+  ],
+  "missing": "",
+  "checked_at": "2026-10-04"
+}

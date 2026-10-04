@@ -1,0 +1,470 @@
+{
+  "id": "790.35",
+  "name": "数量经济",
+  "format": "tutorial-tree-v2",
+  "status": "ok",
+  "goal": "能读懂一篇用回归做的经验研究，并用公开数据完成从一元到多元（必要时工具变量）的估计与检验，交出带软件日志的习题或一篇短实证。不承诺新的因果发现。",
+  "sources": [
+    {
+      "title": "Syllabus | Econometrics | 14.32 (MIT OCW, Spring 2007)",
+      "url": "https://ocw.mit.edu/courses/14-32-econometrics-spring-2007/pages/syllabus/",
+      "kind": "ocw",
+      "used_for": "课程目标：读经验研究并做独立项目；顺序 A–G：概率统计复习 → 双变量回归 → 多元/因果与控制 → 异方差与序列相关 → IV/联立方程；先修 14.30；6 次带 Stata/SAS 日志的 graded problem sets"
+    },
+    {
+      "title": "Assignments | Econometrics | 14.32 (MIT OCW, Spring 2007)",
+      "url": "https://ocw.mit.edu/courses/14-32-econometrics-spring-2007/pages/assignments/",
+      "kind": "ocw",
+      "used_for": "过关形态：Review problem set + Problem sets 1–6；数据含 CPS/wine prices（回归）、Quarter of birth / Fish data（IV/联立）"
+    },
+    {
+      "title": "Readings | Econometrics | 14.32 (MIT OCW, Spring 2007)",
+      "url": "https://ocw.mit.edu/courses/14-32-econometrics-spring-2007/pages/readings/",
+      "kind": "ocw",
+      "used_for": "同一套 A–G 顺序；12b 是 natural experiments / differences-in-differences；13a–b 是异方差与序列相关"
+    },
+    {
+      "title": "Recitations | Econometrics | 14.32 (MIT OCW, Spring 2007)",
+      "url": "https://ocw.mit.edu/courses/14-32-econometrics-spring-2007/pages/recitations/",
+      "kind": "lecture_notes",
+      "used_for": "习题课讲义：Differences-in-Differences、How to Test for Heteroskedasticity、Serial Correlation、IV/2SLS"
+    },
+    {
+      "title": "Calendar | Introduction to Statistical Methods in Economics | 14.30 (MIT OCW, Spring 2009)",
+      "url": "https://ocw.mit.edu/courses/14-30-introduction-to-statistical-methods-in-economics-spring-2009/pages/calendar/",
+      "kind": "ocw",
+      "used_for": "14.32 先修课日历：概率 → 随机变量 → 期望/条件期望 → 大数定律与 CLT → 估计量 → 置信区间 → 假设检验"
+    },
+    {
+      "title": "Assignments | Introduction to Statistical Methods in Economics | 14.30 (MIT OCW, Spring 2009)",
+      "url": "https://ocw.mit.edu/courses/14-30-introduction-to-statistical-methods-in-economics-spring-2009/pages/assignments/",
+      "kind": "ocw",
+      "used_for": "统计先修的 problem sets 1–9，作为复习卷对照"
+    },
+    {
+      "title": "Introduction to Econometrics with R (Hanck, Arnold, Gerber, Schmelzer)",
+      "url": "https://www.econometrics-with-r.org/",
+      "kind": "open_textbook",
+      "used_for": "杜伊斯堡–埃森本科计量公开教材，按 Stock–Watson 顺序；全书目录与作业形态"
+    },
+    {
+      "title": "2 Probability Theory | Introduction to Econometrics with R",
+      "url": "https://www.econometrics-with-r.org/2-pt.html",
+      "kind": "open_textbook",
+      "used_for": "统计先修：随机变量、分布、抽样与样本均值分布；2.3 Exercises"
+    },
+    {
+      "title": "3 A Review of Statistics using R | Introduction to Econometrics with R",
+      "url": "https://www.econometrics-with-r.org/3-arosur.html",
+      "kind": "open_textbook",
+      "used_for": "估计、假设检验、置信区间；3.8 Exercises"
+    },
+    {
+      "title": "4 Linear Regression with One Regressor | Introduction to Econometrics with R",
+      "url": "https://www.econometrics-with-r.org/4-lrwor.html",
+      "kind": "open_textbook",
+      "used_for": "一元回归：OLS、拟合优度、最小二乘假定、抽样分布；4.6 Exercises"
+    },
+    {
+      "title": "5 Hypothesis Tests and Confidence Intervals in SLR Model | Introduction to Econometrics with R",
+      "url": "https://www.econometrics-with-r.org/5-htaciitslrm.html",
+      "kind": "open_textbook",
+      "used_for": "一元回归的 t 检验、置信区间、虚拟变量；5.4 引入异方差"
+    },
+    {
+      "title": "5.4 Heteroskedasticity and Homoskedasticity | Introduction to Econometrics with R",
+      "url": "https://www.econometrics-with-r.org/5.4-hah.html",
+      "kind": "open_textbook",
+      "used_for": "异方差定义、稳健标准误、与同方差标准误的对比"
+    },
+    {
+      "title": "6 Regression Models with Multiple Regressors | Introduction to Econometrics with R",
+      "url": "https://www.econometrics-with-r.org/6-rmwmr.html",
+      "kind": "open_textbook",
+      "used_for": "多元回归、遗漏变量偏误、多重共线性"
+    },
+    {
+      "title": "7 Hypothesis Tests and Confidence Intervals in MR Models | Introduction to Econometrics with R",
+      "url": "https://www.econometrics-with-r.org/7-htaciimr.html",
+      "kind": "open_textbook",
+      "used_for": "多元回归的单系数检验与联合假设的 F 检验"
+    },
+    {
+      "title": "12 Instrumental Variables Regression | Introduction to Econometrics with R",
+      "url": "https://www.econometrics-with-r.org/12-ivr.html",
+      "kind": "open_textbook",
+      "used_for": "IV/TSLS、工具相关与外生、香烟需求例；12.6 Exercises"
+    },
+    {
+      "title": "13 Experiments and Quasi-Experiments | Introduction to Econometrics with R",
+      "url": "https://www.econometrics-with-r.org/13-eaqe.html",
+      "kind": "open_textbook",
+      "used_for": "项目评估：随机实验、准实验/自然实验；13.5 Exercises"
+    },
+    {
+      "title": "Introduction to Econometrics, 4th edition (Stock & Watson) — Pearson table of contents",
+      "url": "https://www.pearson.com/en-us/subject-catalog/p/introduction-to-econometrics/P200000006421",
+      "kind": "other",
+      "used_for": "商业教材目录顺序：Ch.1–3 问题与概率统计复习 → Ch.4–5 一元回归与检验 → Ch.6–7 多元回归 → Ch.12 IV → Ch.13 实验与准实验（目录页，不是公开全书）"
+    },
+    {
+      "title": "Selected Student Resources for Stock and Watson's Introduction to Econometrics, 4th Edition",
+      "url": "https://www.princeton.edu/~mwatson/Stock-Watson_4E/Stock-Watson-Resources-4e.html",
+      "kind": "other",
+      "used_for": "各章 Empirical Exercises 与数据集（EE 4.1 Growth、EE 5.3/6.1/7.1 Birthweight、EE 12.1 Fertility、EE 13.1 Names）；Stata tutorial"
+    },
+    {
+      "title": "《计量经济学》课程教学大纲（长春大学经济学院）",
+      "url": "https://jjxy.ccu.edu.cn/info/1230/2228.htm",
+      "kind": "syllabus",
+      "used_for": "先修统计学；第2–3章一元/多元回归 → 第5–6章异方差与序列相关 → 第10章联立方程组；实践1–3、7 与「计量试验报告」"
+    },
+    {
+      "title": "Introduction to Econometrics | ECO-4421 Spring 2025 (Florida International University)",
+      "url": "https://economics.fiu.edu/undergraduate/syllabi/2025spring/eco4421_2025spring_alfonso.pdf",
+      "kind": "syllabus",
+      "used_for": "概述从 probability and statistical inference 进入经典线性回归；课表 Two Variable → Multiple Regression → Heteroskedasticity；终点是 applied econometrics project（问题/方法/数据/结果）"
+    },
+    {
+      "title": "教学大纲 | 计量经济学（华中科技大学经济学院）",
+      "url": "https://eco.hust.edu.cn/rcpy/jpkc1/jljjx/jxdg.htm",
+      "kind": "syllabus",
+      "used_for": "先修概率论与数理统计；学时顺序：回归分析 → 一元 → 多元 → 异方差 → 自相关 → 联立性偏误与 IV；考核含课后作业"
+    },
+    {
+      "title": "OpenIntro Statistics — Fourth Edition (Open Textbook Library)",
+      "url": "https://open.umn.edu/opentextbooks/textbooks/openintro-statistics",
+      "kind": "open_textbook",
+      "used_for": "统计先修目录：data → probability → inference → linear regression；只支撑统计复习，不单独当计量主干"
+    }
+  ],
+  "trunk": ["stats", "bivariate", "multivariate", "inference", "iv", "wrap"],
+  "forks": [],
+  "join": null,
+  "nodes": {
+    "stats": {
+      "name": "概率与统计复习",
+      "why": "14.32 先修 14.30，大纲第一部分就是 Review of probability and statistics / statistical inference。IER 第2–3章、Stock–Watson 把 Review of Probability / Statistics 放在回归之前。长春大学先修「统计学」，华科先修「概率论与数理统计」。FIU 概述也写讨论从 probability and statistical inference 开始。没有抽样分布和置信区间，后面的回归标准误只是黑箱。",
+      "learn": [
+        "probability and distribution",
+        "expectation and moments",
+        "sampling distributions 与 Central Limit theorem",
+        "confidence intervals",
+        "hypothesis tests"
+      ],
+      "task": {
+        "kind": "problem_set",
+        "prompt": "对照 14.30 的 problem set，或 14.32 Review problem set，或 IER 第2–3章 Exercises，交一份自己写的复习卷：至少一道抽样分布/CLT 计算，以及一个置信区间或假设检验。数字来自题目，不编标准误。",
+        "from": "14.30 Assignments；14.32 Review problem set；IER Ch.2–3 Exercises"
+      },
+      "resources": [
+        {
+          "url": "https://ocw.mit.edu/courses/14-30-introduction-to-statistical-methods-in-economics-spring-2009/pages/calendar/",
+          "title": "14.30 Calendar",
+          "use": "按 I–IX 核对自己缺的是概率、CLT 还是区间/检验"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/14-30-introduction-to-statistical-methods-in-economics-spring-2009/pages/assignments/",
+          "title": "14.30 Assignments",
+          "use": "选一套 problem set 做复习卷，写清题号"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/14-32-econometrics-spring-2007/pages/assignments/",
+          "title": "14.32 Assignments",
+          "use": "也可做页上的 Review problem set"
+        },
+        {
+          "url": "https://www.econometrics-with-r.org/2-pt.html",
+          "title": "IER 第2章 Probability Theory",
+          "use": "读完后做 2.3 Exercises"
+        },
+        {
+          "url": "https://www.econometrics-with-r.org/3-arosur.html",
+          "title": "IER 第3章 A Review of Statistics using R",
+          "use": "做估计、检验、置信区间；对照 3.8 Exercises"
+        },
+        {
+          "url": "https://open.umn.edu/opentextbooks/textbooks/openintro-statistics",
+          "title": "OpenIntro Statistics 目录",
+          "use": "只补概率与推断章节，不要当成计量主干"
+        }
+      ]
+    },
+    "bivariate": {
+      "name": "一元回归：条件期望与最小二乘",
+      "why": "14.32 在统计复习之后是 Regression basics：conditional expectation functions, bivariate regression, Gauss-Markov。IER/Stock–Watson 第4–5章是 Linear Regression with One Regressor 及假设检验。长春大学第2章、华科「一元线性回归模型」、FIU 第一块实质内容都是 Two Variable Linear Regression。",
+      "learn": [
+        "conditional expectation functions 与 bivariate regression",
+        "sampling distribution of regression estimates；Gauss-Markov theorem",
+        "residuals, fitted values, goodness of fit",
+        "斜率的 t 检验与置信区间"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "对照 IER 第4–5章或 Stock–Watson EE 4.1 Growth：估计一个一元回归，交估计式、拟合优度、一次 t/显著性检验，以及软件日志（R/Stata/EViews/Python 任一）。每道题注明用了哪一节或哪一道 Empirical Exercise。",
+        "from": "IER Ch.4–5 Exercises；Stock–Watson EE 4.1 Growth",
+        "alternatives": [
+          {
+            "kind": "problem_set",
+            "prompt": "对照 14.32 Problem set 2（March 1992 CPS / Wine prices）做同一套交卷：估计式、拟合优度、一次检验，附 Stata/SAS/R 日志。",
+            "from": "14.32 Assignments, Problem set 2"
+          },
+          {
+            "kind": "lab",
+            "prompt": "对照长春大学实践1「简单线性回归」：用软件完成变量建立、数据输入、回归、显著性与拟合优度检验，交一份带输出的实验记录。",
+            "from": "长春大学《计量经济学》实践1"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://ocw.mit.edu/courses/14-32-econometrics-spring-2007/pages/syllabus/",
+          "title": "14.32 Syllabus",
+          "use": "读 Part I C Regression basics（主题 6–9）"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/14-32-econometrics-spring-2007/pages/assignments/",
+          "title": "14.32 Assignments",
+          "use": "若选 MIT 轨，做 Problem set 2（CPS / wine prices）"
+        },
+        {
+          "url": "https://www.econometrics-with-r.org/4-lrwor.html",
+          "title": "IER 第4章 Linear Regression with One Regressor",
+          "use": "读 OLS、拟合优度、最小二乘假定，做 4.6 Exercises"
+        },
+        {
+          "url": "https://www.econometrics-with-r.org/5-htaciitslrm.html",
+          "title": "IER 第5章 Hypothesis Tests in SLR",
+          "use": "做斜率的检验与置信区间"
+        },
+        {
+          "url": "https://www.princeton.edu/~mwatson/Stock-Watson_4E/Stock-Watson-Resources-4e.html",
+          "title": "Stock–Watson 4e 学生资源",
+          "use": "下载 Growth 数据做 EE 4.1；需要时可看 STATA Tutorial"
+        },
+        {
+          "url": "https://jjxy.ccu.edu.cn/info/1230/2228.htm",
+          "title": "长春大学《计量经济学》大纲",
+          "use": "若选实践轨，按实践1做简单线性回归"
+        }
+      ]
+    },
+    "multivariate": {
+      "name": "多元回归：控制与遗漏变量",
+      "why": "14.32 Part II 先讲 Regression, causality, and control；omitted variables formula；short vs. long regressions；dummy variables 与 F-tests。IER 第6章从 Omitted Variable Bias 进入多元，第7章做联合假设的 F 检验。长春大学第3章、华科「多元线性回归分析」、FIU 课表接着是 Multiple Linear Regression Model: Estimation / Inference。",
+      "learn": [
+        "anatomy of multivariate regression coefficients",
+        "omitted variables formula；short vs. long regressions",
+        "dummy variables and interactions",
+        "testing linear restrictions using F-tests"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "对照 IER 第6–7章或 Stock–Watson EE 6.1/7.1（Birthweight and Smoking）：交一张短回归与长回归对照表，写清加入控制后系数怎么变，并做一个虚拟变量或线性约束的 F 检验。附软件输出。",
+        "from": "IER Ch.6–7；Stock–Watson EE 6.1 / 7.1 Birthweight and Smoking",
+        "alternatives": [
+          {
+            "kind": "lab",
+            "prompt": "对照长春大学实践2「多元线性回归模型和多重共线性」：建立多元回归，做显著性、拟合优度，并报告一次共线性检查。附软件输出。",
+            "from": "长春大学《计量经济学》实践2"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://ocw.mit.edu/courses/14-32-econometrics-spring-2007/pages/syllabus/",
+          "title": "14.32 Syllabus",
+          "use": "读 Part II D 主题 10–12a（控制、遗漏变量、虚拟变量、F 检验）"
+        },
+        {
+          "url": "https://www.econometrics-with-r.org/6-rmwmr.html",
+          "title": "IER 第6章 Regression Models with Multiple Regressors",
+          "use": "读 OVB 与多元回归设定，做章末 Exercises"
+        },
+        {
+          "url": "https://www.econometrics-with-r.org/7-htaciimr.html",
+          "title": "IER 第7章 Hypothesis Tests in MR Models",
+          "use": "做单系数检验和一个联合假设的 F 检验"
+        },
+        {
+          "url": "https://www.princeton.edu/~mwatson/Stock-Watson_4E/Stock-Watson-Resources-4e.html",
+          "title": "Stock–Watson 4e 学生资源",
+          "use": "下载 Birthweight and Smoking，做 EE 6.1 / 7.1"
+        },
+        {
+          "url": "https://jjxy.ccu.edu.cn/info/1230/2228.htm",
+          "title": "长春大学《计量经济学》大纲",
+          "use": "第3章与实践2：多元回归"
+        },
+        {
+          "url": "https://economics.fiu.edu/undergraduate/syllabi/2025spring/eco4421_2025spring_alfonso.pdf",
+          "title": "FIU ECO-4421 Spring 2025",
+          "use": "对照课表 Multiple Linear Regression Model: Estimation / Inference"
+        }
+      ]
+    },
+    "inference": {
+      "name": "推断问题：异方差与序列相关",
+      "why": "14.32 在多元之后专列 Inference problems：heteroscedasticity（WLS、linear probability model）与 serial correlation（Durbin-Watson）。长春大学第5–6章加实践3，华科在多元之后排异方差与自相关，FIU 在多元之后是 Heteroskedasticity。习题课有 How to Test for Heteroskedasticity 与 Serial Correlation。两边都不反对：经典假定破了要先会检验再谈后面的识别。",
+      "learn": [
+        "heteroskedasticity 的后果与稳健标准误 / weighted least squares",
+        "linear probability model（14.32 13a）",
+        "serial correlation in time series",
+        "Durbin-Watson test"
+      ],
+      "task": {
+        "kind": "lab",
+        "prompt": "对照 14.32 第13讲主题、习题课「How to Test for Heteroskedasticity」「Serial Correlation」，或长春大学实践3，或 IER 5.4：对同一回归做一次异方差检验（或 WLS/稳健标准误）和一次序列相关检验（如 DW），交检验统计量、你怎么修正、以及软件日志。",
+        "from": "14.32 Part E 与 Recitations；长春大学实践3；IER 5.4"
+      },
+      "resources": [
+        {
+          "url": "https://ocw.mit.edu/courses/14-32-econometrics-spring-2007/pages/syllabus/",
+          "title": "14.32 Syllabus",
+          "use": "读 Part II E 主题 13a–13b"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/14-32-econometrics-spring-2007/pages/recitations/",
+          "title": "14.32 Recitations",
+          "use": "打开 How to Test for Heteroskedasticity 与 Serial Correlation 两份讲义"
+        },
+        {
+          "url": "https://www.econometrics-with-r.org/5.4-hah.html",
+          "title": "IER 5.4 Heteroskedasticity and Homoskedasticity",
+          "use": "对照页上的稳健标准误计算，交一次同方差 SE 与稳健 SE 的对比"
+        },
+        {
+          "url": "https://jjxy.ccu.edu.cn/info/1230/2228.htm",
+          "title": "长春大学《计量经济学》大纲",
+          "use": "第5–6章与实践3：异方差性和序列相关"
+        },
+        {
+          "url": "https://eco.hust.edu.cn/rcpy/jpkc1/jljjx/jxdg.htm",
+          "title": "华中科技大学计量经济学大纲",
+          "use": "对照「异方差」「自相关」两段学时安排，确认这一步在多元之后"
+        }
+      ]
+    },
+    "iv": {
+      "name": "识别：工具变量与联立方程",
+      "why": "14.32 在推断问题之后是 Using IV to solve omitted-variables problems，以及 simultaneous equations：identification、reduced form、2SLS。IER/Stock–Watson 第12章是 Instrumental Variables Regression。长春大学第10章为联立方程组识别与估计，华科专列「联立性偏误与IV估计」。FIU 课表未排到 IV，见 conflicts。",
+      "learn": [
+        "instrumental variables：relevance 与 exogeneity",
+        "simultaneous equations bias",
+        "the identification problem",
+        "two-stage least squares"
+      ],
+      "task": {
+        "kind": "exercise",
+        "prompt": "对照 IER 第12章香烟需求例或 Stock–Watson EE 12.1 Fertility：写清内生变量、工具、识别条件，交一次 IV/2SLS 和软件输出。不另编论文篇名。",
+        "from": "IER Ch.12；Stock–Watson EE 12.1 Fertility",
+        "alternatives": [
+          {
+            "kind": "problem_set",
+            "prompt": "对照 14.32 Problem set 6（Quarter of birth data / Fish data）做一次 IV/2SLS 或联立方程识别判断，附软件日志。",
+            "from": "14.32 Assignments, Problem set 6"
+          },
+          {
+            "kind": "lab",
+            "prompt": "对照长春大学实践7「联立方程组模型」：写清识别判断，交一次联立方程估计与软件输出。",
+            "from": "长春大学《计量经济学》实践7"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://ocw.mit.edu/courses/14-32-econometrics-spring-2007/pages/syllabus/",
+          "title": "14.32 Syllabus",
+          "use": "读 Part II F–G 主题 14a、15–16（IV、识别、2SLS）"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/14-32-econometrics-spring-2007/pages/assignments/",
+          "title": "14.32 Assignments",
+          "use": "若选 MIT 轨，做 Problem set 6（Quarter of birth / Fish data）"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/14-32-econometrics-spring-2007/pages/recitations/",
+          "title": "14.32 Recitations",
+          "use": "读 Implementation of IV and Two-stage Least Squares"
+        },
+        {
+          "url": "https://www.econometrics-with-r.org/12-ivr.html",
+          "title": "IER 第12章 Instrumental Variables Regression",
+          "use": "复现香烟需求的 TSLS，或做 12.6 Exercises"
+        },
+        {
+          "url": "https://www.princeton.edu/~mwatson/Stock-Watson_4E/Stock-Watson-Resources-4e.html",
+          "title": "Stock–Watson 4e 学生资源",
+          "use": "下载 Fertility 数据做 EE 12.1"
+        },
+        {
+          "url": "https://jjxy.ccu.edu.cn/info/1230/2228.htm",
+          "title": "长春大学《计量经济学》大纲",
+          "use": "第10章与实践7：联立方程组"
+        }
+      ]
+    },
+    "wrap": {
+      "name": "收束：短实证或政策评估习题",
+      "why": "14.32 课程目标是 understand empirical economic research and plan and execute independent research projects，并覆盖 evaluation of government policies；大纲 12b 是 natural experiments / differences-in-differences。IER 第13章、Stock–Watson Ch.13 把 Experiments and Quasi-Experiments 放在回归核心之后。FIU 用 applied econometrics project（问题、方法、数据、结果、含义）作终点。长春大学用「计量试验报告」作实践考核。两种交卷方式是同一关，不是两条选修轨。本科停在能复现与能交卷，不承诺新结果。",
+      "learn": [
+        "短实证的交卷结构：question / econometric model / data / results",
+        "natural experiments 与 differences-in-differences",
+        "把前面的估计与检验接到一个可复核的对象上"
+      ],
+      "task": {
+        "kind": "project",
+        "prompt": "对照 FIU ECO-4421 项目说明写一篇短实证：问题、方法、变量、结果、一段限定。不必写到其「约 14 页」；能复现即可，不另开未打开的论文。",
+        "from": "FIU ECO-4421 Applied Econometrics Project Details",
+        "alternatives": [
+          {
+            "kind": "writeup",
+            "prompt": "对照 14.32 的 12b / IER 第13章 / Stock–Watson EE 13.1 Names，用公开数据做一个倍差或准实验习题，交设定、结果和一句「相关不等于因果」的限定。或对照长春大学「计量试验报告」交一份实践记录。",
+            "from": "14.32 12b 与 Recitations「More on Differences-in-Differences」；IER Ch.13；Stock–Watson EE 13.1；长春大学实践考核「计量试验报告」"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "url": "https://economics.fiu.edu/undergraduate/syllabi/2025spring/eco4421_2025spring_alfonso.pdf",
+          "title": "FIU ECO-4421 Spring 2025",
+          "use": "按 Applied Econometrics Project Details 的六段（问题/方法/数据/结果/分析/含义）写短实证"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/14-32-econometrics-spring-2007/pages/syllabus/",
+          "title": "14.32 Syllabus",
+          "use": "若选政策评估轨，对照课程目标与 12b natural experiments / DID"
+        },
+        {
+          "url": "https://ocw.mit.edu/courses/14-32-econometrics-spring-2007/pages/recitations/",
+          "title": "14.32 Recitations",
+          "use": "读 More on Differences-in-Differences"
+        },
+        {
+          "url": "https://www.econometrics-with-r.org/13-eaqe.html",
+          "title": "IER 第13章 Experiments and Quasi-Experiments",
+          "use": "做 13.5 Exercises，或按章内设定交一份准实验记录"
+        },
+        {
+          "url": "https://www.princeton.edu/~mwatson/Stock-Watson_4E/Stock-Watson-Resources-4e.html",
+          "title": "Stock–Watson 4e 学生资源",
+          "use": "下载 Names 数据做 EE 13.1"
+        },
+        {
+          "url": "https://jjxy.ccu.edu.cn/info/1230/2228.htm",
+          "title": "长春大学《计量经济学》大纲",
+          "use": "若选试验报告轨，按实践考核「计量试验报告」交记录"
+        }
+      ]
+    }
+  },
+  "conflicts": [
+    "长春大学、华科把多重共线性、滞后变量、单位根/协整写成主干章节；14.32 主干是遗漏变量、IV 与项目评估，时间序列只到序列相关与 Durbin-Watson。步骤取两边都有的路径，多重共线性和协整不单独成节点。",
+    "FIU ECO-4421 课表在异方差、虚拟变量、LPM/Probit/Logit 后进入课程论文，没有 IV。iv 节点主要跟 14.32、IER/Stock–Watson 第12章、长春大学第10章和华科「联立性偏误与IV估计」。",
+    "14.32 把 dummy / differences-in-differences 放在多元回归之后、推断问题之前；FIU 把 Qualitative Information 放在 Heteroskedasticity 之后。多元节点先做控制与遗漏变量，倍差收到 wrap。",
+    "IER/Stock–Watson 在第5章（一元回归检验）就引入 heteroskedasticity；14.32、长春大学、华科、FIU 把异方差放在多元之后专列。inference 节点跟课表多数，放在多元之后。",
+    "同一关的两种交卷方式（FIU 短实证 或 14.32/IER 倍差/试验报告；以及各步的 MIT 习题 / 教材 Empirical Exercise / 长春大学实践）写在 task.alternatives，不长成分叉。"
+  ],
+  "missing": "",
+  "checked_at": "2026-10-04"
+}
