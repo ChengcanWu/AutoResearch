@@ -105,10 +105,13 @@ def test_whole_flow(client):
     assert {"direction:ai", f"project:{proj['id']}"} <= keys
     assert any(k.startswith("task_done:") for k in keys)
 
-    # 软删一条，记录里就看不到
+    # 软删一条，记录里就看不到。
+    # 「软删」在合并后的代码里是 status=retracted（memory.user_retract，留 revision 可追溯）；
+    # 研读层作废结论用的是 deleted。两个都算「不再算数」——按状态筛选用白名单。
     fid = next(f["id"] for f in facts if f["key"] == "direction:ai")
     assert c.delete(f"/api/me/facts/{fid}?uid={uid}").json()["ok"] is True
-    assert fid not in {f["id"] for f in c.get(f"/api/me/facts?uid={uid}").json()["facts"] if f["status"] != "deleted"}
+    assert fid not in {f["id"] for f in c.get(f"/api/me/facts?uid={uid}").json()["facts"]
+                       if f["status"] not in ("deleted", "retracted")}
 
 
 def test_unknown_user_and_direction_are_rejected(client):

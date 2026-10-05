@@ -6,7 +6,8 @@
   <title>启研 · AI 科研导师</title>
   <meta name="description" content="它认识你，它懂科研世界，它决定你此刻最值得做的一件事，陪你做完，记住结果，再给下一步。" />
   <meta name="theme-color" content="#f5f2ea" />
-  <link rel="stylesheet" href="/static/css/styles.css?v=w26" />  <!-- 标题衬线字体走国内可达的镜像，且不阻塞首屏；加载失败时回退系统宋体 -->
+  <link rel="stylesheet" href="/static/css/styles.css?v=w34" />
+  <!-- 标题衬线字体走国内可达的镜像，且不阻塞首屏；加载失败时回退系统宋体 -->
   <link rel="preconnect" href="https://fonts.googleapis.cn" />
   <link rel="stylesheet" media="print" onload="this.media='all'"
         href="https://fonts.googleapis.cn/css2?family=Noto+Serif+SC:wght@600;700&family=Source+Serif+4:opsz,wght@8..60,600&display=swap" />
@@ -25,7 +26,7 @@
         <button class="nav-btn" type="button" data-view="today" data-workspace="today"><span>今日</span><small>状态与建议</small></button>
         <button class="nav-btn" type="button" data-view="position" data-workspace="position"><span>定位</span><small>站在哪、凭什么</small></button>
         <button class="nav-btn" type="button" data-view="read" data-workspace="read"><span>研读</span><small>读懂一个小领域</small></button>
-        <button class="nav-btn" type="button" data-view="onboarding" data-workspace="portrait"><span>画像</span><small>对话与核对</small></button>
+        <button class="nav-btn" type="button" data-view="dialogue" data-workspace="portrait"><span>对话</span><small>聊着把事定下来</small></button>
         <button class="nav-btn" type="button" data-view="cards" data-workspace="cards"><span>方向</span><small>方向与教程</small></button>
         <button class="nav-btn" type="button" data-view="workbench" data-workspace="workbench"><span>任务</span><small>做到提交</small></button>
         <button class="nav-btn" type="button" data-view="projects" data-workspace="projects"><span>项目</span><small>边学边练</small></button>
@@ -43,10 +44,17 @@
       </main>
       <footer class="site-footer">
         <p>课程来自北大教务公开接口，查不到就写查不到。连接模型后，对话、方向理由、下一步和任务反馈由模型生成，失败时回退规则。</p>
+        <!-- 版本戳：唯一目的是让「我改了没有」可以一眼确认，不用猜缓存。
+             每次改前端都要把这个号 +1，并同步下面三个 ?v=。
+             **三个都必须一样** —— 上次 CSS 停在 w27 而 JS 到了 w28，
+             用户就拿到了「新 JS + 旧 CSS」，样式全不对。有测试钉着这件事。 -->
+        <p class="build-stamp">界面版本 <b>w34</b> · 对话页：对话流 / 下一步 / 输入三个区，输入框永远在最下面。成绩单直接粘进对话就能识别。说到院系简称（信管、数院…）就会去查北大培养方案知识库，学校默认北大、不再问「你是哪个学校」。核对页里「学校」标的是默认值。<b>看不到这些就是旧缓存，按 Ctrl+Shift+R 硬刷新</b></p>
       </footer>
     </div>
   </div>
 
-  <script src="/static/js/directions.js?v=w26"></script>
-  <script src="/static/js/app.js?v=w26"></script></body>
+  <script src="/static/js/directions.js?v=w34"></script>
+  <script src="/static/js/chat.js?v=w34"></script>
+  <script src="/static/js/app.js?v=w34"></script>
+</body>
 </html>

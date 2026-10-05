@@ -1,0 +1,297 @@
+# -*- coding: utf-8 -*-
+"""前端静态文件必须能被浏览器正确读出来。
+
+起因：改一个缓存版本号，我用了
+    (Get-Content x.html -Raw) -replace ... | Set-Content x.html
+PowerShell 在中途按错误编码读了一次，把 4 个中文字连同它后面的 ASCII
+一起压成了 U+FFFD。后果**不是显示瑕疵，是结构损坏**：
+
+    定下来</small>   →   定下�?/small>      ← `</small>` 的 `<` 没了
+    工作区">         →   工作�?              ← aria-label 的收尾引号没了
+    下一步。" />     →   下一步�? />         ← content 的收尾引号没了
+
+typecheck 过、单元测试全绿、git diff 里那几行看着也正常，
+**只有把真正发出去的字节解出来才会发现**。所以这条测试直接读文件字节。
+
+以后改这些文件一律走 write/edit 工具，不要用 PowerShell 的 Get-Content/Set-Content。
+"""
+from __future__ import annotations
+
+import pathlib
+import re
+
+import pytest
+
+WEB = pathlib.Path(__file__).resolve().parent.parent.parent / "web"
+
+FILES = ["index.html", "css/styles.css", "js/app.js", "js/chat.js"]
+
+
+@pytest.mark.parametrize("rel", FILES)
+def test_web_file_is_valid_utf8_without_replacement_chars(rel):
+    p = WEB / rel
+    raw = p.read_bytes()
+    try:
+        text = raw.decode("utf-8")
+    except UnicodeDecodeError as e:
+        pytest.fail(f"{rel} 不是合法 UTF-8：{e}。多半是被非 UTF-8 的工具写过。")
+    bad = text.count("\ufffd")
+    assert bad == 0, (
+        f"{rel} 里有 {bad} 个 U+FFFD（编码损坏）。"
+        "不要用 PowerShell 的 Get-Content/Set-Content 改这些文件，用 write/edit 工具。")
+
+
+def test_index_html_tags_are_intact():
+    """属性被吃掉收尾引号、闭合标签少了 `<`——这类损坏会让浏览器
+    把后面的标签当属性吞掉（样式表就曾整个被吞进 meta 里）。"""
+    html = (WEB / "index.html").read_text(encoding="utf-8")
+    for tag in ("</title>", "</small>", "</p>", "</nav>", "</button>"):
+        assert tag in html, f"index.html 少了 {tag}"
+    # 每个属性都要有收尾引号；数引号是否成对是最省事的算法
+    assert html.count('"') % 2 == 0, "index.html 里的引号不成对，有属性没闭合"
+    assert '<link rel="stylesheet"' in html, "样式表链接不在（可能被坏属性吞了）"
+    assert html.count("<script") >= 2, "脚本标签不齐"
+
+
+def test_web_files_have_no_utf8_bom():
+    """BOM 会让 `#!` 之类的开头失效，而且不同工具对它处理不一致。"""
+    for rel in FILES:
+        raw = (WEB / rel).read_bytes()
+        assert raw[:3] != b"\xef\xbb\xbf", f"{rel} 带了 UTF-8 BOM"
+
+
+def test_no_questionnaire_view_is_left():
+    """「问卷」两个字本身可以出现（解释为什么删掉它的注释、
+    课程搜索的占位提示），但它**不能还是一个视图**。"""
+    js = (WEB / "js" / "app.js").read_text(encoding="utf-8")
+    assert '"问卷"' not in js, "「问卷」又被当成标签名了"
+    assert 'case "onboarding"' not in js, "onboarding 视图分支又回来了"
+    assert re.search(r'\[\["dialogue",\s*"对话"\],\s*\["confirm",\s*"核对"\]\]', js), \
+        "画像页应该只有「对话」「核对」两个标签"
+
+
+def test_build_stamp_matches_every_cache_buster():
+    """版本戳上写的号，必须和**每一个** ?v= 完全一致。
+
+    这条是一个真事故换来的：上次把 JS 从 w27 升到 w28 时，
+    `styles.css?v=w27` 忘了改，于是用户拿到「新 JS + 旧 CSS」——
+    项目文件夹、任务面板那些样式全没加载，但版本戳理直气壮地说 w28。
+    版本戳本来就是为了让「我改了没有」一眼可确认；
+    它自己跟缓存参数不一致的时候，比没有版本戳更坏——它会让人以为已经刷新过了。
+    """
+    html = (WEB / "index.html").read_text(encoding="utf-8")
+    stamp = re.search(r'class="build-stamp">\s*界面版本\s*<b>(w\d+)</b>', html)
+    assert stamp, "找不到版本戳"
+    version = stamp.group(1)
+
+    busters = re.findall(r'\?v=(w\d+)', html)
+    assert len(busters) >= 3, f"应该有三个缓存参数（css/chat/app），实际 {busters}"
+    bad = [b for b in busters if b != version]
+    assert not bad, (
+        f"版本戳是 {version}，但这些缓存参数不是：{bad}。"
+        "改了前端就要把版本戳和**全部** ?v= 一起 +1，"
+        "否则用户会拿到新旧混着的文件。"
+    )
+
+
+def test_every_local_asset_is_cache_busted():
+    """本地 js/css 都要带 ?v=，否则改了不生效。"""
+    html = (WEB / "index.html").read_text(encoding="utf-8")
+    for m in re.finditer(r'(?:src|href)="(/static/(?:js|css)/[^"]+)"', html):
+        assert "?v=" in m.group(1), f"{m.group(1)} 没有缓存参数，改了不会生效"
+
+
+# ---------- 对话 ↔ 任务区这条链路的前端半边 ----------
+#
+# 这两处都是「看起来像小事、坏了就整条链路断掉」的地方：
+#   1. 任务区必须能显示对话给的任务（它和知识树无关）
+#   2. 「标记完成」不能回来（点一下就当作做完，没有交付物也不写回记忆）
+# 注释里出现这些字是允许的，所以这里剥掉注释再判断。
+
+
+def _strip_js_comments(js: str) -> str:
+    js = re.sub(r"/\*.*?\*/", "", js, flags=re.S)
+    return re.sub(r"//[^\n]*", "", js)
+
+
+def test_task_area_can_show_dialogue_tasks():
+    js = (WEB / "js" / "app.js").read_text(encoding="utf-8")
+    assert "function dialogueTaskSection" in js, "对话任务区没了——任务区又会是空的"
+    code = _strip_js_comments(js)
+    # 关键：在没有知识树方向时，不能整页 return 掉对话任务
+    assert "task.origin === \"dialogue\"" in code or "tk.origin === \"dialogue\"" in code, \
+        "没有按 origin 分出「对话给的任务」"
+
+
+def test_a_task_answers_the_three_questions():
+    """做什么 / 交什么 / 怎样算做到。缺「交什么」就是用户说的
+    「我在对话里出现的任务是要我怎么完成」。"""
+    js = (WEB / "js" / "app.js").read_text(encoding="utf-8")
+    for label in ("① 做什么", "② 交什么", "③ 怎样算做到"):
+        assert label in js, f"任务里少了「{label}」这一段"
+    assert "task.deliverable" in js, "没有渲染交付物（deliverable）"
+
+
+def test_the_mark_done_button_is_gone():
+    """「标记完成」只能通过提交交付物来做到，不能是一个点一下就完的按钮。"""
+    js = _strip_js_comments((WEB / "js" / "chat.js").read_text(encoding="utf-8"))
+    assert "标记完成" not in js, "「标记完成」按钮又回来了"
+    assert '"complete"' not in js, "前端又在直接发 complete 事件（应该走任务提交）"
+    assert "去任务区完成" in js, "少了「去任务区完成」这个入口"
+
+
+def test_memory_panel_renders_project_folders():
+    """一个项目一张卡——用户要的「大文件夹」。"""
+    js = (WEB / "js" / "chat.js").read_text(encoding="utf-8")
+    assert "function projectFolders" in js, "项目文件夹的渲染没了"
+    assert "r.projects" in js, "没有把 /api/memory 的 projects 用起来"
+
+
+def test_returning_to_the_chat_shows_what_was_finished():
+    """任务一交，pending_action 就空了，卡会凭空消失——必须有落点。"""
+    js = (WEB / "js" / "chat.js").read_text(encoding="utf-8")
+    assert "function finishedNote" in js, "回对话时没有「你刚交了 X」的落点"
+    assert "just_finished" in js, "没有用上 just_finished"
+    assert "history.last_action" in js, "没有用上 last_action"
+
+
+# ---------- CSS 的机械检查 ----------
+#
+# 这一组全部是「跑一遍就能确定」的事，不靠眼睛看。
+# 起因是一次前端审计：截图看不出来的问题（变量名写错、同一条规则写两遍、
+# 删掉的功能留下的钩子）恰好都是这类。
+
+
+def test_css_variables_are_all_defined():
+    """用了 var(--x) 就必须有 --x: 的定义（或自带兜底）。
+
+    没有兜底又没定义的 var() 会让整条声明在计算值阶段失效：
+    `background: var(--teal-wash)` 直接变透明，`color: var(--ink-1)` 变成继承。
+    **不报错、不警告**，只是颜色悄悄不对——最费时间的那一类 bug。
+    实际踩过：--ink-1 / --wash / --teal-wash 三个名字，8 处引用。
+    """
+    css = (WEB / "css" / "styles.css").read_text(encoding="utf-8")
+    defined = set(re.findall(r"(--[a-zA-Z0-9_-]+)\s*:", css))
+    used = re.findall(r"var\(\s*(--[a-zA-Z0-9_-]+)\s*(,)?", css)
+    missing = sorted({name for name, fallback in used
+                      if name not in defined and not fallback})
+    assert not missing, (
+        f"这些变量没有定义也没有兜底：{missing}。"
+        "写错名字不会报错，只会让颜色静默失效。"
+    )
+
+
+def test_no_class_has_two_disagreeing_rule_blocks():
+    """同一个类名不要在两处各写一条规则。
+
+    同特异性、没有媒体查询时，后面那条会静默覆盖前面的。
+    实际踩过：`.finished-note` 在文件中间写了 `margin-top: 16px`，
+    末尾又写 `margin: 0 0 10px`——结果是 0，而且没人看得出来。
+    这里只查我们确实踩过的那几个，不做通用检测（动态类名会误报）。
+    """
+    css = (WEB / "css" / "styles.css").read_text(encoding="utf-8")
+    for cls in ("finished-note", "deliverable", "task-origin", "proj"):
+        blocks = re.findall(rf"^\.{re.escape(cls)}\s*\{{", css, re.M)
+        assert len(blocks) <= 1, (
+            f".{cls} 有 {len(blocks)} 条顶层规则，后面的会静默覆盖前面的"
+        )
+
+
+@pytest.mark.parametrize("cls", ["sr-only", "divider", "typing", "chat-hint", "chat-options"])
+def test_dead_css_hooks_stay_deleted(cls):
+    """删掉的功能不要在样式表里留钩子。
+
+    重做视觉的人看到 `.typing` 会以为「AI 正在输入…」还在用，
+    于是花时间去调一个根本不存在的指示器。
+    """
+    css = (WEB / "css" / "styles.css").read_text(encoding="utf-8")
+    assert not re.search(rf"^\.{re.escape(cls)}\s*[,{{]", css, re.M), \
+        f".{cls} 又回来了（四个前端文件里都没人用它）"
+    for name in ("index.html", "js/app.js", "js/chat.js"):
+        text = (WEB / name).read_text(encoding="utf-8")
+        assert cls not in text.replace(f"chat-{cls}", ""), \
+            f"{name} 里又出现了 {cls}"
+
+
+def test_completed_task_does_not_render_two_headers():
+    """已完成的任务只画一个表头。
+
+    `taskPanel` 先无脑 append 了一个表头（带「约 N 分钟」），
+    然后在 done 分支直接交给 `taskPanelDone`——而后者**不清空面板**，
+    自己又 append 一个表头（带「已完成」）。
+    结果是标题、简介各出现两遍，还同时挂着两个互相矛盾的标签。
+    提交那条路径一直是先 `p.innerHTML = ""` 的，只有这条漏了。
+    """
+    js = (WEB / "js" / "app.js").read_text(encoding="utf-8")
+    m = re.search(r'if \(task\.status === "done"\) \{(.*?)\n  \}', js, re.S)
+    assert m, "找不到 task.status === 'done' 的分支"
+    branch = m.group(1)
+    # 必须**紧挨着**：先清空、再交给 taskPanelDone。
+    # 只断言「分支里出现过 p.innerHTML = ""」是不够的——
+    # 提交那条路径的清空离得很近，会落进同一个窗口里，
+    # 于是把修复回滚掉测试照样绿。（这个弱点是我自己验出来的。）
+    assert re.search(r'p\.innerHTML\s*=\s*""\s*;\s*taskPanelDone\(', branch), (
+        "done 分支里 `p.innerHTML = \"\"` 没有紧接在 taskPanelDone 前面，"
+        "会画出两个表头（标题两遍 + 「约 N 分钟」和「已完成」并存）"
+    )
+    # 而且这两个表头确实都在——说明不清空就真的会重复
+    assert re.search(r'head\.appendChild\(el\("span", "task-meta"', js), \
+        "taskPanel 里应该还有一个无条件追加的表头"
+
+
+def test_chat_page_has_three_named_zones_in_order():
+    """对话页是三个区，顺序固定：对话流 → 下一步 → 输入。
+
+    以前三样都塞在一个 .chat-foot 里，行动卡一高就把输入框顶出屏幕——
+    而输入框该是位置最稳的那个。区域顺序就是这条契约本身，
+    重做视觉的人可以随便改样子，但不能把输入框挪到行动卡上面去。
+    """
+    js = (WEB / "js" / "chat.js").read_text(encoding="utf-8")
+    m = re.search(r"chat\.append\(([^)]*)\)", js)
+    assert m, "找不到把三个区装进对话面板的那一行"
+    zones = [z.strip() for z in m.group(1).split(",")]
+    assert zones == ["scroll", "actions", "inputZone"], (
+        f"对话页三个区的顺序变了：{zones}；"
+        "约定是 对话流 → 下一步 → 输入，输入永远在最下面"
+    )
+    for name, cls in (("scroll", "chat-scroll"), ("actions", "chat-next"),
+                      ("inputZone", "chat-input")):
+        # 只查名字在不在：actions 的类名是双类 "action-slot chat-next"，
+        # 用精确引号匹配会误报。
+        assert cls in js, f"{name} 没有用约定的类名 {cls}"
+    # 旧的单一 footer 不能回来
+    assert ".chat-foot {" not in (WEB / "css" / "styles.css").read_text(encoding="utf-8"), \
+        "`.chat-foot` 又回来了；三个区不该再挤回一个 footer"
+
+
+def test_chat_panel_height_matches_side_panel_height():
+    """对话面板和记忆侧栏用同一套高度算法，底边才对得上。
+
+    两列高度不一致时，短的那列看起来像没加载完。
+    """
+    css = (WEB / "css" / "styles.css").read_text(encoding="utf-8")
+    panel = re.search(r"\.chat-panel \{(.*?)\}", css, re.S)
+    side = re.search(r"\.two-col-chat > \.side-panel \{(.*?)\}", css, re.S)
+    assert panel and side, "找不到对话面板或侧栏的规则"
+    p_h = re.search(r"height:\s*([^;]+);", panel.group(1))
+    s_h = re.search(r"max-height:\s*([^;]+);", side.group(1))
+    assert p_h and s_h, "两边都要限制高度"
+    assert p_h.group(1).strip() == s_h.group(1).strip(), (
+        f"高度算法不一致：面板 {p_h.group(1).strip()} vs 侧栏 {s_h.group(1).strip()}"
+    )
+
+
+def test_new_class_names_all_have_rules():
+    """本轮新起的类名必须真的在样式表里有规则。
+
+    我刚批评过 `.chat-wide` 这种「起了名字没兑现」的空钩子，
+    就不能自己再留一个（`.two-col-chat` 差点就是）。
+    """
+    css = (WEB / "css" / "styles.css").read_text(encoding="utf-8")
+    for cls in ("two-col-chat", "chat-next", "chat-input", "ws-head-bar",
+                "ws-bar-main", "ws-bar-side", "ws-bar-label", "ws-lead"):
+        # 用 (?![\w-]) 而不是 \b：类名里允许 `-`，所以 `\b` 会把
+        # `.chat-next-nonexistent` 也当成 `.chat-next` 存在——那样把规则改名
+        # 测试照样绿。（这个弱点是我回滚验证时发现的。）
+        assert re.search(rf"\.{re.escape(cls)}(?![\w-])", css), \
+            f".{cls} 在 JS 里用了，样式表里却没有规则（空钩子）"

@@ -1,4 +1,6 @@
-/* 启研 · W0 Demo 前端（无构建、经典脚本；设计规范 docs/DESIGN_SPEC.md）*/
+/* 启研 · 前端（无构建、经典脚本；设计规范 docs/DESIGN_SPEC.md）
+   对话页的结构约定见 审计与方案/09-对话前端框架.md —— 改样式前先读那一篇，
+   里面写清了哪些是「结构契约」（不能动）、哪些是「视觉表现」（随便换）。 */
 "use strict";
 
 /* ---------- 状态 ---------- */
@@ -12,7 +14,7 @@ const S = {
   lastTask: null,
   lastFeedback: null,
   newFactIds: [],
-  portraitTab: "onboarding",
+  portraitTab: "dialogue",
   cardsPane: "direction",
   kitId: localStorage.getItem("rg_kit") || "",
   readTab: "kit",
@@ -28,13 +30,30 @@ const $header = document.getElementById("headerRight");
 
 /* ---------- API ---------- */
 
+/* 后端报错体可能是字符串、数组或对象——FastAPI 的 422 detail 是数组。
+   直接 String() 会变成 "[object Object]"，曾经把「缺 action_id」显示成这个，白白多花时间排查。
+   这里统一成人能读的一句话。 */
+function errText(data, status) {
+  const d = data && data.detail;
+  if (typeof d === "string" && d) return d;
+  if (Array.isArray(d)) {
+    const parts = d.map((x) => (typeof x === "string" ? x : x && (x.msg || x.message)))
+      .filter(Boolean);
+    if (parts.length) return parts.join("；");
+  }
+  if (d && typeof d === "object") {
+    try { return JSON.stringify(d); } catch (_) { /* 循环引用等，落到下面 */ }
+  }
+  return `请求失败 (${status})`;
+}
+
 async function api(method, path, body) {
   const opt = { method, headers: { "Content-Type": "application/json" } };
   if (body !== undefined) opt.body = JSON.stringify(body);
   const res = await fetch(path, opt);
   let data = null;
   try { data = await res.json(); } catch (_) { /* no body */ }
-  if (!res.ok) throw new Error((data && data.detail) || `请求失败 (${res.status})`);
+  if (!res.ok) throw new Error(errText(data, res.status));
   return data;
 }
 
@@ -61,7 +80,7 @@ const SRC_CN = { declared: "自述", inferred: "推断", behavior: "行为" };
 
 const WORKSPACE = {
   today: "today",
-  onboarding: "portrait",
+  dialogue: "portrait",
   confirm: "portrait",
   cards: "cards",
   workbench: "workbench",
@@ -77,7 +96,7 @@ const WORKSPACE = {
 
 function setView(name) {
   S.view = name;
-  if (name === "onboarding" || name === "confirm") S.portraitTab = name;
+  if (name === "dialogue" || name === "confirm") S.portraitTab = name;
   document.body.dataset.view = name;
   const home = name === "home";
   const inApp = !home && name !== "login" && !!S.uid;
@@ -109,7 +128,7 @@ async function render() {
   if (!S.uid && S.view !== "login") { renderLogin(); return; }
   switch (S.view) {
     case "login": renderLogin(); break;
-    case "onboarding": renderOnboarding(); break;
+    case "dialogue": ChatView.render($app); break;
     case "confirm": await renderConfirm(); break;
     case "cards": await renderCards(); break;
     case "workbench": await renderWorkbench(); break;
@@ -593,7 +612,7 @@ function workspaceHead(title, lead) {
 
 function portraitTabs(active) {
   const nav = el("nav", "ws-tabs");
-  [["onboarding", "对话"], ["confirm", "核对"]].forEach(([view, label]) => {
+  [["dialogue", "对话"], ["confirm", "核对"]].forEach(([view, label]) => {
     const b = el("button", `ws-tab${view === active ? " on" : ""}`, label);
     b.type = "button";
     b.onclick = () => setView(view);
@@ -626,7 +645,7 @@ function renderLogin() {
       await api("POST", "/api/onboard/start", { uid: S.uid });
       toast(`你好，${r.nickname}`);
       document.getElementById("userNickname").textContent = r.nickname;
-      setView("onboarding");
+      setView("dialogue");
     } catch (e) { toast(e.message); btn.disabled = false; btn.textContent = "进入启研"; }
   };
   input.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.isComposing) btn.click(); });
@@ -709,7 +728,7 @@ async function portraitBar() {
       if (p.active) return;
       S.portraitId = p.id;
       await api("POST", "/api/portraits/activate", { uid: S.uid, id: p.id });
-      setView(S.view === "confirm" ? "confirm" : "onboarding");
+      setView(S.view === "confirm" ? "confirm" : "dialogue");
     };
     const del = el("button", "portrait-x", "删除");
     del.type = "button";
@@ -717,7 +736,7 @@ async function portraitBar() {
       if (!window.confirm(`删除「${p.name}」？这份画像的对话和记录都会清掉，不能恢复。`)) return;
       S.portraitId = "";
       await api("DELETE", `/api/portraits/${p.id}?uid=${S.uid}`);
-      setView("onboarding");
+      setView("dialogue");
     };
     chip.append(name, del);
     bar.appendChild(chip);
@@ -728,118 +747,17 @@ async function portraitBar() {
     const created = await api("POST", "/api/portraits", { uid: S.uid });
     const active = (created.portraits || []).find((item) => item.active);
     S.portraitId = active ? active.id : "";
-    setView("onboarding");
+    setView("dialogue");
   };
   bar.appendChild(add);
   return bar;
 }
 
-/* ---------- ② onboarding 对话 ---------- */
-
-async function renderOnboarding() {
-  const seq = S.renderSeq;
-  const bar = await portraitBar();
-  if (stale(seq)) return;
-  $app.innerHTML = "";
-  $app.appendChild(workspaceHead("画像"));
-  $app.appendChild(bar);
-  $app.appendChild(portraitTabs("onboarding"));
-  const wrap = el("div", "two-col");
-  const chat = el("div", "panel chat-panel");
-
-  const scroll = el("div", "chat-scroll");
-  scroll.setAttribute("aria-live", "polite");
-  const foot = el("div", "chat-foot");
-  const hint = el("p", "chat-hint");
-  const options = el("div", "chat-options");
-  const inputRow = el("div", "chat-input-row");
-  const input = el("input"); input.placeholder = "或者直接打字告诉我…"; input.maxLength = 200;
-  input.setAttribute("aria-label", "回答");
-  const sendBtn = el("button", "btn small", "发送");
-  sendBtn.type = "button";
-  inputRow.append(input, sendBtn);
-  foot.append(hint, options, inputRow);
-  chat.append(scroll, foot);
-
-  const side = el("div", "panel side-panel");
-  side.appendChild(el("p", "side-title", "它刚记下的"));
-  const sideList = el("div", "fact-list");
-  side.append(sideList, el("p", "side-empty", "每答一问，这里会多一条待你核对的记录。"));
-
-  wrap.append(chat, side);
-  $app.appendChild(wrap);
-
-  const r = await api("GET", `/api/onboard/result?uid=${S.uid}`);
-  if (stale(seq)) return;
-  S.onboard = r;
-  r.messages.forEach((m) => addBubble(m.role === "user" ? "user" : "ai", m.text));
-  r.facts.filter((f) => f.status === "draft").forEach((f) => sideList.appendChild(factCard(f)));
-
-  if (r.state.phase === "done") {
-    finish();
-    return;
-  }
-
-  const turn = await api("POST", "/api/onboard/message", { uid: S.uid, msg: "" });
-  if (stale(seq)) return;
-  // msg 为空时后端重发当前轮问题，这里只取 hint/options
-  showTurn(turn);
-
-  async function send(text) {
-    if (!text.trim() || input.disabled) return;
-    addBubble("user", text);
-    input.value = "";
-    input.disabled = true; sendBtn.disabled = true;
-    options.innerHTML = "";
-    hint.textContent = "";
-    const typing = el("div", "typing", "正在整理");
-    scroll.appendChild(typing);
-    scroll.scrollTop = scroll.scrollHeight;
-    let done = false;
-    try {
-      const t = await api("POST", "/api/onboard/message", { uid: S.uid, msg: text });
-      typing.remove();
-      addBubble("ai", t.reply);
-      (t.facts || []).forEach((f) => { S.onboard.facts.push(f); sideList.appendChild(factCard(f, false, true)); });
-      done = !!t.done;
-      showTurn(t);
-    } catch (e) {
-      typing.remove();
-      toast(e.message);
-    }
-    if (!done) { input.disabled = false; sendBtn.disabled = false; input.focus(); }
-  }
-
-  function finish() {
-    hint.textContent = "五问已经聊完。右边每一条都可以改或删，核对之后才会用来推荐方向。";
-    options.innerHTML = "";
-    const go = el("button", "btn", "去核对");
-    go.type = "button";
-    go.onclick = () => setView("confirm");
-    options.appendChild(go);
-    inputRow.hidden = true;
-  }
-
-  function showTurn(t) {
-    if (t.done) { finish(); return; }
-    hint.textContent = t.hint || "";
-    options.innerHTML = "";
-    (t.options || []).forEach((label) => {
-      const b = el("button", "chip", esc(label));
-      b.type = "button";
-      b.onclick = () => send(label);
-      options.appendChild(b);
-    });
-  }
-
-  function addBubble(kind, text) {
-    scroll.appendChild(el("div", `bubble ${kind}`, esc(text)));
-    scroll.scrollTop = scroll.scrollHeight;
-  }
-
-  sendBtn.onclick = () => send(input.value);
-  input.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.isComposing) send(input.value); });
-}
+/* ② 原「问卷」视图已删除：问卷现在全靠对话实现（server/onboarding.py 的固定五问
+   已由 dialogue 内核的提问阶梯取代）。原来的事实写入、待核对列表都在对话页里做完了，
+   所以这一页只剩重复劳动，删掉可以少维护一份流程。
+   后端 /api/onboard/* 仍然保留：它现在是「读画像事实」的通用出口，
+   核对页、方向页、任务页都在用它拿 facts。 */
 
 /* ---------- ③ 确认页 ---------- */
 
@@ -911,6 +829,150 @@ async function renderConfirm() {
   actions.appendChild(later);
   main.appendChild(actions);
   $app.appendChild(main);
+
+  // 字段清单按九大类分列：填了的给值，没填的显示成空格 + 「填了有什么用」。
+  main.appendChild(coverageBoard());
+}
+
+/* 把「还缺什么、填了能得到什么」摊开给用户看。
+   空格本身是邀请，但只列空格不说收益，就变成一张逼人填的表——
+   所以每个空格都带一句 why（来自后端 memory.COVERAGE_GROUPS）。 */
+function coverageBoard() {
+  const box = el("div", "coverage");
+  box.appendChild(el("p", "section-label", "这些填得越全，我给的科研方向越准"));
+  const hintRow = el("p", "coverage-hint", "下面每一格都可以点。空着的也可以先在「对话」里随口说一句。");
+  box.appendChild(hintRow);
+  const grid = el("div", "cov-grid");
+  box.appendChild(grid);
+
+  (async () => {
+    let cov;
+    try {
+      cov = await api("GET", `/api/me/coverage?uid=${encodeURIComponent(S.uid)}`);
+    } catch (e) {
+      // 取不到**要说出来**，不能悄悄把自己删掉。
+      // 之前这里写的是 box.remove()，接口一有问题用户就只看到一片空白，
+      // 既不知道发生了什么、也没法告诉我——「核对没有分类」就是这么来的。
+      grid.innerHTML = "";
+      const err = el("p", "cov-bad",
+        `字段清单没加载出来：${e && e.message ? e.message : "接口没有响应"}。`
+        + "刷新一下试试；如果一直这样，把这个提示截图给我。");
+      grid.appendChild(el("div", "cov-col cov-col-transcript")).appendChild(err);
+      return;
+    }
+    const head = el("p", "cov-total",
+      `已填 ${cov.filled} / ${cov.total} 项` + (cov.missing ? `，还差 ${cov.missing} 项` : "，都齐了"));
+    box.insertBefore(head, grid);
+
+    (cov.groups || []).forEach((G) => {
+      const col = el("div", `cov-col cov-col-${G.group}`);
+      const h = el("p", "cov-head");
+      h.appendChild(el("span", "cov-title", esc(G.label)));
+      h.appendChild(el("span", "cov-count", `${G.filled}/${G.total}`));
+      col.appendChild(h);
+      if (G.why) col.appendChild(el("p", "cov-why", esc(G.why)));
+
+      (G.slots || []).forEach((s) => {
+        const row = el("div", "cov-slot" + (s.filled ? " on" : ""));
+        row.appendChild(el("span", "cov-mark", s.filled ? "✓" : "○"));
+        const body = el("div", "cov-body");
+        const line = el("p", "cov-label");
+        line.appendChild(el("span", "", esc(s.label)));
+        if (s.filled && s.value) {
+          line.appendChild(el("span", "cov-value", esc(String(s.value))));
+          // 默认前提（学校=北京大学）：显示出来，但标清它是默认值、不是他说的
+          if (s.presumed) line.appendChild(el("span", "cov-value", "（默认）"));
+        }
+        body.appendChild(line);
+        // 已填的不再重复「填了有什么用」，省得整页都是废话
+        if (!s.filled && s.why) body.appendChild(el("p", "cov-tip", esc(s.why)));
+        row.appendChild(body);
+        // 点空格 → 去对话里补。不在核对页做输入框：
+        // 这些字段大多需要上下文（成绩单要粘贴、方向要聊），
+        // 摆一排输入框只会让人填一半就走。
+        row.onclick = () => {
+          if (s.presumed) { toast(`「${s.label}」是默认前提（${s.value}），不用填。`); return; }
+          toast(s.filled ? `「${s.label}」已经记下了，想改就去左边侧栏改。`
+            : `去对话里说一句就行——${s.why}`);
+          if (!s.filled) setView("dialogue");
+        };
+        col.appendChild(row);
+      });
+      grid.appendChild(col);
+    });
+
+    // 成绩单单独给一个粘贴入口：它是一条记录变多条，聊天里说不清楚
+    const tcol = el("div", "cov-col cov-col-transcript");
+    tcol.appendChild(el("p", "cov-head", "粘贴成绩单"));
+    tcol.appendChild(el("p", "cov-why", "一次贴上，我就知道你修过哪些课、绩点多少，后面难度判断都靠它。"));
+    const ta = el("textarea", "cov-paste");
+    ta.rows = 4;
+    ta.placeholder = "从树洞或教务复制成绩单，整段粘进来即可。\n形如：\n25-26学年度1学期\n3\n学分\n线性代数 (B)\n专业必修\n88";
+    const act = el("div", "cov-actions");
+    const btn = el("button", "btn small", "识别");
+    btn.type = "button";
+    const report = el("div", "cov-report");
+    btn.onclick = async () => {
+      const text = ta.value.trim();
+      if (!text) { toast("先把成绩单粘进来"); return; }
+      btn.disabled = true;
+      try {
+        const r = await api("POST", "/api/me/transcript/parse", { uid: S.uid, text });
+        report.innerHTML = "";
+        if (!r.courses || !r.courses.length) {
+          report.appendChild(el("p", "cov-bad",
+            "没识别到课程。" + ((r.warnings || [])[0] || "请检查格式。")));
+          btn.disabled = false;
+          return;
+        }
+        const s = r.summary || {};
+        report.appendChild(el("p", "cov-ok",
+          `识别到 ${r.courses.length} 门课，涉及 ${(r.terms || []).length} 个学期` +
+          (s.gpa != null ? `；总绩点 ${s.gpa.toFixed(3)}，均分 ${s.avg_score.toFixed(1)}` : "") +
+          `；通过学分 ${s.passed_credits}，其中计 GPA ${s.gpa_credits}。`));
+        // 少算了什么必须自己说出来。字母等级不进 GPA 是我们的选择，
+        // 用户看到的总绩点是少算过的——不说就成了一个「看起来完整其实是错的数」。
+        if ((s.ungraded || []).length) {
+          report.appendChild(el("p", "cov-warn",
+            `有 ${s.ungraded.length} 门是字母等级/五级制（`
+            + s.ungraded.map((u) => `${esc(u.course)} ${esc(u.grade)}`).join("、")
+            + `，共 ${s.ungraded_credits} 学分），学分已计入，但**没有算进绩点**——`
+            + "教务的换算口径我不敢替你定，你确认后我再加上。"));
+        }
+        if ((s.in_progress || []).length) {
+          report.appendChild(el("p", "cov-warn",
+            `有 ${s.in_progress.length} 门成绩还没出（`
+            + s.in_progress.map((u) => esc(u.course)).join("、")
+            + `），我按「在修」记下来了，不计入已修学分。`));
+        }
+        // 把「我从成绩单读出了什么」先给用户看。落库前就能判断我们有没有读错。
+        (r.preview || []).forEach((d) => {
+          report.appendChild(el("p", "cov-derived", `会记下：${esc(d.value)}`));
+        });
+        (r.warnings || []).forEach((w) => report.appendChild(el("p", "cov-warn", esc(w))));
+        const ok = el("button", "btn small", "就用这份");
+        ok.type = "button";
+        ok.onclick = async () => {
+          ok.disabled = true;
+          try {
+            const w = await api("POST", "/api/me/transcript",
+              { uid: S.uid, text, mode: "replace" });
+            toast(`已记下 ${w.written} 门课`);
+            setView("confirm");
+          } catch (e) { toast(e.message); ok.disabled = false; }
+        };
+        act.appendChild(ok);
+        btn.disabled = false;
+      } catch (e) { toast(e.message); btn.disabled = false; }
+    };
+    act.appendChild(btn);
+    tcol.appendChild(ta);
+    tcol.appendChild(act);
+    tcol.appendChild(report);
+    grid.appendChild(tcol);
+  })();
+
+  return box;
 }
 
 /* ---------- ④ 方向：生长的边界 ---------- */
@@ -1485,7 +1547,10 @@ function openNodeSheet(field, node, ctx) {
     sheet.id = "nodeSheet";
     document.body.appendChild(sheet);
   }
-  sheet.className = "node-sheet open";
+  // 这里原来写的是 "node-sheet open"，但 styles.css 里没有 `.open` 这条规则：
+  // 抽屉的样式是无条件生效的，关掉是把这个元素 remove 掉。
+  // 一个不起作用的类名会让人以为存在开/关两态，去掉。
+  sheet.className = "node-sheet";
   sheet.innerHTML = "";
   const head = el("div", "sheet-head");
   const x = el("button", "sheet-x", "关闭");
@@ -2033,6 +2098,176 @@ function emptyPanel(text, label, view) {
   return p;
 }
 
+/* ---------- 任务渲染：对话出的和树上出的用同一套 ---------- */
+
+/* 「填入演示示例」用的样例：演示时手上没有材料，点一下就有内容可提交。
+   它存在的唯一目的是别让演示卡在「没东西可写」。 */
+const DEMO_ANSWER =
+  "10 条弹幕：「太好哭了」「就这？」「编剧封神」「注水严重」「封神」「看不下去了」「细节绝了」「一般」「泪目」「神剧」\n\n" +
+  "不一致例子 1：「太好哭了」——规则判积极（含「哭」可能误判消极），模型判积极。原因：规则把「哭」当消极词，但语境是感动。\n" +
+  "不一致例子 2：「就这？」——规则因为无情感词判中性，模型判消极。原因：反问语气规则抓不到，模型学了语料里的讽刺用法。\n" +
+  "不一致例子 3：「封神」——规则词表里没有，判中性；模型判积极。原因：网络新词，词表更新慢，模型能从上下文推断。\n\n" +
+  "总结：模型的错误多来自词表覆盖与语境缺失两类；因为规则的可解释性和模型的表达力正好互补，可以互为校验。所以每次重要判断最好两个方法都跑一遍，不一致的例子就是最有价值的学习样本。";
+
+/* 一个任务必须回答三个问题，否则用户不知道要干什么：
+     做什么（步骤）· 交什么（交付物）· 怎样算做到（评分标准）
+   以前只画了「步骤」和「怎样算做到」，没有「交什么」——
+   所以对话里出现任务时，用户最自然的反应就是「这是要我怎么完成」。
+
+   opts.onDone：完成后的去处（对话任务回对话，树任务进下一节点） */
+function taskPanel(task, opts) {
+  opts = opts || {};
+  const p = el("div", "panel task-panel");
+  const head = el("div", "task-head");
+  const hl = el("div");
+  hl.appendChild(el("h2", "task-title", esc(opts.title || task.title)));
+  hl.appendChild(el("p", "task-brief", esc(opts.intro || task.brief || "")));
+  head.appendChild(hl);
+  head.appendChild(el("span", "task-meta", `约 ${task.time_budget_min} 分钟`));
+  p.appendChild(head);
+  // 来源标出来，用户才知道「这个任务是哪来的」
+  p.appendChild(el("p", "task-origin",
+    task.origin === "dialogue"
+      ? "来自对话：你说「就做这个」之后产生的任务。在这里做完，回对话继续。"
+      : "来自方向路径：按知识树的节点排的练习。"));
+
+  // 路径步骤说明（树上的任务才有）：由调用方给一个返回节点或 null 的函数，
+  // 因为「这是主干第几步」这件事只有调用方知道（field / node 都在那边）。
+  if (opts.note) {
+    const note = opts.note();
+    if (note) p.appendChild(note);
+  }
+
+  if (task.status === "done") {
+    // taskPanelDone 会自己画一份「已完成」的表头，而且**不清空 p**。
+    // 这里不先清就会得到两个表头：标题、简介各出现两遍，
+    // 还同时挂着「约 20 分钟」和「已完成」两个互相矛盾的标签。
+    // 提交那条路径（下面 p.innerHTML = ""）一直是清的，这里是漏了。
+    p.innerHTML = "";
+    taskPanelDone(p, task, opts);
+    return p;
+  }
+
+  p.appendChild(el("h3", "section-label", "① 做什么"));
+  const steps = el("div", "step-list");
+  (task.steps || []).forEach((st) => {
+    const row = el("label", "step");
+    const cb = el("input"); cb.type = "checkbox";
+    row.append(cb, el("span", "", esc(st)));
+    steps.appendChild(row);
+  });
+  p.appendChild(steps);
+
+  // ② 交什么——这一段以前完全缺失，是「不知道怎么完成」的直接原因
+  p.appendChild(el("h3", "section-label", "② 交什么"));
+  const dv = el("p", "deliverable");
+  dv.textContent = task.deliverable || "一段文字：你做了什么、结果是什么、你的判断。";
+  p.appendChild(dv);
+  p.appendChild(el("p", "deliverable-note",
+    "不用写得很正式，也不是给谁打分。它只用来看你实际做到了哪一步。"));
+
+  p.appendChild(el("h3", "section-label", "③ 怎样算做到"));
+  const crit = el("ul", "criteria");
+  (task.rubric || []).forEach((r2) => crit.appendChild(el("li", "", esc(r2.criterion))));
+  p.appendChild(crit);
+
+  const box = el("div", "submit-box");
+  const ta = el("textarea");
+  ta.placeholder = "就写上面「交什么」要的那段。没做完也可以交，它只看你写了什么。";
+  ta.setAttribute("aria-label", "提交内容");
+  ta.value = readDraft(task.id);
+  const count = el("span", "hint");
+  const recount = () => {
+    count.textContent = ta.value.trim()
+      ? `已写 ${ta.value.trim().length} 字 · 草稿自动保存在本机`
+      : "提交后按上面三条逐条反馈，并写回你的记录。";
+  };
+  ta.addEventListener("input", () => { writeDraft(task.id, ta.value); recount(); });
+  recount();
+  const submit = el("button", "btn", "提交");
+  submit.type = "button";
+  submit.onclick = async (ev) => {
+    ev.preventDefault();
+    if (ta.value.trim().length < 10) { toast("至少写一句话再提交"); ta.focus(); return; }
+    submit.disabled = true; submit.textContent = "正在逐条看…";
+    try {
+      const fb = await api("POST", `/api/tasks/${task.id}/submit`, { uid: S.uid, payload: ta.value });
+      S.lastFeedback = fb;
+      S.lastFeedbackTaskId = task.id;
+      sessionStorage.setItem("rg_fb_" + task.id, JSON.stringify(fb));
+      writeDraft(task.id, "");
+      S.newFactIds = (fb.learned_facts || []).map((f) => f.id);
+      task.status = "done";
+      p.innerHTML = "";
+      taskPanelDone(p, task, opts);
+      setTimeout(() => document.getElementById("fbPanel")?.scrollIntoView({ behavior: "smooth", block: "start" }), 80);
+    } catch (e) { toast(e.message); submit.disabled = false; submit.textContent = "提交"; }
+  };
+  const acts = el("div", "submit-actions");
+  // 「填入演示示例」只给树上的任务（opts.demo）：它填的是一段通用样例，
+  // 对话里出的任务有自己的上下文，塞一段演示文字反而误导。
+  if (opts.demo) {
+    const demo = el("button", "btn ghost small", "填入演示示例");
+    demo.type = "button";
+    demo.onclick = () => { ta.value = DEMO_ANSWER; writeDraft(task.id, ta.value); recount(); };
+    acts.append(submit, demo, count);
+  } else {
+    acts.append(submit, count);
+  }
+  box.append(ta, acts);
+  p.appendChild(box);
+  return p;
+}
+
+function taskPanelDone(p, task, opts) {
+  const head = el("div", "task-head");
+  const hl = el("div");
+  hl.appendChild(el("h2", "task-title", esc(opts.title || task.title)));
+  hl.appendChild(el("p", "task-brief", esc(opts.intro || task.brief || "")));
+  head.appendChild(hl);
+  head.appendChild(el("span", "task-meta done", "已完成"));
+  p.appendChild(head);
+  if (task.deliverable) {
+    p.appendChild(el("p", "deliverable", "你交的是：" + task.deliverable));
+  }
+  if (opts.note) {
+    const note = opts.note();
+    if (note) p.appendChild(note);
+  }
+  if (S.lastFeedback && S.lastFeedbackTaskId === task.id) renderFeedbackInto(p);
+  if (opts.onDone) p.appendChild(opts.onDone());
+}
+
+/* 对话给你的任务：**和知识树完全无关**，没有选方向也要显示。
+   以前这里是整页 return，所以「对话出了任务但任务区是空的」。 */
+function dialogueTaskSection(tasks) {
+  const box = el("div", "panel dialogue-tasks");
+  box.appendChild(el("h3", "section-label", "对话给你的任务"));
+  if (!tasks.length) {
+    box.appendChild(el("p", "panel-sub",
+      "还没有。在对话里点「就做这个」，任务会出现在这里，做完回对话继续。"));
+    return box;
+  }
+  const open = tasks.filter((tk) => tk.status !== "done");
+  const done = tasks.filter((tk) => tk.status === "done");
+  const pick = tasks.find((tk) => tk.id === S.openTaskId) || open[open.length - 1] || done[done.length - 1];
+  if (pick) S.openTaskId = pick.id;
+
+  if (tasks.length > 1) {
+    const row = el("div", "task-chips");
+    tasks.forEach((tk) => {
+      const b = el("button", `chip${tk.id === S.openTaskId ? " chip-on" : ""}`,
+        `${tk.status === "done" ? "✓ " : ""}${esc(tk.title)}`);
+      b.type = "button";
+      b.onclick = () => { S.openTaskId = tk.id; setView("workbench"); };
+      row.appendChild(b);
+    });
+    box.appendChild(row);
+  }
+  if (pick) box.appendChild(taskPanel(pick, {}));
+  return box;
+}
+
 async function renderWorkbench() {
   const seq = S.renderSeq;
   await ensurePortrait();
@@ -2044,11 +2279,18 @@ async function renderWorkbench() {
   if (stale(seq)) return;
   $app.innerHTML = "";
   const wrap = el("div", "stagger");
-  wrap.appendChild(workspaceHead("任务"));
+  wrap.appendChild(workspaceHead("任务", "对话里说「就做这个」产生的任务，和按方向路径排的练习，都在这里完成。"));
   $app.appendChild(wrap);
+
+  const listed = taskRes.tasks || [];
+
+  /* ① 对话给你的任务：先渲染，且不受「有没有选方向」影响 */
+  const fromDialogue = listed.filter((tk) => tk.origin === "dialogue");
+  wrap.appendChild(dialogueTaskSection(fromDialogue));
+
+  /* ② 方向路径 */
   const facts = ((onboard && onboard.facts) || []).filter((f) => f.status !== "deleted" && f.status !== "dismissed");
   let t = adoptDirection(facts);
-  const listed = taskRes.tasks || [];
   if (t.code) {
     const merged = mergeTrail(t.code, listed);
     if (merged.done.join(",") !== t.done.join(",")) {
@@ -2059,7 +2301,10 @@ async function renderWorkbench() {
   const code = t.code;
   const field = activeField(t);
   if (!code || !field) {
-    wrap.appendChild(emptyPanel("还没有方向。先在方向区选定一个方向，任务会从它的教程起点开始。", "去方向区", "cards"));
+    // 注意：不再整页 return——上面已经画过对话任务了
+    if (!fromDialogue.length) {
+      wrap.appendChild(emptyPanel("还没有任务。去对话里说你手上的情况，它会给你一个下一步；或者去方向区选一棵树。", "去对话", "dialogue"));
+    }
     return;
   }
   const node = currentOnPath(field, t.done);
@@ -2098,150 +2343,74 @@ async function renderWorkbench() {
   const stepNo = path.findIndex((n) => n.id === node.id) + 1;
   wrap.appendChild(el("div", "ws-status",
     `<span>${esc(dirTitle(t.dir, field))}</span><span>第 ${stepNo} / ${path.length} 个节点</span>`));
-  const p = el("div", "panel");
-  wrap.appendChild(p);
 
-  const paintHead = () => {
-    const head = el("div", "task-head");
-    const hl = el("div");
-    hl.appendChild(el("h2", "task-title", esc(node.label)));
-    hl.appendChild(el("p", "task-brief", esc(node.intro || task.brief)));
-    head.appendChild(hl);
-    head.appendChild(el("span", "task-meta", `约 ${task.time_budget_min} 分钟`));
-    p.appendChild(head);
-  };
-
+  /* 路径步骤说明：主干步骤要交的是学期尺度的东西，二十分钟任务只是入门。
+     返回节点而不是直接 append——面板是 taskPanel 画的，插在哪由它决定。 */
   const stepNote = () => {
     const step = stepOf(field, node.id);
-    if (!step) return;
-    // 主干步骤要交的是一学期尺度的东西；二十分钟任务只是入门，过关材料去「项目」里找
+    if (!step) return null;
     const note = el("div", "note-box step-note");
     note.innerHTML = `${node.main ? "这是" : "这一节点属于"}路径第 ${step.stage} 步「${esc(step.label)}」。这一步做完要交：${esc(step.done_when)}`;
     const find = el("button", "linkish", "找能交出它的项目");
     find.type = "button";
     find.onclick = () => findProjectsForStep(code, step.stage);
     note.appendChild(find);
-    p.appendChild(note);
+    return note;
   };
 
-  const showFinished = () => {
-    p.innerHTML = "";
-    paintHead();
-    if (S.lastFeedback && S.lastFeedbackTaskId === task.id) renderFeedbackInto(p);
-    if (node.main) stepNote();
-    const next = currentOnPath(field, t.done.concat(node.id));
-    p.appendChild(el("div", "note-box finished-note", next
-      ? `这一节点已完成。下一节点是「${esc(next.label)}」，进入之后才会安排那一步的任务。`
-      : "这是这条方向上的最后一个节点。"));
-    const acts = el("div", "submit-actions");
-    if (next) {
-      const go = el("button", "btn", `进入「${esc(next.label)}」`);
-      go.type = "button";
-      go.onclick = async () => {
-        go.disabled = true;
-        try {
-          const created = await api("POST", "/api/tasks/generate", {
-            uid: S.uid, direction: code, level: 1, title: next.label, brief: next.intro,
-          });
-          if (!created || created.title !== next.label.slice(0, 40)) {
-            toast("下一节点的任务没有生成，请重启本地服务后再试");
+  /* 树上的任务和对话给的任务共用 taskPanel（对话那条路在 chat.js 里也调它）。
+     差别只在完成后的去处，所以用 onDone 注入：
+     树上任务要「进入下一节点」+「找个项目练手」，对话任务回对话。 */
+  wrap.appendChild(taskPanel(task, {
+    title: node.label,
+    intro: node.intro || task.brief,
+    demo: true,
+    note: stepNote,
+    onDone: () => {
+      const next = currentOnPath(field, t.done.concat(node.id));
+      const acts = el("div", "submit-actions");
+      if (next) {
+        const go = el("button", "btn", `进入「${esc(next.label)}」`);
+        go.type = "button";
+        go.onclick = async () => {
+          go.disabled = true;
+          try {
+            const created = await api("POST", "/api/tasks/generate", {
+              uid: S.uid, direction: code, level: 1, title: next.label, brief: next.intro,
+            });
+            if (!created || created.title !== next.label.slice(0, 40)) {
+              toast("下一节点的任务没有生成，请重启本地服务后再试");
+              go.disabled = false;
+              return;
+            }
+            const tasksMap = Object.assign({}, t.tasks, { [next.id]: created.id });
+            saveTrail({ code, done: t.done.concat(node.id), tasks: tasksMap });
+            S.lastTask = created;
+            S.lastFeedback = null;
+            S.lastFeedbackTaskId = "";
+            setView("workbench");
+          } catch (e) {
+            toast(e.message);
             go.disabled = false;
-            return;
           }
-          const tasksMap = Object.assign({}, t.tasks, { [next.id]: created.id });
-          saveTrail({ code, done: t.done.concat(node.id), tasks: tasksMap });
-          S.lastTask = created;
-          S.lastFeedback = null;
-          S.lastFeedbackTaskId = "";
-          setView("workbench");
-        } catch (e) {
-          toast(e.message);
-          go.disabled = false;
-        }
-      };
-      acts.appendChild(go);
-    }
-    const doneHere = listed.filter((tk) => tk.status === "done" && tk.direction === code && tk.id !== task.id).length + 1;
-    if (doneHere >= PROJECT_AFTER_TASKS || !next) {
-      const proj = el("button", next ? "btn secondary" : "btn", "学完一块了，找个项目练手");
-      proj.type = "button";
-      proj.title = `在「${field.name}」交过 ${doneHere} 次小任务`;
-      proj.onclick = () => goFindProjects();
-      acts.appendChild(proj);
-    }
-    const me = el("button", "btn ghost", "看它记下了什么");
-    me.type = "button";
-    me.onclick = () => setView("me");
-    acts.appendChild(me);
-    p.appendChild(acts);
-  };
-
-  if (task.status === "done") {
-    showFinished();
-    return;
-  }
-
-  paintHead();
-  stepNote();
-
-  p.appendChild(el("h3", "section-label", "步骤"));
-  const steps = el("div", "step-list");
-  task.steps.forEach((st) => {
-    const row = el("label", "step");
-    const cb = el("input"); cb.type = "checkbox";
-    row.append(cb, el("span", "", esc(st)));
-    steps.appendChild(row);
-  });
-  p.appendChild(steps);
-
-  p.appendChild(el("h3", "section-label", "怎样算做到"));
-  const crit = el("ul", "criteria");
-  task.rubric.forEach((r2) => crit.appendChild(el("li", "", esc(r2.criterion))));
-  p.appendChild(crit);
-
-  const box = el("div", "submit-box");
-  const ta = el("textarea");
-  ta.placeholder = "写下你的过程与发现：例子、原因、你现在的判断。没做完也可以交，它只看你写了什么。";
-  ta.setAttribute("aria-label", "提交内容");
-  ta.value = readDraft(task.id);
-  const count = el("span", "hint");
-  const recount = () => { count.textContent = ta.value.trim() ? `已写 ${ta.value.trim().length} 字 · 草稿自动保存在本机` : "提交后按上面的标准逐条反馈，并写回你的记录。"; };
-  ta.addEventListener("input", () => { writeDraft(task.id, ta.value); recount(); });
-  recount();
-  const demo = el("button", "btn ghost small", "填入演示示例");
-  demo.type = "button";
-  demo.onclick = () => {
-    ta.value =
-      "10 条弹幕：「太好哭了」「就这？」「编剧封神」「注水严重」「封神」「看不下去了」「细节绝了」「一般」「泪目」「神剧」\n\n" +
-      "不一致例子 1：「太好哭了」——规则判积极（含「哭」可能误判消极），模型判积极。原因：规则把「哭」当消极词，但语境是感动。\n" +
-      "不一致例子 2：「就这？」——规则因为无情感词判中性，模型判消极。原因：反问语气规则抓不到，模型学了语料里的讽刺用法。\n" +
-      "不一致例子 3：「封神」——规则词表里没有，判中性；模型判积极。原因：网络新词，词表更新慢，模型能从上下文推断。\n\n" +
-      "总结：模型的错误多来自词表覆盖与语境缺失两类；因为规则的可解释性和模型的表达力正好互补，可以互为校验。所以每次重要判断最好两个方法都跑一遍，不一致的例子就是最有价值的学习样本。";
-    writeDraft(task.id, ta.value);
-    recount();
-  };
-  const actions = el("div", "submit-actions");
-  const submit = el("button", "btn", "提交");
-  submit.type = "button";
-  submit.onclick = async (ev) => {
-    ev.preventDefault();
-    if (ta.value.trim().length < 10) { toast("至少写一句话再提交"); ta.focus(); return; }
-    submit.disabled = true; submit.textContent = "正在逐条看…";
-    try {
-      const fb = await api("POST", `/api/tasks/${task.id}/submit`, { uid: S.uid, payload: ta.value });
-      S.lastFeedback = fb;
-      S.lastFeedbackTaskId = task.id;
-      sessionStorage.setItem("rg_fb_" + task.id, JSON.stringify(fb));
-      writeDraft(task.id, "");
-      S.newFactIds = (fb.learned_facts || []).map((f) => f.id);
-      task.status = "done";
-      showFinished();
-      setTimeout(() => document.getElementById("fbPanel")?.scrollIntoView({ behavior: "smooth", block: "start" }), 80);
-    } catch (e) { toast(e.message); submit.disabled = false; submit.textContent = "提交"; }
-  };
-  actions.append(submit, demo, count);
-  box.append(ta, actions);
-  p.appendChild(box);
+        };
+        acts.appendChild(go);
+      }
+      const doneHere = listed.filter((tk) => tk.status === "done" && tk.direction === code && tk.id !== task.id).length + 1;
+      if (doneHere >= PROJECT_AFTER_TASKS || !next) {
+        const proj = el("button", next ? "btn secondary" : "btn", "学完一块了，找个项目练手");
+        proj.type = "button";
+        proj.title = `在「${field.name}」交过 ${doneHere} 次小任务`;
+        proj.onclick = () => goFindProjects();
+        acts.appendChild(proj);
+      }
+      const me = el("button", "btn ghost", "看它记下了什么");
+      me.type = "button";
+      me.onclick = () => setView("me");
+      acts.appendChild(me);
+      return acts;
+    },
+  }));
 }
 
 /* ---------- ⑦ 反馈 ---------- */
@@ -2329,7 +2498,7 @@ async function renderToday() {
   if (!field && !talked) {
     title = "先聊五个问题";
     why = "它还不认识你。五个问题，大约五分钟：年级、基础、好奇什么、习惯怎么学。每一问都可以选「不知道」。";
-    primary = goView("去画像", "onboarding");
+    primary = goView("去对话", "dialogue");
   } else if (!field && drafts) {
     title = `核对它记下的 ${drafts} 条`;
     why = "对话里记下的内容还是草稿。改掉不对的、划掉不属实的，方向建议才会按你来。";
@@ -3259,11 +3428,11 @@ async function renderMe() {
     main.appendChild(g);
   });
   if (!facts.length) {
-    main.appendChild(el("p", "panel-sub", "还没有记录。先在画像里聊几句。"));
-    const go = el("button", "btn", "去画像");
+    main.appendChild(el("p", "panel-sub", "还没有记录。先去对话里聊几句。"));
+    const go = el("button", "btn", "去对话");
     go.type = "button";
     go.style.marginTop = "16px";
-    go.onclick = () => setView("onboarding");
+    go.onclick = () => setView("dialogue");
     main.appendChild(go);
   }
   $app.appendChild(main);
@@ -3758,7 +3927,7 @@ function factCard(f, editable = false, isNew = false) {
 document.querySelectorAll(".nav-btn").forEach((b) => {
   b.addEventListener("click", () => {
     if (!S.uid) return;
-    if (b.dataset.workspace === "portrait") setView(S.portraitTab || "onboarding");
+    if (b.dataset.workspace === "portrait") setView(S.portraitTab || "dialogue");
     else setView(b.dataset.view);
   });
 });
@@ -3776,7 +3945,7 @@ document.getElementById("brandHome").addEventListener("click", () => setView("ho
     try {
       const st = await api("GET", `/api/onboard/result?uid=${S.uid}`);
       document.getElementById("userNickname").textContent = S.nickname;
-      S.portraitTab = st.state && st.state.phase === "done" ? "confirm" : "onboarding";
+      S.portraitTab = st.state && st.state.phase === "done" ? "confirm" : "dialogue";
       S.resume = "today";
       await ensurePortrait();
     } catch (_) {

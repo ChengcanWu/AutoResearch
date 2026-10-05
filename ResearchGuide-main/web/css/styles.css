@@ -78,11 +78,8 @@ button { cursor: pointer; }
 :focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
 ::selection { background: var(--teal-soft); }
 [hidden] { display: none !important; }
-
-.sr-only {
-  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
-  overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;
-}
+/* `.sr-only` 是常用的无障碍工具类，但四个前端文件里一次都没用过，
+   这里不留未使用的钩子——需要时一行就能加回来。 */
 
 /* ---------- 开场 ---------- */
 
@@ -189,6 +186,20 @@ body[data-view="cards"] .site-footer, body[data-view="card"] .site-footer, body[
 .cards-head .ws-tabs { margin-bottom: 0; flex-shrink: 0; }
 .dir-now { margin-top: var(--gap-2); font-family: var(--serif); font-size: 20px; color: var(--ink); }
 
+/* 对话页的页头：标题 + 主标签同行，画像管理退到右侧，说明另起一行。
+   以前是三层竖着叠（标题/画像 chip/标签），画像管理占了一整行中间位置。 */
+.ws-head-bar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--gap-3) var(--gap-4); }
+.ws-bar-main { display: flex; align-items: center; gap: var(--gap-4); flex-wrap: wrap; }
+.ws-bar-side { display: flex; align-items: center; gap: var(--gap-2); margin-left: auto; }
+.ws-bar-label { font-size: 12px; color: var(--ink-3); }
+.ws-head-bar .ws-tabs { margin-bottom: 0; }
+/* 画像 chip 原来靠负外边距去贴上一个元素，进了页头就不需要了 */
+.ws-head-bar .portrait-bar { margin: 0; }
+.ws-head-bar .ws-lead {
+  flex: 1 0 100%; margin-top: calc(-1 * var(--gap-1));
+  font-size: 13px; color: var(--ink-2); max-width: 46em;
+}
+
 .ws-tabs { display: inline-flex; gap: 2px; padding: 3px; margin-bottom: var(--gap-5); border-radius: var(--pill); background: var(--sunken); }
 .ws-tab {
   padding: 5px 16px; border: 0; border-radius: var(--pill);
@@ -218,6 +229,17 @@ body[data-view="cards"] .site-footer, body[data-view="card"] .site-footer, body[
 }
 
 .two-col { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: var(--gap-4); align-items: start; }
+/* 对话页的对话列要比记忆侧栏宽一些。原来 `.chat-wide` 只是个没有规则的
+   空钩子，宽度全靠 .two-col 的默认比例——起了名字却没兑现。 */
+.two-col:has(> .chat-wide) { grid-template-columns: minmax(0, 1.9fr) minmax(0, 1fr); }
+
+/* 对话页的两列各自成块：记忆列表长了就自己滚，
+   不然它会把整页拉得很长，对话面板却停在原地，看起来像错位。
+   上限和 .chat-panel 用同一套算法，两列的底边才对得上。 */
+.two-col-chat > .side-panel {
+  max-height: clamp(520px, calc(100vh - 250px), 880px);
+  overflow-y: auto;
+}
 
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 6px;
@@ -282,7 +304,6 @@ body[data-view="cards"] .site-footer, body[data-view="card"] .site-footer, body[
   font-size: 14px; color: var(--ink);
 }
 .why-box b { color: var(--teal-ink); font-weight: 600; }
-.divider { border: 0; border-top: 1px solid var(--line); margin: var(--gap-5) 0; }
 
 .toast {
   position: fixed; left: 50%; bottom: 28px; z-index: 80;
@@ -364,15 +385,47 @@ body[data-view="cards"] .site-footer, body[data-view="card"] .site-footer, body[
 .portrait-add:hover { color: var(--teal); }
 .portrait-add::before { content: "+ "; }
 
-.chat-panel { display: flex; flex-direction: column; min-height: 560px; padding: 0; overflow: hidden; }
+/* ---------- 对话页：三个区，各管一件事 ----------
+   以前对话流、行动卡、输入框都塞在一个 .chat-foot 里，
+   行动卡一高就把输入框顶出屏幕——而输入框该是位置最稳的那个。
+   现在：对话流自己滚 / 行动区给上限自己滚 / 输入区永远在最下面。 */
+
+.chat-panel {
+  display: flex; flex-direction: column; padding: 0; overflow: hidden;
+  /* 整块有确定高度，三个区才有稳定的相对大小 */
+  height: clamp(520px, calc(100vh - 250px), 880px);
+}
 .chat-scroll {
-  flex: 1;
+  flex: 1 1 auto; min-height: 180px;
   display: flex; flex-direction: column; gap: var(--gap-3);
-  max-height: 60vh; min-height: 320px; overflow-y: auto;
+  overflow-y: auto;
   padding: var(--gap-5) var(--gap-5) var(--gap-4);
 }
+/* 行动区：放得下就撑开，放不下自己滚，绝不占满整屏 */
+.chat-next {
+  flex: 0 1 auto; max-height: 46%; overflow-y: auto;
+  padding: var(--gap-4) var(--gap-5);
+  border-top: 1px solid var(--line);
+  background: var(--bg);
+}
+.chat-next > :last-child { margin-bottom: 0; }
+/* 刚交完任务回对话时，finishedNote 是插在行动区**前面**的兄弟节点，
+   所以它的父节点是 .chat-panel 而不是 .chat-next——它拿不到行动区的内边距，
+   会贴着面板边缘。这里补上对齐用的边距。 */
+.chat-panel > .finished-note { margin: var(--gap-4) var(--gap-5) 0; }
+.chat-input {
+  flex: 0 0 auto;
+  padding: var(--gap-3) var(--gap-5) var(--gap-5);
+  border-top: 1px solid var(--line);
+  background: var(--surface);
+}
+/* 状态行只占一行高度，不能因为空着就撑出一块空白 */
+.chat-input .stage-line:empty { display: none; }
+
+/* 气泡：同一套圆角和一行的最大宽度。
+   AI 气泡带 Markdown，给它宽一点（86%），不然段落会被折得很碎。 */
 .bubble {
-  max-width: 82%;
+  max-width: 78%;
   padding: 10px 14px;
   border-radius: var(--r-lg);
   font-size: 14px; line-height: 1.7;
@@ -381,15 +434,12 @@ body[data-view="cards"] .site-footer, body[data-view="card"] .site-footer, body[
 }
 .bubble.ai { align-self: flex-start; background: var(--sunken); border-top-left-radius: 4px; }
 .bubble.user { align-self: flex-end; background: var(--teal); color: #fff; border-top-right-radius: 4px; }
-.typing { align-self: flex-start; font-size: 13px; color: var(--ink-3); }
-.typing::after { content: "…"; animation: blink 1s steps(2) infinite; }
 @keyframes blink { 50% { opacity: 0.2; } }
-.chat-foot { padding: var(--gap-4) var(--gap-5) var(--gap-5); border-top: 1px solid var(--line); }
-.chat-hint { font-size: 12px; color: var(--ink-3); margin-bottom: var(--gap-2); }
-.chat-hint:empty { display: none; }
-.chat-options { display: flex; flex-wrap: wrap; gap: var(--gap-2); margin-bottom: var(--gap-3); }
-.chat-options:empty { display: none; }
-.chat-input-row { display: flex; gap: var(--gap-2); }
+/* 这里原来还有 `.typing`（旧的「AI 正在输入…」指示器）、`.chat-hint`、
+   `.chat-options` 三条规则，四个前端文件里都搜不到任何引用——
+   指示器早就换成 `.stage-line` 了。死钩子会让重做视觉的人以为它们还在用，
+   所以删掉。要用再按需加回来。 */
+.chat-input-row { display: flex; gap: var(--gap-2); align-items: flex-end; }
 .chat-input-row input {
   flex: 1; min-width: 0; height: 40px; padding: 0 14px;
   border: 1px solid var(--line-strong); border-radius: var(--r-md);
@@ -619,7 +669,11 @@ body[data-view="cards"] .site-footer, body[data-view="card"] .site-footer, body[
 .rubric-crit { font-size: 14px; font-weight: 600; }
 .rubric-comment { font-size: 13px; color: var(--ink-2); margin-top: 2px; }
 .feedback .fact-list { margin-top: var(--gap-4); padding: var(--gap-2) var(--gap-4); border-radius: var(--r-md); background: var(--bg); }
-.finished-note { margin-top: var(--gap-4); }
+
+/* `.finished-note` 的样式统一写在文件末尾那一处。
+   这里原来还有一条 `{ margin-top: var(--gap-4); }`，同特异性、
+   没有媒体查询，被后面那条 `margin: 0 0 10px` 静默覆盖掉了——
+   等于这个间距一直是 0。散在两处的同一条规则就是会这样骗人。 */
 
 
 /* ---------- 项目（边学边练） ---------- */
@@ -991,9 +1045,12 @@ body.is-home .site-footer { display: none; }
   .ws-head h2 { font-size: 26px; }
   .panel { padding: var(--gap-4); }
   .two-col { grid-template-columns: 1fr; }
-  .chat-panel { min-height: 0; }
-  .chat-scroll { max-height: none; padding: var(--gap-4); }
-  .chat-foot { padding: var(--gap-3) var(--gap-4) var(--gap-4); }
+  /* 窄屏：不要 fixed 高度的对话面板。页面本身会滚，
+     面板再限高会让输入框被挤在一个小格子里。 */
+  .chat-panel { height: auto; min-height: 0; }
+  .chat-scroll { min-height: 200px; max-height: 56vh; padding: var(--gap-4); }
+  .chat-next { max-height: none; padding: var(--gap-3) var(--gap-4); }
+  .chat-input { padding: var(--gap-3) var(--gap-4) var(--gap-4); }
   .task-head { flex-direction: column; gap: var(--gap-1); }
   .stage-pick, .stage-pick.path { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .project-facts { grid-template-columns: 1fr; }
@@ -1030,3 +1087,295 @@ body.is-home .site-footer { display: none; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-delay: 0ms !important; transition-duration: 0.01ms !important; }
 }
+
+/* ---------- 对话视图（任务2：长回复 / Markdown / 生成中状态）---------- */
+
+/* 对话输入框是 textarea（能换行），上面那条 input 规则是给选课搜索框的。
+   align-items 已经并进主规则，这里不再重复写一条。 */
+.chat-input-row textarea {
+  flex: 1; min-width: 0; min-height: 40px; max-height: 160px;
+  padding: 9px 14px; resize: none; overflow-y: auto;
+  border: 1px solid var(--line-strong); border-radius: var(--r-md);
+  background: var(--surface); outline: none;
+  font: inherit; font-size: 14px; line-height: 1.5; color: var(--ink);
+  transition: border-color var(--fast), box-shadow var(--fast);
+}
+.chat-input-row textarea:focus { border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-soft); }
+.chat-input-row textarea:disabled { opacity: 0.6; }
+
+/* 生成中：阶段行是真实的服务端阶段推动，不是假进度条 */
+.stage-line {
+  font-size: 12px; color: var(--ink-3); margin-bottom: var(--gap-2);
+  min-height: 16px;
+}
+.stage-line.on { color: var(--teal-ink); }
+.stage-line.on::after { content: "…"; animation: blink 1s steps(2) infinite; }
+
+.action-slot:empty { display: none; }
+.action-card {
+  border: 1px solid var(--teal-soft); border-left: 3px solid var(--teal);
+  background: var(--teal-soft); border-radius: var(--r-md);
+  padding: 10px 14px; margin-bottom: var(--gap-3);
+  animation: riseIn 0.25s var(--ease) both;
+}
+.action-card.done { border-left-color: var(--ink-3); background: var(--sunken); opacity: 0.75; }
+.action-kicker { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; color: var(--teal-ink); margin-bottom: 2px; }
+.action-card.done .action-kicker { color: var(--ink-3); }
+.action-title { font-size: 14px; color: var(--ink); }
+/* 依据：每条一行。任务必须说得出「为什么是给你的」，
+   挤成一句话会让人读不出到底引用了哪几条。 */
+.action-why { margin-top: var(--gap-2); padding-top: var(--gap-2); border-top: 1px dashed var(--teal); }
+.aw-label { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; color: var(--teal-ink); margin-bottom: 3px; }
+.aw-list { margin: 0; padding-left: 16px; }
+.aw-list li { font-size: 12px; color: var(--ink-2); line-height: 1.6; }
+.action-btns { display: flex; gap: var(--gap-2); margin-top: var(--gap-2); }
+.offer-row { display: flex; flex-wrap: wrap; gap: var(--gap-2); margin-bottom: var(--gap-3); }
+
+/* AI 气泡里的 Markdown：要覆盖 .bubble 的 pre-wrap，否则段落渲染不出来 */
+.bubble.md { white-space: normal; max-width: 92%; }
+.bubble.md > :first-child { margin-top: 0; }
+.bubble.md > :last-child { margin-bottom: 0; }
+.bubble.md p { margin: 0 0 8px; }
+.bubble.md h3, .bubble.md h4 { font-family: var(--serif); font-size: 15px; margin: 12px 0 6px; }
+.bubble.md ul { margin: 0 0 8px; padding-left: 20px; }
+.bubble.md li { margin-bottom: 3px; }
+.bubble.md blockquote {
+  margin: 0 0 8px; padding: 2px 0 2px 10px;
+  border-left: 2px solid var(--line-strong); color: var(--ink-2);
+}
+.bubble.md code {
+  font-family: var(--mono); font-size: 12.5px;
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--r-sm); padding: 1px 5px;
+}
+.bubble.md .md-pre {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sm);
+  padding: 10px 12px; margin: 0 0 8px; overflow-x: auto;
+  font-family: var(--mono); font-size: 12.5px; line-height: 1.6; white-space: pre;
+}
+.bubble.md .md-pre code { background: none; border: 0; padding: 0; }
+.bubble.md a { color: var(--teal-ink); text-decoration: underline; text-underline-offset: 2px; }
+.bubble.streaming::after {
+  content: "▍"; margin-left: 2px; color: var(--teal);
+  animation: blink 1s steps(2) infinite;
+}
+
+/* 「这一轮发生了什么」——系统副作用的唯一落点。
+   以前这些东西是五种单行 <p> 散在对话流里的，顺序跟着代码走，
+   和对话内容混在一起。现在统一收进这一块，按固定分组排。 */
+.receipt {
+  border: 1px solid var(--line); background: var(--surface);
+  border-radius: var(--r-md); padding: 10px 14px; margin-bottom: var(--gap-3);
+}
+.rc-head {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.1em;
+  color: var(--ink-3); margin-bottom: var(--gap-2);
+}
+.rc-group + .rc-group { margin-top: var(--gap-2); padding-top: var(--gap-2); border-top: 1px solid var(--line); }
+.rc-label {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 600; color: var(--ink-2); margin-bottom: 2px;
+}
+.rc-count {
+  font-weight: 400; font-size: 11px; color: var(--ink-3);
+  background: var(--sunken); border-radius: var(--pill); padding: 1px 7px;
+}
+.rc-list { margin: 0; padding-left: 16px; }
+.rc-list li { font-size: 12px; color: var(--ink-2); line-height: 1.6; }
+.rc-list-warn li { color: var(--coral); }
+.rc-warn { font-size: 12px; line-height: 1.6; color: var(--coral); margin-top: var(--gap-2); }
+.rc-note { font-size: 12px; line-height: 1.6; color: var(--ink-3); margin-top: var(--gap-2); }
+
+/* 成绩单导入回执：它不是「聊了一句」，是一次数据录入，
+   所以用一组整齐的数字格，而不是一段话。 */
+.receipt-import { border-left: 3px solid var(--gold); }
+.ri-facts { display: flex; flex-wrap: wrap; gap: var(--gap-2); margin-bottom: var(--gap-2); }
+.ri-cell {
+  display: flex; flex-direction: column; gap: 1px;
+  background: var(--sunken); border-radius: var(--r-sm); padding: 5px 12px; min-width: 76px;
+}
+.ri-k { font-size: 11px; color: var(--ink-3); }
+.ri-v { font-size: 15px; font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; }
+
+/* ---------- 记忆面板：按时间跨度分层 ---------- */
+/* 分列的意义是让用户看出「它把哪些事算成同一类」，以及哪些会过期。
+   每层左边一条色带，颜色跟着层的「变化速度」走：越靠上越稳定。 */
+.side-sub { font-size: 12px; color: var(--ink-3); line-height: 1.6; margin: 0 0 var(--gap-3); }
+.memory-board { display: flex; flex-direction: column; gap: var(--gap-3); }
+.mem-layer { border-left: 3px solid var(--line-strong); padding-left: 10px; }
+.mem-layer-identity { border-left-color: var(--teal); }
+.mem-layer-practice { border-left-color: var(--gold); }
+.mem-layer-capability { border-left-color: var(--blue); }
+.mem-layer-experience { border-left-color: var(--ink-3); }
+.mem-layer-interest { border-left-color: var(--coral); }
+.mem-layer-constraint { border-left-color: var(--gold); }
+.mem-layer-head {
+  font-size: 12px; font-weight: 600; letter-spacing: 0.04em; color: var(--ink-2);
+  display: flex; align-items: center; gap: 6px; margin: 0;
+}
+.mem-layer-n {
+  font-size: 11px; font-weight: 500; color: var(--ink-3);
+  background: var(--sunken); border-radius: var(--pill); padding: 0 6px;
+}
+.mem-layer-hint { font-size: 11px; color: var(--ink-3); line-height: 1.5; margin: 3px 0 6px; }
+.mem-layer-list { display: flex; flex-direction: column; gap: 6px; }
+.mem-card {
+  border: 1px solid var(--line); border-radius: var(--r-sm);
+  padding: 7px 9px; background: var(--surface);
+}
+.mem-card.is-dismissed { opacity: 0.45; }
+.mem-value { font-size: 13px; color: var(--ink); line-height: 1.5; word-break: break-word; }
+.mem-value input {
+  width: 100%; font-size: 13px; font-family: inherit; color: var(--ink);
+  border: 1px solid var(--teal); border-radius: var(--r-sm);
+  padding: 3px 6px; background: var(--surface);
+}
+.mem-meta { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
+.mem-acts { display: flex; gap: 10px; margin-top: 5px; }
+.badge.src-declared { background: var(--teal-soft); color: var(--teal-ink); }
+.badge.src-inferred { background: var(--sunken); color: var(--ink-3); }
+.badge.src-behavior { background: var(--blue-soft); color: var(--blue); }
+.badge.src-user_edit { background: var(--gold-soft); color: var(--gold); }
+
+@media (max-width: 720px) {
+  .bubble, .bubble.md { max-width: 100%; }
+  .chat-scroll { max-height: 56vh; }
+}
+
+/* ---------- 核对页：字段清单（按九大类分列）---------- */
+/* 目的：把「还缺什么、填了能得到什么」摊开。空格是邀请，
+   但必须带一句 why，否则就是一张逼人填的表。 */
+.coverage { margin-top: 22px; }
+.coverage-hint { margin: 0 0 10px; color: var(--ink-3); font-size: 12.5px; }
+.cov-total { margin: 0 0 12px; color: var(--ink-2); font-size: 13px; }
+.cov-grid {
+  display: grid; gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(232px, 1fr));
+}
+.cov-col {
+  border: 1px solid var(--line); border-radius: 10px;
+  background: var(--surface); padding: 11px 12px;
+  border-left: 3px solid var(--line-strong);
+}
+.cov-col-identity { border-left-color: var(--teal); }
+.cov-col-practice { border-left-color: var(--gold); }
+.cov-col-capability { border-left-color: #3f6ea8; }
+.cov-col-courses_done { border-left-color: var(--gold); }
+.cov-col-interest { border-left-color: var(--coral); }
+.cov-col-career { border-left-color: #8a6bb0; }
+.cov-col-social { border-left-color: #4f8a72; }
+.cov-col-constraint { border-left-color: var(--gold); }
+.cov-col-experience { border-left-color: var(--ink-3); }
+.cov-col-transcript { border-left-color: var(--teal); grid-column: 1 / -1; }
+
+.cov-head { display: flex; align-items: baseline; gap: 7px; margin: 0 0 3px; }
+.cov-title { font-weight: 600; font-size: 13.5px; color: var(--ink); }
+.cov-count { font-size: 11.5px; color: var(--ink-3); }
+.cov-why { margin: 0 0 8px; font-size: 11.5px; color: var(--ink-3); line-height: 1.5; }
+
+.cov-slot {
+  display: flex; gap: 7px; align-items: flex-start;
+  padding: 5px 6px; border-radius: 7px; cursor: pointer;
+}
+.cov-slot:hover { background: var(--teal-soft); }
+.cov-mark { flex: 0 0 auto; font-size: 11px; color: var(--ink-3); line-height: 1.6; }
+.cov-slot.on .cov-mark { color: var(--teal); }
+.cov-body { min-width: 0; }
+.cov-label { margin: 0; font-size: 12.5px; color: var(--ink-2); display: flex; gap: 6px; flex-wrap: wrap; }
+.cov-slot:not(.on) .cov-label { color: var(--ink-3); }
+.cov-value {
+  color: var(--ink); font-weight: 500;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 150px;
+}
+.cov-tip { margin: 2px 0 0; font-size: 11px; color: var(--ink-3); line-height: 1.45; }
+
+.cov-paste {
+  width: 100%; box-sizing: border-box; margin-top: 4px;
+  font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px;
+  padding: 8px; border: 1px solid var(--line-strong); border-radius: 8px;
+  background: var(--surface); color: var(--ink); resize: vertical;
+}
+.cov-actions { display: flex; gap: 8px; margin-top: 8px; align-items: center; }
+.cov-report { margin-top: 8px; }
+.cov-ok { margin: 0 0 6px; font-size: 12.5px; color: var(--teal-ink); line-height: 1.55; }
+.cov-bad { margin: 0 0 6px; font-size: 12.5px; color: var(--coral); line-height: 1.55; }
+.cov-warn { margin: 0 0 4px; font-size: 11.5px; color: var(--gold); line-height: 1.5; }
+
+/* 成绩单推出来的记忆：比自述硬，视觉上要能一眼区分，且必须摊开依据 */
+.mem-card.mem-derived { border-left: 3px solid var(--teal); background: #f7fbf9; }
+.badge.src-derived { background: var(--teal-soft); color: var(--teal-ink); }
+.mem-basis {
+  margin: 4px 0 0; font-size: 11px; line-height: 1.5; color: var(--ink-3);
+  padding-left: 8px; border-left: 2px solid var(--line-strong);
+}
+.cov-derived { margin: 0 0 4px; font-size: 12px; color: var(--teal-ink); line-height: 1.55; }
+
+/* 版本戳：让「我改了没有」一眼可确认，不用猜缓存 */
+.build-stamp {
+  margin: 4px 0 0; font-size: 11px; color: var(--ink-3);
+}
+.build-stamp b { color: var(--teal-ink); font-weight: 600; }
+
+/* ---------- 任务：对话出的和树上出的用同一套 ---------- */
+
+/* 对话给你的任务：和知识树无关，没选方向也要显示 */
+.dialogue-tasks { border-left: 3px solid var(--teal); }
+.dialogue-tasks .section-label { margin-top: 0; }
+
+.task-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px; }
+.chip-on {
+  background: var(--teal-soft); color: var(--teal-ink);
+  border-color: var(--teal); font-weight: 600;
+}
+
+.task-origin {
+  margin: 0 0 14px; font-size: 12px; line-height: 1.6; color: var(--ink-3);
+  padding: 7px 10px; background: var(--sunken); border-radius: 6px;
+}
+
+/* 任务面板：① 做什么 / ② 交什么 / ③ 怎样算做到 三段之间要有稳定的间距。
+   原来 `.task-panel` 没有自己的规则，全靠 `.panel` 撑着——
+   进了 h3.section-label 的默认间距，三段读起来是糊在一起的。 */
+.task-panel .section-label + * { margin-top: var(--gap-2); }
+.task-panel .section-label:not(:first-of-type) { margin-top: var(--gap-5); }
+.task-panel .step-list { display: flex; flex-direction: column; gap: 6px; }
+.task-panel .criteria { margin: 0; padding-left: 20px; }
+.task-panel .criteria li { font-size: 13px; line-height: 1.7; color: var(--ink-2); }
+
+/* 「交什么」——这一段以前完全缺失，是「不知道怎么完成」的直接原因 */
+.deliverable {
+  margin: 0 0 4px; font-size: 14px; line-height: 1.7; color: var(--ink);
+  padding: 10px 12px; background: var(--teal-soft);
+  border-left: 3px solid var(--teal); border-radius: 0 6px 6px 0;
+}
+.deliverable-note { margin: 0 0 4px; font-size: 12px; color: var(--ink-3); line-height: 1.6; }
+
+.action-hint { margin: 8px 0 0; font-size: 12px; line-height: 1.6; color: var(--teal-ink); }
+.task-meta.done { background: var(--teal-soft); color: var(--teal-ink); font-weight: 600; }
+
+/* 刚在任务区交了任务、回到对话时的落点。没有它，那张卡会凭空消失。 */
+.finished-note {
+  margin: 0 0 10px; padding: 10px 12px; border-radius: 8px;
+  background: var(--teal-soft); border-left: 3px solid var(--teal);
+}
+.fn-title { margin: 0 0 3px; font-size: 13px; font-weight: 600; color: var(--ink); }
+.fn-sub { margin: 0; font-size: 12px; line-height: 1.6; color: var(--ink-3); }
+
+/* ---------- 记忆：项目文件夹 ---------- */
+/* 项目在存储上仍是分开的事实（证据/TTL/单独改删都在），
+   展示上合成一张卡——一个项目一张，属性是它的子行。 */
+.proj {
+  border: 1px solid var(--line-strong); border-radius: 8px;
+  margin: 0 0 10px; overflow: hidden;
+}
+.proj-head {
+  display: flex; align-items: baseline; gap: 8px;
+  padding: 9px 11px; background: var(--sunken); cursor: pointer;
+}
+.proj-name { font-weight: 600; font-size: 13px; color: var(--ink); }
+.proj-n { margin-left: auto; font-size: 11px; color: var(--ink-3); }
+.proj-body { padding: 4px 11px 9px; }
+.proj-row { display: flex; gap: 8px; padding: 5px 0; border-top: 1px dashed var(--line); }
+.proj-row:first-child { border-top: 0; }
+.proj-k { flex: 0 0 62px; font-size: 11px; color: var(--ink-3); padding-top: 2px; }
+.proj-v { flex: 1; font-size: 12px; line-height: 1.6; color: var(--ink); }

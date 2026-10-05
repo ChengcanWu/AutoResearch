@@ -225,12 +225,15 @@ def generate_task(uid: str, direction: str, level: int = 1, title: str = "", bri
                 "举一个你能核对的小例子",
                 "写两句：你现在明白了什么，还卡在哪里",
             ],
+            deliverable=f"一段文字：「{name[:40]}」在问什么 + 一个能核对的例子 + 你还卡在哪",
             rubric=[
                 {"criterion": "说明了这个节点在问什么"},
                 {"criterion": "有一个具体、能核对的例子"},
                 {"criterion": "写了自己的判断，而不是只复述介绍"},
             ],
             time_budget_min=20, difficulty=max(1, level), status="open",
+            origin="tree",
+            node_path=direction,
         )
         store.save_task(task)
         return task
@@ -238,15 +241,140 @@ def generate_task(uid: str, direction: str, level: int = 1, title: str = "", bri
     tpl = tpl_list[min(level, len(tpl_list)) - 1]
     task = MicroTask(
         user_id=uid, direction=direction, title=tpl["title"], brief=tpl["brief"],
-        steps=tpl["steps"], rubric=tpl["rubric"],
+        steps=tpl["steps"], deliverable=tpl.get("deliverable", ""),
+        rubric=tpl["rubric"],
         time_budget_min=tpl["time_budget_min"], difficulty=level, status="open",
+        origin="tree",
+    )
+    store.save_task(task)
+    return task
+
+
+# ---------- 对话出的任务 ----------
+#
+# 用户问过两次：「我在对话里出现的任务是要我怎么完成」「任务区的任务和这个任务
+# 是一个东西吗」。根因是对话的行动卡**从来没建过 tasks 行**，所以任务区是空的。
+#
+# 这里把一张行动卡变成**真的任务**。原则和别处一致：模型给了细节就用模型的，
+# 没给就用确定性的骨架——绝不为了凑满三个框而编内容。
+# 骨架按 action 种类定，因为种类本身就说明了这一步的性质。
+
+_ACTION_TASK_SKELETON: dict[str, dict[str, Any]] = {
+    "micro_task": {
+        "steps": [
+            "先写下你打算做的那件具体的事，一句话",
+            "动手做，控制在 20 分钟内",
+            "做完写下：你原本以为会怎样、实际怎样、差在哪",
+        ],
+        "deliverable": "一段文字：你做了什么、结果是什么、你的判断",
+        "rubric": [
+            {"criterion": "说清了具体做了什么（不是「了解了」这种说法）"},
+            {"criterion": "有真实结果，而不是只写计划"},
+            {"criterion": "写出了自己的判断或意外之处"},
+        ],
+    },
+    "explore_direction": {
+        "steps": [
+            "列出 2–3 个你在考虑的选项",
+            "每个选项写一句：它的日常是什么样、你凭什么觉得自己会喜欢或不喜欢",
+            "写下你现在还判断不了的那个点是什么",
+        ],
+        "deliverable": "一段文字：选项清单 + 每项一句真实理由 + 你还缺的信息",
+        "rubric": [
+            {"criterion": "至少 2 个选项，且不是同一个方向换了说法"},
+            {"criterion": "理由来自你的实际情况，而不是这个方向的介绍"},
+            {"criterion": "明确说出了自己还不确定的地方"},
+        ],
+    },
+    "review_progress": {
+        "steps": [
+            "列出这段时间你实际做过的事（不是计划做的）",
+            "每件事写一句：当时想解决什么、现在觉得解决了吗",
+            "写下下一步最该补的是什么",
+        ],
+        "deliverable": "一段文字：做过的事 + 每件的实际结果 + 下一步",
+        "rubric": [
+            {"criterion": "写的是做过的事，不是打算做的事"},
+            {"criterion": "每件事都有结果判断，不只是罗列"},
+            {"criterion": "给出了下一步，且能接着当前进度做"},
+        ],
+    },
+    "course_action": {
+        "steps": [
+            "选出 1–2 门你在考虑的具体课程",
+            "每门写一句：它和你想弄清楚的问题有什么关系",
+            "写下你判断它值不值得选的依据（培养方案、先修、别人评价都算）",
+        ],
+        "deliverable": "一段文字：课程名 + 和你的问题的关系 + 选择依据",
+        "rubric": [
+            {"criterion": "写的是具体课程名，不是「相关课程」"},
+            {"criterion": "说清了它和你手上的问题的关系"},
+            {"criterion": "有可核对的依据，而不是感觉"},
+        ],
+    },
+}
+
+_ACTION_TASK_FALLBACK = {
+    "steps": ["写下这一步具体要做什么", "做完写下结果", "写下你的判断"],
+    "deliverable": "一段文字：做了什么、结果、你的判断",
+    "rubric": [
+        {"criterion": "具体到别人能看懂你做了什么"},
+        {"criterion": "有实际结果"},
+        {"criterion": "有自己的判断"},
+    ],
+}
+
+
+def task_from_action(uid: str, action: dict[str, Any]) -> MicroTask:
+    """把一张对话行动卡变成任务区里能完成的真任务。
+
+    幂等：同一张行动卡只会有一个任务，重复 accept 不会造出第二个。
+    """
+    aid = action.get("id") or action.get("action_id") or ""
+    if aid:
+        for t in store.list_tasks(uid):
+            if t.action_id == aid:
+                return t
+
+    title = (action.get("title") or "").strip() or "这一步"
+    kind = (action.get("action") or "").strip()
+    sk = _ACTION_TASK_SKELETON.get(kind) or _ACTION_TASK_FALLBACK
+    payload = action.get("payload") or {}
+    if isinstance(payload, str):
+        payload = {}
+
+    # 模型若在 payload 里给了更具体的，就用它的；否则用骨架
+    steps = payload.get("steps") or sk["steps"]
+    deliverable = payload.get("deliverable") or sk["deliverable"]
+    rubric = payload.get("rubric") or sk["rubric"]
+
+    task = MicroTask(
+        user_id=uid,
+        direction=action.get("direction") or "",
+        title=title[:60],
+        brief=payload.get("brief") or title[:240],
+        steps=[str(s)[:200] for s in steps][:6],
+        deliverable=str(deliverable)[:240],
+        rubric=[{"criterion": str(r.get("criterion", r))[:160]} if isinstance(r, dict)
+                else {"criterion": str(r)[:160]} for r in rubric][:6],
+        time_budget_min=int(payload.get("time_budget_min") or 20),
+        difficulty=int(payload.get("difficulty") or 1),
+        status="open",
+        origin="dialogue",
+        action_id=aid,
+        node_path=(action.get("node_id") or ""),
     )
     store.save_task(task)
     return task
 
 
 def submit(uid: str, task: MicroTask, payload: str) -> Feedback:
-    """提交 → 反馈 + 写回 UM（行为事实，真实入库）。"""
+    """提交 → 反馈 + 写回 UM（行为事实，真实入库）。
+
+    如果这个任务是从对话的行动卡来的，**顺手把那张卡标成 completed**——
+    这就是「在任务区做完 → 回到对话，对话知道你完成了」的那一步。
+    少了它，用户做完了任务、回到对话，对话还停在这一步问他要不要做。
+    """
     submission_id = store.save_submission(task.id, uid, payload)
     task.status = "done"
     store.save_task(task)
@@ -270,6 +398,16 @@ def submit(uid: str, task: MicroTask, payload: str) -> Feedback:
     )
     store.add_fact(fact)
     fb["learned_facts"] = [fact.to_dict()]
+
+    if task.action_id:
+        a = store.get_action(uid, task.action_id)
+        if a and a.get("status") != "completed":
+            store.update_action(uid, task.action_id, "completed")
+            store.add_event(uid, "action_completed", source_id=task.action_id,
+                            payload={"action": a.get("action"), "via": "task_submit"})
+            store.add_event(uid, "task_submitted", source_id=task.action_id,
+                            payload={"title": task.title, "task_id": task.id,
+                                     "chars": len(payload), "score": fb["score"]})
     return fb
 
 

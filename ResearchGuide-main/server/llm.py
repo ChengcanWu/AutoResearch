@@ -196,3 +196,61 @@ def chat_json(system: str, user: str, *, timeout: int = 30, tag: str = "json") -
     except json.JSONDecodeError:
         return None
     return data if isinstance(data, dict) else None
+
+
+def chat_stream(system: str, user: str, *, temperature: float = 0.6, timeout: int = 60,
+                tag: str = "stream"):
+    """逐块产出助手文本（OpenAI 兼容的 SSE）。
+
+    只在调用方能接受纯文本时使用——结构化决策（TurnProposal）必须走 chat_json，
+    因为它需要完整 JSON 才能校验。失败时产出零块，调用方要自己兜底。
+    """
+    cfg = config()
+    if not cfg["enabled"]:
+        return
+    key = os.environ.get("LLM_API_KEY") or os.environ.get("OPENAI_API_KEY") or os.environ.get("DEEPSEEK_API_KEY")
+    payload: dict = {
+        "model": cfg["model"],
+        "temperature": temperature,
+        "stream": True,
+        "messages": [
+            {"role": "system", "content": system},
+            {"role": "user", "content": user},
+        ],
+    }
+    effort = (os.environ.get("LLM_REASONING_EFFORT") or "").strip()
+    if effort:
+        payload["reasoning_effort"] = effort
+    req = urllib.request.Request(
+        cfg["base_url"] + "/chat/completions",
+        data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
+        method="POST",
+        headers={"Content-Type": "application/json", "Authorization": f"Bearer {key}"},
+    )
+    t0, pieces, err = time.time(), 0, ""
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            for raw in resp:
+                line = raw.decode("utf-8", "replace").strip()
+                if not line.startswith("data:"):
+                    continue
+                body = line[5:].strip()
+                if body == "[DONE]":
+                    break
+                try:
+                    chunk = json.loads(body)
+                except json.JSONDecodeError:
+                    continue
+                choices = chunk.get("choices") or [{}]
+                piece = (choices[0].get("delta") or {}).get("content")
+                if piece:
+                    pieces += 1
+                    yield piece
+    except urllib.error.HTTPError as exc:
+        err = f"http {exc.code}"
+    except (urllib.error.URLError, TimeoutError, OSError) as exc:
+        err = f"network {type(exc).__name__}"
+    print(json.dumps({
+        "llm": tag, "model": cfg["model"], "ok": pieces > 0,
+        "ms": int((time.time() - t0) * 1000), "chunks": pieces, "error": err or None,
+    }, ensure_ascii=False))
