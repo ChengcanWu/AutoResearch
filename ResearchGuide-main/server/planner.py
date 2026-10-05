@@ -19,7 +19,7 @@ from typing import Any
 import llm
 import store
 from pku_adapter import search_courses
-from schemas import NBA, UserFact
+from schemas import DECISION_STATUSES, NBA, UserFact
 
 # ---------- 方向目录（策展：从 knowledge/disciplines.json 浓缩的入门友好子集）----------
 
@@ -98,10 +98,14 @@ DIRECTIONS: dict[str, dict[str, Any]] = {
 
 
 def _signals(facts: list[UserFact]) -> dict[str, list[UserFact]]:
-    """fact.key → 命中的事实列表（只统计已确认/行为类，draft 不参与决策）。"""
+    """fact.key → 命中的事实列表（只统计已确认/行为类，draft 不参与决策）。
+
+    用白名单而不是排除列表：新增状态（如 superseded）必须显式加入才会参与决策，
+    否则会被静默当成有效信号（例如换了方向后旧方向仍被计分）。
+    """
     out: dict[str, list[UserFact]] = {}
     for f in facts:
-        if f.status in ("draft", "dismissed", "deleted"):
+        if f.status not in DECISION_STATUSES:
             continue
         out.setdefault(f.key, []).append(f)
     return out
@@ -267,7 +271,10 @@ def _voice_cards(cards: list[dict[str, Any]], facts: list[UserFact], quotes: dic
     for i, c in enumerate(cards):
         lines.append(f"{i}. {c['direction']['name']}｜规则理由：{c['why_you']}")
     said = [f"{k}={v}" for k, v in quotes.items() if v]
-    facts_txt = [f.value for f in facts if f.status not in ("dismissed", "deleted")][:8]
+    # 用白名单（schemas.DECISION_STATUSES），不用排除列表：
+    # 「用户删掉的」在合并后的代码里有两个状态（retracted / deleted），
+    # 排除列表漏掉任何一个，被删的事实就会继续进模型上下文。
+    facts_txt = [f.value for f in facts if f.status in DECISION_STATUSES][:8]
     data = llm.chat_json(
         "你在改写给本科低年级的方向推荐理由。每条必须引用学生原话或已记录事实，禁止编造经历。"
         "why 不超过 70 个汉字。条数必须与输入一致。",

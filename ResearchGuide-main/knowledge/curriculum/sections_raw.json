@@ -1,0 +1,722 @@
+[
+ {
+  "kind": "dept",
+  "name": "在用本科专业目录（本部）",
+  "printed": 1
+ },
+ {
+  "kind": "major",
+  "name": "公共与基础课程安排",
+  "printed": 7
+ },
+ {
+  "kind": "dept",
+  "name": "本科生思想政治必修课培养方案",
+  "printed": 8
+ },
+ {
+  "kind": "dept",
+  "name": "本科生思政选择性必修课培养方案",
+  "printed": 10
+ },
+ {
+  "kind": "dept",
+  "name": "本科生军事理论课培养方案",
+  "printed": 11
+ },
+ {
+  "kind": "dept",
+  "name": "本科生国家安全教育课程培养方案",
+  "printed": 13
+ },
+ {
+  "kind": "dept",
+  "name": "本科生体育课程培养方案",
+  "printed": 15
+ },
+ {
+  "kind": "dept",
+  "name": "本科生心理健康课程培养方案",
+  "printed": 19
+ },
+ {
+  "kind": "dept",
+  "name": "本科生劳动教育课程培养方案",
+  "printed": 20
+ },
+ {
+  "kind": "dept",
+  "name": "本科生大学英语课程培养方案",
+  "printed": 22
+ },
+ {
+  "kind": "dept",
+  "name": "公共信息科学课程培养方案",
+  "printed": 25
+ },
+ {
+  "kind": "major",
+  "name": "附件：公共信息科学课程简介",
+  "printed": 27
+ },
+ {
+  "kind": "dept",
+  "name": "本科生通识教育课程培养方案",
+  "printed": 44
+ },
+ {
+  "kind": "group",
+  "name": "人文学部",
+  "printed": null
+ },
+ {
+  "kind": "dept",
+  "name": "中国语言文学系",
+  "printed": 48
+ },
+ {
+  "kind": "major",
+  "name": "汉语言文学专业",
+  "printed": 50
+ },
+ {
+  "kind": "major",
+  "name": "汉语言专业",
+  "printed": 60
+ },
+ {
+  "kind": "major",
+  "name": "古典文献学专业",
+  "printed": 68
+ },
+ {
+  "kind": "major",
+  "name": "应用语言学专业",
+  "printed": 76
+ },
+ {
+  "kind": "major",
+  "name": "汉语言文学（古文字学方向）专业",
+  "printed": 84
+ },
+ {
+  "kind": "major",
+  "name": "汉语言（古文字学方向）专业",
+  "printed": 92
+ },
+ {
+  "kind": "major",
+  "name": "古典文献学（古文字学方向）专业",
+  "printed": 100
+ },
+ {
+  "kind": "major",
+  "name": "应用语言学（古文字学方向）专业",
+  "printed": 108
+ },
+ {
+  "kind": "major",
+  "name": "汉语言文学专业（留学生）",
+  "printed": 116
+ },
+ {
+  "kind": "dept",
+  "name": "历史学系",
+  "printed": 126
+ },
+ {
+  "kind": "major",
+  "name": "历史学专业",
+  "printed": 127
+ },
+ {
+  "kind": "major",
+  "name": "世界史专业",
+  "printed": 132
+ },
+ {
+  "kind": "major",
+  "name": "外国语言与外国历史专业",
+  "printed": 137
+ },
+ {
+  "kind": "major",
+  "name": "历史学专业 古典语文学项目（中国古典学方向）",
+  "printed": 142
+ },
+ {
+  "kind": "major",
+  "name": "世界史专业 古典语文学项目（西方古典学方向、亚非古典学方向）",
+  "printed": 146
+ },
+ {
+  "kind": "major",
+  "name": "历史学系关于港澳台学生和留学生的学分与选课要求",
+  "printed": 151
+ },
+ {
+  "kind": "dept",
+  "name": "考古文博学院",
+  "printed": 152
+ },
+ {
+  "kind": "major",
+  "name": "考古学专业",
+  "printed": 154
+ },
+ {
+  "kind": "major",
+  "name": "文物与博物馆学专业",
+  "printed": 163
+ },
+ {
+  "kind": "major",
+  "name": "文物保护技术专业",
+  "printed": 171
+ },
+ {
+  "kind": "major",
+  "name": "考古学（文物建筑方向）专业",
+  "printed": 178
+ },
+ {
+  "kind": "major",
+  "name": "外国语言与外国历史（考古学方向）专业（阿拉伯语）",
+  "printed": 186
+ },
+ {
+  "kind": "dept",
+  "name": "哲学系宗教学系",
+  "printed": 194
+ },
+ {
+  "kind": "major",
+  "name": "哲学专业（含留学生）",
+  "printed": 196
+ },
+ {
+  "kind": "major",
+  "name": "哲学专业（逻辑学与科学技术哲学方向）（含留学生）",
+  "printed": 209
+ },
+ {
+  "kind": "major",
+  "name": "宗教学专业（含留学生）",
+  "printed": 218
+ },
+ {
+  "kind": "dept",
+  "name": "外国语学院",
+  "printed": 225
+ },
+ {
+  "kind": "major",
+  "name": "阿拉伯语专业",
+  "printed": 228
+ },
+ {
+  "kind": "major",
+  "name": "朝鲜语专业",
+  "printed": 236
+ },
+ {
+  "kind": "major",
+  "name": "德语专业",
+  "printed": 243
+ },
+ {
+  "kind": "major",
+  "name": "俄语专业",
+  "printed": 250
+ },
+ {
+  "kind": "major",
+  "name": "法语专业",
+  "printed": 256
+ },
+ {
+  "kind": "major",
+  "name": "葡萄牙语专业",
+  "printed": 263
+ },
+ {
+  "kind": "major",
+  "name": "泰语专业",
+  "printed": 271
+ },
+ {
+  "kind": "major",
+  "name": "乌尔都语专业",
+  "printed": 278
+ },
+ {
+  "kind": "major",
+  "name": "西班牙语专业",
+  "printed": 285
+ },
+ {
+  "kind": "major",
+  "name": "日语专业",
+  "printed": 292
+ },
+ {
+  "kind": "major",
+  "name": "印尼语专业",
+  "printed": 299
+ },
+ {
+  "kind": "major",
+  "name": "英语专业",
+  "printed": 306
+ },
+ {
+  "kind": "dept",
+  "name": "艺术学院",
+  "printed": 314
+ },
+ {
+  "kind": "major",
+  "name": "艺术史论专业",
+  "printed": 316
+ },
+ {
+  "kind": "major",
+  "name": "广播电视编导（戏剧影视文学方向）专业",
+  "printed": 323
+ },
+ {
+  "kind": "major",
+  "name": "艺术史论（文化产业管理方向）专业",
+  "printed": 330
+ },
+ {
+  "kind": "major",
+  "name": "艺术史论（计算艺术与设计方向）专业",
+  "printed": 338
+ },
+ {
+  "kind": "group",
+  "name": "社会科学学部",
+  "printed": null
+ },
+ {
+  "kind": "dept",
+  "name": "国际关系学院",
+  "printed": 346
+ },
+ {
+  "kind": "major",
+  "name": "国际政治专业 国际政治（国际政治经济学方向）专业 外交学专业",
+  "printed": 348
+ },
+ {
+  "kind": "major",
+  "name": "国际政治（国际组织与国际公共政策方向）专业",
+  "printed": 357
+ },
+ {
+  "kind": "dept",
+  "name": "法学院",
+  "printed": 366
+ },
+ {
+  "kind": "major",
+  "name": "法学专业",
+  "printed": 369
+ },
+ {
+  "kind": "dept",
+  "name": "信息管理系",
+  "printed": 377
+ },
+ {
+  "kind": "major",
+  "name": "信息管理与信息系统专业（文理科生）",
+  "printed": 378
+ },
+ {
+  "kind": "major",
+  "name": "图书馆学专业",
+  "printed": 387
+ },
+ {
+  "kind": "major",
+  "name": "大数据管理与应用专业",
+  "printed": 396
+ },
+ {
+  "kind": "dept",
+  "name": "社会学系",
+  "printed": 405
+ },
+ {
+  "kind": "major",
+  "name": "社会学专业",
+  "printed": 407
+ },
+ {
+  "kind": "major",
+  "name": "社会工作专业",
+  "printed": 414
+ },
+ {
+  "kind": "major",
+  "name": "人类学专业",
+  "printed": 421
+ },
+ {
+  "kind": "dept",
+  "name": "政府管理学院",
+  "printed": 428
+ },
+ {
+  "kind": "major",
+  "name": "政治学与行政学专业",
+  "printed": 430
+ },
+ {
+  "kind": "major",
+  "name": "政治学与行政学（数字治理方向）专业",
+  "printed": 442
+ },
+ {
+  "kind": "major",
+  "name": "行政管理专业",
+  "printed": 451
+ },
+ {
+  "kind": "major",
+  "name": "城市管理专业",
+  "printed": 465
+ },
+ {
+  "kind": "dept",
+  "name": "马克思主义学院",
+  "printed": 476
+ },
+ {
+  "kind": "major",
+  "name": "马克思主义理论专业",
+  "printed": 478
+ },
+ {
+  "kind": "dept",
+  "name": "新闻与传播学院",
+  "printed": 487
+ },
+ {
+  "kind": "major",
+  "name": "新闻学专业",
+  "printed": 489
+ },
+ {
+  "kind": "major",
+  "name": "广播电视学专业",
+  "printed": 497
+ },
+ {
+  "kind": "major",
+  "name": "广告学专业",
+  "printed": 506
+ },
+ {
+  "kind": "major",
+  "name": "体育教育（新闻传播方向）专业",
+  "printed": 514
+ },
+ {
+  "kind": "group",
+  "name": "经管学部",
+  "printed": null
+ },
+ {
+  "kind": "dept",
+  "name": "经济学院",
+  "printed": 522
+ },
+ {
+  "kind": "major",
+  "name": "经济学专业",
+  "printed": 524
+ },
+ {
+  "kind": "major",
+  "name": "经济学专业（新结构经济学实验班）",
+  "printed": 530
+ },
+ {
+  "kind": "major",
+  "name": "国际经济与贸易专业",
+  "printed": 536
+ },
+ {
+  "kind": "major",
+  "name": "金融学专业（金融方向）",
+  "printed": 542
+ },
+ {
+  "kind": "major",
+  "name": "金融学专业（金融科技实验班）",
+  "printed": 548
+ },
+ {
+  "kind": "major",
+  "name": "保险学（风险管理与保险方向）专业",
+  "printed": 554
+ },
+ {
+  "kind": "major",
+  "name": "保险学（精算与人工智能方向）专业",
+  "printed": 560
+ },
+ {
+  "kind": "major",
+  "name": "财政学专业",
+  "printed": 566
+ },
+ {
+  "kind": "major",
+  "name": "经济学院关于荣誉学位的要求",
+  "printed": 572
+ },
+ {
+  "kind": "major",
+  "name": "港澳台学生、留学生培养方案说明",
+  "printed": 573
+ },
+ {
+  "kind": "dept",
+  "name": "光华管理学院",
+  "printed": 574
+ },
+ {
+  "kind": "major",
+  "name": "金融学专业",
+  "printed": 576
+ },
+ {
+  "kind": "major",
+  "name": "金融学专业（金融经济方向）",
+  "printed": 585
+ },
+ {
+  "kind": "major",
+  "name": "会计学专业",
+  "printed": 594
+ },
+ {
+  "kind": "major",
+  "name": "市场营销专业",
+  "printed": 603
+ },
+ {
+  "kind": "major",
+  "name": "市场营销专业（数据科学方向）",
+  "printed": 612
+ },
+ {
+  "kind": "major",
+  "name": "工商管理专业",
+  "printed": 621
+ },
+ {
+  "kind": "major",
+  "name": "工商管理专业（数字经济管理方向）",
+  "printed": 634
+ },
+ {
+  "kind": "dept",
+  "name": "国家发展研究院",
+  "printed": 642
+ },
+ {
+  "kind": "major",
+  "name": "经济学（国家发展方向）专业",
+  "printed": 644
+ },
+ {
+  "kind": "group",
+  "name": "跨学科类",
+  "printed": null
+ },
+ {
+  "kind": "dept",
+  "name": "元培学院",
+  "printed": 658
+ },
+ {
+  "kind": "major",
+  "name": "政治学、经济学与哲学专业",
+  "printed": 662
+ },
+ {
+  "kind": "dept",
+  "name": "人文学部",
+  "printed": 669
+ },
+ {
+  "kind": "major",
+  "name": "古典语文学项目",
+  "printed": 669
+ },
+ {
+  "kind": "dept",
+  "name": "哲学系宗教学系/社会学系",
+  "printed": 679
+ },
+ {
+  "kind": "major",
+  "name": "思想与社会项目",
+  "printed": 679
+ },
+ {
+  "kind": "dept",
+  "name": "外国语学院",
+  "printed": 683
+ },
+ {
+  "kind": "major",
+  "name": "多语种国际化卓越外语人才拔尖学生培养实验班项目（西班牙语、俄语、阿拉伯语、日语、德语、法语方向）",
+  "printed": 683
+ },
+ {
+  "kind": "major",
+  "name": "多语种国际化卓越外语人才拔尖学生培养实验班项目（英汉互译方向）",
+  "printed": 688
+ },
+ {
+  "kind": "major",
+  "name": "国别区域研究项目",
+  "printed": 691
+ },
+ {
+  "kind": "major",
+  "name": "附表一：公共语言课课程列表",
+  "printed": 693
+ },
+ {
+  "kind": "major",
+  "name": "附表二：区域方向课程课程列表",
+  "printed": 696
+ },
+ {
+  "kind": "dept",
+  "name": "对外汉语教育学院/教育学院",
+  "printed": 700
+ },
+ {
+  "kind": "major",
+  "name": "汉语国际教育项目",
+  "printed": 700
+ },
+ {
+  "kind": "dept",
+  "name": "社会科学学部",
+  "printed": 703
+ },
+ {
+  "kind": "major",
+  "name": "社会科学基础人才培养项目（严复班）",
+  "printed": 703
+ },
+ {
+  "kind": "dept",
+  "name": "政府管理学院",
+  "printed": 705
+ },
+ {
+  "kind": "major",
+  "name": "政治、法律与社会项目",
+  "printed": 705
+ },
+ {
+  "kind": "dept",
+  "name": "马克思主义学院",
+  "printed": 709
+ },
+ {
+  "kind": "major",
+  "name": "马克思主义理论项目（大钊班）",
+  "printed": 709
+ },
+ {
+  "kind": "dept",
+  "name": "教育学院/社会学系",
+  "printed": 713
+ },
+ {
+  "kind": "major",
+  "name": "教育与文明发展项目",
+  "printed": 713
+ },
+ {
+  "kind": "dept",
+  "name": "新闻与传播学院/汇丰商学院",
+  "printed": 716
+ },
+ {
+  "kind": "major",
+  "name": "国际传播与国际金融项目",
+  "printed": 716
+ },
+ {
+  "kind": "dept",
+  "name": "国际关系学院/汇丰商学院",
+  "printed": 719
+ },
+ {
+  "kind": "major",
+  "name": "国际政治与国际金融项目",
+  "printed": 719
+ },
+ {
+  "kind": "dept",
+  "name": "法学院/国际关系学院",
+  "printed": 722
+ },
+ {
+  "kind": "major",
+  "name": "涉外法治与全球治理项目",
+  "printed": 722
+ },
+ {
+  "kind": "dept",
+  "name": "光华管理学院/信息科学技术学院",
+  "printed": 726
+ },
+ {
+  "kind": "major",
+  "name": "数智金融项目",
+  "printed": 726
+ },
+ {
+  "kind": "dept",
+  "name": "新闻与传播学院/信息科学技术学院",
+  "printed": 729
+ },
+ {
+  "kind": "major",
+  "name": "人工智能与未来传播项目",
+  "printed": 729
+ },
+ {
+  "kind": "dept",
+  "name": "人工智能研究院",
+  "printed": 732
+ },
+ {
+  "kind": "major",
+  "name": "“人文+AI”能力提升证书项目",
+  "printed": 732
+ },
+ {
+  "kind": "major",
+  "name": "附 院系先修课目录",
+  "printed": 735
+ },
+ {
+  "kind": "major",
+  "name": "附录 与中国有关课程",
+  "printed": 738
+ }
+]

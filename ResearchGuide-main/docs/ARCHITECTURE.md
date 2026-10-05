@@ -46,12 +46,30 @@ knowledge/           disciplines.json 等
   confidence: 0~1,                  # declared 起始 0.6 · inferred 0.4 · behavior 0.8
   source: declared|inferred|behavior,
   evidence: [{type, quote|submission_id...}],   # 无证据不写入
-  status: draft→confirmed→active; dismissed; deleted(软删) }
+  valid_until: ISO 日期 | null,     # 只对 constraint:* 有意义，到点后不再进环境包
+  status: draft→confirmed→active; superseded; dismissed; deleted(软删) }
 ```
 
-- 冲突：新旧并存，旧者 superseded，用户裁决；
-- 衰减：interest 类 60 天无新证据 ×0.9/30天；background/experience 不衰减；
+- 冲突：新旧并存，旧者 `superseded`，用户裁决；
+- **按状态取事实一律用白名单**（`schemas.DECISION_STATUSES = confirmed|active`），
+  不要用「排除 draft/dismissed/deleted」的写法——新增状态会静默漏进决策计分。
+- `experience:*` 只能由提交事件写入；模型不能在对话里造经历（`memory.py` 会拒）。
 - 用户主权：可见 / 可改 / 可删 / 可导出（me 页已实装前三项）。
+- 写入规则与校验细节见 `docs/DIALOGUE_CONTRACT.md` §3、§7。
+
+> **未实装，别当契约用**：interest 类 60 天衰减（`valid_until` 只覆盖明文声明的临时约束，
+> 不做自动衰减）；`dismissed` 与 `superseded` 的语义区分在 UI 上还没有分别展示。
+
+### 3.5 画像隔离（任务 2 起）
+
+一次登录可以有多个「画像」（例如「本科生视角」「转专业视角」），**彼此完全不可见**。
+
+- 活跃画像的数据放在现场表（`facts` / `messages` / `tasks` / `submissions` / `projects` /
+  `conversations` / `actions` / `events` / `fact_revisions` / `decisions`），按 `user_id` 取；
+- 切换或新建画像时，现场数据整体序列化进 `portraits.snapshot`，然后清空现场；
+- 因此**任何新增的用户数据表都必须同步加进 `store._dump_live` / `_clear_live` /
+  `_RESTORE_COLS`**，否则新表会跨画像泄漏（已用 `server/tests/test_portrait_isolation.py` 兜住）；
+- 跨画像 id（任务 id、项目 id、行动 id）取不到就是 404/403，不区分「不存在」和「不属于你」。
 
 ### 3.2 NBA（决策输出）
 
@@ -94,22 +112,50 @@ invoke(**kwargs) -> { ok, data|error, source, retrieved_at }
 
 ```text
 POST /api/auth/login            {nickname} → {uid, token}
+# ---- 画像：每份画像的数据互相不可见，见 §3.5 ----
+GET  /api/portraits            ?uid → {portraits}
+POST /api/portraits             {uid} → {portraits}          # 新建：旧画像收进快照，现场清空
+POST /api/portraits/activate    {uid, id} → {portraits}      # 切换：存回当前，载入目标
+DELETE /api/portraits/{pid}    ?uid                          # 删；删最后一份会清空并要求重新开场
+# ---- 对话内核（任务 2）----
+POST /api/dialogue/turn         {uid, message, conversation_id?} → TurnResult
+POST /api/dialogue/stream       {uid, message, conversation_id?} → SSE         # 同内核，事件为 stage/delta/result/error
+POST /api/dialogue/action       {uid, action_id, event} → {action}             # event: accept|decline|complete
+GET  /api/dialogue/history     ?uid&conversation_id? → {messages, conversations, pending_action}
+# ---- 向导（保留兼容：配了模型时内部由对话内核接管，见 DIALOGUE_CONTRACT §10）----
 POST /api/onboard/start         {uid} → {reply, options, state}
-POST /api/onboard/message       {uid, msg} → {reply, hint?, options, facts, state, done}
+POST /api/onboard/message       {uid, msg} → {reply, hint?, options, facts, state, done, dialogue?}
 GET  /api/onboard/result       ?uid → {messages, facts, state}
 POST /api/onboard/confirm       {uid, edits[{id,value?,dismissed?}]} → {facts}
+# ---- 决策与方向 ----
 POST /api/nba                   {uid} → NBA
+GET  /api/directions/recommend ?uid → {directions, reason}
 POST /api/directions/cards      {uid} → {cards}            # 含真实课程检索（慢，慎用）
 POST /api/directions/choose     {uid, code} → {fact}
+# ---- 任务 ----
 POST /api/tasks/generate        {uid, direction, level} → MicroTask
 GET  /api/tasks                ?uid → {tasks}
 GET  /api/tasks/{tid}          → MicroTask
-POST /api/tasks/{tid}/submit    {uid, payload} → Feedback  # 同时写回 behavior 事实
+POST /api/tasks/{tid}/submit    {uid, payload} → Feedback  # 同时写回 behavior 事实；非本人任务返回 403
+# ---- 它记住的 ----
 GET  /api/me/facts             ?uid → {facts}
+GET  /api/me/facts/{fid}       ?uid → fact
 PATCH /api/me/facts/{fid}       {uid, value?/status?}
 DELETE /api/me/facts/{fid}     ?uid                        # 软删
+# ---- 外部世界 ----
 GET  /api/explore/courses      ?query&limit&term → {ok, items, term|error}   # 有 knowledge/catalog/ 时读快照
 GET  /api/explore/teachers     ?name → {ok, bio?, courses[]}                 # 本学期授课 + 能对上的简介
+# 院系-专业知识库（server/curriculum.py，读 knowledge/curriculum + knowledge/minor，只查表不调模型）
+GET  /api/explore/majors       ?q&minor&limit → {ok, kind, 命中[], 近名[]}    # kind=唯一|专业簇(N)|未命中
+GET  /api/explore/major        ?name → {ok, 卡片, 学分结构, 必修课[], 兄弟专业[]}
+POST /api/curriculum/match      {codes[], low_only?, top?} → {ok, 院系排名[], 专业排名[], 说明}
+GET  /api/explore/minor        ?q|dept&limit → {ok, 命中[]}                  # 辅修/双专业 + 替代课程
+GET  /api/explore/course       ?code → {ok, 课程名, 必修它的专业[], 开课院系线索[]}
+GET  /api/curriculum/stats      → {ok, 专业卡, 培养方案, 辅修方案, 课程索引}
+# 同一批能力的 MCP 服务（工具表在 server/mcp_curriculum.py，stdio 与 http 共用）
+POST /mcp                       MCP streamable-http：initialize / tools/list / tools/call
+                                （工具：major_lookup·major_detail·match_transcript·minor_programs·course_lookup·kb_stats）
+python server/mcp_curriculum.py MCP stdio 版（客户端自己拉进程，不依赖本服务在跑）
 GET  /api/projects/sources      → 来源清单（任务 3，新增）
 GET  /api/projects/context     ?uid → {direction, stage, reason, paths, path_step}   # 默认「走到哪」；paths 来自任务 4
 POST /api/projects/search       {uid, direction, stage, keywords?, node?, path_step?} → {query, items, sources, routes, empty_reason}
@@ -140,10 +186,18 @@ POST /api/statement             {uid, kit, x_ref, x_text, y[edge ids], dry_run?}
 GET  /api/bets                 ?uid → {active, closed, checks, max}
 POST /api/bets                  {uid, name, kind, tier: reach|match|safety, kit?, niche?} → 同上（同时最多 3 个）
 POST /api/bets/{bet_id}/close   {uid, outcome: got|missed|dropped, reason} → 同上
+# ---- 运行状态 ----
+POST /api/llm/connect           {base_url, api_key, model} → 连通性探测结果
 GET  /api/health
 ```
 
 前端课程懒加载走 `/api/explore/courses?query=<节点名>`；有学期快照时本地返回。
+对话内调用外部信息走 `server/tools.py` 的 registry（全部只读），不走 REST：
+除课程/项目/成绩单外，院系-专业知识库的 5 个工具（`major_lookup`·`major_detail`·
+`match_transcript`·`minor_programs`·`course_lookup`）也在里面，与 MCP 服务共用
+`server/mcp_curriculum.py` 的工具表和 `server/curriculum.py` 的查询层——同一份数据、
+同一套口径，只有「怎么把工具讲给模型听」不同（MCP 用 JSON Schema，对话用文字清单）。
+所以「信管有哪些专业分流」这类问题，产品内对话和外部 AI 客户端走的是同一条路。
 
 ## 6. 技术决策（ADR 摘要）
 

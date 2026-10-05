@@ -38,6 +38,8 @@ CREATE TABLE IF NOT EXISTS facts (
   source TEXT NOT NULL,
   evidence TEXT NOT NULL DEFAULT '[]',
   status TEXT NOT NULL,
+  valid_until TEXT,
+  affects TEXT NOT NULL DEFAULT '',
   created_at TEXT NOT NULL,
   updated_at TEXT NOT NULL
 );
@@ -129,12 +131,105 @@ CREATE INDEX IF NOT EXISTS idx_edges_user ON edges(user_id);
 DROP INDEX IF EXISTS idx_statements_user;
 CREATE INDEX IF NOT EXISTS idx_statements_ver ON statements(user_id, kit_id, version);
 CREATE INDEX IF NOT EXISTS idx_bets_user ON bets(user_id);
+-- 对话内核（任务 2）：会话 / 行动 / 事件 / 事实修订 / 决策日志
+-- 见 docs/DIALOGUE_CONTRACT.md。这些表与 facts/messages 一样属于「当前活跃画像」，
+-- 切换画像时由 _dump_live / _clear_live / _load_live 一起收进快照并清空。
+CREATE TABLE IF NOT EXISTS conversations (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'open',
+  topic_hint TEXT NOT NULL DEFAULT '',
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS actions (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  conversation_id TEXT NOT NULL DEFAULT '',
+  action TEXT NOT NULL,
+  title TEXT NOT NULL,
+  direction TEXT NOT NULL DEFAULT '',
+  node_id TEXT NOT NULL DEFAULT '',
+  payload TEXT NOT NULL DEFAULT '{}',
+  based_on TEXT NOT NULL DEFAULT '[]',
+  status TEXT NOT NULL DEFAULT 'offered',
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS events (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  kind TEXT NOT NULL,
+  source_id TEXT NOT NULL DEFAULT '',
+  payload TEXT NOT NULL DEFAULT '{}',
+  created_at TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS fact_revisions (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  fact_id TEXT NOT NULL,
+  operation TEXT NOT NULL,
+  old_value TEXT,
+  new_value TEXT,
+  evidence TEXT NOT NULL DEFAULT '[]',
+  decision_id TEXT NOT NULL DEFAULT '',
+  created_at TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS decisions (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  conversation_id TEXT NOT NULL DEFAULT '',
+  memory_version INTEGER NOT NULL DEFAULT 0,
+  move TEXT NOT NULL DEFAULT '',
+  reason TEXT NOT NULL DEFAULT '',
+  rationale_refs TEXT NOT NULL DEFAULT '[]',
+  tool_calls TEXT NOT NULL DEFAULT '[]',
+  rejected_ops TEXT NOT NULL DEFAULT '[]',
+  degraded INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL
+);
+
+-- 成绩单：一门课一条记录。
+-- 为什么不塞进 facts 的 key-value：一个人 20~40 门课、每门四个字段，
+-- 塞进 value 会变成一坨文本（正是 base:code 那起事故的形态），
+-- 既撑不住引文校验，也没法按学期/成绩/关键词查。
+-- facts 里只放**从成绩单推出来的能力结论**，这里放底稿。
+CREATE TABLE IF NOT EXISTS enrollments (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  course TEXT NOT NULL DEFAULT '',
+  grade TEXT NOT NULL DEFAULT '',      -- 百分制分数，或 W/I/合格/不合格/缓考/退课
+  credits REAL NOT NULL DEFAULT 0,
+  term TEXT NOT NULL DEFAULT '',       -- 形如 25-26学年度1学期
+  kind TEXT NOT NULL DEFAULT '',       -- 课程性质：专业必修/任选/通选课…
+  status TEXT NOT NULL DEFAULT 'completed',  -- completed 已修 | current 在修 | audit 旁听
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+
 CREATE INDEX IF NOT EXISTS idx_facts_user ON facts(user_id);
+CREATE INDEX IF NOT EXISTS idx_enroll_user ON enrollments(user_id);
 CREATE INDEX IF NOT EXISTS idx_projects_user ON projects(user_id);
 CREATE INDEX IF NOT EXISTS idx_tasks_user ON tasks(user_id);
 CREATE INDEX IF NOT EXISTS idx_msgs_user ON messages(user_id);
 CREATE INDEX IF NOT EXISTS idx_portraits_user ON portraits(user_id);
+CREATE INDEX IF NOT EXISTS idx_conv_user ON conversations(user_id);
+CREATE INDEX IF NOT EXISTS idx_actions_user ON actions(user_id);
+CREATE INDEX IF NOT EXISTS idx_events_user ON events(user_id);
+CREATE INDEX IF NOT EXISTS idx_revisions_user ON fact_revisions(user_id);
+CREATE INDEX IF NOT EXISTS idx_decisions_user ON decisions(user_id);
 """
+
+# 老库补列：SQLite 的 ADD COLUMN 是安全操作，已存在就跳过。
+_MIGRATIONS: list[tuple[str, str, str]] = [
+    ("users", "memory_version", "ALTER TABLE users ADD COLUMN memory_version INTEGER NOT NULL DEFAULT 0"),
+    ("messages", "conversation_id", "ALTER TABLE messages ADD COLUMN conversation_id TEXT NOT NULL DEFAULT ''"),
+    ("facts", "valid_until", "ALTER TABLE facts ADD COLUMN valid_until TEXT"),
+    ("actions", "based_on", "ALTER TABLE actions ADD COLUMN based_on TEXT NOT NULL DEFAULT '[]'"),
+    ("facts", "affects", "ALTER TABLE facts ADD COLUMN affects TEXT NOT NULL DEFAULT ''"),
+    # 信息源边指向 knowledge/channels.json 的 id；早期本地库没有这一列（合并 10-03 的研读/定位层时补上）
+    ("edges", "ref", "ALTER TABLE edges ADD COLUMN ref TEXT NOT NULL DEFAULT ''"),
+]
 
 
 @contextmanager
@@ -154,9 +249,10 @@ def init_db() -> None:
     with _LOCK, _conn() as c:
         c.execute("PRAGMA journal_mode=WAL")  # 读写不互相阻塞，演示时多开几个页面也不锁库
         c.executescript(_SCHEMA)
-        cols = {r["name"] for r in c.execute("PRAGMA table_info(edges)")}
-        if "ref" not in cols:  # 早期本地库没有 ref 列（信息源边指向 knowledge/channels.json 的 id）
-            c.execute("ALTER TABLE edges ADD COLUMN ref TEXT NOT NULL DEFAULT ''")
+        for table, column, ddl in _MIGRATIONS:
+            have = {r["name"] for r in c.execute(f"PRAGMA table_info({table})")}
+            if column not in have:
+                c.execute(ddl)
 
 
 # ---------- users ----------
@@ -201,10 +297,11 @@ def _fact_row(r: sqlite3.Row) -> UserFact:
 def add_fact(f: UserFact) -> UserFact:
     with _LOCK, _conn() as c:
         c.execute(
-            "INSERT INTO facts(id,user_id,category,key,value,confidence,source,evidence,status,created_at,updated_at)"
-            " VALUES(?,?,?,?,?,?,?,?,?,?,?)",
+            "INSERT INTO facts(id,user_id,category,key,value,confidence,source,evidence,status,valid_until,affects,created_at,updated_at)"
+            " VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)",
             (f.id, f.user_id, f.category, f.key, f.value, f.confidence, f.source,
-             json.dumps(f.evidence, ensure_ascii=False), f.status, f.created_at, f.updated_at),
+             json.dumps(f.evidence, ensure_ascii=False), f.status, f.valid_until,
+             getattr(f, "affects", "") or "", f.created_at, f.updated_at),
         )
     return f
 
@@ -221,7 +318,12 @@ def list_facts(uid: str, statuses: list[str] | None = None) -> list[UserFact]:
     return [_fact_row(r) for r in rows]
 
 
-def update_fact(fid: str, value: str | None = None, status: str | None = None) -> UserFact | None:
+_UNSET = object()
+
+
+def update_fact(fid: str, value: str | None = None, status: str | None = None,
+                valid_until: Any = _UNSET, evidence: list[dict[str, Any]] | None = None) -> UserFact | None:
+    """局部更新。valid_until 用哨兵区分「不改」和「清空」，因为 None 是合法值。"""
     f = get_fact(fid)
     if not f:
         return None
@@ -229,13 +331,30 @@ def update_fact(fid: str, value: str | None = None, status: str | None = None) -
         f.value = value
     if status is not None:
         f.status = status
+    if valid_until is not _UNSET:
+        f.valid_until = valid_until  # type: ignore[assignment]
+    if evidence is not None:
+        f.evidence = evidence
     f.updated_at = now_iso()
     with _LOCK, _conn() as c:
         c.execute(
-            "UPDATE facts SET value=?, status=?, updated_at=? WHERE id=?",
-            (f.value, f.status, f.updated_at, fid),
+            "UPDATE facts SET value=?, status=?, valid_until=?, evidence=?, updated_at=? WHERE id=?",
+            (f.value, f.status, f.valid_until,
+             json.dumps(f.evidence, ensure_ascii=False), f.updated_at, fid),
         )
     return f
+
+
+def retract_fact(fid: str, *, decision_id: str = "") -> UserFact | None:
+    """作废一条事实。用户自己在界面上改/删记忆时走这里，留 revision 以便追溯。"""
+    f = get_fact(fid)
+    if not f:
+        return None
+    store_evidence = list(f.evidence) + [{"type": "user_edit", "quote": "", "decision_id": decision_id}]
+    update_fact(fid, status="retracted", evidence=store_evidence)
+    add_revision(f.user_id, fact_id=fid, operation="retract", old_value=f.value,
+                 new_value=None, evidence=store_evidence, decision_id=decision_id)
+    return get_fact(fid)
 
 
 def get_fact(fid: str) -> UserFact | None:
@@ -279,18 +398,28 @@ def save_submission(task_id: str, uid: str, payload: str) -> str:
     return sid
 
 
-def add_message(uid: str, role: str, text: str, round_id: str = "") -> None:
+def add_message(uid: str, role: str, text: str, round_id: str = "", conversation_id: str = "") -> str:
+    mid = new_id()
     with _LOCK, _conn() as c:
         c.execute(
-            "INSERT INTO messages(id, user_id, role, text, round, created_at) VALUES(?,?,?,?,?,?)",
-            (new_id(), uid, role, text, round_id, now_iso()),
+            "INSERT INTO messages(id, user_id, role, text, round, conversation_id, created_at)"
+            " VALUES(?,?,?,?,?,?,?)",
+            (mid, uid, role, text, round_id, conversation_id, now_iso()),
         )
+    return mid
 
 
-def list_messages(uid: str) -> list[dict[str, Any]]:
+def list_messages(uid: str, conversation_id: str | None = None, limit: int | None = None) -> list[dict[str, Any]]:
+    q = "SELECT * FROM messages WHERE user_id=?"
+    args: list[Any] = [uid]
+    if conversation_id is not None:
+        q += " AND conversation_id=?"
+        args.append(conversation_id)
+    q += " ORDER BY rowid"
     with _conn() as c:
-        rows = c.execute("SELECT * FROM messages WHERE user_id=? ORDER BY rowid", (uid,)).fetchall()
-    return [dict(r) for r in rows]
+        rows = c.execute(q, args).fetchall()
+    out = [dict(r) for r in rows]
+    return out[-limit:] if limit else out
 
 
 # ---------- portraits（多份画像；当前份的对话和事实仍写在 live 表里） ----------
@@ -327,44 +456,112 @@ def _dump_live(c: sqlite3.Connection, uid: str) -> dict[str, Any]:
         item["evidence"] = json.loads(item.get("evidence") or "[]")
         facts.append(item)
     msgs = [
-        {"role": r["role"], "text": r["text"], "round": r["round"]}
-        for r in c.execute("SELECT role, text, round FROM messages WHERE user_id=? ORDER BY rowid", (uid,))
+        {"role": r["role"], "text": r["text"], "round": r["round"],
+         "conversation_id": r["conversation_id"], "created_at": r["created_at"]}
+        for r in c.execute(
+            "SELECT role, text, round, conversation_id, created_at FROM messages"
+            " WHERE user_id=? ORDER BY rowid", (uid,))
     ]
-    u = c.execute("SELECT onboard_state FROM users WHERE id=?", (uid,)).fetchone()
+    u = c.execute("SELECT onboard_state, memory_version FROM users WHERE id=?", (uid,)).fetchone()
     state: dict[str, Any] = {}
     if u:
         try:
             state = json.loads(u["onboard_state"] or "{}")
         except json.JSONDecodeError:
             state = {}
-    return {"facts": facts, "messages": msgs, "state": state}
+
+    def rows(sql: str) -> list[dict[str, Any]]:
+        return [dict(r) for r in c.execute(sql, (uid,))]
+
+    return {
+        "facts": facts,
+        "messages": msgs,
+        "state": state,
+        "memory_version": int(u["memory_version"]) if u else 0,
+        # 画像隔离：以下数据同属当前画像。切换/新建画像时必须一起收进快照并在现场清空，
+        # 否则新画像会读到旧画像的任务与项目（archive 中的 M5）。
+        "tasks": rows("SELECT * FROM tasks WHERE user_id=? ORDER BY rowid"),
+        "submissions": rows("SELECT * FROM submissions WHERE user_id=? ORDER BY rowid"),
+        "projects": rows("SELECT * FROM projects WHERE user_id=? ORDER BY rowid"),
+        "conversations": rows("SELECT * FROM conversations WHERE user_id=? ORDER BY rowid"),
+        "actions": rows("SELECT * FROM actions WHERE user_id=? ORDER BY rowid"),
+        "events": rows("SELECT * FROM events WHERE user_id=? ORDER BY rowid"),
+        "fact_revisions": rows("SELECT * FROM fact_revisions WHERE user_id=? ORDER BY rowid"),
+        "decisions": rows("SELECT * FROM decisions WHERE user_id=? ORDER BY rowid"),
+        "enrollments": rows("SELECT * FROM enrollments WHERE user_id=? ORDER BY rowid"),
+    }
 
 
 def _clear_live(c: sqlite3.Connection, uid: str) -> None:
-    c.execute("DELETE FROM facts WHERE user_id=?", (uid,))
-    c.execute("DELETE FROM messages WHERE user_id=?", (uid,))
-    c.execute("UPDATE users SET onboard_state=? WHERE id=?", ("{}", uid))
+    for table in ("facts", "messages", "tasks", "submissions", "projects",
+                  "conversations", "actions", "events", "fact_revisions", "decisions",
+                  "enrollments"):
+        c.execute(f"DELETE FROM {table} WHERE user_id=?", (uid,))
+    c.execute("UPDATE users SET onboard_state=?, memory_version=0 WHERE id=?", ("{}", uid))
+
+
+# 恢复快照时的列顺序；memory_version / degraded 是整数列，缺省补 0，其余补空串。
+_RESTORE_COLS: dict[str, tuple[str, ...]] = {
+    "tasks": ("id", "user_id", "data"),
+    "submissions": ("id", "task_id", "user_id", "payload", "created_at"),
+    "projects": ("id", "user_id", "data", "status", "created_at", "updated_at"),
+    "conversations": ("id", "user_id", "status", "topic_hint", "created_at", "updated_at"),
+    "actions": ("id", "user_id", "conversation_id", "action", "title", "direction",
+                "node_id", "payload", "based_on", "status", "created_at", "updated_at"),
+    "events": ("id", "user_id", "kind", "source_id", "payload", "created_at"),
+    "fact_revisions": ("id", "user_id", "fact_id", "operation", "old_value", "new_value",
+                       "evidence", "decision_id", "created_at"),
+    "decisions": ("id", "user_id", "conversation_id", "memory_version", "move", "reason",
+                  "rationale_refs", "tool_calls", "rejected_ops", "degraded", "created_at"),
+    "enrollments": ("id", "user_id", "course", "grade", "credits", "term", "kind",
+                    "status", "created_at", "updated_at"),
+}
+_NUMERIC_COLS = {"memory_version", "degraded", "credits"}
+
+
+def _restore_rows(c: sqlite3.Connection, table: str, uid: str, items: Any) -> None:
+    cols = _RESTORE_COLS[table]
+    for item in items or []:
+        vals: list[Any] = []
+        for col in cols:
+            if col == "user_id":
+                vals.append(uid)
+                continue
+            v = item.get(col)
+            if v is None:
+                v = 0 if col in _NUMERIC_COLS else ""
+            vals.append(v)
+        c.execute(
+            f"INSERT INTO {table}({','.join(cols)}) VALUES({','.join('?' * len(cols))})",
+            tuple(vals),
+        )
 
 
 def _load_live(c: sqlite3.Connection, uid: str, snap: dict[str, Any]) -> None:
     _clear_live(c, uid)
     for f in snap.get("facts") or []:
         c.execute(
-            "INSERT INTO facts(id,user_id,category,key,value,confidence,source,evidence,status,created_at,updated_at)"
-            " VALUES(?,?,?,?,?,?,?,?,?,?,?)",
+            "INSERT INTO facts(id,user_id,category,key,value,confidence,source,evidence,status,valid_until,affects,created_at,updated_at)"
+            " VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)",
             (f.get("id") or new_id(), uid, f.get("category") or "interest", f.get("key") or "",
              f.get("value") or "", float(f.get("confidence") or 0.5), f.get("source") or "declared",
              json.dumps(f.get("evidence") or [], ensure_ascii=False), f.get("status") or "draft",
+             f.get("valid_until"), f.get("affects") or "",
              f.get("created_at") or now_iso(), f.get("updated_at") or now_iso()),
         )
     for m in snap.get("messages") or []:
         c.execute(
-            "INSERT INTO messages(id, user_id, role, text, round, created_at) VALUES(?,?,?,?,?,?)",
-            (new_id(), uid, m.get("role") or "assistant", m.get("text") or "", m.get("round") or "", now_iso()),
+            "INSERT INTO messages(id, user_id, role, text, round, conversation_id, created_at)"
+            " VALUES(?,?,?,?,?,?,?)",
+            (new_id(), uid, m.get("role") or "assistant", m.get("text") or "",
+             m.get("round") or "", m.get("conversation_id") or "", m.get("created_at") or now_iso()),
         )
+    for table in _RESTORE_COLS:
+        _restore_rows(c, table, uid, snap.get(table))
     c.execute(
-        "UPDATE users SET onboard_state=? WHERE id=?",
-        (json.dumps(snap.get("state") or {}, ensure_ascii=False), uid),
+        "UPDATE users SET onboard_state=?, memory_version=? WHERE id=?",
+        (json.dumps(snap.get("state") or {}, ensure_ascii=False),
+         int(snap.get("memory_version") or 0), uid),
     )
 
 
@@ -629,3 +826,311 @@ def list_bets(uid: str) -> list[dict[str, Any]]:
     with _conn() as c:
         rows = c.execute("SELECT data FROM bets WHERE user_id=? ORDER BY created_at, rowid", (uid,)).fetchall()
     return [json.loads(r["data"]) for r in rows]
+# ---------- 对话内核：会话 / 行动 / 事件 / 事实修订 / 决策日志（任务 2）----------
+# 契约见 docs/DIALOGUE_CONTRACT.md。这些数据的可见范围与 facts/messages 一致：
+# 都属于「当前活跃画像」，切换画像时随快照一起收走。
+
+def get_memory_version(uid: str) -> int:
+    u = get_user(uid)
+    return int(u["memory_version"]) if u and u.get("memory_version") is not None else 0
+
+
+def bump_memory_version(uid: str) -> int:
+    with _LOCK, _conn() as c:
+        c.execute("UPDATE users SET memory_version = memory_version + 1 WHERE id=?", (uid,))
+        row = c.execute("SELECT memory_version FROM users WHERE id=?", (uid,)).fetchone()
+    return int(row["memory_version"]) if row else 0
+
+
+def _conv_row(r: sqlite3.Row) -> dict[str, Any]:
+    return dict(r)
+
+
+def open_conversation(uid: str, topic_hint: str = "") -> dict[str, Any]:
+    """取本画像当前打开的会话；没有就新建。"""
+    with _LOCK, _conn() as c:
+        row = c.execute(
+            "SELECT * FROM conversations WHERE user_id=? AND status='open' ORDER BY rowid DESC LIMIT 1",
+            (uid,),
+        ).fetchone()
+        if row:
+            return _conv_row(row)
+        now = now_iso()
+        cid = new_id()
+        c.execute(
+            "INSERT INTO conversations(id, user_id, status, topic_hint, created_at, updated_at)"
+            " VALUES(?,?,?,?,?,?)",
+            (cid, uid, "open", topic_hint[:200], now, now),
+        )
+        return {"id": cid, "user_id": uid, "status": "open",
+                "topic_hint": topic_hint[:200], "created_at": now, "updated_at": now}
+
+
+def get_conversation(uid: str, cid: str) -> dict[str, Any] | None:
+    with _conn() as c:
+        row = c.execute("SELECT * FROM conversations WHERE id=? AND user_id=?", (cid, uid)).fetchone()
+    return _conv_row(row) if row else None
+
+
+def touch_conversation(uid: str, cid: str, topic_hint: str | None = None) -> None:
+    with _LOCK, _conn() as c:
+        if topic_hint is None:
+            c.execute("UPDATE conversations SET updated_at=? WHERE id=? AND user_id=?", (now_iso(), cid, uid))
+        else:
+            c.execute("UPDATE conversations SET updated_at=?, topic_hint=? WHERE id=? AND user_id=?",
+                      (now_iso(), topic_hint[:200], cid, uid))
+
+
+def close_conversation(uid: str, cid: str) -> None:
+    with _LOCK, _conn() as c:
+        c.execute("UPDATE conversations SET status='closed', updated_at=? WHERE id=? AND user_id=?",
+                  (now_iso(), cid, uid))
+
+
+def list_conversations(uid: str, statuses: list[str] | None = None) -> list[dict[str, Any]]:
+    q = "SELECT * FROM conversations WHERE user_id=?"
+    args: list[Any] = [uid]
+    if statuses:
+        q += f" AND status IN ({','.join('?' * len(statuses))})"
+        args += statuses
+    q += " ORDER BY rowid"
+    with _conn() as c:
+        return [_conv_row(r) for r in c.execute(q, args).fetchall()]
+
+
+def _action_row(r: sqlite3.Row) -> dict[str, Any]:
+    d = dict(r)
+    d["payload"] = json.loads(d.get("payload") or "{}")
+    d["based_on"] = json.loads(d.get("based_on") or "[]")
+    return d
+
+
+def save_action(uid: str, *, conversation_id: str, action: str, title: str,
+                direction: str = "", node_id: str = "", payload: dict[str, Any] | None = None,
+                status: str = "offered", action_id: str | None = None,
+                based_on: list[str] | None = None) -> dict[str, Any]:
+    now = now_iso()
+    aid = action_id or new_id()
+    with _LOCK, _conn() as c:
+        c.execute(
+            "INSERT INTO actions(id, user_id, conversation_id, action, title, direction,"
+            " node_id, payload, based_on, status, created_at, updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",
+            (aid, uid, conversation_id, action, title, direction, node_id,
+             json.dumps(payload or {}, ensure_ascii=False),
+             json.dumps(based_on or [], ensure_ascii=False), status, now, now),
+        )
+    return {"id": aid, "user_id": uid, "conversation_id": conversation_id, "action": action,
+            "title": title, "direction": direction, "node_id": node_id,
+            "payload": payload or {}, "based_on": based_on or [], "status": status,
+            "created_at": now, "updated_at": now}
+
+
+def get_action(uid: str, aid: str) -> dict[str, Any] | None:
+    with _conn() as c:
+        row = c.execute("SELECT * FROM actions WHERE id=? AND user_id=?", (aid, uid)).fetchone()
+    return _action_row(row) if row else None
+
+
+def list_actions(uid: str, statuses: list[str] | None = None) -> list[dict[str, Any]]:
+    q = "SELECT * FROM actions WHERE user_id=?"
+    args: list[Any] = [uid]
+    if statuses:
+        q += f" AND status IN ({','.join('?' * len(statuses))})"
+        args += statuses
+    q += " ORDER BY rowid"
+    with _conn() as c:
+        return [_action_row(r) for r in c.execute(q, args).fetchall()]
+
+
+def update_action(uid: str, aid: str, status: str) -> dict[str, Any] | None:
+    with _LOCK, _conn() as c:
+        c.execute("UPDATE actions SET status=?, updated_at=? WHERE id=? AND user_id=?",
+                  (status, now_iso(), aid, uid))
+    return get_action(uid, aid)
+
+
+def pending_action(uid: str) -> dict[str, Any] | None:
+    """当前唯一非终态行动。同一画像同时最多一个，避免反复追问。"""
+    open_states = ["offered", "accepted", "in_progress"]
+    acts = list_actions(uid, statuses=open_states)
+    return acts[-1] if acts else None
+
+
+def last_action(uid: str) -> dict[str, Any] | None:
+    """最近一张行动卡，**不论状态**（含 completed）。
+
+    为什么需要它：用户在任务区把任务交掉之后回到对话，pending_action 已经是
+    None 了（那一步终结了），于是对话里那张卡直接消失——用户看不到「我刚做完
+    的那件事」。他说过「按常理来讲不应该是在任务工作区进行处理，然后回到对话吗」，
+    这就是那句话背后缺的东西：完成的结果必须有落点。
+    """
+    acts = list_actions(uid)
+    return acts[-1] if acts else None
+
+
+def abandon_open_actions(uid: str, keep: str | None = None) -> int:
+    """把未终结的旧行动置为 abandoned；keep 指定的那个保留。"""
+    n = 0
+    for a in list_actions(uid, statuses=["offered", "accepted", "in_progress"]):
+        if keep and a["id"] == keep:
+            continue
+        update_action(uid, a["id"], "abandoned")
+        n += 1
+    return n
+
+
+def add_event(uid: str, kind: str, source_id: str = "", payload: dict[str, Any] | None = None) -> str:
+    eid = new_id()
+    with _LOCK, _conn() as c:
+        c.execute(
+            "INSERT INTO events(id, user_id, kind, source_id, payload, created_at) VALUES(?,?,?,?,?,?)",
+            (eid, uid, kind, source_id, json.dumps(payload or {}, ensure_ascii=False), now_iso()),
+        )
+    return eid
+
+
+def list_events(uid: str, kinds: list[str] | None = None, limit: int = 50) -> list[dict[str, Any]]:
+    q = "SELECT * FROM events WHERE user_id=?"
+    args: list[Any] = [uid]
+    if kinds:
+        q += f" AND kind IN ({','.join('?' * len(kinds))})"
+        args += kinds
+    q += " ORDER BY rowid DESC"
+    with _conn() as c:
+        rows = c.execute(q, args).fetchall()
+    out = []
+    for r in rows:
+        d = dict(r)
+        d["payload"] = json.loads(d.get("payload") or "{}")
+        out.append(d)
+    return out[:limit]
+
+
+def add_revision(uid: str, *, fact_id: str, operation: str, old_value: str | None,
+                 new_value: str | None, evidence: list[dict[str, Any]] | None = None,
+                 decision_id: str = "") -> str:
+    rid = new_id()
+    with _LOCK, _conn() as c:
+        c.execute(
+            "INSERT INTO fact_revisions(id, user_id, fact_id, operation, old_value, new_value,"
+            " evidence, decision_id, created_at) VALUES(?,?,?,?,?,?,?,?,?)",
+            (rid, uid, fact_id, operation, old_value, new_value,
+             json.dumps(evidence or [], ensure_ascii=False), decision_id, now_iso()),
+        )
+    return rid
+
+
+def list_revisions(uid: str, fact_id: str | None = None) -> list[dict[str, Any]]:
+    q = "SELECT * FROM fact_revisions WHERE user_id=?"
+    args: list[Any] = [uid]
+    if fact_id:
+        q += " AND fact_id=?"
+        args.append(fact_id)
+    q += " ORDER BY rowid"
+    with _conn() as c:
+        rows = c.execute(q, args).fetchall()
+    out = []
+    for r in rows:
+        d = dict(r)
+        d["evidence"] = json.loads(d.get("evidence") or "[]")
+        out.append(d)
+    return out
+
+
+def add_decision(uid: str, *, conversation_id: str, memory_version: int, move: str, reason: str,
+                 rationale_refs: list[str] | None = None, tool_calls: list[dict[str, Any]] | None = None,
+                 rejected_ops: list[dict[str, Any]] | None = None, degraded: bool = False) -> str:
+    did = new_id()
+    with _LOCK, _conn() as c:
+        c.execute(
+            "INSERT INTO decisions(id, user_id, conversation_id, memory_version, move, reason,"
+            " rationale_refs, tool_calls, rejected_ops, degraded, created_at)"
+            " VALUES(?,?,?,?,?,?,?,?,?,?,?)",
+            (did, uid, conversation_id, int(memory_version), move, reason,
+             json.dumps(rationale_refs or [], ensure_ascii=False),
+             json.dumps(tool_calls or [], ensure_ascii=False),
+             json.dumps(rejected_ops or [], ensure_ascii=False),
+             1 if degraded else 0, now_iso()),
+        )
+    return did
+
+
+def list_decisions(uid: str, limit: int = 20) -> list[dict[str, Any]]:
+    with _conn() as c:
+        rows = c.execute("SELECT * FROM decisions WHERE user_id=? ORDER BY rowid DESC LIMIT ?",
+                         (uid, limit)).fetchall()
+    out = []
+    for r in rows:
+        d = dict(r)
+        for col in ("rationale_refs", "tool_calls", "rejected_ops"):
+            d[col] = json.loads(d.get(col) or "[]")
+        d["degraded"] = bool(d.get("degraded"))
+        out.append(d)
+    return out
+
+
+# ---------- 成绩单（enrollments）----------
+# 底稿层：一门课一条记录。能力结论由 server/transcript.py 从这里推，不在这里写。
+
+def replace_enrollments(uid: str, items: list[dict[str, Any]]) -> int:
+    """整表替换某个人的成绩单，返回写入条数。
+
+    为什么要「替换」而不是「逐条追加」：成绩单是**快照**，不是流水。
+    用户重贴一份新的成绩单，期望的是它以新为准；逐条追加会让同一门课
+    （例如重修、或者重复粘贴）出现两三条，后面的绩点就算重了。
+    """
+    now = now_iso()
+    with _conn() as c:
+        c.execute("DELETE FROM enrollments WHERE user_id=?", (uid,))
+        for it in items:
+            c.execute(
+                "INSERT INTO enrollments(id,user_id,course,grade,credits,term,kind,status,created_at,updated_at)"
+                " VALUES(?,?,?,?,?,?,?,?,?,?)",
+                (it.get("id") or new_id(), uid, str(it.get("course") or "")[:120],
+                 str(it.get("grade") or "")[:24], float(it.get("credits") or 0),
+                 str(it.get("term") or "")[:40], str(it.get("kind") or "")[:40],
+                 str(it.get("status") or "completed"), now, now),
+            )
+    return len(items)
+
+
+def add_enrollments(uid: str, items: list[dict[str, Any]]) -> int:
+    """追加式写入。给「识别并追加」用：不删原有，只跳过完全重复的条目。"""
+    now = now_iso()
+    n = 0
+    with _conn() as c:
+        have = {
+            (r["course"], r["term"], r["grade"])
+            for r in c.execute(
+                "SELECT course, term, grade FROM enrollments WHERE user_id=?", (uid,))
+        }
+        for it in items:
+            key = (str(it.get("course") or ""), str(it.get("term") or ""),
+                   str(it.get("grade") or ""))
+            if key in have:
+                continue
+            have.add(key)
+            c.execute(
+                "INSERT INTO enrollments(id,user_id,course,grade,credits,term,kind,status,created_at,updated_at)"
+                " VALUES(?,?,?,?,?,?,?,?,?,?)",
+                (it.get("id") or new_id(), uid, str(it.get("course") or "")[:120],
+                 str(it.get("grade") or "")[:24], float(it.get("credits") or 0),
+                 str(it.get("term") or "")[:40], str(it.get("kind") or "")[:40],
+                 str(it.get("status") or "completed"), now, now),
+            )
+            n += 1
+    return n
+
+
+def list_enrollments(uid: str) -> list[dict[str, Any]]:
+    with _conn() as c:
+        rows = c.execute(
+            "SELECT * FROM enrollments WHERE user_id=? ORDER BY rowid", (uid,)).fetchall()
+    return [dict(r) for r in rows]
+
+
+def delete_enrollment(uid: str, eid: str) -> bool:
+    """删一门课。带 user_id 条件，防止删掉别人的记录。"""
+    with _conn() as c:
+        cur = c.execute("DELETE FROM enrollments WHERE id=? AND user_id=?", (eid, uid))
+        return cur.rowcount > 0

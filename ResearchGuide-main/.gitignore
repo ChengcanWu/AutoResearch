@@ -14,6 +14,8 @@ knowledge/catalog/_peek.txt
 *.log
 smoke_result.txt
 smoke2.txt
+# 评测跑分产物（每次跑都会变；用例与跑分器本身入库）
+eval/last-report.json
 
 # 系统与编辑器
 .DS_Store
@@ -22,3 +24,9 @@ desktop.ini
 .idea/
 .vscode/
 .pytest_cache/
+# 本地跑测试留下的临时目录（pytest 的 basetemp / 手写探针；默认 basetemp 在系统临时区，
+# 换到仓库里跑时会留一堆 .ptmp-xxx）
+.ptmp-*/
+.probe-*/
+pytest-cache-files-*/
+

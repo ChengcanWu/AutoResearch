@@ -327,8 +327,13 @@ def test_rarity_reads_peers_in_batches(monkeypatch):
     with sqlite3.connect(store.DB_PATH) as c:
         c.executemany("INSERT INTO cards VALUES(?,?,?,?,?,?,?,?)",
                       [(f"c{i}", f"u{i}", "llm-eval", "2310.17623", 1, _json.dumps({}), "pass", now) for i in range(1000)])
-        c.executemany("INSERT INTO facts VALUES(?,?,?,?,?,?,?,?,?,?,?)",
-                      [(f"f{i}", f"u{i}", "capability", "card:llm-eval:2310.17623", "v", 0.8, "behavior", "[]", "active", now, now) for i in range(1000)])
+        # 列名写全：facts 表后来加了 valid_until / affects（老库由 store._MIGRATIONS 补），
+        # 按位置塞 11 个值会在加了列的库上直接报「13 columns but 11 values」。
+        c.executemany(
+            "INSERT INTO facts(id,user_id,category,key,value,confidence,source,evidence,"
+            "status,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?)",
+            [(f"f{i}", f"u{i}", "capability", "card:llm-eval:2310.17623", "v", 0.8,
+              "behavior", "[]", "active", now, now) for i in range(1000)])
         c.executemany("INSERT INTO edges(id, user_id, kind, text, evidence_url, ref, created_at) VALUES(?,?,?,?,?,?,?)",
                       [(f"e{i}", f"u{i}", "language", "粤语母语", "", "", now) for i in range(0, 1000, 3)])
     me = store.create_user("me")["uid"]

@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import asyncio
 import hmac
+import json
 import os
 import sys
 from concurrent.futures import ThreadPoolExecutor
@@ -17,12 +18,16 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from fastapi import FastAPI, HTTPException, Request
 from starlette.concurrency import run_in_threadpool
-from fastapi.responses import FileResponse, JSONResponse, Response
+from fastapi.responses import FileResponse, JSONResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 import catalog
+import curriculum
+import dialogue
 import llm
+import mcp_curriculum
+import memory
 import onboarding
 import planner
 import positioning
@@ -31,6 +36,7 @@ import quotes
 import reading
 import store
 import submission
+import transcript
 import workbench
 from pku_adapter import search_courses
 from limits import TTLCache
@@ -167,6 +173,30 @@ class PortraitReq(BaseModel):
     id: str = ""
 
 
+class DialogueTurnReq(BaseModel):
+    uid: str
+    message: str
+    conversation_id: str | None = None
+
+
+class DialogueActionReq(BaseModel):
+    uid: str
+    action_id: str
+    event: str  # accept | decline | complete
+
+
+class TranscriptParseReq(BaseModel):
+    uid: str
+    text: str = ""
+
+
+class TranscriptCommitReq(BaseModel):
+    uid: str
+    text: str = ""                      # 有原文就以原文为准，重新解析
+    courses: list[dict] = []
+    mode: str = "replace"               # replace | append
+
+
 def _user_or_404(uid: str) -> dict:
     u = store.get_user(uid)
     if not u:
@@ -198,9 +228,45 @@ def onboard_message(req: OnboardMsgReq):
     state = store.get_onboard_state(req.uid)
     if state.get("phase") == "done":
         raise HTTPException(400, "onboarding already done")
+    # 任务2：配了模型就由新对话内核接管，**冷启动第一句也算**。
+    # 这个判断必须排在 `not state` 之前：否则新用户的第一句会落到老向导的第 1 轮问题，
+    # 要等到第二句才进内核，行为前后不一致。
+    if llm.enabled():
+        return _onboard_from_dialogue(req.uid, req.msg)
+    # 没配模型时保持老向导，保证离线 demo 与既有测试不受影响。
     if not state:
         return onboarding.start(req.uid)
     return onboarding.message(req.uid, req.msg)
+
+
+def _onboard_from_dialogue(uid: str, msg: str) -> dict:
+    """把新内核的一轮结果翻译成旧向导的响应形状，老前端不动也能继续跑。"""
+    # 空消息要在进内核之前挡住：内核按契约抛 ValueError，放它出去就是一个 500。
+    # 之前这里没校验，前端发空串（例如点了没有内容的按钮）会直接把请求打崩。
+    if not (msg or "").strip():
+        raise HTTPException(400, "message is required")
+    r = dialogue.turn(uid, msg)
+    state = store.get_onboard_state(uid)
+    return {
+        "reply": r["reply"],
+        "hint": "",
+        "options": [a["label"] for a in r.get("offered_actions") or []],
+        "facts": [f.to_dict() for f in store.list_facts(uid, statuses=["draft"])],
+        "state": state,
+        "done": bool(r.get("next_action")) or state.get("phase") == "done",
+        # 新内核的附加信息；老前端会忽略这些字段
+        "dialogue": {
+            "conversation_id": r["conversation_id"],
+            "move": r["move"],
+            "memory_version": r["memory_version"],
+            "degraded": r["degraded"],
+            "rejected_ops": r["rejected_ops"],
+            "next_action": r["next_action"],
+            "pending_action": r["pending_action"],
+            "tool_results": r["tool_results"],
+            "trace": r["trace"],
+        },
+    }
 
 
 @app.get("/api/onboard/result")
@@ -219,10 +285,183 @@ def onboard_confirm(req: OnboardConfirmReq):
     return {"facts": [f.to_dict() for f in confirmed]}
 
 
+# ---------- 对话内核（任务2：环境观察 → 决策 → 工具 → 记忆）----------
+
+@app.post("/api/dialogue/turn")
+def dialogue_turn(req: DialogueTurnReq):
+    _user_or_404(req.uid)
+    if not req.message.strip():
+        raise HTTPException(400, "message is required")
+    try:
+        return dialogue.turn(req.uid, req.message, req.conversation_id)
+    except ValueError as exc:
+        raise HTTPException(400, str(exc))
+
+
+def _sse(event: str, data: dict) -> str:
+    return f"event: {event}\ndata: {json.dumps(data, ensure_ascii=False)}\n\n"
+
+
+@app.post("/api/dialogue/stream")
+def dialogue_stream(req: DialogueTurnReq):
+    """与 /api/dialogue/turn 同一份内核，但把阶段推进和回复增量实时推给前端。
+
+    事件：stage（observe/decide/memory/tool/compose）、delta（正文增量）、
+    result（完整响应体，与 turn 一致）、error。
+    """
+    _user_or_404(req.uid)
+    if not req.message.strip():
+        raise HTTPException(400, "message is required")
+
+    def gen():
+        try:
+            for kind, payload in dialogue.turn_steps(req.uid, req.message,
+                                                     req.conversation_id, stream_reply=True):
+                yield _sse(kind, payload)
+        except ValueError as exc:
+            yield _sse("error", {"error": str(exc)})
+        except Exception as exc:  # 流已经开始，不能再抛 HTTP 错误，只能作为事件送出去
+            yield _sse("error", {"error": f"{type(exc).__name__}: {exc}"})
+
+    return StreamingResponse(gen(), media_type="text/event-stream",
+                             headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
+
+
+@app.post("/api/dialogue/action")
+def dialogue_action(req: DialogueActionReq):
+    _user_or_404(req.uid)
+    try:
+        a = dialogue.action_event(req.uid, req.action_id, req.event)
+    except ValueError as exc:
+        raise HTTPException(400, str(exc))
+    if a is None:
+        raise HTTPException(404, "action not found")
+    return {"action": a}
+
+
+@app.get("/api/dialogue/history")
+def dialogue_history(uid: str, conversation_id: str | None = None):
+    _user_or_404(uid)
+    return dialogue.history(uid, conversation_id)
+
+
 @app.get("/api/portraits")
 def portraits_list(uid: str):
     _user_or_404(uid)
     return {"portraits": store.list_portraits(uid)}
+
+
+@app.get("/api/memory")
+def memory_board(uid: str):
+    """按层返回「它记住的我」，供界面分列展示。"""
+    _user_or_404(uid)
+    return memory.board(uid)
+
+
+@app.get("/api/me/coverage")
+def memory_coverage(uid: str):
+    """按用户给的九大类，列出每个固定字段填了没有 + 填了有什么用。
+
+    「核对」页用它把空格显示出来：空格是邀请，但得说清填了能得到什么，
+    否则就变成一张逼人填的表。
+    """
+    _user_or_404(uid)
+    return memory.coverage(uid)
+
+
+# ---------- 成绩单 ----------
+# 分两步：先 parse（只解析、不写库，让用户看清楚识别到了什么），
+# 再 commit（确认后才落库）。成绩单是快照，写错了会污染后面所有难度判断，
+# 所以不让「粘贴即入库」。
+
+@app.post("/api/me/transcript/parse")
+def transcript_parse(req: TranscriptParseReq):
+    """只解析，不落库。返回识别到的课程 + 汇总 + 警告 + 会推导出什么。"""
+    _user_or_404(req.uid)
+    parsed = transcript.parse_transcript(req.text)
+    courses = parsed["courses"]
+    return {
+        "courses": courses,
+        "by_term": transcript.summarize_by_term(courses),
+        "summary": transcript.summarize(courses),
+        # 先给他看「我会从中记下什么」。落库前就能发现我们读错了课，
+        # 比事后去记忆面板里一条条删强。
+        "preview": transcript.derive_capabilities(courses),
+        "warnings": parsed["warnings"],
+        "terms": parsed["terms"],
+    }
+
+
+@app.post("/api/me/transcript")
+def transcript_commit(req: TranscriptCommitReq):
+    """确认后落库。`mode=replace`（默认，整表替换）或 `append`（跳过完全重复）。"""
+    _user_or_404(req.uid)
+    items = req.courses or []
+    # 不信前端逐条传回来的内容，优先拿原文重新解析一遍。
+    # 顺序很重要：先解析再判空。写成先判空的话，
+    # 只传原文（最常见的情形）会被当成「没给课程」直接 400——
+    # 这个 bug 是端到端跑真实成绩单时抓到的，单元测试没覆盖到这条路径。
+    if req.text:
+        reparsed = transcript.parse_transcript(req.text)["courses"]
+        if reparsed:
+            items = reparsed
+    if not items:
+        raise HTTPException(400, "没有可写入的课程：请给 text 或 courses")
+    clean = []
+    for it in items:
+        course = str(it.get("course") or "").strip()
+        if not course:
+            continue
+        clean.append({
+            "course": course[:120],
+            "grade": transcript.normalize_grade(it.get("grade")),
+            "credits": max(0.0, float(it.get("credits") or 0)),
+            "term": str(it.get("term") or "")[:40],
+            "kind": str(it.get("kind") or "")[:40],
+            "status": (str(it.get("status") or "completed")
+                       if str(it.get("status") or "") in ("completed", "current", "audit")
+                       else "completed"),
+        })
+    if not clean:
+        raise HTTPException(400, "没有可写入的课程")
+    n = (store.add_enrollments(req.uid, clean) if req.mode == "append"
+         else store.replace_enrollments(req.uid, clean))
+    store.add_event(req.uid, "transcript_imported", "",
+                    {"count": n, "mode": req.mode or "replace"})
+    # 成绩单变了 → 重新推导能力结论。这一步是成绩单真正的用处：
+    # 让「能力」从模型凭一段话编的判断，变成从底稿确定性推出来的事实。
+    derived = memory.sync_transcript_facts(req.uid)
+    return {"ok": True, "written": n, "derived": derived, **transcript_board(req.uid)}
+
+
+@app.get("/api/me/transcript")
+def transcript_get(uid: str):
+    _user_or_404(uid)
+    return transcript_board(uid)
+
+
+@app.delete("/api/me/enrollments/{eid}")
+def enrollment_delete(uid: str, eid: str):
+    _user_or_404(uid)
+    if not store.delete_enrollment(uid, eid):
+        raise HTTPException(404, "enrollment not found")
+    # 删课之后必须重新推导，否则「修过 N 门某某课」会留着过期结论——
+    # 那比没有更糟，因为它看起来是最硬的那类证据。
+    derived = memory.sync_transcript_facts(uid)
+    return {"ok": True, "derived": derived, **transcript_board(uid)}
+
+
+def transcript_board(uid: str) -> dict:
+    """成绩单 + 汇总 + 分学期 + 推导出来的能力结论。界面直接用这一个。"""
+    courses = store.list_enrollments(uid)
+    derived = [f.to_dict() for f in memory.active_facts(uid)
+               if str(f.key).startswith("transcript:")]
+    return {
+        "courses": courses,
+        "summary": transcript.summarize(courses),
+        "by_term": transcript.summarize_by_term(courses),
+        "derived": derived,
+    }
 
 
 @app.post("/api/portraits")
@@ -319,6 +558,9 @@ def task_submit(tid: str, req: SubmitReq):
     t = store.get_task(tid)
     if not t:
         raise HTTPException(404, "task not found")
+    # 归属校验：否则任何 uid 都能提交别人的任务并写进别人的画像（审计 P0）
+    if t.user_id != req.uid:
+        raise HTTPException(403, "task does not belong to this user")
     if len(req.payload.strip()) < 10:
         raise HTTPException(400, "提交内容太短，至少写一句话")
     fb = workbench.submit(req.uid, t, req.payload)
@@ -344,22 +586,34 @@ def me_fact(fid: str, uid: str):
 
 @app.patch("/api/me/facts/{fid}")
 def me_fact_patch(fid: str, req: FactPatchReq):
+    """用户自己改一条记忆。
+
+    走 memory.user_edit 而不是裸 update_fact，是为了拿到三件必须的事：
+    来源升级为 user_edit（用户关于自己的话是最高可信，1.0）、留 revision、memory_version+1。
+    少了这些，用户改完的记忆和模型推断的在库里长得一样，也没法追溯是谁改的。
+    """
     f = store.get_fact(fid)
     if not f or f.user_id != req.uid:
         raise HTTPException(404, "fact not found")
     if req.value is None and req.status is None:
         raise HTTPException(400, "nothing to update")
-    f2 = store.update_fact(fid, value=req.value, status=req.status)
+    if req.value is not None:
+        updated = memory.user_edit(req.uid, fid, req.value)
+        if not updated:
+            raise HTTPException(400, "value is required")
+        return updated
+    f2 = store.update_fact(fid, status=req.status)
     return f2.to_dict() if f2 else {}
 
 
 @app.delete("/api/me/facts/{fid}")
 def me_fact_delete(fid: str, uid: str):
+    """用户删掉一条记忆。不硬删：置为 retracted 并留 revision，可追溯。"""
     f = store.get_fact(fid)
     if not f or f.user_id != uid:
         raise HTTPException(404, "fact not found")
-    store.update_fact(fid, status="deleted")
-    return {"ok": True}
+    memory.user_retract(uid, fid)
+    return {"ok": True, "memory_version": store.get_memory_version(uid)}
 
 
 # ---------- explore（真实课程检索透传） ----------
@@ -378,6 +632,82 @@ def explore_teacher(name: str):
     if not name.strip():
         raise HTTPException(400, "name is required")
     return catalog.teacher_payload(name.strip())
+
+
+# ---------- 院系-专业知识库（培养方案）：先查表，再让模型说话 ----------
+# 数据是离线抽好的（文理两卷 + 辅修双专业），这里只查表：不联网、不调模型。
+# 用户说「我是经济学院的」这类问题，答案必须来自这些接口，而不是模型回忆。
+
+class MatchReq(BaseModel):
+    codes: list[str] = []
+    low_only: bool = False        # 只看大一/大二必修（低年级成绩单更稳）
+    top: int = 5
+
+
+@app.get("/api/explore/majors")
+def explore_majors(q: str = "", minor: bool = False, limit: int = 8):
+    """按用户说法查专业；一个名字对上多个就返回专业簇。"""
+    return curriculum.find_major(q, minor=minor, limit=min(30, max(1, limit)))
+
+
+@app.get("/api/explore/major")
+def explore_major(name: str):
+    """单个专业：卡片 + 学分结构 + 必修课清单 + 同院兄弟专业（低年级认不出细分专业时要用）。"""
+    if not name.strip():
+        raise HTTPException(400, "name is required")
+    return curriculum.major_detail(name.strip())
+
+
+@app.post("/api/curriculum/match")
+def curriculum_match(req: MatchReq):
+    """成绩单课号 → 院系排名 + 专业排名 + 还缺哪几门必修。"""
+    return curriculum.match(req.codes, low_only=req.low_only, top=min(20, max(1, req.top)))
+
+
+@app.get("/api/explore/minor")
+def explore_minor(q: str = "", dept: str = "", limit: int = 20):
+    """辅修 / 双专业：学分量、核心课程、替代课程（主修修过同名课时改修这些）。"""
+    return curriculum.find_minor(q, dept, top=min(60, max(1, limit)))
+
+
+@app.get("/api/explore/course")
+def explore_course(code: str):
+    """课号反查：这门课是什么、哪些专业必修它、课号前缀属于哪个院系。"""
+    if not code.strip():
+        raise HTTPException(400, "code is required")
+    return curriculum.course_detail(code.strip())
+
+
+@app.get("/api/curriculum/stats")
+def curriculum_stats():
+    """知识库健康检查：现在库里有多少专业/方案/课程。"""
+    return curriculum.stats()
+
+
+# ---------- 同一个知识库的 MCP 服务（streamable-http） ----------
+# 工具表在 server/mcp_curriculum.py，stdio 和 http 两种传输共用一套工具：
+#   · DSH 的 dsh-mcp-client 配置见 docs/DEPARTMENT_KNOWLEDGE.md §4.4
+#   · stdio：python server/mcp_curriculum.py
+
+@app.post("/mcp")
+async def mcp_endpoint(request: Request):
+    try:
+        payload = await request.json()
+    except Exception:                                          # noqa: BLE001
+        return JSONResponse({"jsonrpc": "2.0", "id": None,
+                             "error": {"code": -32700, "message": "parse error"}}, status_code=200)
+    resp = mcp_curriculum.http_handle(payload)
+    if resp is None:                                            # 通知类消息：按 MCP 规范回 202
+        return Response(status_code=202)
+    return JSONResponse(resp)
+
+
+@app.get("/mcp")
+def mcp_info():
+    """给人看的：这个地址是 MCP 的 streamable-http 端点，用 POST 发 JSON-RPC。"""
+    return {"ok": True, "endpoint": "/mcp", "protocol": mcp_curriculum.PROTOCOL,
+            "tools": [t["name"] for t in mcp_curriculum.list_tools()],
+            "hint": "MCP streamable-http：POST JSON-RPC（initialize / tools/list / tools/call）"}
 
 
 # ---------- 边学边练：项目检索 / 选定 / 交成果（任务 3） ----------

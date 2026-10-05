@@ -22,8 +22,19 @@ def new_id() -> str:
 
 
 FactCategory = Literal["background", "interest", "capability", "preference", "experience"]
-FactSource = Literal["declared", "inferred", "behavior"]
-FactStatus = Literal["draft", "confirmed", "active", "dismissed", "deleted"]
+# derived：从成绩单这类**官方底稿**由代码确定性推出来的（模型写不了，见 memory.py）
+# user_edit：用户在界面上亲手改的
+FactSource = Literal["declared", "inferred", "behavior", "derived", "user_edit"]
+# superseded：被更新的事实取代（例如换了方向）。任何按状态取事实的地方都必须用白名单，
+# 不能用排除列表，否则新增状态会静默漏进决策（见 memory.py 的 ACTIVE_STATUSES）。
+# retracted：用户删掉的（对话/记忆层走 memory.user_retract，留 revision 可追溯）；
+# deleted：同样表示「不再算数」，研读层用它作废一条结论。两个都**不能**进决策。
+FactStatus = Literal["draft", "confirmed", "active", "superseded", "dismissed", "deleted", "retracted"]
+
+# 参与决策的事实状态白名单。按状态筛选一律用白名单，不要用排除列表。
+DECISION_STATUSES: tuple[str, ...] = ("confirmed", "active")
+# 需要用户核对、还没生效的状态。
+DRAFT_STATUSES: tuple[str, ...] = ("draft",)
 
 
 class UserFact:
@@ -41,6 +52,8 @@ class UserFact:
         source: FactSource = "declared",
         evidence: list[dict[str, Any]] | None = None,
         status: FactStatus = "draft",
+        valid_until: str | None = None,
+        affects: str = "",
         created_at: str | None = None,
         updated_at: str | None = None,
     ) -> None:
@@ -53,6 +66,10 @@ class UserFact:
         self.source = source
         self.evidence = evidence or []
         self.status = status
+        # 临时约束的有效期（如「本周只有十分钟」）。到点后不再进环境包，见 memory.is_expired。
+        self.valid_until = valid_until
+        # 这条记忆改变未来的哪个决策（写入时举证，见 memory.AFFECTS）。
+        self.affects = affects or ""
         self.created_at = created_at or now_iso()
         self.updated_at = updated_at or self.created_at
 
@@ -67,6 +84,8 @@ class UserFact:
             "source": self.source,
             "evidence": self.evidence,
             "status": self.status,
+            "valid_until": self.valid_until,
+            "affects": self.affects,
             "created_at": self.created_at,
             "updated_at": self.updated_at,
         }
@@ -83,6 +102,8 @@ class UserFact:
             source=d.get("source", "declared"),
             evidence=d.get("evidence") or [],
             status=d.get("status", "draft"),
+            valid_until=d.get("valid_until"),
+            affects=d.get("affects", ""),
             created_at=d.get("created_at"),
             updated_at=d.get("updated_at"),
         )
@@ -120,7 +141,18 @@ class NBA:
 
 
 class MicroTask:
-    """微任务：10–30 分钟、带步骤与评分标准的真实小任务。"""
+    """微任务：10–30 分钟、带步骤与评分标准的真实小任务。
+
+    **一个任务必须能回答三个问题**，否则用户不知道要干什么：
+      做什么   steps        —— 具体动作
+      交什么   deliverable  —— 交上来的东西长什么样（一段话？一张表？截图？）
+      怎样算过 rubric       —— 逐条可判定，不是「做得不错」
+
+    origin / action_id 是「这个任务从哪来」：
+      origin="dialogue" —— 对话里「就做这个」产生的，action_id 指回那张行动卡
+      origin="tree"     —— 任务区里点知识树节点产生的
+    两者**必须都能在任务区看到**，所以 origin 是数据字段而不是各自的列表。
+    """
 
     def __init__(
         self,
@@ -131,11 +163,15 @@ class MicroTask:
         title: str = "",
         brief: str = "",
         steps: list[str] | None = None,
+        deliverable: str = "",
         rubric: list[dict[str, str]] | None = None,
         time_budget_min: int = 20,
         difficulty: int = 1,
         status: str = "open",  # open | submitted | done
         created_at: str | None = None,
+        origin: str = "tree",
+        action_id: str = "",
+        node_path: str = "",
     ) -> None:
         self.id = id or new_id()
         self.user_id = user_id
@@ -143,11 +179,15 @@ class MicroTask:
         self.title = title
         self.brief = brief
         self.steps = steps or []
+        self.deliverable = deliverable
         self.rubric = rubric or []
         self.time_budget_min = time_budget_min
         self.difficulty = difficulty
         self.status = status
         self.created_at = created_at or now_iso()
+        self.origin = origin
+        self.action_id = action_id
+        self.node_path = node_path
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -157,11 +197,15 @@ class MicroTask:
             "title": self.title,
             "brief": self.brief,
             "steps": self.steps,
+            "deliverable": self.deliverable,
             "rubric": self.rubric,
             "time_budget_min": self.time_budget_min,
             "difficulty": self.difficulty,
             "status": self.status,
             "created_at": self.created_at,
+            "origin": self.origin,
+            "action_id": self.action_id,
+            "node_path": self.node_path,
         }
 
     @classmethod
@@ -173,11 +217,16 @@ class MicroTask:
             title=d.get("title", ""),
             brief=d.get("brief", ""),
             steps=d.get("steps") or [],
+            # 老任务没有 deliverable，回退到 brief，界面上不会出现空白格
+            deliverable=d.get("deliverable") or "",
             rubric=d.get("rubric") or [],
             time_budget_min=d.get("time_budget_min", 20),
             difficulty=d.get("difficulty", 1),
             status=d.get("status", "open"),
             created_at=d.get("created_at"),
+            origin=d.get("origin") or "tree",
+            action_id=d.get("action_id") or "",
+            node_path=d.get("node_path") or "",
         )
 
 

@@ -6,6 +6,47 @@
 
 ---
 
+## [2026-10-05] [BUILD] 默认北大（不问学校）+ 说到院系简称时先查库
+
+- 变更内容：用户给了一段实测对话——第一句「我是信管的大二学生」，系统答完一句评价后反问「你是哪个学校的？」；第二句「帮我查一下信管的专业方向」才去查库。两个问题都在这一版修掉。
+  - **默认北大**：产品只服务北大学生，学校是默认前提而不是待填的空。`memory.COVERAGE_GROUPS` 的 `school` 改成 `Slot(presumed="北京大学")`（核对页显示为已填、标注默认），`LADDER_PROBE["identity"]` 去掉 `school`，系统提示词明确「默认他就是北大学生，不要问『你是哪个学校』」，他若自己说起别的学校则如实说知识库只覆盖北大培养方案。
+  - **身份层漏判**：`LADDER_PROBE["identity"]` 原本只有 `grade/school/major/enroll_year`，**没有 `department`**——「信管大二」把年级和院系都答了，这层仍被判成空着，模型于是接着问一个已经答过的问题。补上 `department`。
+  - **说到名字就先查**：新增 `tools.kb_env_facts(uid, message)`，组装环境包时用 `curriculum.mentions()` 找出这句话里出现的库内院系/专业名，**代码先把培养方案原文事实查好**放进 `env["lib_facts"]`（只读、有界：最多 2 个名字 × 4 张卡 × 6 门课，带来源页），并随 `_env_for_prompt` 进入两次模型调用。这是「代码组装环境、模型决定怎么用」，与按层召回记忆同一个模式。
+  - 规则版（未配模型）也认这份事实：`_degraded_proposal` 在有 `lib_facts` 时直接报出该院系的专业名单，不再答一句与这句话无关的「先看看你想往哪个方向走」。
+  - 提示词补一条引用纪律：**只写库内事实真的写了的东西**（实测模型把只出现在两个专业清单里的《数据库系统》说成「三个方向都有」）；并明确 `school` 只有在他说出北大以外的学校时才写。
+- 影响文档：docs/DIALOGUE_CONTRACT.md §3.1.1 + §4（环境包新增 `lib_facts`）、docs/DEPARTMENT_KNOWLEDGE.md §4.6、docs/CHANGELOG.md
+- 影响模块：server/memory.py、server/tools.py、server/dialogue.py、server/tests/test_dialogue_libfacts.py（新增 11 条）
+- 验证：真模型跑用户那段对话——「我是信管的大二学生」→ 环境包已有 3 个专业名单，回复「你们系三个方向……这学期哪门课你会额外花时间」，**没有再问学校**；「帮我查一下信管的专业方向」→ 三专业 + 学分 + 核心必修课 + 来源页 p378/p387/p396 + 分流以教务为准；「哪个更适合做数据」→ 按必修清单比较且不再把《数据库系统》说成三门共有。三轮 `degraded=false`。
+- 决策来源：用户实测反馈（默认北大；「信管」这种简称应该去查数据库，什么时候用库要更准）
+- 登记人：助手
+
+## [2026-10-05] [BUILD] 对话 agent 接上院系-专业知识库（问「信管有哪些专业分流」不再答「我没有这个工具」）
+
+- 变更内容：产品内对话问「信管有哪些专业分流」，回复是「我手上没有能检索北大培养方案的工具」——知识库与 MCP 都在，只是没挂进对话的工具 registry。现在把 5 个知识库工具（`major_lookup` / `major_detail` / `match_transcript` / `minor_programs` / `course_lookup`）挂进 `server/tools.py`，**定义只有一份**（`mcp_curriculum.TOOLS`，MCP 与对话共用，`curriculum.py` 是唯一查询层）。
+  - 查询层新增：按院系查（「信管」简称表 `DEPT_ALIAS` + 官方名 → 该院全部专业，这才是「有哪些分流」的答案）、`mentions()`（模型把整句当 query 时从原话里抠库内名字）、`codes_for_names()`（课名 → 课号确定性反查，因为北大成绩单只有课名）、未命中时的 `COVERAGE_NOTE`（医学部/深研院/软微不在库里，别把「库里没有」说成「北大没有」）。`mcp_curriculum` 拆出 `run_tool()` 供对话复用，MCP 的 `isError` 语义不变。
+  - 对话层：系统提示词补「专业/分流/培养方案/必修课必须调工具，不许说没有工具」与 `tool_intent` 的形状；`_clean_proposal` 收敛字段名同义写法（`name`/`tool_name` → `tool`，`arguments` → `args`）——实测模型写成 `{"name": ...}`，导致整轮被判无效输出而降级；降级模板 `_tool_fallback_reply` 认知识库结果形状（`命中`/`院系排名`），不再误报「没有合适的结果」。
+- 影响文档：docs/DIALOGUE_CONTRACT.md §5、docs/DEPARTMENT_KNOWLEDGE.md §4.6、docs/ARCHITECTURE.md §5
+- 影响模块：server/curriculum.py、server/mcp_curriculum.py、server/tools.py、server/dialogue.py、server/tests/test_tools_curriculum.py（新增 20 条）
+- 验证：真模型跑三问——「信管有哪些专业分流」→ 调 `major_lookup` 回三个专业 + 学分/核心课 + 「名额以教务为准」；「必修课与学分」→ 调 `major_detail` 出席 p396 的 16 门必修课；「学过的高数B/线代B/计算概论A像哪个院系」→ 调 `match_transcript`（课名反查 3 个课号）并如实说公共课认不出院系。三问均 `degraded=false`、`fabrication_risk=false`。
+- 决策来源：用户实测反馈（对话不能调用数据库）
+- 登记人：助手
+
+## [2026-10-05] [BUILD] 院系-专业知识库（199 专业卡）+ 查询接口 + MCP 服务
+
+- 变更内容：从《北大本科培养方案（2026）》文科卷/理科卷与《辅修双专业培养方案（2025）》抽出结构化知识库：`knowledge/curriculum/`（199 张专业认知卡、198 份培养方案、13k 课程、1077 门被必修课、课号前缀归属 43 个）与 `knowledge/minor/`（98 条辅修/双专业，含替代课程）。定位逐条由模型蒸馏成 ≤40 字并抽检。查询层 `server/curriculum.py`（只读 JSON、不联网、不调模型）：四层检索（主键 → 别名 → 子串 → 近似）、成绩单课号认院系/专业（与留一验证同一 F1 口径，返回「还缺哪几门」）、专业簇与同院兄弟专业、课号反查。接口 6 个（ARCHITECTURE §5）；同一套工具表另有 MCP 服务 `server/mcp_curriculum.py`（stdio 与 streamable-http 两种传输）。留一验证：院系级 Top-1 100%（三种口径）、专业级 Top-1 89%/91%、Top-3 99%。
+- 影响文档：docs/DEPARTMENT_KNOWLEDGE.md、docs/ARCHITECTURE.md §5、docs/curriculum_validation.md、docs/curriculum_intros_review.md、docs/curriculum_minor_review.md、README.md
+- 影响模块：knowledge/curriculum/、knowledge/minor/、tools/curriculum/（抽取与校验脚本）、server/curriculum.py、server/mcp_curriculum.py、server/main.py、server/tests/test_curriculum.py、server/tests/test_mcp_curriculum.py
+- 决策来源：任务表（知识库 / 院系-专业认知）
+- 登记人：助手
+
+## [2026-10-05] [MERGE] 任务 2 对话 agent 合回开发线
+
+- 变更内容：把 `feat/dialogue-agent`（任务 2：对话内核「模型决策、代码裁决」、记忆分层与三道闸门、成绩单与绩点、对话↔任务区、SSE、evaluation）合并到本轮开发线。冲突只出现在 7 个文件：`server/main.py`（import 取并集）、`server/store.py`（两边的表与函数都保留，`edges.ref` 走统一 `_MIGRATIONS`）、`web/index.html`（导航取并集：今日 / 定位 / 研读 / 对话 / 方向 / 任务 / 项目 / 记录，版本戳推到 w33）、`web/js/app.js`（**任务区统一到 `taskPanel`**：对话给的任务和树上任务共用一套面板，树上任务多传「路径步骤说明」与「填入演示示例」，完成后的去处由 `onDone` 注入）、`README.md` / `docs/ARCHITECTURE.md` / `docs/CHANGELOG.md`（两边内容取并集）。
+- 影响模块：server/main.py、server/store.py、web/index.html、web/js/app.js、README.md、docs/ARCHITECTURE.md
+- 说明：合并后 `画像` 视图由任务 2 的「对话 / 核对」两个标签取代（`case "onboarding"` 不再存在）。合并当时 `python -m pytest server/tests` 共 406 条：405 通过，唯一失败是 `test_perf.py::test_deadline_covers_slow_response_headers`（本机让 127.0.0.1 的慢响应头卡约 4.7 秒，断言 <1.5 秒）——同一条在合并前的 `3318243` 上也一样失败，与本次改动无关。（本文件更上面的条目改完后为 417 条，416 通过，唯一失败仍是这一条。）
+- 决策来源：本轮开发线整合
+- 登记人：助手
+
 ## [2026-10-04] [BUILD] 教程蒸馏改为流程树（主干 + 有据才分叉）
 
 - 变更内容：`tutorial-distill` 不再强制 6 步直线。输出 `tutorial-tree-v2`：共用主干，仅当大纲把后面写成并行课/选修轨时才分叉；同一关的两种交卷方式写在 `task.alternatives`。每个节点必须有 `learn` / `task` / `resources`（原链接 + 这一页干什么）。样例：人工智能 `520.20`（卷积 | Transformer）、计算机软件 `520.40`（OS | 编译 | 数据库）。`preview.py` 打 mermaid 和节点卡片。其余 JSON 仍是旧 6 步，校验兼容，等确认后再重跑。未接入 `directions.js`。
@@ -115,12 +156,407 @@
 - 影响模块：server/projects.py、server/main.py、skills/project-scout/SKILL.md、web/js/app.js、web/css/styles.css、knowledge/、docs/TASK3_PROJECTS.md、docs/ARCHITECTURE.md、docs/paths/README.md（一行）
 - 决策来源：陈浩文
 - 登记人：助手
+## [2026-10-02] [CHORE] 交付清理：删密钥与用户数据、夹具改合成、补任务 2 交付文档
+
+这一轮不是加功能，是**让这个文件夹能安全地发给别人**（原话：
+「把该删的过程文件删掉，把 apikey 等敏感数据删掉，把我的用户数据删掉，
+按照开发规范留一份文档介绍我的部分的修改情况，确保我能把整个文件夹压缩发给别人」）。
+
+### 删掉的
+
+| 项 | 是什么 |
+| --- | --- |
+| `ResearchGuide-main/.env` | **真实 DeepSeek 密钥**。从未进过 git（只跟踪 `.env.example`） |
+| `ResearchGuide-main/server/data/` | `demo.db`：一个真实用户 id + 画像 + 成绩单 + 全部记忆 + 明文密钥 |
+| `eval/last-report.json` | 构建产物 |
+| `审计与方案/`（仓库外） | 60+ 过程文件：审计稿、方案草案、探针、一次性载荷 |
+| `docs/paths` | 1 字节的垃圾文件 |
+
+全量历史上扫过 `sk-[0-9a-f]{20,}`（`git rev-list --all` 的每个 blob）：**零命中**，
+密钥只在上面那两个工作区文件里。
+
+### 换成合成数据的
+
+真实成绩单曾经出现在 5 个地方。全部替换，并**保持学分和成绩不变**，
+所以数字断言继续成立（通过学分 10.0 / 绩点学分 8.0 / 绩点 3.8020）：
+
+- `server/tests/test_transcript.py` 的 `SAMPLE` 和 `REAL`
+- `server/tests/test_transcript_in_dialogue.py` 的 `REAL`
+- `tools/verify/verify_served.py`（原来直接读一个 `user-transcript.txt`）
+- `tools/verify/verify_transcript_sse.py`、`verify_receipt_render.js`
+- `eval/dialogue_cases.json` 里用户的自述、`test_memory.py` 的画像夹具
+
+理由不只是隐私：**测试夹具不该来自某一个人的数据**。合成夹具更通用，
+也不会让下一个读代码的人以为这是某个真实用户。
+
+> 顺带核实：「北京大学」在 `knowledge/`、`skills/pku-course/`、`discipline-map/`
+> 里是**公开参考数据**（含一份国标 `gbt13745_source.txt`），不是个人数据，保留。
+
+### 搬进来的
+
+`审计与方案/` 里 8 个有长期价值的验收脚本搬进 `ResearchGuide-main/tools/verify/`，
+并把写死的仓库外路径改成仓库内相对路径。
+
+**为什么必须搬**：`test_render_layer.py` 以前找不到脚本就 `skip`，
+而脚本在仓库外 → 别人 clone 下来这 4 条**永远是跳过的**。那等于没有这层保护。
+
+### 新增文档
+
+[`TASK2_DIALOGUE.md`](TASK2_DIALOGUE.md)：任务 2 交付说明（闭环、记忆六层与三道闸门、
+九大类、成绩单与绩点、对话↔任务区、接口、跑法、边界）。
+**取代** `审计与方案/05-任务2交付说明.md`（那份只覆盖内核、早于记忆层/成绩单/前端）。
+
+其中第 12 节「我改过别人代码的地方」请重点看——含一处**尚未在群里定**的接口冲突：
+任务 3 用 `stage=0..3`、任务 4 用 `stage=1..6`，同名字段两套语义，
+建议拆成 `practice_stage` 和 `path_stage_id`。
+
+### 影响文档 / 模块
+
+`docs/README.md`（导航表 + 测试数 61→271 + 测试入口）、`server/memory.py`、
+`docs/CHANGELOG.md` 一处示例、`server/tests/` 三个夹具文件、
+`tools/verify/`（新增目录）、`.gitignore`（已覆盖 `.env` / `server/data/`，未改）。
+
+### 验证
+
+`python tools/verify/run_existing_tests.py` → **271 passed**；
+4 个渲染层脚本全绿；`verify_guards_can_fail.py` 8 条回滚全部证明守卫会红。
+
+### 决策来源
+
+用户直接指令（本轮）。**登记人：任务 2。**
+
+---
+
+## [2026-10-02] [FEAT] 能力从成绩单确定性推导（transcript:*），取代模型凭一段话编判断
+
+接着上一条做。用户批准的方向：「让能力结论自动从成绩单推出来」。
+
+### 为什么这是 `base:code` 事故的正面修法
+
+那起事故的根不是提示词写得不好，而是**能力这件事根本没有底稿**：
+模型读到「Vibecoding」只能自己编一个判断，于是写下
+`'修过计算概论B(Python)93…课程基础扎实（依赖AI生成）'`——
+一半是真实课程，一半是它自己加的评语，混在一条 `value` 里存成一个 `declared` 事实。
+事后谁也分不清哪部分有依据。
+
+现在成绩单在 `enrollments` 表里，能力**可以**是推出来的。所以：
+
+| | 来源 | 谁写 | 长什么样 |
+| --- | --- | --- | --- |
+| `capability:*` | declared / inferred | 模型或用户 | 「我会一点 Python，只会照教程抄」 |
+| `transcript:*` | **derived** | **只有代码** | 「修过 3 门数学类课程，学分加权平均 89.5：概率统计 (B) 96、线性代数 (B) 88、高等数学 (B) (二) 86.5」 |
+
+两个 namespace 分开是有意的——混在一个 key 上就又会分不清硬证据和自述。
+
+### 两条设计红线
+
+1. **不写判断，只写事实。** `value` 里只准出现「修过哪几门、考了多少、加权平均多少」。
+   绝不出现「基础扎实」「能力偏弱」——那是我们的推断，写进「事实」就再也分不清了。
+   难度判断交给读到这条事实的模型自己下。有测试逐词守着（`test_derivation_reports_facts_not_judgements`）。
+2. **只统计通过的课。** 挂了的高等数学不能算「修过数学类课程」，那句话会误导人。
+
+关键词只是**匹配模式**，只在用户真实录入的课程名上做子串匹配，匹配不上就不产出任何东西——
+没有一条课程是我们编的。推导是幂等的、不依赖历史，同样的成绩单永远得到同样的结论。
+
+挂到 capability 层（`LAYER_BUDGET` 4 → 6），并在层内排序给 derived 加 0.9 的权重：
+坑位不够时**硬证据应该压过自述**。0.9 刻意小于 1.0，所以用户直接问到某条自述时它仍能排前面。
+
+### 「用户是最终权威」需要三处让路（这一版最初全漏了）
+
+`sync_transcript_facts` 会在成绩单变动后重新推导。第一版实现里有两个会**覆盖用户意志**的 bug，
+都是写测试时逼出来的：
+
+1. **用户删掉的会自己长回来。** `user_reject` 我按 fact id 记，但重新推导可能新建一行、
+   id 就变了，于是拒绝失效。改成**按 key** 记（从 revision 反查 key）。
+2. **用户改过的会被改回去。** 我为了「让路」把 user_edit 的 key 从 desired 里 pop 掉，
+   结果**撤除循环**把它当成「推导不出来了」直接 retract——用户刚改的那条被删了。
+   现在是独立的 `protected` 集合：受保护的 key 不加、不改、也不撤。
+
+代价不对称：让路只少一条注入的结论（成绩单还在，`transcript.summary` 工具照样查得到）；
+不让路的代价是他发现有一条东西删不掉、改不了。所以让路。
+
+### 界面
+
+- 记忆面板：`source=derived` 的卡单独样式，**摊开依据**（「依据：概率统计 (B) 96、线性代数 (B) 88」）。
+  不给「改」只给「不算」——逐字修改一条机械推导出来的事实没有意义，
+  用户对它唯一合理的表态是否掉它。那个「不算」会被记住。
+- 核对页粘贴成绩单时先给**预览**（会记下哪几条结论），落库前就能发现我们读错了课。
+
+### 验证
+
+- 离线 163 通过（本轮 +2，推导相关共 15 条）
+- 19/19 评测通过（registry doc 和 env packet 都变了，所以必须重跑）
+- `verify_derived_render.js`：真实 chat.js 源码 + 真实 `/api/memory` 载荷，25 项断言全通
+  （依据必须来自**该条自己的 evidence**，不是写死几个课程名对样例；含转义）
+- `probe_derived_live.py`：live 跑真实对话。模型引用具体课程和分数，
+  并给出**有分寸**的判断：「你目前修过的数学课集中在工科数学这一档，
+  还没有实分析、抽象代数这类更硬的课……够用，偏统计这一侧比较强，但还没被真正难的数学检验过」，
+  任务锚在概率统计 96 / 计算概论 92 上，且明确要求用真实数据。
+  没有出现无依据的评语；没有试图去写 `transcript:*`。
+
+- 影响文档：`docs/DIALOGUE_CONTRACT.md` §5.2（新增推导一节）
+- 影响模块：`server/transcript.py`（推导规则）`server/memory.py`（`sync_transcript_facts`）
+  `server/schemas.py`（新增 derived / user_edit 来源）`server/main.py` `server/dialogue.py`
+  `web/js/chat.js` `web/js/app.js` `web/css/styles.css`
+- 决策来源：用户批准「让能力结论自动从成绩单推出来」
+
+---
+
+## [2026-10-02] [FEAT] 成绩单单开一张表 + 树洞格式自动识别 + 绩点计算；核对页摊开九大类字段
+
+用户指令：「成绩单可以单开一个表，同时，参考这个 GitHub 项目，加入树洞成绩粘贴格式自动识别+
+绩点计算的功能」「同时建议把我给出来的这些空都给用户展示出来，就在核对也分列展示，
+表示填好这些信息可以让科研导向更准确」。
+
+### 1. 成绩单进独立表（`enrollments`）
+
+一门课一条：`course / grade / credits / term / kind / status`。
+
+**为什么不塞进 `facts` 的 key-value**：一个人 20~40 门课 × 四个字段，
+塞进 `value` 会变成一坨文本——**正是 `base:code` 那起事故的形态**，
+既撑不住引文校验（闸门②判不了哪部分有依据），也没法按学期/成绩/关键词查。
+`facts` 里只放**从成绩单推出来的能力结论**，底稿留在表里。
+
+画像隔离同步覆盖：`_dump_live` / `_clear_live` / `_RESTORE_COLS` 三处都加上了，
+并加了 `test_enrollments_survive_a_portrait_roundtrip`
+（`affects` 那一列就曾在硬编码列名里被静默丢掉，同一个坑不踩第二次）。
+
+**写入语义是「快照」不是「流水」**：`replace` 整表替换，`append` 跳过完全重复的。
+逐条追加会让重复粘贴的课把绩点算重。
+
+### 2. 树洞 / 教务粘贴格式自动识别（`server/transcript.py`）
+
+规则和公式**移植自**开源计算器
+[PKUMuZi/pku-gpa-calculator](https://github.com/PKUMuZi/pku-gpa-calculator)（MIT）。
+格式：`学分 / 「学分」 / 课程名 / (课程性质)* / 成绩`，学期标题形如 `25-26学年度1学期`
+且**向下贯穿**到后面的课。
+
+**验证方式是重点**：没有手写样例对着自己的假设测，而是
+`审计与方案/verify_transcript_vs_reference.js` 从上游 HTML 里**抠出它真实的解析函数**、
+拿它**自己的示例成绩单**跑出基准，再用 `verify_transcript_my.py` 跑我们的实现**逐条对**。
+结果：**50 门课、8 个学期、总绩点 3.838950、均分 91.617308、通过学分 110、
+计 GPA 学分 104 —— 全部一致**。这个脚本里没有一个字符是我猜的。
+
+另外加了两件上游没有的：解析失败**说得出原因**（「没识别到学期标题」），
+以及未知行计数上报，而不是静默丢数据。
+
+**绩点**：`GPA(x) = 4 − 3(100−x)²/1600`。
+
+**一处有意与上游不同**：低于 60 分我们记 0，上游不设下限——
+上游写法在 50 分时会算出 `-0.6875` 的**负绩点**，累加进平均会拖低别的课。
+负绩点没有意义，北大教务口径也是不及格记 0。
+做成 `GPA_FLOOR_AT_ZERO` 开关，改回上游行为只需一个常量。
+
+**汇总口径**：通过学分含「合格」；计 GPA 学分**只含百分制**，
+`W`/`I`/`合格`/`不合格` 不进分母。把「合格」当 60 分算会把绩点算低。
+
+### 3. 核对页摊开九大类字段（用户反馈）
+
+`GET /api/me/coverage` + 核对页的 `coverageBoard()`：九大类各一列，
+每格标已填（给值）/ 空（给「填了有什么用」），顶部「已填 N / M 项」。
+
+设计取舍：**每个空格必须带一句 why**。空格本身是邀请，
+但只列空格不说收益就变成一张逼人填的表——所以 `why` 写在
+`memory.COVERAGE_GROUPS` 里，和字段定义放在一起，不散在前端。
+已填的格子**不重复**显示 why，免得整页都是废话。
+
+点空格跳去对话而不是就地开输入框：这些字段大多需要上下文
+（成绩单要粘贴、方向要聊），摆一排输入框只会让人填一半就走。
+
+### 4. `transcript.summary` 只读工具（P3 落地）
+
+默认**只回汇总**，要具体课程必须带 `keyword`。
+成绩单是 §4 优先级里的 P3，整份进上下文会挤掉真正决定判断的那几条，
+还会逼模型自己在几十条里找——找错一条就会说出用户一眼看穿的话。
+「底稿留在表里，结论才进上下文」和「不塞进 facts」是同一个决定的两面。
+
+### 5. 修掉的 bug
+
+- **`/api/me/transcript` 提交永远 400**：我先判 `courses` 为空、再从 `text` 重新解析，
+  于是只传原文（最常见的情形）被当成「没给课程」。**单元测试没覆盖这条路径，
+  是端到端跑真实成绩单抓到的。** 已把顺序改成先解析再判空。
+- 我自己在测试里写错两处，也都是被测出来的：`线性代数 (B)` 在两个学期各出现一次
+  （我用字典取值拿了后一条）、`缓考` 解析时归一成 `I`（和上游 `normalizeScore` 一致）。
+
+**验收**：148 个离线测试通过（新增 35 条）；19/19 评测用例通过；
+`审计与方案/verify_transcript_api.py` 走真实接口 9 项全通（含画像隔离往返）；
+`审计与方案/verify_coverage_render.js` 用**真实 app.js 源码 + 真实载荷**
+渲染字段清单，13 项断言全通（含 HTML 转义）——没有无头浏览器，所以写了 DOM shim。
+
+- 影响文档：`docs/DIALOGUE_CONTRACT.md` §5（新增工具 + §5.1/§5.2 成绩单与格式）
+- 影响模块：`server/transcript.py`（新）`server/store.py` `server/memory.py`
+  `server/tools.py` `server/main.py` `web/js/app.js` `web/css/styles.css` `web/index.html`
+- 决策来源：用户指令（单开表 + 参考开源计算器 + 核对页摊开字段）
+
+---
+
+## [2026-10-01] [FEAT] 记忆改成按「时间跨度」分层 + 写入三道闸门 + 用户可改可删
+
+**起因**：用户手测第二轮的反馈。原话两条：一是「AI 记忆不是很结构化？以后数据量多了全量注入吗？
+是不是可以分成几个部分去处理？」，二是「这里现在的区分标准太不专业了，注入上下文照样会出错，
+先判断一下这种记忆业界常用的通则是什么，我们这里需要个性化修改哪些」。
+另有一条追问：「还有从实践跨度角度的呢，比如手头正在做什么项目？以及怎么让AI知道
+哪些可以写进记忆，哪些不需要进入记忆」。
+
+**先对齐业界通则**（读了原始论文，不是凭印象）：
+- **CoALA**（arXiv:2309.02427）：工作记忆 + 长期记忆分 **episodic / semantic / procedural**。
+- **Generative Agents**（arXiv:2304.03442）：记忆流 + **reflection**（合成为更高层结论）
+  + 检索按 **recency + importance + relevance** 三信号加权。
+- **MemGPT**（arXiv:2310.08560）：分层记忆、在有限上下文里做数据搬运。
+
+**我们和通用聊天记忆不一样的地方**（这决定了不能照抄）：
+1. 我们是**画像**不是聊天记忆——每条记忆都要回答「它改变哪个决策」，所以排序依据是
+   **决策影响**而不是语义相似度。
+2. 主体是**会变的人，而变化本身就是信号**——所以 semantic 记忆要**按变化速度再切一刀**，
+   这一刀同时决定了「什么时候该重新问」。
+3. 诚实标准更高——必须硬区分「他说的 / 我们推的 / 做出来的」，推断不得当自述复用。
+4. 结论的过期速度不一样。
+
+**做了什么**：
+- **记忆分层**（`memory.LAYERS`）：`identity 身份` / `practice 当前实践` / `capability 能力起点` /
+  `experience 经历积累` / `interest 倾向` / `constraint 临时约束`。层同时管三件事：
+  提问顺序、注入预算、什么时候重新问。`LAYER_BUDGET` 给出每层名额。
+- **补了缺失的 key**：`school`（原来根本没有——「某某大学信息管理系」里的「某某大学」
+  被静默丢掉了），以及 `current:course` / `current:project`（当前实践，`default_ttl_days=90`
+  自动过期，避免半年前的项目被当成「他正在做的事」）。
+- **召回从「平表取 top-8」改成「按层给预算」**：全局抢坑位时一条课程成绩可能把「他的方向」
+  挤出去，而且没有任何信号告诉模型记忆被截断了。层内相关度**只认多字词命中**——
+  原来那个「单字命中 0.05/字」在中文里等于噪声，一句话的每个字都会命中一堆无关事实。
+- **写入三道闸门**（默认不写，要写就举证），出发点是**代价不对称**：
+  漏写一条，下次再问一遍就行；写错一条，它会**静默污染之后的每一个决策**，而且没人会发现。
+  1. **在册**：key 命中 registry，且允许该 source。
+  2. **引文撑得住值**：`evidence_quote` 要支撑写进去的 value。算「value 的内容有多少能在
+     引文里找到」：`≥0.8` 收；`0.5~0.8` 收但**降级为 `inferred`**；`<0.5` 拒。
+     value 不足 8 字跳过（`AI`、`大二` 是规范化缩写，逐字要求会误杀）。
+     阈值是拿真实例子校准的（`审计与方案/calibrate_support.py`，9/9 符合预期）：
+     真实事故那条 **0.29**，正常值 **0.67–1.00**，分得开。
+  3. **说得清改变哪个决策**：`affects` 必填且命中白名单（`task_difficulty` `task_kind`
+     `direction_choice` `question_next` `course_pick` `pace` `feedback`）。**填不出来就没资格进记忆。**
+- **中文 slug 放行 + key 规范化**：模型写 `current:选课数据大作业` 是很自然的，
+  只放行 `[a-z0-9_]` 会把真实信息整条丢掉（同一个错犯过两次，第二次是中文）。
+  `canon_key` 把空格/下划线统一成连字符、削掉首尾分隔符。注意 ASCII-only **从来没真正
+  解决同义重复**（`ai`/`AI`/`人工智能` 照样三条），同义不同词靠 single 基数的 supersede 兜。
+- **用户可看可改可删**（`GET /api/memory` 按层返回 + 复用已有的 `PATCH/DELETE /api/me/facts`）。
+  改一条会**升级为 `user_edit`、置信度 1.0、留 revision、memory_version+1**；删是软删
+  （置 `retracted`）不硬删。原来这两个接口是裸 `update_fact`，既不升级来源也不留 revision，
+  用户改完的记忆和模型推断的在库里长得一样。对话界面右侧按层分列展示，每条能直接改删。
+  - 没有新开一套接口——**刻意复用**：前面 `actions` 和 `tasks` 两套任务系统不连通
+    就是新开一套的代价，不再犯。
+
+**修的真实 bug**（都是这轮验证时暴露的）：
+- `server/main.py` **没有 `import memory`**，新加的 `/api/memory` 直接 500
+  （`py_compile` 查不出 `NameError`）。
+- `store._load_live` 的 facts INSERT 是硬编码列名，**新加的 `affects` 没跟上**——
+  切画像时这一列会被静默丢掉。已补列 + 加回归测试。
+
+**prompt 同步改了两处**，否则模型不写 `affects` 会导致记忆全被静默丢掉：
+- `_registry_doc()` 改成按层列 key，并在系统提示里解释「当前实践」是什么。
+- `_PROPOSAL_RULES` 加了「这些该写，别漏」正面清单。**这一步是被评测逼出来的**：
+  只写「默认不写」的负面清单，模型连「这周只有十分钟」这种典型临时约束都不写了
+  （`rejected_ops` 为空，说明是它主动不写，不是被闸门拦的）——和之前
+  `action_has_landing` 那次一样，单边规则会让模型变得不敢出手。
+
+**提问阶梯**（用户反馈第 1 点：「我只说了个大二，怎么跳过学校先问课程了……不是写个硬规则用的，
+只是从这个例子让你了解现在追问不自然」）：
+- 把层的顺序直接当作阶梯：身份 → 当前实践 → 能力起点 → 经历积累 → 倾向 → 临时约束。
+  跳级就是不自然——还没弄清他是谁，就问到了他的能力细节。
+- 代码侧 `memory.ladder_state(uid)` 算出「哪层已经有数、最早的空白层是哪一层」，
+  注入环境包。**刻意没做成硬闸门**：问题是一句自由文本，靠关键词判它「在问哪一层」很脆；
+  本轮只有两次模型调用，没有余量再分类一次。所以设计是**代码给真相、模型定措辞、评测管结果**。
+- 阶梯只管「你想了解他时问什么」，不是每轮都必须问。上下文在别处（追问概念、刚说急事）
+  就顺着走——prompt 里明确写了这一条，防止它变成一张问不完的表。
+- 补了两条评测：`ladder_asks_earliest_gap`（只说大二时必须问到身份层）、
+  `ladder_no_skipping_to_capability`（不许跳去问课程/编程/数学）。
+
+**又抓到两个自己埋的 bug**（都是「把真东西跑一遍」才暴露的，grep 关键字查不出来）：
+- **`build_env` 里的 `limit=10` 把分层预算架空了。** 召回是按层序拉平的，
+  这个总数会把靠后的层截掉——等于把平表抢坑位换了个地方犯。
+  实测：9 条能力 + 9 条当前实践时，**倾向和临时约束双双消失**。
+  现在总上限由各层名额之和决定，只留一个很大的 `RECALL_HARD_CAP` 防异常数据撑爆上下文。
+  加了回归测试 `test_env_packet_keeps_tail_layers_even_when_early_layers_are_full`。
+- **`layer_hint` 挂错了对象**：它描述的是「这一层」，却被塞进了每条 fact 里，
+  前端读 `L.layer_hint` 取不到，那行说明永远不显示。
+  这个是靠**把 chat.js 里真实的渲染函数抠出来、用最小 DOM 喂真实载荷跑一遍**才发现的
+  （没有无头浏览器，所以写了个 DOM shim：`审计与方案/verify_ui_render.js`）。
+
+**验收**：109 个离线测试通过；19 条评测用例 19/19 通过（新增
+`vibecoding_is_not_invented_into_incompetence` 直接复现上面那条真实事故、
+`current_practice_is_captured` 验当前实践落层）；
+`审计与方案/verify_memory_layers.py` 走真实接口验分层/闸门/用户改删全通；
+`审计与方案/verify_ui_render.js` 用真实 chat.js 源码 + 真实载荷验界面渲染全通。
+
+- 影响文档：`docs/DIALOGUE_CONTRACT.md` §3（重写为分层 + 三道闸门）、§4（召回改分层预算）
+- 影响模块：`server/memory.py` `server/store.py` `server/schemas.py` `server/main.py`
+  `server/dialogue.py` `web/js/chat.js` `web/css/styles.css` `eval/run_eval.py`
+  `eval/dialogue_cases.json`
+- 决策来源：用户实测反馈第二轮（记忆结构化 / 业界通则 / 实践跨度 / 写入标准 / 分列展示）
+- 登记人：任务2
+
+---
+
+## [2026-10-01] [FIX] 任务必须有依据 + 三个实测 bug（用户手测反馈）
+
+- **产品问题（最重要）：还没了解就派任务。** 用户实测：只说了「信管大二、想走大数据」，
+  系统就派「关掉讲义重写一段代码」——这句对任何信管大二学生都成立，等于没了解这个人。
+  这正是产品原则二「个性化必须有依据」被违反。现在做成了**代码侧闸门**：
+  提案里的 `next_action` 必须带 `based_on`（本画像生效事实的 id），一个都引不到就整个丢掉，
+  本轮不给落点。`based_on` 同时返回给前端，行动卡上显示「依据你说的：…」，
+  把「凭什么给我这个」摊开给用户看。prompt 里也加了判断法：把用户信息划掉换成任何一个
+  北大大二学生，这句话还成立吗？成立就是套话，不许填。
+  - **同时修了反向问题**：收紧之后模型一度连用户明确问「我这周该干什么」都不给任务，
+    变成连续三轮换个说法问同一件事——这是同一种毛病（一直在指望用户回答），只是反过来了。
+    现在规则是：只要手上有至少一条跟他有关的真实事实，就直接给任务并引用它；
+    同一个问题最多连续问两轮，第三轮必须换成给任务或给可点选项。
+- **修 bug 1：`/api/dialogue/history` 返回数据库原始行，导致刷新后按钮全废。**
+  三个出口形状不一致——`turn` 返回规整形状（`action_id`），`history` 和 `action_event`
+  返回原始行（`id`）。前端刷新后读 `a.action_id` 得到 `undefined`，
+  点「就做这个」发的请求缺字段 → 422；而 `api()` 把 FastAPI 的 422 `detail`
+  （数组）直接塞进 `Error`，toast 就显示成 `[object Object]`。两个现象同一个根因。
+  现在统一走 `_public_action()` 一个出口，并加了「三个出口形状必须一致」的回归测试。
+- **修 bug 2：`[object Object]` 本身。** `app.js` 的 `api()` 用 `new Error(data.detail)`，
+  后端 `detail` 是数组/对象时 `String()` 就变成 `[object Object]`，把「缺 action_id」
+  这种明确信息盖掉了，白白多花排查时间。现在统一格式化成能读的一句话。
+- **修 bug 3：空消息把请求打成 500。** `/api/onboard/message` 转调内核前没校验空串，
+  内核按契约抛 `ValueError`，直接冒成 ASGI 异常。现在返回 400。
+- 影响模块：server/dialogue.py、server/store.py（actions 表补 `based_on` 列 + 迁移 +
+  快照恢复列）、server/main.py、web/js/app.js、web/js/chat.js、web/css/styles.css、eval/
+- 验证：离线测试 79 → 85 全过；真实模型评测 12 → **15 条用例 15/15 通过**
+  （新增 `no_generic_task_early` / `task_carries_its_basis` / `no_nagging_after_action`）。
+- 决策来源：用户手测反馈（任务 2）
+- 登记人：助手
+
+---
+
+## [2026-10-01] [BUILD] 任务 2：对话内核改为「模型决策、代码裁决」的闭环
+- 变更内容：
+  - **架构反转**。原来 `planner.py` 用 S0/S1/S2 规则先决定动作、模型只改措辞；现在改成一轮最多两次模型调用：调用① 出结构化 `TurnProposal`（观察 / 记忆写入意图 / 工具意图 / 回复 / 下一步），代码校验并提交，需要外部信息时执行只读工具，再由调用② 带工具结果收口。代码从「决定做什么」退到「决定能不能做」。
+  - **记忆治理**（新增 `server/memory.py`）：key registry 白名单（不在表内一律拒绝）、引文必须能在本画像消息里逐字找到、confidence 由代码按来源指定（declared 0.6 / inferred 0.4 / behavior 0.8）、模型不得自称 behavior、`experience:*` 只能由提交事件写入、`constraint:*` 必须带 `valid_until`、方向互斥（写新方向自动把旧的置 `superseded`）、同 key 同 value 幂等（重试不重复计数）。被拒的操作进 `rejected_ops`，前端如实告诉用户「有 N 条我没记下来」。
+  - **画像完全隔离**（修 M5）：快照切换从只覆盖 facts/messages/onboard_state 扩到 tasks/submissions/projects/conversations/actions/events/fact_revisions/decisions。新建画像不再看到旧画像的任务。
+  - **工具层**（新增 `server/tools.py`）：`course.search` / `project.search` / `project.review`，全部只读；工具失败原样返回 `ok=false`，由模型如实转述，不许编造结果顶上。
+  - **接口**：新增 `POST /api/dialogue/turn`、`POST /api/dialogue/stream`（SSE，真实阶段推进 + 回复正文增量）、`POST /api/dialogue/action`、`GET /api/dialogue/history`。`/api/onboard/*` 保留原签名，配了模型时**冷启动第一句起**就由新内核接管并把结果翻译回旧响应形状（`onboard_state` 由内核同步维护，附加信息挂在 `dialogue` 字段上），没配模型时仍走老向导，离线 demo 不受影响。
+  - **前端**：新增对话视图（`web/js/chat.js`），支持多轮、长回复、轻量 Markdown 渲染、生成中状态行（观察 → 决策 → 核对记忆 → 查资料 → 组织回复）、回复逐字流式呈现、下一步行动卡（接受 / 完成 / 先不做）、「它记住的」侧栏、这一轮记下了什么 / 没记下什么 / 查没查到的如实回执。侧栏「画像」改为「对话」。
+  - **安全修复**：`POST /api/tasks/{tid}/submit` 增加归属校验。原来任何 uid 都能提交别人的任务（审计 P0，探针实测 HTTP 200），现在返回 403。
+  - **顺手修掉的状态泄漏**：`planner._signals` 原来用排除列表（`draft/dismissed/deleted`）过滤事实，新增状态会静默漏进方向计分；改成白名单 `DECISION_STATUSES`。`facts` 表新增 `valid_until`，`UserFact` 同步。
+  - **不编造事实的代码侧兜底**：结构化路径（写进记忆的事实）本来就由引文逐字校验兜住，但**正文里的具体名称**没有约束。实测发现：检索失败后模型会承认「没查成功」，接着照样列出 7 个课名当推荐清单——大一学生拿这个去选课会踩空。现在工具返回 `ok=false` 且正文出现 `《…》` 时，触发一次定向重写（只删名称、保留原意与结构）；重写无效则保留原文并在响应里标 `fabrication_risk: true`，进日志可统计，不假装没发生。这是「正常路径最多两次模型调用」的唯一例外，语义见 DIALOGUE_CONTRACT §9.1。**效果实测**：这条规则单靠 prompt 只能压到 4 次里约 3 次合规；加兜底后连测 4 次全过（日志里能看到 repair 真的被触发过一次）。
+  - **`next_action` 与 `pending_action` 拆开**：原来模型决定不给落点时，代码会回退成「把当前还开着的行动返回」，导致一个字段混了两种含义——「这一轮该不该派任务」从响应里根本看不出来（用户说「先别推进了」，响应里却仍有任务）。现在 `next_action` 只表示本轮决定，`pending_action` 单独表示界面状态；`move=acknowledge_stop` 时开着的行动会被置 abandoned。
+  - **记忆 key 正则放宽**：原来只放行 `[a-z0-9_]`，模型写 `interest:machine-learning` 会被整条拒掉——丢的是用户真实说的话。现在允许连字符与点。
+  - **工具参数兜底**：模型漏传 `course.search` 的必填 `query` 时，退回用用户这句话当检索词，并在结果里标 `query_from: user_message`，不再白费一整轮。
+  - **测试**：`server/tests/` 从 11 → 79 个，新增 `test_memory.py`(18)、`test_dialogue.py`(20)、`test_api_dialogue.py`(13)、`test_tools.py`(11)、`test_portrait_isolation.py`(4)，覆盖校验规则、两次调用契约、行动生命周期与语义拆分、不编造兜底、画像隔离、SSE、P0 归属。
+  - **评测**：新增 `eval/dialogue_cases.json`（12 条多轮用例）+ `eval/run_eval.py`，断言只判可机器判定的性质（是否重问已知信息、用户要动作时有没有落点、检索失败是否如实且不点名、改口后旧事实是否失效、是否重复记忆、说停时是否收干净）。真实模型验收 **12/12**。
+  - **文档**：新增 `docs/DIALOGUE_CONTRACT.md`（v1 冻结契约：TurnProposal / TurnReply schema、memory key registry、env packet、工具 registry、九条确定性校验、降级语义、验收）。
+- 影响文档：`docs/DIALOGUE_CONTRACT.md`（新增）、`docs/ARCHITECTURE.md` §5、`docs/CHANGELOG.md`（本条）
+- 影响模块：server/memory.py、server/tools.py、server/dialogue.py（新增）；server/store.py、server/schemas.py、server/planner.py、server/llm.py、server/main.py、web/js/chat.js、web/js/app.js、web/index.html、web/css/styles.css、eval/
+- 决策来源：任务表（任务 2 · 交互与问卷 / 对话 agent + 记忆）
+- 登记人：助手
+
+---
 
 ## [2026-09-30] [DOC] 新增方向路径交付目录（任务 4 · 数学 / 人工智能）
 - 变更内容：新增 `docs/paths/`：`README.md`（每步的固定字段 + 主链标注约定）、`数学.md`、`人工智能.md`、`改树建议.md`。两条路径各 6 步，每步含「为什么是这一步 / 先弄懂什么 / 做完怎样算过了 / 依据 / 对应现有树节点」；文中共 41 条外部链接于 2026-09-30 逐条请求核对，核不到的四条（AMS Notices、Papers with Code、Hugging Face、Tao 某篇旧文）在文末如实记录，未用替代链接补位。
 - 影响文档：`docs/paths/`（新增）；甲的两个方向（认知、经济）待补
 - 影响模块：暂无代码改动；`web/js/app.js` 的 `FIELD_TREES` 改不改、怎么改，等两人路径合并后再定（建议见 `docs/paths/改树建议.md`）
 - 决策来源：陈旭 依据任务表（任务 4乙）
+- 登记人：助手
 
 ## [2026-09-30] [BUILD] 任务 3 边学边练：公开来源检索项目、交压缩包、五条标准评阅
 - 变更内容：新增侧栏「项目」。来源清单 `knowledge/project_sources.json`（24 个来源、72 条逐字核对过原文的样例）；7 个来源实时检索（和鲸、飞桨学习赛、天池学习赛、北大开放数据、科学数据银行、创新大赛产业命题、欧拉计划中文站），其余给快照和「去哪找」路线；查不到就空着。成果以 `.zip` 提交，只在内存里读、不执行，按五条标准评阅，规则判定是上限，模型引文必须在文件里逐字找得到；每次提交写回一条行为事实。模型的工作说明写在 `skills/project-scout/`、`skills/project-review/`，代码与 skill 分工见 `skills/README.md`。新增接口只加不改，见 ARCHITECTURE §5。

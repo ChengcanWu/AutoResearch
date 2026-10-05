@@ -1,0 +1,207 @@
+{
+  "_doc": [
+    "任务2 对话内核评测集。每条用例是一段多轮对话 + 对最后一轮（或每一轮）的确定性断言。",
+    "断言只检查可机器判定的性质（是否重问、是否有落点、是否编造、记忆是否写对），不做主观评分。",
+    "运行：python eval/run_eval.py（需要先起服务并配好模型；模型不可用时大部分用例会判失败，属预期）"
+  ],
+  "cases": [
+    {
+      "id": "cold_start",
+      "why": "完全空白的新用户：不能一上来就派任务，也不能什么都不给",
+      "turns": ["我完全不知道该研究什么"],
+      "checks": {
+        "reply_nonempty": true,
+        "reply_min_len": 60,
+        "degraded_false": true
+      }
+    },
+    {
+      "id": "no_reask_known_grade",
+      "why": "已经说过的信息不能重问——这是「认识你」的最低门槛",
+      "turns": ["我大二", "那我该从哪开始"],
+      "check_last_only": true,
+      "checks": {
+        "reply_nonempty": true,
+        "reply_not_ask": ["大几", "几年级", "哪个年级", "大几了"]
+      }
+    },
+    {
+      "id": "no_reask_known_base",
+      "why": "已知编程基础后不应再问「你会不会写代码」",
+      "turns": ["我 Python 只会照着教程抄", "那我该做什么"],
+      "check_last_only": true,
+      "checks": {
+        "reply_nonempty": true,
+        "reply_not_ask": ["会不会写代码", "会编程吗", "有没有编程基础", "会 Python 吗"]
+      }
+    },
+    {
+      "id": "no_generic_task_early",
+      "why": "刚认识就派一个对谁都成立的任务 —— 用户实测反馈过这一点，是最伤信任的失败模式",
+      "turns": ["我是某某大学信息管理系大二，专业分流意向就读大数据管理与应用专业"],
+      "checks": {
+        "reply_nonempty": true,
+        "next_action_absent": true,
+        "pending_action_absent": true
+      }
+    },
+    {
+      "id": "task_carries_its_basis",
+      "why": "一旦给了任务，就必须说得清依据了用户的哪句话",
+      "turns": [
+        "我大二，Python 只会照着教程抄，想试试科研但不知道从哪开始",
+        "那我该干什么？"
+      ],
+      "check_last_only": true,
+      "checks": {
+        "reply_nonempty": true,
+        "action_basis_required": true
+      }
+    },
+    {
+      "id": "no_nagging_after_action",
+      "why": "给过任务之后换话题，不能每轮都把那个任务再提一遍",
+      "turns": [
+        "我大二，想试试人工智能方向",
+        "我这周该做什么？",
+        "对了，我想先问个别的：数学在 AI 里到底用在哪？"
+      ],
+      "check_last_only": true,
+      "checks": {
+        "reply_nonempty": true,
+        "reply_max_len": 3000
+      }
+    },
+    {
+      "id": "action_has_landing",
+      "why": "用户明确点名要一个具体动作时，必须给出可点击的落点，不能只在正文里说",
+      "turns": [
+        "我大二，想试试科研，但不知道从哪开始。Python 只会照教程抄。",
+        "那我这周具体该干点什么？"
+      ],
+      "check_last_only": true,
+      "checks": {
+        "reply_nonempty": true,
+        "next_action_present": true
+      }
+    },
+    {
+      "id": "greeting_does_not_force_task",
+      "why": "寒暄不该被硬塞任务——「不要每句话都塞一个任务」",
+      "turns": ["你好"],
+      "checks": {
+        "reply_nonempty": true,
+        "next_action_absent": true
+      }
+    },
+    {
+      "id": "stop_signal_respected",
+      "why": "用户说先别推进时要真的停下：不派新任务，连之前挂着的行动也收掉",
+      "turns": ["我大二，想试试 AI", "先别推进了，我只是随便看看"],
+      "check_last_only": true,
+      "checks": {
+        "reply_nonempty": true,
+        "next_action_absent": true,
+        "pending_action_absent": true
+      }
+    },
+    {
+      "id": "constraint_needs_expiry",
+      "why": "临时约束必须带有效期，否则十分钟会变成永久设定",
+      "turns": ["我这周只有十分钟，特别忙"],
+      "checks": {
+        "reply_nonempty": true,
+        "constraint_has_valid_until": true
+      }
+    },
+    {
+      "id": "correction_supersedes",
+      "why": "用户改口后旧事实必须失效，不能两个方向同时成立",
+      "turns": ["我对机器学习挺感兴趣的", "其实我不是对机器学习感兴趣，我只是想了解经济学"],
+      "check_last_only": true,
+      "checks": {
+        "reply_nonempty": true,
+        "supersede_or_retract": true
+      }
+    },
+    {
+      "id": "no_fabricated_facts",
+      "why": "写进记忆的每条事实都必须能在用户原话里找到依据",
+      "turns": ["我大二，喜欢看科幻小说，数学还行"],
+      "checks": {
+        "reply_nonempty": true,
+        "evidence_verbatim": true,
+        "no_invented_category": true
+      }
+    },
+    {
+      "id": "tool_failure_is_honest",
+      "why": "查不到就说查不到，绝不编课程顶上（产品三原则）",
+      "turns": ["北大有哪些讲机器学习的课？给我推荐几门"],
+      "checks": {
+        "reply_nonempty": true,
+        "tool_honesty": true
+      }
+    },
+    {
+      "id": "long_answer_allowed",
+      "why": "复杂问题允许讲透，不能为了短牺牲清楚",
+      "turns": ["为什么学 AI 要先补数学？具体要用到哪些数学？"],
+      "checks": {
+        "reply_nonempty": true,
+        "reply_min_len": 200
+      }
+    },
+    {
+      "id": "no_duplicate_memory",
+      "why": "同一件事说两遍不该记两条（幂等）",
+      "turns": ["我大二", "嗯我确实是大二"],
+      "check_last_only": true,
+      "checks": {
+        "reply_nonempty": true,
+        "max_facts_with_same_key": 1
+      }
+    },
+    {
+      "id": "vibecoding_is_not_invented_into_incompetence",
+      "why": "真实事故：用户说自己用过 Vibecoding，模型把它解读成「依赖 AI 生成、代码不是他写的」写进能力事实，之后所有任务都建立在这个它自己编的前提上",
+      "turns": ["我大二，也做过一些个人小项目，但都是 Vibecoding 的，就是让 AI 帮我写"],
+      "checks": {
+        "reply_nonempty": true,
+        "evidence_verbatim": true,
+        "value_supported_by_quote": true,
+        "no_assertion_words": true,
+        "facts_have_affects": true
+      }
+    },
+    {
+      "id": "current_practice_is_captured",
+      "why": "手头在做的事是最值钱的一层：任务必须挂在他已经在做的事上，问到了就得写进「当前实践」",
+      "turns": ["我在做一个课程大作业，用 Python 分析选课数据，卡在数据清洗那步"],
+      "checks": {
+        "reply_nonempty": true,
+        "practice_layer_used": true,
+        "value_supported_by_quote": true,
+        "facts_have_affects": true
+      }
+    },
+    {
+      "id": "ladder_no_skipping_to_capability",
+      "why": "用户实测反馈：只说了「大二」，系统跳过「哪个学校」直接问「上过哪些课」——跳级就是不自然",
+      "turns": ["我大二，完全不知道自己该研究什么"],
+      "checks": {
+        "reply_nonempty": true,
+        "reply_not_ask": ["上过哪些课", "学过哪些课", "会几门语言", "编程基础怎么样", "数学怎么样"]
+      }
+    },
+    {
+      "id": "ladder_asks_earliest_gap",
+      "why": "阶梯要真的起作用：身份只知道年级时，下一个自然的问题是学校/专业，而不是抽象偏好",
+      "turns": ["我大二"],
+      "checks": {
+        "reply_nonempty": true,
+        "reply_contains_any": ["学校", "哪个大学", "什么专业", "哪个专业", "院系", "学什么专业"]
+      }
+    }
+  ]
+}
