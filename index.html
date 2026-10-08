@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>启研 · 本科生进科研</title>
+  <meta name="description" content="给北大本科一、二年级。先聊你现在卡在哪，再给一件能做完的事。" />
+  <meta name="theme-color" content="#f5f2ea" />
+  <link rel="stylesheet" href="/static/css/styles.css?v=w38" />
+  <!-- 标题衬线字体走国内可达的镜像，且不阻塞首屏；加载失败时回退系统宋体 -->
+  <link rel="preconnect" href="https://fonts.googleapis.cn" />
+  <link rel="stylesheet" media="print" onload="this.media='all'"
+        href="https://fonts.googleapis.cn/css2?family=Noto+Serif+SC:wght@600;700&family=Source+Serif+4:opsz,wght@8..60,600&display=swap" />
+</head>
+<body>
+  <div class="boot" id="boot" aria-hidden="true">
+    <p class="boot-kicker">QIYAN</p>
+    <h2>启研</h2>
+    <div class="boot-line"><i></i></div>
+  </div>
+
+  <div class="app-frame">
+    <aside class="side-nav" id="mainNav" hidden>
+      <button class="side-brand" id="brandHome" type="button" title="回到首页">启研<small>本科生进科研</small></button>
+      <nav class="side-links" aria-label="工作区">
+        <button class="nav-btn" type="button" data-view="today" data-workspace="today"><span>今日</span><small>先做这个</small></button>
+        <button class="nav-btn" type="button" data-view="workbench" data-workspace="workbench"><span>作业</span><small>现在该交的</small></button>
+        <button class="nav-btn" type="button" data-view="projects" data-workspace="projects"><span>项目</span><small>找个真题练</small></button>
+        <button class="nav-btn" type="button" data-view="read" data-workspace="read"><span>研读</span><small>先读懂一篇</small></button>
+        <button class="nav-btn" type="button" data-view="position" data-workspace="position"><span>定位</span><small>凭什么是我</small></button>
+      </nav>
+      <div class="side-foot">
+        <button class="llm-pill" id="llmPill" type="button">连接模型</button>
+      </div>
+    </aside>
+
+    <div class="app-column">
+      <header class="app-top" id="headerRight" hidden>
+        <div class="app-top-right">
+          <button class="dir-chip empty" id="dirChip" type="button">还没有方向</button>
+          <div class="user-menu-wrap">
+            <button class="user-menu-btn" id="userMenuBtn" type="button" aria-haspopup="true" aria-expanded="false">
+              <span class="dot"></span>
+              <span id="userNickname"></span>
+            </button>
+          </div>
+        </div>
+      </header>
+      <main class="page" id="app">
+        <!-- 各视图由 app.js 渲染 -->
+      </main>
+      <footer class="site-footer">
+        <p>课名来自北大教务公开接口。查不到就空着，不编。</p>
+        <!-- 版本戳：唯一目的是让「我改了没有」可以一眼确认，不用猜缓存。
+             每次改前端都要把这个号 +1，并同步下面三个 ?v=。
+             **三个都必须一样** —— 上次 CSS 停在 w27 而 JS 到了 w28，
+             用户就拿到了「新 JS + 旧 CSS」，样式全不对。有测试钉着这件事。 -->
+        <p class="build-stamp">界面版本 <b>w38</b> · 文案收过。硬刷新用 Ctrl+Shift+R。</p>
+      </footer>
+    </div>
+  </div>
+
+  <script>window.QIYAN_API = "https://qiyan-caxplsowco.cn-hangzhou.fcapp.run";
+  window.apiUrl = function (path) {
+    return String(window.QIYAN_API || "").replace(/\/$/, "") + path;
+  };</script>
+  <script src="/static/js/directions.js?v=w38"></script>
+  <script src="/static/js/chat.js?v=w38"></script>
+  <script src="/static/js/app.js?v=w38"></script>
+</body>
+</html>
