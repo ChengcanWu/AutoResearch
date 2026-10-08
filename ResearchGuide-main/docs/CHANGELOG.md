@@ -6,6 +6,51 @@
 
 ---
 
+## [2026-10-09] [OPS] 补容器与测试环境，对齐部署课
+
+- 变更内容：`ResearchGuide-main` 根目录增加 `Dockerfile` / `docker-compose.yml`。开发用 8100，测试用 8101。云上另部函数 `qiyan-test`，不当生产首页。生产仍是 GitHub Pages + 函数 `qiyan`。没有备案域名，不开 ECS。`docs/DEPLOY.md` 写清三套环境和回滚。
+- 影响文档：docs/DEPLOY.md、docs/CHANGELOG.md
+- 影响模块：Dockerfile、docker-compose.yml、tools/deploy/deploy_fc.py
+- 决策来源：邬程灿（产品部署要求）
+- 登记人：助手
+
+## [2026-10-08] [OPS] 默认函数域名会下载网页，改走 OSS 站点打开
+
+- 变更内容：`*.fcapp.run` 会在网关加 `Content-Disposition: attachment`，浏览器就下载 htm。页面改到 OSS 静态网站打开；接口仍走函数计算。前端加 `QIYAN_API` / `apiUrl`，同域时为空。函数计算放开 CORS。界面版本 w38。
+- 影响文档：docs/CHANGELOG.md
+- 影响模块：web/index.html、web/js/app.js、web/js/chat.js、server/main.py、tools/deploy/
+- 决策来源：邬程灿
+- 登记人：助手
+
+## [2026-10-08] [OPS] 杭州函数计算公网发布
+
+- 变更内容：当前产品发布到阿里云杭州函数计算（`custom.debian12` + 匿名 HTTP）。按量 ECS 因帐号后付费门槛未开成，所以走按请求计费。公网地址 `https://qiyan-caxplsowco.cn-hangzhou.fcapp.run`。模型走函数环境变量里的 DeepSeek。SQLite 写 `/tmp`，实例回收会丢本地库。密钥只在本机 `.env` 和函数环境变量，zip / `.deploy.env` / `vendor_wheels` 不入库。`arxiv` 条目 URL 先算出 id 再拼，兼容镜像上的 Python 3.11。
+- 影响文档：docs/CHANGELOG.md
+- 影响模块：tools/deploy/、server/arxiv.py、server/store.py
+- 决策来源：邬程灿
+- 登记人：助手
+
+## [2026-10-07] [UX] 收掉 AI 口吻，五个房间首屏对准大一痛点
+
+- 变更内容：用户可见文案去掉「问答画像 / 先聊五个问题 / 此刻最值得做的一件事 / AI Research Mentor」这类口吻。今日、作业、项目、研读、定位的页头改成大一会问的那一句。侧栏五栏、粒子首页、右上角画像和方向不动。页脚只留课名来源。品牌小字改成「本科生进科研」。不改 REST。
+- 影响模块：web/index.html、web/js/app.js、web/js/chat.js、web/css/styles.css、docs/CHANGELOG.md
+- 决策来源：邬程灿
+- 登记人：助手
+
+## [2026-10-06] [UX] 对话和记录收进用户菜单，侧栏只留五栏
+
+- 变更内容：回到备份那一版的粒子首页。侧栏改为今日 / 作业 / 项目 / 研读 / 定位。「任务」改称「作业」。对话、画像、记录不再占侧栏：右上角是当前方向和用户名。点方向进方向树；点用户名弹出画像管理，可切换 / 新建画像，并进入对话、核对或记录。第一次登录仍先进对话。不改 REST。
+- 影响模块：web/index.html、web/js/app.js、web/js/chat.js、web/css/styles.css、docs/CHANGELOG.md
+- 决策来源：邬程灿
+- 登记人：助手
+
+## [2026-10-06] [UX] 侧栏按进度展开，今日只推一件事
+
+- 变更内容：新用户进门不再并列八个工作区。登录文案改成「先聊几句，再给下一步」。已登录刷新后直接回今日，不再掉回六屏首页。侧栏按进度长出来：先是今日 / 对话；聊出事实后出现方向和记录；选定方向后出现任务；交过任务或对话派了任务后出现项目；有方向且开始做事之后才出现研读和定位。今日去掉「先聊五个问题」的过期口径，每日情报也等研读房间打开再出现。首页第一屏就能开始，不必滑完六屏；登录页不再把「连接模型」和进门并列。核对页改成和对话同一块页头，字段清单默认收起。方向页先给最多三个建议卡片，教程标签等确认方向后再出现。页脚版本戳缩短。不改 REST。
+- 影响模块：web/js/app.js、web/index.html、web/css/styles.css、docs/CHANGELOG.md
+- 决策来源：邬程灿（用户走查：入口太满、没有一条主流程）
+- 登记人：助手
+
 ## [2026-10-05] [BUILD] 默认北大（不问学校）+ 说到院系简称时先查库
 
 - 变更内容：用户给了一段实测对话——第一句「我是信管的大二学生」，系统答完一句评价后反问「你是哪个学校的？」；第二句「帮我查一下信管的专业方向」才去查库。两个问题都在这一版修掉。
