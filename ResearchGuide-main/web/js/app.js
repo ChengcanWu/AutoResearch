@@ -125,7 +125,6 @@ const HOME_PAGES = [
     kicker: "启研 · AI RESEARCH MENTOR",
     title: "先认识你，<br>再走下一步。",
     lead: "面向本科一、二年级。它不是问答框，而是一条可以回头看的科研入门。",
-    hint: "向下滚动",
   },
   {
     kicker: "01",
@@ -189,9 +188,6 @@ function renderHome() {
   const canvas = el("canvas", "land-field");
   canvas.setAttribute("aria-hidden", "true");
   const snap = el("div", "land-snap");
-  const mapLayer = el("div", "land-map");
-  mapLayer.setAttribute("aria-hidden", "true");
-  STATIONS.forEach((st) => mapLayer.appendChild(el("span", "", st.label)));
   HOME_PAGES.forEach((page, i) => {
     const sec = el("section", "snap");
     sec.dataset.index = String(i);
@@ -204,40 +200,36 @@ function renderHome() {
       + `<p class="land-lead">${page.lead}</p>`
       + (points ? `<ul class="land-points">${points}</ul>` : "")
       + (page.closing ? `<p class="land-closing">${page.closing}</p>` : "")
-      + (page.hint ? `<p class="snap-hint">${page.hint}</p>` : "")
       + `</div>`;
-    const inner = sec.querySelector(".snap-inner");
-    if (i === 0) {
-      const quick = el("button", "land-ghost", "直接开始");
-      quick.type = "button";
-      quick.onclick = beginExperience;
-      inner.insertBefore(quick, inner.querySelector(".snap-hint"));
-    }
     if (i === HOME_PAGES.length - 1) {
       const btn = el("button", "btn land-cta", "立即开始体验");
       btn.type = "button";
       btn.onclick = beginExperience;
-      inner.appendChild(btn);
+      sec.querySelector(".snap-inner").appendChild(btn);
     }
     snap.appendChild(sec);
   });
-  const rail = el("div", "fella-index");
-  rail.appendChild(el("span", "fella-mark"));
-  HOME_PAGES.forEach((page, i) => {
-    const b = el("button", "fella-no" + (i === 0 ? " on" : ""), String(i).padStart(2, "0"));
-    b.type = "button";
-    b.setAttribute("aria-label", `第 ${i + 1} 屏`);
-    b.onclick = () => {
-      const sec = snap.querySelectorAll(".snap")[i];
-      snap.scrollTo({ top: sec ? sec.offsetTop : 0, behavior: "smooth" });
-    };
-    rail.appendChild(b);
-  });
-  const progress = el("div", "home-progress");
-  progress.appendChild(el("i"));
-  land.append(canvas, mapLayer, snap, rail, progress);
+  const hintEl = el("div", "land-hint");
+  hintEl.setAttribute("aria-hidden", "true");
+  hintEl.append(el("span", "", "滚动以继续"), el("i"));
+  const skip = el("button", "land-skip", "跳过，直接开始");
+  skip.type = "button";
+  skip.onclick = beginExperience;
+  land.append(canvas, buildSteps(), hintEl, skip, snap);
   $app.appendChild(land);
-  stopField = mountSketch(canvas, snap, rail, progress, mapLayer);
+  stopField = mountSketch(canvas, snap);
+}
+
+/* 左缘纵向进度：当前步号随屏换（染主题色）、轨道随滚动生长、底部标总步数；序号从 00 计 */
+function buildSteps() {
+  const box = el("div", "land-steps");
+  box.setAttribute("aria-hidden", "true");
+  const cur = el("b", "", "00");
+  const track = el("i", "land-steps-track");
+  track.appendChild(el("i"));
+  const total = el("span", "", `/ ${String(HOME_PAGES.length - 1).padStart(2, "0")}`);
+  box.append(cur, track, total);
+  return box;
 }
 
 function beginExperience() {
@@ -309,32 +301,37 @@ function bubble(x0, y0, x1, y1, r, tx, dir) {
 }
 
 const SKETCHES = [
-  // 00 台阶通向一扇门：先认识你，再走下一步
+  // 00 台阶通向一扇门：先认识你，再走下一步（白门框不动，绿门板绕左铰链带透视向里推开；
+  //     门内地板两条透视线收向消失点，门开了才渐显——走进去的路）
   () => {
     const door = [[0.22, 0.12], [0.22, -0.46], ...arcPts(0.5, -0.46, 0.28, Math.PI, Math.PI * 2, 32), [0.78, 0.12]];
     const inner = [[0.3, 0.12], [0.3, -0.44], ...arcPts(0.5, -0.44, 0.2, Math.PI, Math.PI * 2, 28), [0.7, 0.12]];
     const stairs = [[-0.95, 0.74], [-0.62, 0.74], [-0.62, 0.53], [-0.3, 0.53], [-0.3, 0.32], [0.02, 0.32], [0.02, 0.12], [0.95, 0.12]];
+    const pathL = [[0.3, 0.12], [0.385, -0.05]];
+    const pathR = [[0.7, 0.12], [0.615, -0.05]];
     return [
       { pts: stairs },
       { pts: door },
-      { pts: inner, accent: true },
+      { pts: inner, accent: true, part: "door" },
       { pts: ring(-0.46, 0.38, 0.05, 20), accent: true },
+      { pts: pathL, accent: true, part: "path" },
+      { pts: pathR, accent: true, part: "path" },
     ];
   },
-  // 01 一问一答的两个气泡
+  // 01 一问一答的两个气泡（问号绕自己的底部轻微摆动）
   () => {
     const q = [...arcPts(-0.36, -0.5, 0.1, Math.PI * 1.05, Math.PI * 2.25, 28), [-0.36, -0.33], [-0.36, -0.28]];
     return [
       { pts: bubble(-0.92, -0.78, 0.18, -0.12, 0.12, -0.62, -1) },
-      { pts: q, accent: true },
-      { pts: ring(-0.36, -0.2, 0.018, 8), accent: true },
+      { pts: q, accent: true, part: "q" },
+      { pts: ring(-0.36, -0.2, 0.018, 8), accent: true, part: "q" },
       { pts: bubble(-0.18, 0.06, 0.92, 0.62, 0.12, 0.56, 1) },
       { pts: [[0.0, 0.22], [0.72, 0.22]] },
       { pts: [[0.0, 0.34], [0.6, 0.34]] },
       { pts: [[0.0, 0.46], [0.38, 0.46]] },
     ];
   },
-  // 02 罗盘：指针指向一个方向
+  // 02 罗盘：指针指向一个方向（指针绕盘心来回摆动）
   () => {
     const out = [{ pts: ring(0, 0.04, 0.74, 96) }];
     for (let k = 0; k < 8; k++) {
@@ -348,13 +345,13 @@ const SKETCHES = [
     const s = tip(a + Math.PI, 0.52);
     const l = tip(a - Math.PI / 2, 0.1);
     const rr = tip(a + Math.PI / 2, 0.1);
-    out.push({ pts: [l, n, rr], accent: true });
-    out.push({ pts: [l, s, rr] });
+    out.push({ pts: [l, n, rr], accent: true, part: "needle" });
+    out.push({ pts: [l, s, rr], part: "needle" });
     out.push({ pts: ring(0, 0.04, 0.035, 12) });
     out.push({ pts: [[-0.05, -0.8], [-0.05, -0.96], [0.05, -0.8], [0.05, -0.96]] });
     return out;
   },
-  // 03 秒表：二十分钟
+  // 03 秒表：二十分钟（指针转回 12 点方向）
   () => {
     const c = [0, 0.14];
     const out = [
@@ -368,24 +365,24 @@ const SKETCHES = [
       const r0 = k % 3 === 0 ? 0.5 : 0.56;
       out.push({ pts: [[c[0] + Math.cos(a) * r0, c[1] + Math.sin(a) * r0], [c[0] + Math.cos(a) * 0.62, c[1] + Math.sin(a) * 0.62]] });
     }
-    out.push({ pts: arcPts(c[0], c[1], 0.4, -Math.PI / 2, Math.PI / 6, 40), accent: true });
-    out.push({ pts: [c, [c[0] + Math.cos(Math.PI / 6) * 0.44, c[1] + Math.sin(Math.PI / 6) * 0.44]], accent: true });
+    out.push({ pts: arcPts(c[0], c[1], 0.4, -Math.PI / 2, Math.PI * 1.5 - 0.02, 120), accent: true, part: "arc" });
+    out.push({ pts: [c, [c[0] + Math.cos(Math.PI / 6) * 0.44, c[1] + Math.sin(Math.PI / 6) * 0.44]], accent: true, part: "hand" });
     out.push({ pts: ring(c[0], c[1], 0.03, 12) });
     return out;
   },
-  // 04 一页提交，逐条打勾
+  // 04 一页提交，逐条打勾（第三条的待办圈滚动时变成对勾、换成主题色）
   () => {
     const page = [[-0.58, -0.8], [0.2, -0.8], [0.44, -0.56], [0.44, 0.8], [-0.58, 0.8], [-0.58, -0.8]];
     const out = [{ pts: page }, { pts: [[0.2, -0.8], [0.2, -0.56], [0.44, -0.56]] }];
     [-0.3, 0.02, 0.34].forEach((y, i) => {
       if (i < 2) out.push({ pts: [[-0.42, y], [-0.35, y + 0.07], [-0.22, y - 0.08]], accent: true });
-      else out.push({ pts: ring(-0.33, y, 0.06, 20) });
+      else out.push({ pts: ring(-0.33, y, 0.06, 20), part: "todo" });
       out.push({ pts: [[-0.1, y], [0.28, y]] });
     });
     out.push({ pts: [[-0.42, 0.6], [0.1, 0.6]] });
     return out;
   },
-  // 05 一棵往右长的树，走过的路用主色
+  // 05 一棵往右长的树，走过的路用主色（R→A→A2→C2 四个节点依次点亮）
   () => {
     const R = [-0.82, 0.06];
     const A = [-0.3, -0.38];
@@ -398,44 +395,54 @@ const SKETCHES = [
     const C2 = [0.8, 0.1];
     const node = (p, r, accent) => ({ pts: ring(p[0], p[1], r, 24), accent });
     const edge = (a, b, accent) => ({ pts: curve([a[0] + 0.06, a[1]], [b[0] - 0.06, b[1]]), accent });
-    return [
+    const arr = [
       node(R, 0.06, true), edge(R, A, true), node(A, 0.055, true), edge(A, A2, true), node(A2, 0.055, true),
       edge(A2, C2, true), node(C2, 0.05, true),
       edge(A, A1), node(A1, 0.05), edge(A2, C1), node(C1, 0.05),
       edge(R, B), node(B, 0.055), edge(B, B1), node(B1, 0.05), edge(B, B2), node(B2, 0.05),
     ];
+    arr[0].part = "n0"; arr[2].part = "n1"; arr[4].part = "n2"; arr[6].part = "n3";
+    return arr;
   },
 ];
 
-/* 大地图：六站竖向排布，屏幕上一屏左一屏右地交替；内容列（图形+文字）总在站的对面。
-   滚动 = 镜头沿弧长竖向行进：走过段发光生长、前端亮点沿线走 */
-const STATIONS = [
-  { y: 0, label: "起点" },
-  { y: 1.9, label: "画像" },
-  { y: 3.8, label: "方向" },
-  { y: 5.7, label: "任务" },
-  { y: 7.6, label: "反馈" },
-  { y: 9.5, label: "成长" },
+/* 每屏主题色（参考彩色 WebGL 粒子站）：强调笔画、图形后柔光、背景微染、文字点缀共用，
+   随滚动相位在相邻两色间连续过渡 */
+const TONES = [
+  [127, 209, 194], // 00 起点 · 青
+  [143, 189, 246], // 01 画像 · 蓝
+  [195, 174, 245], // 02 方向 · 紫
+  [242, 205, 126], // 03 任务 · 金
+  [242, 160, 138], // 04 反馈 · 珊瑚
+  [164, 222, 138], // 05 成长 · 绿
 ];
 
-/* Catmull-Rom 样条：过全部控制点的平滑曲线，首尾各补一拍让线从画面外伸进来、伸出去 */
-function catmullRom(ctrl) {
-  const P = [ctrl[0], ...ctrl, ctrl[ctrl.length - 1]];
-  const out = [];
-  for (let i = 1; i < P.length - 2; i++) {
-    const p0 = P[i - 1]; const p1 = P[i]; const p2 = P[i + 1]; const p3 = P[i + 2];
-    const n = Math.max(10, Math.ceil(Math.hypot(p2[0] - p1[0], p2[1] - p1[1]) / 0.02));
-    for (let j = 0; j < n; j++) {
-      const t = j / n; const u = 1 - t;
-      out.push([
-        0.5 * (2 * p1[0] + (-p0[0] + p2[0]) * t + (2 * p0[0] - 5 * p1[0] + 4 * p2[0] - p3[0]) * t * t + (-p0[0] + 3 * p1[0] - 3 * p2[0] + p3[0]) * t * t * t),
-        0.5 * (2 * p1[1] + (-p0[1] + p2[1]) * t + (2 * p0[1] - 5 * p1[1] + 4 * p2[1] - p3[1]) * t * t + (-p0[1] + 3 * p1[1] - 3 * p2[1] + p3[1]) * t * t * t),
-      ]);
-    }
-  }
-  out.push(ctrl[ctrl.length - 1]);
-  return out;
-}
+/* 每图的聚形后动画：聚形完成、文字出完，随本屏向下滚动推进（act 0→1，scrub 可逆）。
+   persp = 门板绕竖轴向里推的透视旋转；sweep = 弧线随指针扫过逐渐显出；fill = 点亮时填实心 */
+const FIG_ANIMS = [
+  // 00 绿门板绕自身左铰链向里推开 78°：远端向铰链收拢、向门高中线收缩（白门框不动）；
+  //    门内地板两条透视线（收向消失点）随开门渐显——走进去的路
+  { parts: {
+    door: { persp: { hinge: [0.3, 0.12], w: 0.4, yc: -0.26, pf: 1.4, ang: (act) => 1.36 * (1 - Math.pow(1 - act, 3)) } },
+    path: { reveal: (act) => 1 - Math.pow(1 - act, 2) },
+  } },
+  { parts: { q: { pivot: [-0.36, -0.28], ang: (act, tm) => Math.sin(tm * 2.2) * 0.14 * (0.15 + 0.85 * act) } } },
+  // 02 指北针：以正北为中心，在相邻的两个刻度（东北—西北）之间来回摆
+  { parts: { needle: { pivot: [0, 0.04], ang: (act, tm) => -Math.PI / 4 + (Math.PI / 4) * (0.15 + 0.85 * act) * Math.sin(tm * 1.6) } } },
+  // 03 时针顺时针转 240° 回到 12 点；金色进度弧从 12 点起随时针扫过的位置延长
+  { parts: {
+    hand: { pivot: [0, 0.14], ang: (act) => 4.19 * (1 - Math.pow(1 - act, 3)) },
+    arc: { pivot: [0, 0.14], sweep: { from: -Math.PI / 2, base: 2.09, span: 4.19 } },
+  } },
+  { parts: { todo: { morphTo: [[-0.42, 0.34], [-0.35, 0.41], [-0.22, 0.26]] } } },
+  // 05 四个节点依次点亮：环内填成实心并发光
+  { parts: {
+    n0: { light: 0, fill: [-0.82, 0.06, 0.06] },
+    n1: { light: 1, fill: [-0.3, -0.38, 0.055] },
+    n2: { light: 2, fill: [0.24, -0.12, 0.055] },
+    n3: { light: 3, fill: [0.8, 0.1, 0.05] },
+  } },
+];
 
 function strokeLength(pts) {
   let L = 0;
@@ -444,11 +451,12 @@ function strokeLength(pts) {
 }
 
 function sampleSketch(strokes, n) {
-  // 沿全部笔画等距取 n 个点；返回 {xy, acc}，顺序即笔画顺序
+  // 沿全部笔画等距取 n 个点；返回 {xy, acc, sid}，顺序即笔画顺序；sid 记粒子属于哪一笔（供图形动画分组）
   const lens = strokes.map((s) => strokeLength(s.pts));
   const total = lens.reduce((a, b) => a + b, 0) || 1;
   const xy = new Float32Array(n * 2);
   const acc = new Uint8Array(n);
+  const sid = new Uint16Array(n);
   let k = 0;
   strokes.forEach((s, si) => {
     const want = si === strokes.length - 1 ? n - k : Math.max(2, Math.round((lens[si] / total) * n));
@@ -468,65 +476,95 @@ function sampleSketch(strokes, n) {
       xy[k * 2] = a[0] + (b[0] - a[0]) * t;
       xy[k * 2 + 1] = a[1] + (b[1] - a[1]) * t;
       acc[k] = s.accent ? 1 : 0;
+      sid[k] = si;
       k += 1;
     }
   });
-  return { xy, acc, length: total };
+  return { xy, acc, sid, length: total };
 }
 
-function scrollTarget(scroller) {
-  // 每屏前 40% 停住不动（读字），40%–85% 之间换图，之后停在新图上
-  const secs = [...scroller.querySelectorAll(".snap")];
-  const st = scroller.scrollTop;
-  let a = 0;
-  while (a < secs.length - 2 && st >= secs[a + 1].offsetTop) a += 1;
-  const span = Math.max(1, secs[a + 1].offsetTop - secs[a].offsetTop);
-  const raw = (st - secs[a].offsetTop) / span;
-  const t = Math.min(1, Math.max(0, (raw - 0.4) / 0.45));
-  return Math.min(secs.length - 1, a + t);
-}
-
-function mountSketch(canvas, scroller, rail, progress, mapLayer) {
+function mountSketch(canvas, scroller) {
   const ctx = canvas.getContext("2d");
   if (!ctx) return () => {};
   const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const nos = [...rail.querySelectorAll(".fella-no")];
-  const mark = rail.querySelector(".fella-mark");
-  const bar = progress.querySelector("i");
-  const INK = "rgb(237, 241, 238)";
-  const ACCENT = "rgb(127, 209, 194)";
-  const MARK = "rgb(229, 138, 78)";
-  const NODE = "rgb(154, 165, 160)";
-  let W = 0; let H = 0; let gy = 0; let size = 0; let dot = 1.15;
-  let stx = [];   // 站点屏幕 x（逐屏左右交替）
-  let gxArr = []; // 各屏图形锚点 x（与站点对面同列）
-  let kY = 1;     // 世界 y → 像素
+  let W = 0; let H = 0; let size = 0; let dot = 1.15;
+  let gy = 0;    // 图形锚点 y（恒为内容带中心）
+  let gxA = [];  // 各屏图形锚点 x（与文字逐屏左右对调；转场时随相位插值横移）
   let figs = [];
-  let path = null; // 大地图：样条点、弧长表、站点弧长
   let N = 0;
   let scatter = []; // 换图途中粒子均匀散布的全屏目标位（也是开场出发点）
+  let dust = [];    // 漂浮星尘：随主题色的氛围层，缓慢漂移明灭
+  let plex = [];    // 星座网：漂移节点 + 近邻连线，背景的图案结构层
+  let lastActive = -1; // 上次写进 CSS 的主题色屏号
+  const stepsBox = canvas.parentElement ? canvas.parentElement.querySelector(".land-steps") : null;
+  const stepCur = stepsBox ? stepsBox.querySelector("b") : null;
+  const stepFill = stepsBox ? stepsBox.querySelector(".land-steps-track i") : null;
 
-  /* 发光粒子 sprite：径向渐变画一次，逐点 drawImage（逐点 shadowBlur 顶不住这个点数） */
+  /* 发光粒子 sprite：热芯型径向渐变（核心占 45%、外围快速衰减）画一次，逐点 drawImage；
+     粒子层用加法混合，交叠处亮度叠加出「燃烧」感，而不是靠大光晕 */
   const glowSprite = (rgb) => {
     const c = document.createElement("canvas");
     c.width = 32; c.height = 32;
     const g = c.getContext("2d");
     const grad = g.createRadialGradient(16, 16, 0, 16, 16, 16);
     grad.addColorStop(0, `rgba(${rgb},1)`);
-    grad.addColorStop(0.3, `rgba(${rgb},0.9)`);
+    grad.addColorStop(0.45, `rgba(${rgb},0.85)`);
     grad.addColorStop(1, `rgba(${rgb},0)`);
     g.fillStyle = grad;
     g.fillRect(0, 0, 32, 32);
     return c;
   };
   const SPR_INK = glowSprite("237,241,238");
-  const SPR_ACC = glowSprite("127,209,194");
+  const SPRS = TONES.map((t) => glowSprite(t.join(","))); // 每屏一色的强调笔画 sprite
+  /* 胶片颗粒：一张静态噪点瓦片（中灰上下抖动，overlay 才能双向），低透明度铺满全屏 */
+  const grainTile = document.createElement("canvas");
+  grainTile.width = grainTile.height = 160;
+  {
+    const g = grainTile.getContext("2d");
+    const id = g.createImageData(160, 160);
+    for (let i = 0; i < id.data.length; i += 4) {
+      const v = 90 + Math.random() * 76;
+      id.data[i] = id.data[i + 1] = id.data[i + 2] = v;
+      id.data[i + 3] = 255;
+    }
+    g.putImageData(id, 0, 0);
+  }
+  const grainPat = ctx.createPattern(grainTile, "repeat");
+  /* 相位 → 相邻两屏主题色的线性插值（背景微染/柔光/文字点缀共用） */
+  const mixTone = (ph) => {
+    const a = Math.min(TONES.length - 1, Math.floor(ph));
+    const b = Math.min(TONES.length - 1, a + 1);
+    const k = ph - a;
+    return TONES[a].map((v, i) => v + (TONES[b][i] - v) * k);
+  };
+  /* 一团径向色斑（氛围光斑 / bokeh 共用画法） */
+  const blob = (x, y, r, c, al) => {
+    const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+    g.addColorStop(0, `rgba(${Math.round(c[0])},${Math.round(c[1])},${Math.round(c[2])},${al})`);
+    g.addColorStop(1, `rgba(${Math.round(c[0])},${Math.round(c[1])},${Math.round(c[2])},0)`);
+    ctx.fillStyle = g;
+    ctx.fillRect(x - r, y - r, r * 2, r * 2);
+  };
   let phase = 0;
   let target = 0;
   let intro = still ? 1 : 0;
   let raf = 0;
+  let idleT = 0; // 静止期的星尘心跳定时器
   let introStart = 0;
-  let pIdx = 0; // pointAt 的弧长游标
+  let step = 0;     // 已落定的屏号
+  let actCur = 0;   // 当前屏聚形后动画的剧本进度 0→1
+  let actStart = 0; // 动画起播时间戳（0 = 未起播）
+  let busy = true;  // 剧本进行中（锁输入）；开场聚形后自动播 00 屏动画再亮提示
+  let phaseFrom = 0; // 本段换屏的相位起点
+  let transStart = 0; // 本段换屏起播时间
+  const hintEl = canvas.parentElement ? canvas.parentElement.querySelector(".land-hint") : null;
+  const skipEl = canvas.parentElement ? canvas.parentElement.querySelector(".land-skip") : null;
+  const hint = (show) => {
+    if (hintEl) hintEl.classList.toggle("show", show && !busy && step < figs.length - 1);
+  };
+  const syncSkip = () => {
+    if (skipEl) skipEl.style.visibility = step >= figs.length - 1 ? "hidden" : "";
+  };
 
   const build = () => {
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -535,14 +573,38 @@ function mountSketch(canvas, scroller, rail, progress, mapLayer) {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     const narrow = W < 920;
     const mid = !narrow && W < 1280;
-    size = narrow ? Math.min(W * 0.34, H * 0.2) : mid ? Math.min(H * 0.22, W * 0.17) : Math.min(H * 0.25, W * 0.16);
-    gy = narrow ? H * 0.27 : H * 0.3; // 图形锚点高度（内容列上部，文字在下面）
-    const nodeX = mid ? 0.79 : 0.76; // 站点列位置（偶数屏在右、奇数屏在左）
-    stx = Array.from({ length: STATIONS.length }, (_, i) => (i % 2 === 0 ? W * nodeX : W * (1 - nodeX)));
-    gxArr = STATIONS.map((_, i) => (narrow ? W * 0.5 : i % 2 === 0 ? W * (1 - nodeX) : W * nodeX));
-    kY = H * (narrow ? 0.5 : 0.55);
-    dot = narrow ? 1.0 : 1.15;
-    const spacing = narrow ? 3.0 : 2.8; // 更密：聚形后近似连续的发光线
+    /* 文字与图形逐屏左右对调（偶数屏文字左/图形右，奇数屏反之）；
+       竖直位置由 JS 写 top、与图形中心对齐，整列放不下时向上收敛：
+       顶部最少 72px、底部留 24px，保证不裁字（短屏配合 CSS max-height 收紧一档） */
+    const inners = [...scroller.querySelectorAll(".snap-inner")];
+    const hh = inners.reduce((m, el) => Math.max(m, el.offsetHeight), 0) || H * 0.5;
+    let textTop;
+    if (narrow) {
+      const figSpace = Math.max(140, H - hh - 40);
+      size = Math.min(W * 0.5, figSpace * 0.5);
+      gy = 10 + figSpace / 2;
+      gxA = inners.map(() => W * 0.5);
+      textTop = Math.max(72, Math.min(H - 24 - hh, 10 + figSpace + 16));
+    } else {
+      const mL = Math.max(120, W * 0.13); // 左列文字边距（与 CSS --col-pad 一致，更靠中）
+      const mR = Math.max(88, W * 0.09);  // 右列文字边距
+      const colW = mid ? 360 : 440;
+      const figM = Math.max(72, W * 0.05); // 图形区域的左右边距（宽图如「树」也不贴边）
+      const rightRegion = [mL + colW + 48, W - figM]; // 文字在左时图形的区域
+      const leftRegion = [figM, W - mR - colW - 48];  // 文字在右时图形的区域
+      const availEven = rightRegion[1] - rightRegion[0];
+      const availOdd = leftRegion[1] - leftRegion[0];
+      size = Math.min(H * 0.42, availEven * 0.38, availOdd * 0.38);
+      gy = H * 0.5;
+      gxA = inners.map((_, i) => {
+        const r = i % 2 === 0 ? rightRegion : leftRegion;
+        return (r[0] + r[1]) / 2;
+      });
+      textTop = Math.max(72, (H - hh) / 2);
+    }
+    inners.forEach((el) => { el.style.top = `${textTop}px`; });
+    dot = narrow ? 0.85 : 0.95;
+    const spacing = narrow ? 1.8 : 1.6; // 更密：细粒子密排 + 横向散布铺成粗笔画
     const raws = SKETCHES.map((f) => f());
     const totalLen = (st) => st.reduce((s, x) => s + strokeLength(x.pts), 0);
     const need = raws.map((st) => Math.ceil((totalLen(st) * size) / spacing));
@@ -552,134 +614,234 @@ function mountSketch(canvas, scroller, rail, progress, mapLayer) {
       const f = sampleSketch(st, N);
       const vis = new Uint8Array(N);
       for (let j = 0; j < want; j++) vis[Math.floor((j * N) / want)] = 1;
+      // 带 part 标记的笔画 → 粒子分组表（1 起，0 = 无分组），供聚形后动画用
+      const names = [];
+      const pid = new Uint8Array(N);
+      st.forEach((s2, si) => {
+        if (!s2.part) return;
+        let id = names.indexOf(s2.part) + 1;
+        if (!id) { names.push(s2.part); id = names.length; }
+        for (let j = 0; j < N; j++) if (f.sid[j] === si) pid[j] = id;
+      });
+      f.pid = pid;
+      f.pnames = names;
       f.vis = vis;
       return f;
     };
     figs = raws.map((st, k) => sample(st, need[k]));
-    // 引导线：样条过六站（x 用屏幕像素、y 用世界坐标的混合坐标），向画面上下各延一段；
-    // 弧长表 + 站点弧长。dots 仅作弧长均匀参考，不参与绘制
-    const pts = catmullRom([
-      [stx[0] + (W * 0.5 - stx[0]) * 0.25, -1.2],
-      ...STATIONS.map((s, i) => [stx[i], s.y]),
-      [stx[STATIONS.length - 1] + (W * 0.5 - stx[STATIONS.length - 1]) * 0.25, STATIONS[STATIONS.length - 1].y + 1.3],
-    ]);
-    const cum = [0];
-    for (let i = 1; i < pts.length; i++) cum.push(cum[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
-    const stationArc = [];
-    let ptr = 0;
-    STATIONS.forEach((s, i) => {
-      while (ptr < pts.length - 1 && Math.hypot(pts[ptr][0] - stx[i], pts[ptr][1] - s.y) > 1e-9) ptr++;
-      stationArc.push(cum[ptr]);
+    // 04「待办圈 → 对勾」的形变目标：沿对勾折线按弧长均匀取点，与圈上粒子一一对应
+    const spec4 = FIG_ANIMS[4] && FIG_ANIMS[4].parts.todo;
+    if (figs[4] && figs[4].pid && spec4) {
+      const f4 = figs[4];
+      const mid = f4.pnames.indexOf("todo") + 1;
+      const idxs = [];
+      for (let j = 0; j < N; j++) if (f4.pid[j] === mid) idxs.push(j);
+      const [p0, p1, p2] = spec4.morphTo;
+      const L1 = Math.hypot(p1[0] - p0[0], p1[1] - p0[1]);
+      const L2 = Math.hypot(p2[0] - p1[0], p2[1] - p1[1]);
+      const TT = L1 + L2;
+      const tgt = new Float32Array(N * 2);
+      idxs.forEach((j, q2) => {
+        const d = idxs.length === 1 ? 0 : (q2 / (idxs.length - 1)) * TT;
+        let k2;
+        if (d <= L1) {
+          k2 = L1 ? d / L1 : 0;
+          tgt[j * 2] = p0[0] + (p1[0] - p0[0]) * k2;
+          tgt[j * 2 + 1] = p0[1] + (p1[1] - p0[1]) * k2;
+        } else {
+          k2 = L2 ? (d - L1) / L2 : 0;
+          tgt[j * 2] = p1[0] + (p2[0] - p1[0]) * k2;
+          tgt[j * 2 + 1] = p1[1] + (p2[1] - p1[1]) * k2;
+        }
+      });
+      f4.morph = tgt;
+    }
+    // 每个采样点的路径法线：细粒子沿法线横向散布，铺出有颗粒感的粗笔画
+    figs.forEach((f) => {
+      const nx = new Float32Array(N); const ny = new Float32Array(N);
+      for (let i = 0; i < N; i++) {
+        const i0 = Math.max(0, i - 2); const i1 = Math.min(N - 1, i + 2);
+        const dx = f.xy[i1 * 2] - f.xy[i0 * 2];
+        const dy = f.xy[i1 * 2 + 1] - f.xy[i0 * 2 + 1];
+        const L = Math.hypot(dx, dy) || 1;
+        nx[i] = -dy / L; ny[i] = dx / L;
+      }
+      f.nx = nx; f.ny = ny;
     });
-    path = { pts, cum, stationArc };
-    pIdx = 0;
-    if (mapLayer) mapLayer.style.opacity = "1"; // 标签层常显（窄屏由 CSS 隐藏）
     scatter = Array.from({ length: N }, (_, i) => [
       W * (0.06 + 0.88 * unitHash(i, 11)),
       H * (0.06 + 0.88 * unitHash(i, 13)),
     ]);
-  };
-
-  /* 弧长 → 样条上的点（镜头位置）；游标随 s 进退，逐帧 O(1) */
-  const pointAt = (s) => {
-    const pts = path.pts; const cum = path.cum;
-    const total = cum[cum.length - 1];
-    s = Math.min(Math.max(s, 0), total);
-    while (pIdx < cum.length - 2 && cum[pIdx + 1] < s) pIdx++;
-    while (pIdx > 0 && cum[pIdx] > s) pIdx--;
-    const seg = cum[pIdx + 1] - cum[pIdx] || 1;
-    const tt = (s - cum[pIdx]) / seg;
-    return [pts[pIdx][0] + (pts[pIdx + 1][0] - pts[pIdx][0]) * tt, pts[pIdx][1] + (pts[pIdx + 1][1] - pts[pIdx][1]) * tt];
+    // 星尘三层：远景细点（多而暗）→ 中景点 → 近景 bokeh 软斑（大而更淡、漂移更快），带出纵深
+    dust = [];
+    const addDust = (n, rr, ar, sp, soft) => {
+      for (let k = 0; k < n; k++) {
+        const s = dust.length;
+        dust.push({
+          x: unitHash(s, 19), y: unitHash(s, 23),
+          r: rr[0] + unitHash(s, 29) * (rr[1] - rr[0]),
+          p: unitHash(s, 31) * Math.PI * 2,
+          w: 0.4 + unitHash(s, 37) * 0.9,
+          a: ar[0] + unitHash(s, 41) * (ar[1] - ar[0]),
+          sp, soft,
+        });
+      }
+    };
+    const nn = narrow ? 0.55 : 1;
+    addDust(Math.round(74 * nn), [0.5, 1.3], [0.035, 0.09], 0.5, false);
+    addDust(Math.round(34 * nn), [0.9, 1.9], [0.05, 0.12], 1, false);
+    addDust(narrow ? 7 : 13, [6, 16], [0.028, 0.06], 1.7, true);
+    // 星座网节点：向画面中央聚拢（左右两侧留给文字列），小幅漂移，连线随距离实时增减
+    plex = Array.from({ length: narrow ? 12 : 24 }, (_, i) => ({
+      x: 0.5 + (unitHash(i, 53) - 0.5) * 0.78,
+      y: 0.08 + 0.84 * unitHash(i, 59),
+      p: unitHash(i, 61) * Math.PI * 2,
+      sp: 0.4 + unitHash(i, 67) * 0.7,
+      r: 1.1 + unitHash(i, 71),
+    }));
   };
 
   const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
-  /* 站点 x 固定在两侧交替、镜头只竖向行进：走过段发光生长，图形+文字列在站的对面 */
-  const draw = () => {
-    ctx.clearRect(0, 0, W, H);
-    if (!path || !figs.length) return;
+  /* 聚形后动画进度：当前屏由剧本播放（actCur），已越过的屏视为播完，未到的屏为 0 */
+  const actOf = (idx) => (idx === step ? actCur : idx < step ? 1 : 0);
+
+  /* 聚形后动画的逐帧参数；ang 类预乘好 cos/sin，sweep/fill/flat 按各自类型展开 */
+  const animsOf = (idx, tm2) => {
+    const spec = FIG_ANIMS[idx];
+    if (!spec) return null;
+    const act = actOf(idx);
+    const out = {};
+    for (const name of Object.keys(spec.parts)) {
+      const c = spec.parts[name];
+      if (c.ang) {
+        const ang = c.ang(act, tm2);
+        out[name] = { ca: Math.cos(ang), sa: Math.sin(ang), px: c.pivot[0], py: c.pivot[1] };
+      } else if (c.persp) {
+        const ang = c.persp.ang(act);
+        out[name] = {
+          hx: c.persp.hinge[0], yc: c.persp.yc, w: c.persp.w, pf: c.persp.pf,
+          co: Math.cos(ang), si: Math.sin(ang),
+        };
+      } else if (c.sweep) {
+        out[name] = {
+          sweep: c.sweep.base + c.sweep.span * (1 - Math.pow(1 - act, 3)),
+          from: c.sweep.from, sx: c.pivot[0], sy: c.pivot[1],
+        };
+      } else if (c.reveal) {
+        out[name] = { reveal: c.reveal(act) }; // 门内路面：随开门渐显
+      } else if (c.morphTo) {
+        out[name] = { morph: true, k: 1 - Math.pow(1 - act, 3) };
+      } else if (c.light !== undefined) {
+        out[name] = { light: Math.min(1, Math.max(0, act * 4 - c.light)), fill: c.fill || null };
+      }
+    }
+    return out;
+  };
+
+  /* 每屏一色（参考彩色 WebGL 粒子站）：背景向主题色微染、图形后一团柔光、强调笔画换色，
+  全部随相位在相邻两色间连续过渡；粒子换图途中先均匀散布全屏再聚回 */
+  const draw = (now) => {
+    if (!figs.length) return;
+    const tone = mixTone(phase);
+    const bg = mixTone(phase).map((v, i) => Math.round(v * 0.09 + [12, 15, 14][i] * 0.91));
+    ctx.fillStyle = `rgb(${bg[0]},${bg[1]},${bg[2]})`;
+    ctx.fillRect(0, 0, W, H);
     const a = Math.min(figs.length - 1, Math.floor(phase));
     const b = Math.min(figs.length - 1, a + 1);
     const t = phase - a;
-    const sa = path.stationArc[a];
-    const sb = path.stationArc[a + 1] ?? sa;
-    const camY = STATIONS[a].y + (STATIONS[b].y - STATIONS[a].y) * t;
-    const my = (wy) => H * 0.5 + (wy - camY) * kY;
-    const active = Math.min(STATIONS.length - 1, Math.round(phase));
-    /* 走过段的前端在行进前半程连续长到下一站，后半程停住等聚焦环跳站 */
-    const head = sa + (sb - sa) * Math.min(1, Math.max(0, t * 2));
-    const total = path.cum[path.cum.length - 1];
+    /* 图形锚点随相位在左右两个区域间插值横移（与文字对调），粒子散开途中完成换位 */
+    const anchorT = still ? (t >= 0.5 ? 1 : 0) : ease(Math.min(1, Math.max(0, t / 0.8)));
+    const gxCur = gxA.length ? gxA[a] + (gxA[b] - gxA[a]) * anchorT : W * 0.5;
 
-    /* 引导线（加粗实线）：未走段灰在下，走过段主色发光叠在上面 */
-    const strokeSeg = (fromArc, toArc, style, alpha, glow) => {
-      if (toArc - fromArc < 1e-6) return;
-      const p0 = pointAt(fromArc);
-      const p1 = pointAt(toArc);
-      ctx.strokeStyle = style;
-      ctx.globalAlpha = alpha;
-      ctx.lineWidth = 4;
-      ctx.lineJoin = "round";
-      ctx.lineCap = "round";
-      ctx.shadowColor = glow ? ACCENT : "transparent";
-      ctx.shadowBlur = glow ? 12 : 0;
-      ctx.beginPath();
-      ctx.moveTo(p0[0], my(p0[1]));
-      for (let i = 0; i < path.pts.length; i++) {
-        const c = path.cum[i];
-        if (c <= fromArc + 1e-6 || c >= toArc - 1e-6) continue;
-        ctx.lineTo(path.pts[i][0], my(path.pts[i][1]));
+    /* 氛围：四团大范围色斑几乎铺满画面（图形后主光斑 + 本屏色×2 + 下一屏色对角）缓慢漂移，
+       背景有了色彩空间而不是单点光源（reduced-motion 时静止） */
+    const tm = still ? 0 : (now || 0) / 1000;
+    const next = mixTone(Math.min(phase + 1, TONES.length - 1));
+    const dr = (p, amp) => (still ? 0 : Math.sin(tm * 0.05 + p) * amp);
+    blob(gxCur + dr(0.3, 26), gy + dr(1.1, 20), Math.max(size * 2, H * 0.6), tone, 0.2);
+    blob(gxCur - W * 0.22 + dr(2.2, 22), gy + H * 0.22 + dr(3.1, 18), H * 0.85, tone, 0.1);
+    blob(W * 0.12 + dr(4.0, 20), H * 0.82 + dr(5.2, 16), H * 0.9, next, 0.09);
+    blob(W - gxCur + dr(6.1, 18), H * 0.16 + dr(7.3, 14), H * 0.78, tone, 0.07);
+
+    /* 星座网：节点缓慢漂移，近邻之间牵起随距离淡出的细线——背景有可辨的图案结构 */
+    const linkR = Math.min(W, H) * 0.22;
+    const pts = plex.map((n) => [
+      n.x * W + Math.sin(tm * 0.05 * n.sp + n.p) * 16,
+      n.y * H + Math.cos(tm * 0.04 * n.sp + n.p * 1.3) * 12,
+    ]);
+    const tcol = `rgba(${Math.round(tone[0])},${Math.round(tone[1])},${Math.round(tone[2])},1)`;
+    /* 当前屏文字列所在的纵带：穿过去的连线淡化，别在字底下拉线 */
+    const tx0 = (a % 2 === 0 ? 0.06 : 0.55) * W;
+    const tx1 = tx0 + W * 0.39;
+    const inTextBand = (p) => p[0] > tx0 && p[0] < tx1 && p[1] > H * 0.15 && p[1] < H * 0.88;
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = tcol;
+    for (let i = 0; i < pts.length; i++) {
+      for (let j = i + 1; j < pts.length; j++) {
+        const d = Math.hypot(pts[i][0] - pts[j][0], pts[i][1] - pts[j][1]);
+        if (d >= linkR) continue;
+        ctx.globalAlpha = (1 - d / linkR) * 0.14 * (inTextBand(pts[i]) || inTextBand(pts[j]) ? 0.3 : 1);
+        ctx.beginPath();
+        ctx.moveTo(pts[i][0], pts[i][1]);
+        ctx.lineTo(pts[j][0], pts[j][1]);
+        ctx.stroke();
       }
-      ctx.lineTo(p1[0], my(p1[1]));
-      ctx.stroke();
-      ctx.shadowBlur = 0;
-    };
-    strokeSeg(head, total, NODE, 0.32, false);
-    strokeSeg(0, head, ACCENT, 0.9, true);
-    ctx.globalAlpha = 1;
-
-    /* 站点：实心圆 + 外圆环；走过的填主色带微光，聚焦站外环换 --night-mark */
-    STATIONS.forEach((st, i) => {
-      const sx = stx[i]; const sy = my(st.y);
-      if (sy < -60 || sy > H + 60) return;
-      const isActive = i === active;
-      ctx.globalAlpha = isActive ? 1 : 0.6;
-      ctx.strokeStyle = isActive ? MARK : NODE;
-      ctx.lineWidth = isActive ? 2 : 1.5;
+    }
+    ctx.fillStyle = tcol;
+    plex.forEach((n, i) => {
+      ctx.globalAlpha = 0.12 + 0.08 * n.sp;
       ctx.beginPath();
-      ctx.arc(sx, sy, isActive ? 15 : 12, 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.globalAlpha = 1;
-      ctx.fillStyle = i <= active ? ACCENT : INK;
-      ctx.shadowColor = ACCENT;
-      ctx.shadowBlur = i <= active ? 6 : 0;
-      ctx.beginPath();
-      ctx.arc(sx, sy, 6, 0, Math.PI * 2);
+      ctx.arc(pts[i][0], pts[i][1], n.r, 0, Math.PI * 2);
       ctx.fill();
-      ctx.shadowBlur = 0;
     });
-
-    /* 行进最前端的亮点：沿走过段顶端，亮核 + 柔光晕 */
-    const hp = pointAt(head);
-    const hx = hp[0]; const hy = my(hp[1]);
-    ctx.fillStyle = ACCENT;
-    ctx.globalAlpha = 0.22;
-    ctx.beginPath();
-    ctx.arc(hx, hy, 11, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.globalAlpha = 0.95;
-    ctx.shadowColor = ACCENT;
-    ctx.shadowBlur = 14;
-    ctx.beginPath();
-    ctx.arc(hx, hy, 4.5, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.shadowBlur = 0;
     ctx.globalAlpha = 1;
 
-    /* 粒子：图形锚点逐屏换到站的对面；行进中先均匀散布全屏（变暗变细）再聚回图形（渐亮变粗） */
+    /* 星尘三层：远景细点 / 中景点 / 近景 bokeh 软斑，漂移速度不同带出纵深 */
+    for (const d of dust) {
+      const x = d.x * W + Math.sin(tm * 0.12 + d.p) * 18 * d.sp;
+      const y = d.y * H + Math.cos(tm * 0.09 + d.p * 1.7) * 14 * d.sp;
+      const tw = still ? 0.8 : 0.55 + 0.45 * Math.sin(tm * d.w + d.p);
+      ctx.globalAlpha = d.a * tw;
+      if (d.soft) {
+        blob(x, y, d.r, tone, 1);
+        ctx.globalAlpha = 1;
+        continue;
+      }
+      ctx.fillStyle = `rgb(${Math.round(tone[0])},${Math.round(tone[1])},${Math.round(tone[2])})`;
+      ctx.beginPath();
+      ctx.arc(x, y, d.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    /* 暗角：四周压暗，视线聚到画面中部（DOM 文字在 canvas 之上，不受影响） */
+    const vg = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.36, W / 2, H / 2, Math.hypot(W, H) / 2);
+    vg.addColorStop(0, "rgba(0,0,0,0)");
+    vg.addColorStop(1, "rgba(0,0,0,0.18)");
+    ctx.fillStyle = vg;
+    ctx.fillRect(0, 0, W, H);
+
     const A = still && t >= 0.5 ? figs[b] : figs[a];
     const B = still ? A : figs[b];
-    const anchorT = still ? (t >= 0.5 ? 1 : 0) : ease(Math.min(1, Math.max(0, t / 0.8)));
-    const gxa = gxArr[a] + (gxArr[b] - gxArr[a]) * anchorT;
+    const fxA = still ? null : animsOf(a, tm);
+    const fxB = still ? null : animsOf(b, tm);
+    /* 05 点亮的节点：环内填成实心并发光（实心核 + 柔光晕，画在环粒子下面） */
+    const drawFills = (fx) => {
+      if (!fx) return;
+      for (const nm2 of Object.keys(fx)) {
+        const f2 = fx[nm2];
+        if (f2.fill && f2.light > 0) {
+          const fxp = gxCur + f2.fill[0] * size;
+          const fyp = gy + f2.fill[1] * size;
+          const fr = f2.fill[2] * size;
+          blob(fxp, fyp, fr * 2.6, tone, 0.3 * f2.light);
+          blob(fxp, fyp, fr * 0.95, tone, 0.85 * f2.light);
+        }
+      }
+    };
+    drawFills(fxA);
+    drawFills(fxB);
     for (let i = 0; i < N; i++) {
       const f = i / N;
       const local = still ? (t >= 0.5 ? 1 : 0) : ease(Math.min(1, Math.max(0, (t - f * 0.35) / 0.65)));
@@ -687,8 +849,45 @@ function mountSketch(canvas, scroller, rail, progress, mapLayer) {
       const bx = B.xy[i * 2]; const by = B.xy[i * 2 + 1];
       const x = ax + (bx - ax) * local;
       const y = ay + (by - ay) * local;
-      let px = gxa + x * size;
-      let py = gy + y * size;
+      /* 聚形后动画：主导图形里带分组的粒子做 旋转（问号/罗盘/时针）/ 向里推（门）/
+         弧线扫过显出（进度弧）/ 形变换色（待办圈→对勾）/ 依次点亮（树节点） */
+      let xx = x; let yy = y; let lightK = 0; let recolor = false; let cut = false; let revealK = 1;
+      const dom = local < 0.5 ? A : B;
+      const domIdx = local < 0.5 ? a : b;
+      const fx = domIdx === a ? fxA : fxB;
+      if (fx && dom.pid && dom.pid[i]) {
+        const f2 = fx[dom.pnames[dom.pid[i] - 1]];
+        if (f2) {
+          if (f2.ca !== undefined) {
+            const dx0 = xx - f2.px; const dy0 = yy - f2.py;
+            xx = f2.px + dx0 * f2.ca - dy0 * f2.sa;
+            yy = f2.py + dx0 * f2.sa + dy0 * f2.ca;
+          } else if (f2.hx !== undefined) {
+            /* 绿门向里推：绕左铰链竖轴旋转 + 透视——远端向铰链收拢、向门高中线收缩 */
+            const u0 = Math.min(1.2, Math.max(0, (xx - f2.hx) / f2.w));
+            const p = 1 / (1 + u0 * f2.w * f2.si * f2.pf);
+            xx = f2.hx + u0 * f2.w * f2.co * p;
+            yy = f2.yc + (yy - f2.yc) * p;
+          } else if (f2.sweep !== undefined) {
+            const aP = Math.atan2(yy - f2.sy, xx - f2.sx);
+            if ((aP - f2.from + Math.PI * 2.001) % (Math.PI * 2) > f2.sweep) cut = true;
+          } else if (f2.morph && dom.morph) {
+            xx += (dom.morph[i * 2] - xx) * f2.k;
+            yy += (dom.morph[i * 2 + 1] - yy) * f2.k;
+            if (f2.k > 0.5) recolor = true;
+          } else if (f2.light > 0) {
+            lightK = f2.light;
+          } else if (f2.reveal !== undefined) {
+            revealK = f2.reveal; // 门内路面随开门渐显
+          }
+        }
+      }
+      /* 横向散布：细粒子沿笔画法线铺开成粗带（±2.6×dot），转场时法线归零收成细线飞走 */
+      const lat = (unitHash(i, 47) * 2 - 1) * 2.6 * dot;
+      const nxv = A.nx[i] + (B.nx[i] - A.nx[i]) * local;
+      const nyv = A.ny[i] + (B.ny[i] - A.ny[i]) * local;
+      let px = gxCur + xx * size + nxv * lat;
+      let py = gy + yy * size + nyv * lat;
       const lift = Math.sin(Math.PI * local); // 散开程度：0 聚成图形、1 均匀铺满全屏
       if (lift > 0.001) {
         px += (scatter[i][0] - px) * lift;
@@ -701,34 +900,57 @@ function mountSketch(canvas, scroller, rail, progress, mapLayer) {
       }
       const vis = A.vis[i] + (B.vis[i] - A.vis[i]) * local;
       const focus = 1 - lift; // 聚形度：散开暗而细，聚形亮而粗，聚拢完成时最强
-      const alpha = vis * (0.28 + 0.72 * Math.pow(focus, 1.4)) * Math.min(1, intro * 1.4);
-      if (alpha < 0.03) continue;
-      const spr = (local < 0.5 ? A.acc[i] : B.acc[i]) ? SPR_ACC : SPR_INK;
-      const r = dot * (0.6 + 0.85 * focus);
-      const s = r * 3;
+      let alpha = vis * (0.28 + 0.72 * Math.pow(focus, 1.4)) * Math.min(1, intro * 1.4) * revealK;
+      if (cut || alpha < 0.03) continue; // 进度弧只显出指针扫过的部分；门内路面随开门渐显
+      let spr = (local < 0.5 ? A.acc[i] : B.acc[i]) ? (local < 0.5 ? SPRS[a] : SPRS[b]) : SPR_INK;
+      if (recolor) spr = SPRS[domIdx]; // 待办圈形变过半后换成本屏主题色
+      /* 背景回声：同一图形放大 2.1 倍铺在画面中心后面，淡而可辨的大轮廓（每 3 颗画 1 颗） */
+      if (i % 3 === 0) {
+        const gpx = W / 2 + x * size * 2.1;
+        const gpy = H / 2 + y * size * 2.1;
+        const gs = dot * 3;
+        ctx.globalAlpha = alpha * 0.15;
+        ctx.drawImage(spr, gpx - gs, gpy - gs, gs * 2, gs * 2);
+      }
+      const jit = 0.75 + unitHash(i, 17) * 0.6; // 粒径抖动：大小参差，聚形后不是均匀的「灯管」
+      let r = dot * (0.55 + 1.05 * focus) * jit;
+      if (lightK) { // 树节点依次点亮：变亮变大，点亮的瞬间鼓一下再落定
+        alpha = Math.min(1, alpha * (1 + 0.8 * lightK));
+        r *= 1 + 0.35 * lightK + Math.sin(lightK * Math.PI) * 0.55;
+      }
+      const s = r * 2.2; // 光晕收小：亮在芯、不在晕
       ctx.globalAlpha = alpha;
       ctx.drawImage(spr, px - s, py - s, s * 2, s * 2);
     }
     ctx.globalAlpha = 1;
 
-    /* 站点标签随镜头竖向投影定位，出屏的藏起来 */
-    if (mapLayer) {
-      [...mapLayer.children].forEach((sp, i) => {
-        const st = STATIONS[i];
-        const sx = stx[i]; const sy = my(st.y);
-        sp.style.left = sx + "px";
-        sp.style.top = sy + "px";
-        sp.style.opacity = (sy < -40 || sy > H + 40) ? "0" : "0.9";
-      });
+    /* 胶片颗粒：静态噪点以 overlay 叠全屏——亮部见纹理、暗部保持干净 */
+    if (grainPat) {
+      ctx.globalCompositeOperation = "overlay";
+      ctx.globalAlpha = 0.08;
+      ctx.fillStyle = grainPat;
+      ctx.fillRect(0, 0, W, H);
+      ctx.globalCompositeOperation = "source-over";
+      ctx.globalAlpha = 1;
     }
   };
 
   const sections = [...scroller.querySelectorAll(".snap")];
 
   const syncRail = () => {
-    const active = Math.min(nos.length - 1, Math.round(phase));
-    nos.forEach((d, i) => d.classList.toggle("on", i === active));
-    if (mark && nos[active]) mark.style.transform = `translateY(${nos[active].offsetTop}px)`;
+    const active = Math.min(figs.length - 1, Math.round(phase));
+    /* 文字点缀（kicker/大编号/滚动提示线/进度条）的 --tone 随屏换主题色、步号随屏跳；
+       换屏发生在文字淡出的间隙，跳变不会被看见 */
+    if (active !== lastActive) {
+      lastActive = active;
+      const tn = TONES[active];
+      (canvas.parentElement || canvas).style.setProperty("--tone", `rgb(${tn[0]},${tn[1]},${tn[2]})`);
+      if (stepCur) stepCur.textContent = String(active).padStart(2, "0");
+    }
+    /* 左缘纵向进度轨道随换屏相位连续生长 */
+    if (stepFill) {
+      stepFill.style.height = `${Math.min(1, phase / Math.max(1, figs.length - 1)) * 100}%`;
+    }
     /* 文字钉在视口不动，只按相位渐显渐隐：行进后段（聚形近完成）渐入，
        开始滚向下一步就渐出；首屏等开场粒子聚完再出现 */
     sections.forEach((sec, i) => {
@@ -743,46 +965,118 @@ function mountSketch(canvas, scroller, rail, progress, mapLayer) {
       sec.style.opacity = String(Math.min(1, Math.max(0, vis)));
       sec.classList.toggle("lit", vis > 0.5);
     });
-    const limit = Math.max(1, scroller.scrollHeight - scroller.clientHeight);
-    if (bar) bar.style.width = `${Math.min(1, scroller.scrollTop / limit) * 100}%`;
   };
 
-  /* 追滚动：phase 平滑追向 target（滚动映射的连续值），镜头随之在引导线上行进 */
+  /* 一次滚轮/滑动/按键 = 走一整段剧本：粒子散开聚形换位 → 文字两段进场 →
+     聚形后动画 → 亮「滚动以继续」提示；期间锁输入，不吃连续滚动 */
+  const go = (n) => {
+    const next = Math.min(figs.length - 1, Math.max(0, n));
+    if (busy || next === step) return;
+    busy = true;
+    actCur = 0;
+    actStart = 0;
+    phaseFrom = phase;
+    transStart = 0;
+    target = next;
+    hint(false);
+    wake();
+  };
+
   const tick = (now) => {
     raf = 0;
     if (!canvas.isConnected) return;
     let moving = false;
     if (intro < 1) {
       if (!introStart) introStart = now;
-      intro = Math.min(1, (now - introStart) / 1600);
+      intro = Math.min(1, (now - introStart) / 2200);
       moving = true;
     }
-    const gap = target - phase;
-    if (Math.abs(gap) > 0.0005) {
-      phase += still ? gap : gap * 0.14;
+    if (busy && intro >= 1) { // 开场聚形先走完，剧本才开始——00 屏的过程要看得见
+      if (!transStart) transStart = now;
+      const kk = still ? 1 : Math.min(1, (now - transStart) / 4200); // 换屏整段 4.2s，帧率无关
+      const ee = kk * kk * (3 - 2 * kk); // smoothstep：缓起缓收，全程可见的运动
+      phase = phaseFrom + (target - phaseFrom) * ee;
       moving = true;
-    } else {
-      phase = target;
+      /* 文字进场刚收尾（差 0.02 相位）就起播本屏动画——提示与动画同时亮、输入同时解锁 */
+      if (target - phase <= 0.02) {
+        phase = target;
+        step = target;
+        syncSkip();
+        if (!actStart) {
+          actStart = now;
+          busy = false;
+          hint(true);
+        }
+      }
     }
-    draw();
+    if (!busy && actStart && actCur < 1) { // 动画与收尾并行，播完转入空闲心跳
+      actCur = still ? 1 : Math.min(1, (now - actStart) / 1600);
+      moving = true;
+    }
+    draw(now);
     syncRail();
-    if (moving) raf = requestAnimationFrame(tick);
+    if (moving || busy) raf = requestAnimationFrame(tick);
+    else if (!still && dust.length) {
+      idleT = setTimeout(() => { idleT = 0; raf = requestAnimationFrame(tick); }, 80);
+    }
   };
-  const wake = () => { if (!raf) raf = requestAnimationFrame(tick); };
-  const onScroll = () => { target = scrollTarget(scroller); wake(); };
+  const wake = () => {
+    if (idleT) { clearTimeout(idleT); idleT = 0; }
+    if (!raf) raf = requestAnimationFrame(tick);
+  };
   const onResize = () => { build(); wake(); };
 
+  /* 步进输入：滚轮（阈值 + busy 锁）、触摸滑动、方向键/翻页键/空格 */
+  const onWheel = (e) => {
+    if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
+    e.preventDefault();
+    if (e.deltaY > 12) go(step + 1);
+    else if (e.deltaY < -12) go(step - 1);
+  };
+  let touchY = null;
+  const onTouchStart = (e) => { touchY = e.touches[0].clientY; };
+  const onTouchMove = (e) => { e.preventDefault(); };
+  const onTouchEnd = (e) => {
+    if (touchY == null) return;
+    const d = touchY - e.changedTouches[0].clientY;
+    touchY = null;
+    if (d > 46) go(step + 1);
+    else if (d < -46) go(step - 1);
+  };
+  const onKey = (e) => {
+    if (e.target && e.target.closest && e.target.closest("button, input, textarea")) return;
+    if (e.key === "ArrowDown" || e.key === "PageDown" || e.key === " ") { e.preventDefault(); go(step + 1); }
+    else if (e.key === "ArrowUp" || e.key === "PageUp") { e.preventDefault(); go(step - 1); }
+    else if (e.key === "Home") { e.preventDefault(); go(0); }
+    else if (e.key === "End") { e.preventDefault(); go(figs.length - 1); }
+  };
+
   build();
-  target = scrollTarget(scroller);
-  phase = target;
-  scroller.addEventListener("scroll", onScroll, { passive: true });
+  target = 0;
+  phase = 0;
+  step = 0;
+  window.addEventListener("wheel", onWheel, { passive: false });
+  window.addEventListener("touchstart", onTouchStart, { passive: true });
+  window.addEventListener("touchmove", onTouchMove, { passive: false });
+  window.addEventListener("touchend", onTouchEnd, { passive: true });
+  window.addEventListener("keydown", onKey);
   window.addEventListener("resize", onResize);
+  // 衬线字体到位后行高会变：重新量内容高度再收敛钉位（采样带 unitHash，是确定性的，重建无跳变）
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(() => { if (canvas.isConnected) { build(); wake(); } });
+  }
   wake();
 
   return () => {
     cancelAnimationFrame(raf);
     raf = 0;
-    scroller.removeEventListener("scroll", onScroll);
+    if (idleT) clearTimeout(idleT);
+    idleT = 0;
+    window.removeEventListener("wheel", onWheel);
+    window.removeEventListener("touchstart", onTouchStart);
+    window.removeEventListener("touchmove", onTouchMove);
+    window.removeEventListener("touchend", onTouchEnd);
+    window.removeEventListener("keydown", onKey);
     window.removeEventListener("resize", onResize);
   };
 }

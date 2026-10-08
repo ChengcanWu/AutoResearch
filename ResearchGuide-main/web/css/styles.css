@@ -29,6 +29,7 @@
   /* 首页夜色 */
   --night: #0c0f0e;
   --night-ink: #edf1ee;
+  --night-1: #c3ccc7;
   --night-2: #9aa5a0;
   --night-3: #5d6763;
   --night-accent: #7fd1c2;
@@ -799,124 +800,146 @@ code { font-family: var(--mono); font-size: 0.92em; padding: 1px 5px; border-rad
 }
 .nba-alts::before { content: "或者"; font-size: 12px; color: var(--ink-3); margin-right: var(--gap-1); }
 
-/* ---------- 首页：夜色 + 点线图 ---------- */
+/* ---------- 首页：夜色 + 每屏一色的粒子 ---------- */
 
 body.is-home { background: var(--night); overflow: hidden; }
-body.is-home .page { max-width: none; padding: 0; height: 100vh; overflow: hidden; }
+body.is-home .page { max-width: none; padding: 0; height: 100vh; height: 100dvh; overflow: hidden; }
 body.is-home .site-footer { display: none; }
 
-.land { position: relative; height: 100vh; color: var(--night-ink); background: var(--night); }
-.land-field { position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; }
-.land-snap {
-  position: relative; z-index: 1;
-  height: 100vh; overflow-y: auto; overscroll-behavior: contain;
-  scrollbar-width: none;
+/* 只剩文字与粒子：--tone 由 JS 按屏写入（kicker/大编号/滚动提示线/进度条随之换色），
+   canvas 负责背景微染、图形后柔光与粒子本体 */
+.land {
+  --tone: rgb(127, 209, 194);
+  position: relative; height: 100vh; height: 100dvh; color: var(--night-ink); background: var(--night);
 }
-.land-snap::-webkit-scrollbar { display: none; }
-/* 内容列逐屏左右交替：section 只负责撑滚动高度，文字块 sticky 钉在视口 56vh 不随滚动移动；
-   图形画在列上部（canvas 锚点），显隐由 JS 按相位渐变；站点在对面一侧（见 app.js 的 stx/gxArr） */
-.snap { min-height: 170vh; }
-.snap:last-child { min-height: 140vh; }
+.land-field { position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100dvh; pointer-events: none; }
+/* 步进叙事：不自由滚动，一次滚轮/滑动/按键走一整段剧本（见 app.js 的 go/tick）；
+   六个 section 叠满视口，文字显隐由 JS 按相位控制 */
+.land-snap { position: relative; z-index: 1; height: 100vh; height: 100dvh; overflow: hidden; }
+/* 文字与图形逐屏左右对调：竖直位置由 JS 写 top（与图形中心对齐，整列放不下时向上收敛）；
+   左列边距更大（离左缘进度条更远、更靠中），右列 9vw；
+   --col-pad = 内容左缘到元素左缘的距离，大编号用它锚到文字起点（左右列一致） */
+.snap { position: absolute; inset: 0; }
 .snap-inner {
-  position: sticky;
-  top: 56vh;
-  max-width: calc(max(64px, 7vw) + 440px);
-  padding-left: max(64px, 7vw);
+  --col-pad: max(120px, 13vw);
+  position: absolute;
+  top: 40vh; /* JS 按内容高度覆盖 */
+  left: 0;
+  width: calc(var(--col-pad) + 440px);
+  padding-left: var(--col-pad);
 }
+/* 奇数屏文字换到右侧，图形去左 */
 .snap:nth-child(even) .snap-inner {
-  margin-left: 56vw;
-  max-width: 440px;
+  --col-pad: 0px;
+  left: auto;
+  right: max(88px, 9vw);
+  width: 440px;
   padding-left: 0;
 }
-.snap .hero-kicker { color: var(--night-2); font-size: 12px; letter-spacing: 0.24em; }
+.snap .hero-kicker { color: var(--tone); font-size: 12px; letter-spacing: 0.24em; }
 .snap h2 {
-  margin: var(--gap-4) 0 var(--gap-4);
-  font-family: var(--serif); font-size: clamp(34px, 4.2vw, 56px); line-height: 1.18; letter-spacing: 0.04em;
-  color: var(--night-ink);
+  margin: 26px 0 var(--gap-5);
+  font-family: var(--serif); font-size: clamp(34px, 4.2vw, 56px); line-height: 1.22; letter-spacing: 0.04em;
+  color: #fff;
+  text-shadow: 0 0 18px rgba(255, 255, 255, 0.28);
 }
-.land-lead { font-size: 14px; line-height: 1.8; color: var(--night-2); }
+.land-lead { font-size: 15px; line-height: 1.75; color: var(--night-1); }
 .land-points { margin: var(--gap-5) 0 0; padding: 0; list-style: none; border-top: 1px solid rgba(237, 241, 238, 0.12); }
-.land-points li { display: grid; grid-template-columns: 76px 1fr; gap: var(--gap-3); padding: 12px 0; border-bottom: 1px solid rgba(237, 241, 238, 0.12); }
+.land-points li { display: grid; grid-template-columns: 72px 1fr; gap: var(--gap-3); padding: 10px 0; border-bottom: 1px solid rgba(237, 241, 238, 0.12); }
 .land-points b { font-size: 12px; font-weight: 600; color: var(--night-ink); }
-.land-points span { font-size: 13px; line-height: 1.7; color: var(--night-2); }
-.snap-hint { margin-top: var(--gap-6); font-size: 12px; letter-spacing: 0.12em; color: var(--night-3); }
-.snap-hint::after { content: ""; display: block; width: 1px; height: 40px; margin-top: var(--gap-3); background: linear-gradient(var(--night-3), transparent); }
+.land-points span { font-size: 13px; line-height: 1.65; color: var(--night-1); }
 .land-cta { margin-top: var(--gap-6); background: var(--night-ink); border-color: var(--night-ink); color: var(--night); }
 .land-cta:hover { background: #fff; border-color: #fff; }
 
-/* 大编号：01–05 屏的衬线数字，压在标题上方做编辑排版 */
+/* 右上角直达：除尾屏外全程可见，下划线文字 */
+.land-skip {
+  position: fixed; top: 22px; right: 32px; z-index: 2;
+  padding: 6px 2px;
+  border: 0; background: none; cursor: pointer;
+  font-size: 13px; letter-spacing: 0.06em;
+  color: var(--night-2);
+  text-decoration: underline;
+  text-underline-offset: 5px;
+  text-decoration-color: rgba(237, 241, 238, 0.35);
+  transition: color var(--fast), text-decoration-color var(--fast);
+}
+.land-skip:hover { color: var(--tone); text-decoration-color: var(--tone); }
+
+/* 大编号：不占行高的背景层，垫在标题后方做编辑排版，随屏染主题色；
+   放大 + 更低不透明度，向左上偏出——上部和左边露出文字外，右下留在字后 */
 .snap-no {
+  position: absolute;
+  top: -0.55em;
+  left: calc(var(--col-pad, 0px) - 0.22em);
+  z-index: -1;
   margin: 0;
   font-family: var(--serif);
-  font-size: clamp(44px, 8vw, 92px);
+  font-size: clamp(150px, 15vw, 220px);
   line-height: 1;
-  letter-spacing: 0.06em;
-  color: var(--night-3);
+  letter-spacing: 0.04em;
+  color: color-mix(in srgb, var(--tone) 12%, transparent);
+  pointer-events: none;
 }
-.snap-no + h2 { margin-top: -10px; }
-
-/* 首屏直达：不想滚完六屏的人 */
-.land-ghost {
-  min-height: 42px; padding: 0 22px;
-  border: 1px solid var(--night-3); border-radius: var(--r-md);
-  background: transparent; color: var(--night-ink);
-  font-size: 14px; font-weight: 600;
-  transition: border-color var(--fast), background var(--fast);
-}
-.land-ghost:hover { border-color: var(--night-ink); background: rgba(237, 241, 238, 0.07); }
 
 /* 尾屏收束句 */
 .land-closing { margin-top: var(--gap-6); font-family: var(--serif); font-size: 19px; letter-spacing: 0.02em; color: var(--night-ink); }
 
-/* 路线图站点标签：换屏锁定窗口内随圆环一起淡入（定位由 app.js 按 canvas 投影写入） */
-.land-map { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0; }
-.land-map span {
-  position: absolute;
-  transform: translate(-50%, 14px);
-  font-size: 12px;
-  letter-spacing: 0.1em;
-  color: var(--night-2);
-  white-space: nowrap;
-}
-
 /* 文字显隐：JS 把 .snap 的 opacity 按滚动相位渐入渐出；挂 .lit 后块内两段进场——
-   标题先出现，内容（导语/要点/按钮）延迟 0.26s 再出现；摘掉 .lit 时整体快速淡出 */
-.snap-inner > * { opacity: 0; transition: opacity 0.22s var(--ease); }
+   标题先出现，内容（导语/要点/按钮）延迟 0.35s 再出现；摘掉 .lit 时整体快速淡出 */
+.snap-inner > * { opacity: 0; transition: opacity 0.3s var(--ease); }
 .snap.lit .snap-inner > :is(.hero-kicker, .snap-no, h2) {
   opacity: 1;
   transition: opacity 0.6s var(--ease);
 }
-.snap.lit .snap-inner > :is(.land-lead, .land-points, .land-closing, .land-ghost, .snap-hint, .land-cta) {
+.snap.lit .snap-inner > :is(.land-lead, .land-points, .land-closing, .land-cta) {
   opacity: 1;
-  transition: opacity 0.6s var(--ease) 0.26s;
+  transition: opacity 0.6s var(--ease) 0.35s;
 }
 
-.fella-index {
-  position: fixed; left: 32px; top: 50%; z-index: 2;
+/* 左缘纵向进度：当前步号随屏换（染主题色）、轨道随滚动生长、底部标总步数 */
+.land-steps {
+  position: fixed; left: 34px; top: 50%; z-index: 2;
   transform: translateY(-50%);
-  display: flex; flex-direction: column; gap: 6px;
+  display: flex; flex-direction: column; align-items: center; gap: 14px;
 }
-.fella-mark {
-  position: absolute; left: -12px; top: 0;
-  width: 5px; height: 5px; margin-top: 8px;
-  background: var(--night-mark);
-  transition: transform 0.45s var(--ease);
-}
-.fella-no {
-  padding: 2px 0; border: 0; background: none;
-  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--night-3);
-  text-align: left;
-  transition: color var(--fast);
-}
-.fella-no:hover, .fella-no.on { color: var(--night-ink); }
-.home-progress { position: fixed; left: 0; right: 0; top: 0; z-index: 2; height: 1px; background: rgba(237, 241, 238, 0.08); }
-.home-progress i { display: block; height: 100%; width: 0; background: var(--night-mark); }
+.land-steps b { font-family: var(--mono); font-size: 13px; letter-spacing: 0.08em; color: var(--tone); transition: color 0.45s var(--ease); }
+.land-steps-track { position: relative; width: 2px; height: min(34vh, 240px); background: rgba(237, 241, 238, 0.12); }
+.land-steps-track i { position: absolute; left: 0; top: 0; width: 100%; height: 0; background: var(--tone); }
+.land-steps span { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--night-3); }
 
-/* 中屏（920–1279）：交替照旧，内容收窄到 360px、站点列更贴边，藏站点标签 */
+/* 步进提示：聚形后动画播完出现；文字缓慢渐变发光，下面一个小箭头 */
+.land-hint {
+  position: fixed; left: 50%; bottom: 26px; z-index: 2;
+  transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 7px;
+  opacity: 0; transition: opacity 0.6s var(--ease);
+  pointer-events: none;
+}
+.land-hint.show { opacity: 1; }
+.land-hint span {
+  font-size: 12px; letter-spacing: 0.18em; color: var(--night-2);
+  animation: hintGlow 2.4s ease-in-out infinite;
+}
+.land-hint i {
+  width: 8px; height: 8px;
+  border-right: 1.5px solid var(--night-2);
+  border-bottom: 1.5px solid var(--night-2);
+  transform: translateY(0) rotate(45deg);
+  animation: hintArrow 2.4s ease-in-out infinite;
+}
+@keyframes hintGlow {
+  0%, 100% { color: var(--night-3); text-shadow: none; }
+  50% { color: var(--tone); text-shadow: 0 0 14px color-mix(in srgb, var(--tone) 55%, transparent); }
+}
+@keyframes hintArrow {
+  0%, 100% { border-color: var(--night-3); filter: none; transform: translateY(0) rotate(45deg); }
+  50% { border-color: var(--tone); filter: drop-shadow(0 0 6px color-mix(in srgb, var(--tone) 60%, transparent)); transform: translateY(3px) rotate(45deg); }
+}
+
+/* 中屏（920–1279）：内容列收窄到 360px，图形锚点/尺寸由 JS 按剩余宽度自适应 */
 @media (min-width: 920px) and (max-width: 1279px) {
-  .snap-inner { max-width: calc(max(48px, 6vw) + 360px); padding-left: max(48px, 6vw); }
-  .snap:nth-child(even) .snap-inner { margin-left: 56vw; max-width: 360px; }
-  .land-map span { display: none; }
+  .snap-inner { width: calc(var(--col-pad) + 360px); }
+  .snap:nth-child(even) .snap-inner { width: 360px; }
 }
 
 /* ---------- 窄屏 ---------- */
@@ -964,16 +987,23 @@ body.is-home .site-footer { display: none; }
   .node-sheet { top: auto; left: 0; width: 100vw; max-height: 72vh; border-left: 0; border-top: 1px solid var(--line); border-radius: var(--r-lg) var(--r-lg) 0 0; box-shadow: 0 -18px 40px rgba(28, 40, 35, 0.1); animation-name: sheetUp; }
   @keyframes sheetUp { from { transform: translateY(24px); opacity: 0; } }
   .hero { margin-top: 10vh; }
-  .snap { min-height: 150vh; }
-  .snap-inner { top: 52vh; max-width: none; margin-left: 0; padding: 0 24px 0 28px; }
-  .snap:nth-child(even) .snap-inner { margin-left: 0; max-width: none; }
-  .snap h2 { font-size: 32px; }
-  .fella-index { display: none; }
-  .snap-no { font-size: 44px; }
-  .snap-no + h2 { margin-top: -6px; }
-  .land-ghost { margin-top: var(--gap-4); }
+  .snap-inner { --col-pad: 28px; top: 60vh; left: 0; width: auto; padding: 0 24px 0 28px; }
+  .snap:nth-child(even) .snap-inner { --col-pad: 28px; right: 0; width: auto; }
+  .snap h2 { font-size: 32px; margin: 18px 0 var(--gap-4); }
+  .snap-no { font-size: 104px; left: calc(var(--col-pad, 0px) - 0.18em); }
+  .land-steps { display: none; }
   .land-closing { margin-top: var(--gap-5); font-size: 16px; }
-  .land-map { display: none; }
+}
+
+/* 短屏（笔记本 / 高分屏缩放）：整列收紧一档，配合 JS 钉位上移保证底部不裁切 */
+@media (max-height: 760px) {
+  .snap h2 { font-size: clamp(30px, 3.6vw, 44px); margin: 18px 0 var(--gap-4); }
+  .land-lead { font-size: 14px; line-height: 1.65; }
+  .land-points li { grid-template-columns: 64px 1fr; gap: var(--gap-2); padding: 8px 0; }
+  .land-points b, .land-points span { font-size: 12px; }
+  .land-points span { line-height: 1.55; }
+  .land-cta, .land-closing { margin-top: var(--gap-4); }
+  .snap-no { font-size: clamp(118px, 12vw, 168px); }
 }
 
 @media (prefers-reduced-motion: reduce) {
