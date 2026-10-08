@@ -1,0 +1,26 @@
+# 开发：本机 http://127.0.0.1:8100
+# 测试：本机 http://127.0.0.1:8101（组内联调用这套，不当生产首页）
+services:
+  qiyan:
+    build: .
+    image: qiyan:dev
+    ports:
+      - "8100:8100"
+    environment:
+      QIYAN_DB: /data/qiyan.db
+    volumes:
+      - qiyan-dev:/data
+
+  qiyan-test:
+    build: .
+    image: qiyan:test
+    ports:
+      - "8101:8100"
+    environment:
+      QIYAN_DB: /data/qiyan.db
+    volumes:
+      - qiyan-test:/data
+
+volumes:
+  qiyan-dev:
+  qiyan-test:
