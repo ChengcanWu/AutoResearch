@@ -8,16 +8,22 @@
 """
 from __future__ import annotations
 
+import hashlib
 import json
+import os
+import secrets
 import sqlite3
 import threading
+import time
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 
 from schemas import MicroTask, UserFact, new_id, now_iso
 
-DB_PATH = Path(__file__).resolve().parent / "data" / "demo.db"
+# 部署时用 QIYAN_DB 指到持久盘（Dockerfile 指向卷 /data/qiyan.db）；不设就用仓库里的演示库。
+# 原来写死在 server/data/demo.db，Dockerfile 设的变量没人读，重建容器就丢光所有用户。
+DB_PATH = Path(os.environ.get("QIYAN_DB") or Path(__file__).resolve().parent / "data" / "demo.db")
 _LOCK = threading.Lock()
 
 _SCHEMA = """
@@ -207,6 +213,31 @@ CREATE TABLE IF NOT EXISTS enrollments (
   updated_at TEXT NOT NULL
 );
 
+-- 账号：会话只存令牌的哈希，库泄露了也拿不到能用的令牌。
+CREATE TABLE IF NOT EXISTS sessions (
+  token_hash TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  expires_at REAL NOT NULL,
+  last_seen REAL NOT NULL
+);
+-- 邮箱验证码：一个邮箱同时只有一条；发送频率也记在这里（多实例时各自的内存计数对不上）。
+CREATE TABLE IF NOT EXISTS login_codes (
+  email TEXT PRIMARY KEY,
+  salt TEXT NOT NULL,
+  code_hash TEXT NOT NULL,
+  expires_at REAL NOT NULL,
+  tries INTEGER NOT NULL DEFAULT 0,
+  sent_at REAL NOT NULL,
+  hour_start REAL NOT NULL,
+  hour_count INTEGER NOT NULL DEFAULT 0
+);
+CREATE TABLE IF NOT EXISTS mail_days (
+  day TEXT PRIMARY KEY,
+  sent INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(user_id);
 CREATE INDEX IF NOT EXISTS idx_facts_user ON facts(user_id);
 CREATE INDEX IF NOT EXISTS idx_enroll_user ON enrollments(user_id);
 CREATE INDEX IF NOT EXISTS idx_projects_user ON projects(user_id);
@@ -229,6 +260,16 @@ _MIGRATIONS: list[tuple[str, str, str]] = [
     ("facts", "affects", "ALTER TABLE facts ADD COLUMN affects TEXT NOT NULL DEFAULT ''"),
     # 信息源边指向 knowledge/channels.json 的 id；早期本地库没有这一列（合并 10-03 的研读/定位层时补上）
     ("edges", "ref", "ALTER TABLE edges ADD COLUMN ref TEXT NOT NULL DEFAULT ''"),
+    # 账号：学校邮箱、同意隐私说明的时间与版本；claimed_at 为空的是「有账号之前」的老用户，可以凭 uid 认领一次
+    ("users", "email", "ALTER TABLE users ADD COLUMN email TEXT"),
+    ("users", "consent_at", "ALTER TABLE users ADD COLUMN consent_at TEXT"),
+    ("users", "consent_version", "ALTER TABLE users ADD COLUMN consent_version TEXT NOT NULL DEFAULT ''"),
+    ("users", "claimed_at", "ALTER TABLE users ADD COLUMN claimed_at TEXT"),
+]
+
+# 依赖补出来的列，必须在补列之后建
+_AFTER_MIGRATIONS = [
+    "CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users(email) WHERE email IS NOT NULL",
 ]
 
 
@@ -253,16 +294,21 @@ def init_db() -> None:
             have = {r["name"] for r in c.execute(f"PRAGMA table_info({table})")}
             if column not in have:
                 c.execute(ddl)
+        for ddl in _AFTER_MIGRATIONS:
+            c.execute(ddl)
 
 
 # ---------- users ----------
 
-def create_user(nickname: str) -> dict[str, Any]:
-    uid, token = new_id(), new_id()
+def create_user(nickname: str, email: str | None = None) -> dict[str, Any]:
+    """新用户一出生就算「已认领」：只有加账号之前的老用户能凭 uid 认领。
+    token 列是早期留下的，从没被校验过；登录凭证是 sessions 表里的会话。"""
+    uid, token, now = new_id(), new_id(), now_iso()
     with _LOCK, _conn() as c:
         c.execute(
-            "INSERT INTO users(id, nickname, token, onboard_state, created_at) VALUES(?,?,?,?,?)",
-            (uid, nickname, token, "{}", now_iso()),
+            "INSERT INTO users(id, nickname, token, onboard_state, created_at, email, claimed_at)"
+            " VALUES(?,?,?,?,?,?,?)",
+            (uid, nickname, token, "{}", now, email, now),
         )
     return {"uid": uid, "token": token, "nickname": nickname}
 
@@ -271,6 +317,156 @@ def get_user(uid: str) -> dict[str, Any] | None:
     with _conn() as c:
         row = c.execute("SELECT * FROM users WHERE id=?", (uid,)).fetchone()
     return dict(row) if row else None
+
+
+# ---------- 账号：邮箱、会话、验证码、删号与导出 ----------
+# 规则（有效期、频率、哪些邮箱能用）在 auth.py；这里只管读写。
+
+SESSION_REFRESH = 86400  # 会话一天续一次期，不在每个请求上写库
+
+
+def _token_hash(token: str) -> str:
+    return hashlib.sha256(token.encode("utf-8")).hexdigest()
+
+
+def user_by_email(email: str) -> dict[str, Any] | None:
+    with _conn() as c:
+        row = c.execute("SELECT * FROM users WHERE email=?", (email,)).fetchone()
+    return dict(row) if row else None
+
+
+def bind_email(uid: str, email: str) -> bool:
+    """只给还没绑邮箱的账号绑；邮箱已被别的账号占用时抛 sqlite3.IntegrityError。"""
+    with _LOCK, _conn() as c:
+        cur = c.execute("UPDATE users SET email=?, claimed_at=COALESCE(claimed_at, ?) WHERE id=? AND email IS NULL",
+                        (email, now_iso(), uid))
+    return cur.rowcount == 1
+
+
+def record_consent(uid: str, version: str) -> None:
+    with _LOCK, _conn() as c:
+        c.execute("UPDATE users SET consent_at=?, consent_version=? WHERE id=?", (now_iso(), version, uid))
+
+
+def claim_legacy(uid: str) -> bool:
+    """有账号之前的老用户凭 uid 认领一次；认领过、或已经绑了邮箱的，都不能再凭 uid 进来。"""
+    with _LOCK, _conn() as c:
+        cur = c.execute("UPDATE users SET claimed_at=? WHERE id=? AND claimed_at IS NULL AND email IS NULL",
+                        (now_iso(), uid))
+    return cur.rowcount == 1
+
+
+def create_session(uid: str, ttl: float) -> str:
+    token = "qy_" + secrets.token_urlsafe(32)
+    now = time.time()
+    with _LOCK, _conn() as c:
+        c.execute("INSERT INTO sessions(token_hash, user_id, created_at, expires_at, last_seen) VALUES(?,?,?,?,?)",
+                  (_token_hash(token), uid, now_iso(), now + ttl, now))
+    return token
+
+
+def session_lookup(token: str) -> tuple[str | None, bool]:
+    """只读：(令牌对应的用户, 是否该续期)。过期的当作没有。
+    每个请求都在事件循环里调它，所以不写库；续期和清理交给 touch_session 在别的线程做。"""
+    now = time.time()
+    with _conn() as c:
+        row = c.execute("SELECT user_id, expires_at, last_seen FROM sessions WHERE token_hash=?",
+                        (_token_hash(token),)).fetchone()
+    if row is None or row["expires_at"] <= now:
+        return None, row is not None
+    return row["user_id"], now - row["last_seen"] > SESSION_REFRESH
+
+
+def touch_session(token: str, ttl: float) -> None:
+    """用着的会话续期（一天最多一次），过期的删掉。"""
+    h, now = _token_hash(token), time.time()
+    with _LOCK, _conn() as c:
+        c.execute("DELETE FROM sessions WHERE token_hash=? AND expires_at<=?", (h, now))
+        c.execute("UPDATE sessions SET last_seen=?, expires_at=? WHERE token_hash=?", (now, now + ttl, h))
+
+
+def session_user(token: str, ttl: float) -> str | None:
+    """同步版：查到就顺手续期。给登录接口这类本来就在线程池里跑的地方用。"""
+    uid, stale = session_lookup(token)
+    if stale:
+        touch_session(token, ttl)
+    return uid
+
+
+def drop_session(token: str) -> None:
+    with _LOCK, _conn() as c:
+        c.execute("DELETE FROM sessions WHERE token_hash=?", (_token_hash(token),))
+
+
+def code_row(email: str) -> dict[str, Any] | None:
+    with _conn() as c:
+        row = c.execute("SELECT * FROM login_codes WHERE email=?", (email,)).fetchone()
+    return dict(row) if row else None
+
+
+def put_code(email: str, salt: str, code_hash: str, expires_at: float, sent_at: float,
+             hour_start: float, hour_count: int) -> None:
+    with _LOCK, _conn() as c:
+        c.execute(
+            "INSERT INTO login_codes(email, salt, code_hash, expires_at, tries, sent_at, hour_start, hour_count)"
+            " VALUES(?,?,?,?,0,?,?,?) ON CONFLICT(email) DO UPDATE SET salt=excluded.salt,"
+            " code_hash=excluded.code_hash, expires_at=excluded.expires_at, tries=0, sent_at=excluded.sent_at,"
+            " hour_start=excluded.hour_start, hour_count=excluded.hour_count",
+            (email, salt, code_hash, expires_at, sent_at, hour_start, hour_count),
+        )
+
+
+def bump_code_tries(email: str) -> None:
+    with _LOCK, _conn() as c:
+        c.execute("UPDATE login_codes SET tries=tries+1 WHERE email=?", (email,))
+
+
+def spend_code(email: str) -> None:
+    """用掉就作废，但留着发送记录，频率限制照样算。"""
+    with _LOCK, _conn() as c:
+        c.execute("UPDATE login_codes SET code_hash='', expires_at=0 WHERE email=?", (email,))
+
+
+def mail_count(day: str) -> int:
+    with _conn() as c:
+        row = c.execute("SELECT sent FROM mail_days WHERE day=?", (day,)).fetchone()
+    return row["sent"] if row else 0
+
+
+def count_mail(day: str) -> None:
+    with _LOCK, _conn() as c:
+        c.execute("INSERT INTO mail_days(day, sent) VALUES(?, 1) ON CONFLICT(day) DO UPDATE SET sent=sent+1", (day,))
+
+
+def _user_tables(c: sqlite3.Connection) -> list[str]:
+    """所有带 user_id 列的表。按列找而不是写死表名：以后加了新表，删号和导出不会漏。"""
+    names = [r["name"] for r in c.execute("SELECT name FROM sqlite_master WHERE type='table'")]
+    return [n for n in names if "user_id" in {r["name"] for r in c.execute(f"PRAGMA table_info({n})")}]
+
+
+def export_user(uid: str) -> dict[str, Any]:
+    with _conn() as c:
+        user = c.execute("SELECT id, nickname, email, created_at, consent_at, consent_version, onboard_state"
+                         " FROM users WHERE id=?", (uid,)).fetchone()
+        out: dict[str, Any] = {"user": dict(user) if user else None}
+        for t in _user_tables(c):
+            if t == "sessions":
+                continue  # 令牌哈希不是用户的数据，导出了也没用
+            out[t] = [dict(r) for r in c.execute(f"SELECT * FROM {t} WHERE user_id=?", (uid,))]
+    return out
+
+
+def delete_user(uid: str) -> dict[str, int]:
+    """真删：这个人在每张表里的行、会话、验证码记录、账号本身。返回各表删了几行。"""
+    counts: dict[str, int] = {}
+    with _LOCK, _conn() as c:
+        row = c.execute("SELECT email FROM users WHERE id=?", (uid,)).fetchone()
+        for t in _user_tables(c):
+            counts[t] = c.execute(f"DELETE FROM {t} WHERE user_id=?", (uid,)).rowcount
+        if row and row["email"]:
+            c.execute("DELETE FROM login_codes WHERE email=?", (row["email"],))
+        counts["users"] = c.execute("DELETE FROM users WHERE id=?", (uid,)).rowcount
+    return counts
 
 
 def set_onboard_state(uid: str, state: dict[str, Any]) -> None:

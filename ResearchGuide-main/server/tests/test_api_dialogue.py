@@ -219,4 +219,4 @@ def test_cannot_submit_someone_elses_task(client):
                     json={"uid": attacker, "payload": "我随便写点什么就能完成别人的任务"})
     assert r.status_code == 403
     # 拥有者的任务状态没有被别人改动
-    assert client.get(f"/api/tasks/{t['id']}").json()["status"] != "done"
+    assert client.get(f"/api/tasks/{t['id']}?uid={owner}").json()["status"] != "done"

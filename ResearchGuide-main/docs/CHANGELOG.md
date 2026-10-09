@@ -6,6 +6,14 @@
 
 ---
 
+## [2026-10-09] [FEAT] 账号：学校邮箱验证码登录、访客绑邮箱、删号与导出；库路径读 QIYAN_DB
+
+- 变更内容：原来「登录」只是起个昵称，每次都开新号；uid 是唯一凭证，知道别人的 uid 就能读他的成绩单和对话；`users.token` 生成了但从没校验。现在：学校邮箱（默认 `edu.cn`）收 6 位验证码登录，不用密码；访客可以先用，之后在「记录」页绑邮箱，数据跟着走；会话三十天不用才过期，库里只存令牌哈希。所有接口默认要登录（公开的写在 `server/auth.py` 的 `PUBLIC`），请求里带的 uid 必须是本人；`GET /api/tasks/{tid}` 补上归属校验。「记录」页加账号块：隐私说明、导出全部数据、退出、删除账号（真删每张带 user_id 的表）。首次进入要同意隐私说明，说明改了会再问一次。有账号之前的老用户凭浏览器里的 uid 自动认领一次。`store.DB_PATH` 读 `QIYAN_DB`（Dockerfile 早就设了，代码没读，重建容器会丢光用户）。加 `tools/backup_db.py` 在线备份。界面版本跳到 w60：w35–w38 线上用过、PR #15 到了 w53，同号会让浏览器拿到旧缓存。
+- 影响文档：docs/DEPLOY.md、docs/CHANGELOG.md、.env.example
+- 影响模块：server/auth.py（新）、server/mailer.py（新）、server/store.py、server/main.py、web/js/app.js、web/js/chat.js、web/css/styles.css、web/index.html、tools/backup_db.py（新）、server/tests/test_auth.py（新）、server/tests/conftest.py（新）
+- 决策来源：陈浩文（真实用户上线前：要能找回自己的数据、别人读不到）
+- 登记人：陈浩文
+
 ## [2026-10-09] [OPS] 补容器与测试环境，对齐部署课
 
 - 变更内容：`ResearchGuide-main` 根目录增加 `Dockerfile` / `docker-compose.yml`。开发用 8100，测试用 8101。云上另部函数 `qiyan-test`，不当生产首页。生产仍是 GitHub Pages + 函数 `qiyan`。没有备案域名，不开 ECS。`docs/DEPLOY.md` 写清三套环境和回滚。
