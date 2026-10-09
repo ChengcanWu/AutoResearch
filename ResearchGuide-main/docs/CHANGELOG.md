@@ -6,6 +6,15 @@
 
 ---
 
+## [2026-10-10] [FIX] 多人同时用：流式对话有总时限和封顶、关思考；线程池 40 → 128；库在临时盘上会报出来
+
+- 变更内容：`llm.chat_stream`（对话页用的流式调用）原来直接 `urlopen`，没有总时限、没有 `max_tokens`、没对 DeepSeek 关思考——每个对话默认开着思考（贵、慢），一个一直吊着不结束的流能占住一个工作线程不放。现在走 `limits.stream`（和 `fetch` 一样：总时限 `LLM_TOTAL_SECONDS`、空闲时限、字节上限），带 `max_tokens=2000` 和 `thinking: disabled`。Starlette 工作线程池默认 40 个，同步接口和流式对话各占一个直到做完，四十个学生同时对话第四十一个人就排队：启动时调到 `QIYAN_THREADS`（默认 128）。`store.ephemeral()`：库在 `/tmp` 下、或在函数计算上没设 `QIYAN_DB`，`/api/health` 报 `db.ephemeral: true` 并在启动日志里警告——线上现在就是这样（10-08 的记录：SQLite 写 `/tmp`），实例回收会丢掉所有账号和记录。`/api/health` 另报 `threads`。
+- 没改的（要换部署才能解决）：函数计算多实例时每个实例各有一份库和一份内存状态（会话、微信登录的数字、限频、去重缓存），登录会在实例之间来回失效。要么单实例 + NAS，要么换一台常驻机器跑 Docker 镜像，见 docs/DEPLOY.md。
+- 影响文档：docs/CHANGELOG.md、.env.example
+- 影响模块：server/limits.py、server/llm.py、server/main.py、server/store.py、server/tests/test_concurrency.py（新）
+- 决策来源：陈浩文（多人同时用会出什么事的自查）
+- 登记人：陈浩文
+
 ## [2026-10-09] [FEAT] 账号：微信登录（关注公众号发数字）、访客绑微信、删号与导出；库路径读 QIYAN_DB
 
 - 变更内容：原来「登录」只是起个昵称，每次都开新号；uid 是唯一凭证，知道别人的 uid 就能读他的成绩单和对话；`users.token` 生成了但从没校验。现在：微信登录——网页给一个 6 位数字，学生关注公众号把数字发过去，网页轮询到了自己登进去，没注册过的微信自动注册。走个人订阅号的「服务器配置」收消息（网站扫码登录要企业认证和备案域名，个人拿不到），只存公众号给的 openid，不存手机号、不用密码。访客可以先用，之后在「记录」页绑微信，数据跟着走。会话三十天不用才过期，库里只存令牌哈希。所有接口默认要登录（公开的写在 `server/auth.py` 的 `PUBLIC`），请求里带的 uid 必须是本人；`GET /api/tasks/{tid}` 补上归属校验。「记录」页加账号块：隐私说明、导出全部数据、退出、删除账号（真删每张带 user_id 的表）。首次进入要同意隐私说明，说明改了会再问一次。有账号之前的老用户凭浏览器里的 uid 自动认领一次。`store.DB_PATH` 读 `QIYAN_DB`（Dockerfile 早就设了，代码没读，重建容器会丢光用户）。加 `tools/backup_db.py` 在线备份。界面版本跳到 w60：w35–w38 线上用过、PR #15 到了 w53，同号会让浏览器拿到旧缓存。

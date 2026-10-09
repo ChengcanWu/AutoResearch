@@ -12,10 +12,12 @@ import json
 import os
 import sys
 from concurrent.futures import ThreadPoolExecutor
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+import anyio.to_thread
 from fastapi import Depends, FastAPI, HTTPException, Request
 from starlette.concurrency import run_in_threadpool
 from fastapi.responses import FileResponse, JSONResponse, Response, StreamingResponse
@@ -45,8 +47,23 @@ from singleflight import AsyncFlight
 
 WEB_DIR = Path(__file__).resolve().parent.parent / "web"
 
+# Starlette 的工作线程池默认 40 个：每个同步接口、每个流式对话各占一个线程直到做完。
+# 四十个学生同时在对话，第四十一个人的任何请求都要排队。线程等模型回话几乎不占资源，可以多开。
+THREADS = int(os.environ.get("QIYAN_THREADS") or 128)
+
+
+@asynccontextmanager
+async def _lifespan(_app: FastAPI):
+    anyio.to_thread.current_default_thread_limiter().total_tokens = THREADS
+    if store.ephemeral():
+        print(json.dumps({"warn": "db_ephemeral", "msg": "库在临时盘上，实例回收会丢掉所有账号和记录；设 QIYAN_DB 指到持久盘"},
+                         ensure_ascii=False))
+    yield
+
+
 # 每个接口先过 auth.guard：公开的放行，其余要登录，且请求里的 uid 必须是登录的这个人
-app = FastAPI(title="启研 · AI Research Mentor (W0 Demo)", version="0.1.0", dependencies=[Depends(auth.guard)])
+app = FastAPI(title="启研 · AI Research Mentor (W0 Demo)", version="0.1.0", dependencies=[Depends(auth.guard)],
+              lifespan=_lifespan)
 store.init_db()
 app.include_router(auth.router)
 
@@ -1105,6 +1122,8 @@ def health():
             "base_url": cfg["base_url"] if cfg["enabled"] else "",
         },
         "auth": auth.status(),
+        "db": {"ephemeral": store.ephemeral()},  # true 就是库会随实例一起没：上线前必须是 false
+        "threads": THREADS,
     }
 
 
