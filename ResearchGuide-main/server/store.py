@@ -26,6 +26,15 @@ from schemas import MicroTask, UserFact, new_id, now_iso
 DB_PATH = Path(os.environ.get("QIYAN_DB") or Path(__file__).resolve().parent / "data" / "demo.db")
 _LOCK = threading.Lock()
 
+
+def ephemeral() -> bool:
+    """库放在会被清掉的地方：/tmp 下，或者在函数计算上却没设 QIYAN_DB（默认路径在代码包里，实例回收就没了）。
+    只看路径，不碰磁盘。/api/health 把它报出来，线上一眼能看到。"""
+    path = str(DB_PATH)
+    if path.startswith(("/tmp/", "/private/tmp/")):
+        return True
+    return bool(os.environ.get("FC_FUNCTION_NAME")) and not os.environ.get("QIYAN_DB")
+
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS users (
   id TEXT PRIMARY KEY,
