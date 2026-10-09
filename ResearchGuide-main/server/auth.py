@@ -64,7 +64,7 @@ def _bearer(request: Request) -> str:
     return token.strip() if scheme.lower() == "bearer" else ""
 
 
-# 续期要写库、要拿写锁；放到这个线程里做，事件循环上的 guard 只读
+# 续期要写库、要拿写锁；放到这个线程里做，guard 那一侧只读
 _TOUCH = ThreadPoolExecutor(max_workers=1, thread_name_prefix="session-touch")
 
 
@@ -83,7 +83,9 @@ async def guard(request: Request) -> None:
     route = request.scope.get("route")
     if getattr(route, "path", None) in PUBLIC:
         return
-    uid = _session_uid(request)
+    # 查会话是一次 SQLite 读：放线程池，别在事件循环上做。每个请求都经过这里，库在网络盘上时一次就是几毫秒，
+    # 在循环上排队会拖慢所有人，包括正在流式输出的对话。
+    uid = await run_in_threadpool(_session_uid, request)
     if not uid:
         raise HTTPException(401, "请先登录", headers={"WWW-Authenticate": "Bearer"})
     request.state.uid = uid
