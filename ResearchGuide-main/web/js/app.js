@@ -7,7 +7,11 @@
 
 const S = {
   uid: localStorage.getItem("rg_uid") || "",
+  token: localStorage.getItem("rg_token") || "",
   nickname: localStorage.getItem("rg_nick") || "",
+  wechat: false,
+  guest: true,
+  auth: null,
   view: "home",
   resume: "login",
   onboard: { facts: [], messages: [] },
@@ -47,10 +51,28 @@ function errText(data, status) {
   return `请求失败 (${status})`;
 }
 
+/* 接口地址：同源部署时为空。页面放在 GitHub Pages、接口在别的域名时，index.html 里先设 window.QIYAN_API。 */
+const API_BASE = String(window.QIYAN_API || "").replace(/\/$/, "");
+function apiUrl(path) { return API_BASE + path; }
+
+/* 登录凭证是会话令牌，放在请求头里（页面和接口不同源，cookie 会被浏览器拦）。
+   所有请求都走 apiFetch；接口回 401 说明令牌失效了（退出、过期、删号），回到登录页。 */
+function authHeaders(extra) {
+  const h = Object.assign({}, extra || {});
+  if (S.token) h.Authorization = `Bearer ${S.token}`;
+  return h;
+}
+
+async function apiFetch(path, opt = {}) {
+  const res = await fetch(apiUrl(path), { ...opt, headers: authHeaders(opt.headers) });
+  if (res.status === 401 && S.token && !path.startsWith("/api/auth/")) signedOut("登录过期了，请重新登录");
+  return res;
+}
+
 async function api(method, path, body) {
   const opt = { method, headers: { "Content-Type": "application/json" } };
   if (body !== undefined) opt.body = JSON.stringify(body);
-  const res = await fetch(path, opt);
+  const res = await apiFetch(path, opt);
   let data = null;
   try { data = await res.json(); } catch (_) { /* no body */ }
   if (!res.ok) throw new Error(errText(data, res.status));
@@ -621,46 +643,312 @@ function portraitTabs(active) {
   return nav;
 }
 
+/* ---------- 账号：微信登录（公众号发数字）、访客、隐私说明 ---------- */
+
+function setSession(r) {
+  S.uid = r.uid;
+  if (r.token) S.token = r.token;
+  S.nickname = r.nickname || S.nickname;
+  S.wechat = !!r.wechat;
+  S.guest = !!r.guest;
+  try {
+    localStorage.setItem("rg_uid", S.uid);
+    localStorage.setItem("rg_token", S.token);
+    localStorage.setItem("rg_nick", S.nickname);
+  } catch (_) { /* 存不了就只在这一页有效 */ }
+  const chip = document.getElementById("userNickname");
+  if (chip) chip.textContent = S.guest ? `${S.nickname} · 访客` : S.nickname;
+}
+
+function clearSession() {
+  S.uid = ""; S.token = ""; S.wechat = false; S.guest = true;
+  S.myDir = undefined; S.portraitId = "";
+  ["rg_uid", "rg_token", "rg_nick"].forEach((k) => {
+    try { localStorage.removeItem(k); } catch (_) { /* 无痕模式等 */ }
+  });
+}
+
+function signedOut(msg) {
+  clearSession();
+  if (msg) toast(msg);
+  setView("login");
+}
+
+/* 回到一个已有的账号：读它的画像状态，决定「对话」页落在哪一格 */
+async function resumeUser() {
+  const st = await api("GET", `/api/onboard/result?uid=${S.uid}`);
+  S.portraitTab = st.state && st.state.phase === "done" ? "confirm" : "dialogue";
+  S.resume = "today";
+  await ensurePortrait();
+}
+
+async function afterLogin(isNew) {
+  if (isNew) {
+    await api("POST", "/api/onboard/start", { uid: S.uid });
+    setView("dialogue");
+    return;
+  }
+  await resumeUser();
+  setView("today");
+}
+
+/* 隐私说明：改了这里就把 server/auth.py 的 PRIVACY_VERSION 换成今天的日期，老用户会再看到一次 */
+const PRIVACY_HTML = `
+  <h4>存了什么</h4>
+  <ul>
+    <li><b>账号</b>：昵称；用微信登录的话还有公众号给的 openid——一串只对「启研」公众号有效的编号，不是你的微信号。我们拿不到你的手机号和微信资料，也不用密码。</li>
+    <li><b>你写下和做过的</b>：对话；从对话里记下的画像（每条都标来源，在「记录」里能改能删）；你粘贴的成绩单；任务和项目提交；阅读卡；定位里的边、陈述和下注。</li>
+    <li><b>登录会话</b>：只存令牌的哈希，三十天不用就失效。</li>
+  </ul>
+  <h4>谁能看到</h4>
+  <ul>
+    <li>只有登录的你能看到自己的记录。开发团队能在服务器上看到原始数据，只用来排查问题，不给别人。</li>
+    <li>公众号只用来登录，不推营销消息。</li>
+    <li>对话和成绩单会发给大模型服务（DeepSeek）生成回复。</li>
+    <li>「定位」的竞争地图和稀有度用的是所有人的匿名计数，只出数字，不出名字和原话。</li>
+  </ul>
+  <h4>存在哪、存多久</h4>
+  <ul>
+    <li>存在团队租用的阿里云服务器上。不卖数据，不做广告。</li>
+    <li>「记录」页随时可以导出全部数据或删除账号。删除会立刻清掉库里你的所有记录，备份最多再留 7 天。</li>
+  </ul>`;
+
+/* gate=true：老用户或说明更新后必须先同意才能继续用 */
+function openPrivacy(gate) {
+  document.querySelectorAll(".connect-mask").forEach((n) => n.remove());
+  const mask = el("div", "connect-mask");
+  const box = el("div", "connect-box privacy-box");
+  box.appendChild(el("p", "hero-kicker", "PRIVACY"));
+  box.appendChild(el("h3", "", gate ? "继续之前，看一眼我们存什么" : "我们存什么"));
+  box.appendChild(el("div", "privacy-body", PRIVACY_HTML));
+  const acts = el("div", "connect-actions");
+  if (gate) {
+    const out = el("button", "btn secondary", "退出登录");
+    out.type = "button";
+    out.onclick = async () => { mask.remove(); await logout(); };
+    const ok = el("button", "btn", "同意并继续");
+    ok.type = "button";
+    ok.onclick = async () => {
+      try {
+        await api("POST", "/api/auth/consent", { version: S.auth ? S.auth.privacy_version : "" });
+        mask.remove();
+      } catch (e) { toast(e.message); }
+    };
+    acts.append(out, ok);
+  } else {
+    const ok = el("button", "btn", "知道了");
+    ok.type = "button";
+    ok.onclick = () => mask.remove();
+    acts.appendChild(ok);
+    mask.addEventListener("click", (e) => { if (e.target === mask) mask.remove(); });
+  }
+  box.appendChild(acts);
+  mask.appendChild(box);
+  document.body.appendChild(mask);
+}
+
+function consentRow() {
+  const row = el("label", "consent-row");
+  const box = el("input");
+  box.type = "checkbox";
+  const read = el("button", "linkish", "我们存什么");
+  read.type = "button";
+  read.onclick = (e) => { e.preventDefault(); openPrivacy(false); };
+  row.append(box, document.createTextNode("我读过"), read, document.createTextNode("，同意按这个方式保存我的记录"));
+  return { row, ok: () => box.checked };
+}
+
+let wxPoll = 0;  // 微信登录的轮询；离开登录页或换数字时停掉
+
+function stopWxPoll() {
+  clearTimeout(wxPoll);
+  wxPoll = 0;
+}
+
+/* 微信登录：网页拿一个 6 位数字，学生在公众号里发它，网页轮询到了就登进去 */
+async function startWechat(box, opts) {
+  stopWxPoll();
+  box.innerHTML = "";
+  box.hidden = false;
+  let r;
+  try {
+    r = await api("POST", "/api/auth/wechat/start", { nickname: opts.nickname, consent: true });
+  } catch (e) { box.hidden = true; toast(e.message); return; }
+  const name = r.account_name ? `「${esc(r.account_name)}」` : "启研";
+  if (r.qr_url) {
+    const qr = el("img", "wx-qr");
+    qr.src = r.qr_url;
+    qr.alt = "公众号二维码";
+    box.appendChild(qr);
+  }
+  const steps = el("ol", "wx-steps");
+  steps.appendChild(el("li", "", `微信扫码关注${name}公众号（已经关注的，直接打开它）`));
+  const li = el("li", "", "在公众号里发送这个数字：");
+  li.appendChild(el("b", "wx-code", `${r.code.slice(0, 3)} ${r.code.slice(3)}`));
+  steps.appendChild(li);
+  box.appendChild(steps);
+  const status = el("p", "wx-status", "等你在微信里发送…");
+  box.appendChild(status);
+  const acts = el("div", "account-actions");
+  const again = el("button", "btn small secondary", "换一个数字");
+  again.type = "button";
+  again.onclick = () => startWechat(box, opts);
+  acts.appendChild(again);
+  if (S.auth && S.auth.dev) {  // 本机开发没有公众号：假装从微信发了这个数字
+    const dev = el("button", "btn small ghost", "（开发）模拟微信发送");
+    dev.type = "button";
+    dev.onclick = () => api("POST", "/api/auth/wechat/dev-send", { code: r.code }).catch((e) => toast(e.message));
+    acts.appendChild(dev);
+  }
+  box.appendChild(acts);
+
+  const deadline = Date.now() + r.expires_in * 1000;
+  const tick = async () => {
+    if (!box.isConnected) { stopWxPoll(); return; }  // 离开了登录页
+    let res;
+    try {
+      res = await api("POST", "/api/auth/wechat/poll", { ticket: r.ticket });
+    } catch (e) {
+      status.textContent = `${e.message}`;
+      return;  // 过期或用过了：不再轮询，等学生点「换一个数字」
+    }
+    if (res.pending) {
+      const left = Math.max(0, Math.round((deadline - Date.now()) / 1000));
+      status.textContent = `等你在微信里发送…（还剩 ${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}）`;
+      wxPoll = setTimeout(tick, 2000);
+      return;
+    }
+    stopWxPoll();
+    setSession(res);
+    if (res.left_guest) toast("这个微信已经有账号，已登进去；刚才访客的记录留在访客号里");
+    else toast(res.bound ? "绑定好了，记录都在" : `你好，${res.nickname}`);
+    if (res.bound) { setView("me"); return; }
+    await afterLogin(res.created);
+  };
+  wxPoll = setTimeout(tick, 2000);
+}
+
 function renderLogin() {
   $nav.hidden = true; $header.hidden = true;
   $app.innerHTML = "";
+  stopWxPoll();
+  const binding = !!(S.uid && S.guest);  // 访客来绑微信：start 时带着访客会话，记录跟着走
+  const wxOn = !S.auth || S.auth.wechat_login;
   const hero = el("section", "hero stagger");
-  hero.appendChild(el("p", "hero-kicker", "启研 · 第一步"));
-  hero.appendChild(el("h2", "", "怎么称呼你？"));
-  hero.appendChild(el("p", "hero-lead", "不用真实姓名。进去之后是八个工作区：今日、定位、研读、画像、方向、任务、项目、记录，随时可以换。"));
-  const row = el("div", "login-row");
-  const input = el("input"); input.placeholder = "你的昵称，例如：小北"; input.maxLength = 24;
-  input.setAttribute("aria-label", "昵称");
-  const btn = el("button", "btn", "进入启研");
-  btn.type = "button";
-  btn.onclick = async () => {
-    const nick = input.value.trim();
-    if (!nick) { toast("先起个昵称吧"); input.focus(); return; }
-    btn.disabled = true; btn.textContent = "进入中…";
+  hero.appendChild(el("p", "hero-kicker", binding ? "启研 · 绑定微信" : "启研 · 登录"));
+  hero.appendChild(el("h2", "", binding ? "绑定微信" : "微信登录"));
+  hero.appendChild(el("p", "hero-lead", binding
+    ? "绑定后换设备、清了浏览器也能接着用，访客期间的记录都会带过去。"
+    : "换手机、清了浏览器也能接着用。不用密码，也不要手机号。"));
+  const consent = consentRow();
+  const need = () => { if (consent.ok()) return true; toast("先勾选同意隐私说明"); return false; };
+
+  const wxStep = el("div", "login-step");
+  const nick = el("input", "login-nick");
+  nick.placeholder = "怎么称呼你（选填，新账号用）"; nick.maxLength = 24;
+  nick.setAttribute("aria-label", "昵称");
+  const go = el("button", "btn", binding ? "绑定微信" : "用微信登录");
+  go.type = "button";
+  const wxBox = el("div", "wx-box");
+  wxBox.hidden = true;
+  go.onclick = () => { if (need()) startWechat(wxBox, { nickname: nick.value.trim() }); };
+  if (!binding) wxStep.appendChild(nick);
+  wxStep.append(go, wxBox);
+
+  // 访客：只要昵称，记录只能在这台浏览器里找回；之后可以绑微信
+  const guestBox = el("div", "login-step");
+  const guestRow = el("div", "login-row");
+  const gname = el("input");
+  gname.placeholder = "你的昵称，例如：小北"; gname.maxLength = 24;
+  gname.setAttribute("aria-label", "访客昵称");
+  const gbtn = el("button", "btn", "以访客进入");
+  gbtn.type = "button";
+  gbtn.onclick = async () => {
+    if (!need()) return;
+    const n = gname.value.trim();
+    if (!n) { toast("先起个昵称吧"); gname.focus(); return; }
+    gbtn.disabled = true;
     try {
-      const r = await api("POST", "/api/auth/login", { nickname: nick });
-      S.uid = r.uid; S.nickname = r.nickname; S.myDir = undefined;
-      localStorage.setItem("rg_uid", r.uid);
-      localStorage.setItem("rg_nick", r.nickname);
-      await api("POST", "/api/onboard/start", { uid: S.uid });
-      toast(`你好，${r.nickname}`);
-      document.getElementById("userNickname").textContent = r.nickname;
-      setView("dialogue");
-    } catch (e) { toast(e.message); btn.disabled = false; btn.textContent = "进入启研"; }
+      setSession(await api("POST", "/api/auth/login", { nickname: n, consent: true }));
+      toast(`你好，${S.nickname}`);
+      await afterLogin(true);
+    } catch (e) { toast(e.message); gbtn.disabled = false; }
   };
-  input.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.isComposing) btn.click(); });
-  row.append(input, btn);
+  gname.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.isComposing) gbtn.click(); });
+  guestRow.append(gname, gbtn);
+  guestBox.append(guestRow, el("p", "form-note", "访客的记录只能在这台浏览器里找回，之后可以在「记录」页绑定微信。"));
+
+  if (binding) {
+    hero.append(consent.row, wxStep);
+  } else if (wxOn) {
+    guestBox.hidden = true;
+    hero.append(consent.row, wxStep, guestBox);
+  } else {
+    hero.append(el("p", "login-note", "微信登录还没开通，先以访客进入。"), guestBox, consent.row);
+  }
+
   const links = el("div", "hero-links");
+  if (!binding && wxOn) {
+    const asGuest = el("button", "linkish", "先不登录，以访客进入");
+    asGuest.type = "button";
+    asGuest.onclick = () => { guestBox.hidden = false; asGuest.remove(); gname.focus(); };
+    links.appendChild(asGuest);
+  }
   const link = el("button", "linkish", "连接模型 API");
   link.type = "button";
   link.onclick = () => openConnect();
-  const back = el("button", "linkish", "返回首页");
+  const back = el("button", "linkish", binding ? "返回" : "返回首页");
   back.type = "button";
-  back.onclick = () => setView("home");
+  back.onclick = () => setView(binding ? "me" : "home");
   links.append(link, back);
-  hero.append(row, links);
+  hero.appendChild(links);
   $app.appendChild(hero);
-  input.focus();
+  if (!wxOn) gname.focus();
+}
+
+async function logout() {
+  try { await api("POST", "/api/auth/logout"); } catch (_) { /* 会话已经没了也照样退 */ }
+  clearSession();
+  setView("home");
+}
+
+function accountPanel() {
+  const box = el("section", "panel account-panel");
+  box.appendChild(el("h3", "section-label", "账号"));
+  box.appendChild(el("p", "panel-sub", S.guest
+    ? `访客「${esc(S.nickname)}」：记录只能在这台浏览器里找回。绑定微信后换设备也能接着用。`
+    : `已用微信登录：${esc(S.nickname)}`));
+  const acts = el("div", "account-actions");
+  const add = (label, cls, fn) => {
+    const b = el("button", cls, label);
+    b.type = "button";
+    b.onclick = fn;
+    acts.appendChild(b);
+  };
+  if (S.guest) add("绑定微信", "btn small", () => setView("login"));
+  add("我们存什么", "btn small ghost", () => openPrivacy(false));
+  add("导出我的数据", "btn small secondary", async () => {
+    const res = await apiFetch("/api/me/export");
+    if (!res.ok) { toast("导出失败"); return; }
+    downloadBlob(await res.blob(), "启研-我的数据.json");
+  });
+  add("退出登录", "btn small secondary", async () => {
+    if (S.guest && !window.confirm("访客退出后，这些记录就找不回来了（除非先绑定微信）。确定退出？")) return;
+    await logout();
+  });
+  add("删除账号", "btn small ghost danger", async () => {
+    const typed = window.prompt("删除后，库里你的所有记录会立刻清掉，不能恢复。确定的话输入「删除」两个字：");
+    if (typed === null) return;
+    if (typed.trim() !== "删除") { toast("没有删除：输入的不是「删除」"); return; }
+    try {
+      await api("DELETE", "/api/me");
+      clearSession();
+      toast("账号和记录都删了");
+      setView("home");
+    } catch (e) { toast(e.message); }
+  });
+  box.appendChild(acts);
+  return box;
 }
 
 function openConnect() {
@@ -689,7 +977,7 @@ function openConnect() {
     go.disabled = true; go.textContent = "正在连通…";
     try {
       // 管理员口令走请求头，所以这里不用 api()
-      const res = await fetch("/api/llm/connect", {
+      const res = await apiFetch("/api/llm/connect", {
         method: "POST",
         headers: { "Content-Type": "application/json", "X-Admin-Token": box.admin.value.trim() },
         body: JSON.stringify({ base_url: box.base.value.trim(), api_key: box.key.value.trim(), model: box.model.value.trim() }),
@@ -3414,6 +3702,7 @@ async function renderMe() {
   const facts = r.facts.filter((f) => f.status !== "deleted" && f.status !== "dismissed");
   $app.innerHTML = "";
   $app.appendChild(workspaceHead("记录", "它记住的每一条都写着来源。说得不对可以改，不想让它记着可以删。"));
+  $app.appendChild(accountPanel());
   const main = el("div", "panel");
 
   const groups = {};
@@ -3753,14 +4042,14 @@ async function renderProject() {
   const tpl = el("button", "btn small secondary", "下载 README 模板");
   tpl.type = "button";
   tpl.onclick = async () => {
-    const res = await fetch(`/api/projects/${p.id}/readme?uid=${S.uid}`);
+    const res = await apiFetch(`/api/projects/${p.id}/readme?uid=${S.uid}`);
     if (!res.ok) { toast("模板下载失败"); return; }
     downloadBlob(await res.blob(), "README.md");
   };
   const sample = el("button", "btn small ghost", "看一份示例压缩包");
   sample.type = "button";
   sample.onclick = async () => {
-    const res = await fetch(`/api/projects/${p.id}/sample.zip?uid=${S.uid}`);
+    const res = await apiFetch(`/api/projects/${p.id}/sample.zip?uid=${S.uid}`);
     if (!res.ok) { toast("示例生成失败"); return; }
     downloadBlob(await res.blob(), "示例成果.zip");
   };
@@ -3786,7 +4075,7 @@ async function renderProject() {
     drop.classList.add("busy");
     drop.querySelector("span").textContent = `正在看「${f.name}」…`;
     try {
-      const res = await fetch(`/api/projects/${p.id}/submit?uid=${S.uid}`, {
+      const res = await apiFetch(`/api/projects/${p.id}/submit?uid=${S.uid}`, {
         method: "POST", headers: { "Content-Type": "application/zip" }, body: f,
       });
       const data = await res.json().catch(() => null);
@@ -3938,23 +4227,28 @@ document.getElementById("brandHome").addEventListener("click", () => setView("ho
   try {
     const [h, paths] = await Promise.all([api("GET", "/api/health"), api("GET", "/api/paths").catch(() => null)]);
     applyLlmPill(h.llm);
+    S.auth = h.auth || null;
     if (paths) applyPaths(paths.paths);
   } catch (_) { /* 健康检查失败不挡页面 */ }
   buildTutorials();
-  if (S.uid) {
+  let needConsent = false;
+  if (S.uid && !S.token) {
+    // 有账号之前，浏览器里只存了 uid：凭它认领一次，换成会话
+    try { setSession(await api("POST", "/api/auth/legacy", { uid: S.uid })); } catch (_) { clearSession(); }
+  }
+  if (S.token) {
     try {
-      const st = await api("GET", `/api/onboard/result?uid=${S.uid}`);
-      document.getElementById("userNickname").textContent = S.nickname;
-      S.portraitTab = st.state && st.state.phase === "done" ? "confirm" : "dialogue";
-      S.resume = "today";
-      await ensurePortrait();
+      const me = await api("GET", "/api/auth/me");
+      setSession(me);
+      needConsent = !me.consent_ok;
+      await resumeUser();
     } catch (_) {
-      S.uid = "";
+      clearSession();
       S.resume = "login";
-      localStorage.removeItem("rg_uid");
     }
   }
   setView("home");
+  if (needConsent) openPrivacy(true);
   // 开场最多停 0.7 秒：数据到了就走，不再固定等 1.4 秒
   const splash = document.getElementById("boot");
   setTimeout(() => {

@@ -339,7 +339,22 @@ body[data-view="cards"] .site-footer, body[data-view="card"] .site-footer, body[
 }
 .login-row input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-soft); }
 .login-row .btn { min-height: 44px; }
-.hero-links { display: flex; gap: var(--gap-4); margin-top: var(--gap-4); }
+.hero-links { display: flex; flex-wrap: wrap; gap: var(--gap-2) var(--gap-4); margin-top: var(--gap-4); }
+.login-step { display: flex; flex-direction: column; gap: var(--gap-2); margin-bottom: var(--gap-3); }
+.login-step[hidden], .login-row[hidden] { display: none; }
+.login-nick {
+  height: 40px; padding: 0 16px;
+  border: 1px solid var(--line); border-radius: var(--r-md);
+  background: var(--surface); font-size: 14px; outline: none;
+}
+.login-nick:focus { border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-soft); }
+.login-note { margin-bottom: var(--gap-3); color: var(--ink-2); font-size: 14px; }
+.consent-row {
+  display: flex; flex-wrap: wrap; align-items: center;
+  font-size: 13px; color: var(--ink-2); cursor: pointer;
+}
+.consent-row .linkish { margin: 0 2px; font-size: 13px; }
+.consent-row input { width: 16px; height: 16px; margin: 0 8px 0 0; accent-color: var(--teal); }
 
 /* ---------- 连接模型 ---------- */
 
@@ -366,6 +381,36 @@ body[data-view="cards"] .site-footer, body[data-view="card"] .site-footer, body[
 }
 .connect-box input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-soft); }
 .connect-actions { display: flex; justify-content: flex-end; gap: var(--gap-2); margin-top: var(--gap-2); }
+
+/* 隐私说明：内容长，弹窗内部滚动 */
+.privacy-box { width: min(560px, 100%); max-height: calc(100vh - 2 * var(--gap-4)); }
+.privacy-body { overflow-y: auto; font-size: 14px; line-height: 1.7; color: var(--ink-2); }
+.privacy-body h4 { margin: var(--gap-3) 0 var(--gap-1); font-size: 14px; color: var(--ink); }
+.privacy-body h4:first-child { margin-top: 0; }
+.privacy-body ul { padding-left: 1.2em; }
+.privacy-body li + li { margin-top: 2px; }
+
+/* 微信登录：二维码、步骤、要发的数字 */
+.wx-box {
+  display: flex; flex-direction: column; align-items: flex-start; gap: var(--gap-2);
+  margin-top: var(--gap-3); padding: var(--gap-4);
+  border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface);
+}
+.wx-box[hidden] { display: none; }
+.wx-qr { width: 168px; height: 168px; border-radius: var(--r-md); border: 1px solid var(--line); background: #fff; }
+.wx-steps { padding-left: 1.2em; font-size: 14px; color: var(--ink-2); line-height: 1.9; }
+.wx-code {
+  display: inline-block; margin-left: 4px; padding: 2px 10px;
+  border-radius: var(--r-sm); background: var(--teal-soft); color: var(--teal-ink);
+  font-family: var(--mono); font-size: 22px; letter-spacing: 0.12em;
+}
+.wx-status { font-size: 13px; color: var(--ink-3); }
+
+/* 记录页的账号块 */
+.account-panel { margin-bottom: var(--gap-4); }
+.account-actions { display: flex; flex-wrap: wrap; gap: var(--gap-2); margin-top: var(--gap-3); }
+.btn.danger { color: var(--coral); }
+.btn.danger:hover { background: var(--coral-soft); color: var(--coral); }
 
 /* ---------- 画像：切换 / 对话 / 核对 ---------- */
 

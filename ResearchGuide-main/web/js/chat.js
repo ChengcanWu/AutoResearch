@@ -53,7 +53,7 @@ const ChatView = (() => {
     abort = new AbortController();
     let res;
     try {
-      res = await fetch("/api/dialogue/stream", {
+      res = await apiFetch("/api/dialogue/stream", {  // app.js 的 apiFetch：带会话、接口地址
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

@@ -16,12 +16,13 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, HTTPException, Request
 from starlette.concurrency import run_in_threadpool
 from fastapi.responses import FileResponse, JSONResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
+import auth
 import catalog
 import curriculum
 import dialogue
@@ -44,15 +45,13 @@ from singleflight import AsyncFlight
 
 WEB_DIR = Path(__file__).resolve().parent.parent / "web"
 
-app = FastAPI(title="启研 · AI Research Mentor (W0 Demo)", version="0.1.0")
+# 每个接口先过 auth.guard：公开的放行，其余要登录，且请求里的 uid 必须是登录的这个人
+app = FastAPI(title="启研 · AI Research Mentor (W0 Demo)", version="0.1.0", dependencies=[Depends(auth.guard)])
 store.init_db()
+app.include_router(auth.router)
 
 
 # ---------- 请求模型 ----------
-
-class LoginReq(BaseModel):
-    nickname: str
-
 
 class OnboardMsgReq(BaseModel):
     uid: str
@@ -204,14 +203,7 @@ def _user_or_404(uid: str) -> dict:
     return u
 
 
-# ---------- auth ----------
-
-@app.post("/api/auth/login")
-def login(req: LoginReq):
-    nickname = req.nickname.strip()
-    if not nickname:
-        raise HTTPException(400, "nickname is required")
-    return store.create_user(nickname)
+# ---------- auth：登录、会话、删号与导出在 auth.py ----------
 
 
 # ---------- onboarding ----------
@@ -539,9 +531,10 @@ def task_generate(req: TaskGenerateReq):
 
 
 @app.get("/api/tasks/{tid}")
-def task_get(tid: str):
+def task_get(tid: str, request: Request):
     t = store.get_task(tid)
-    if not t:
+    # 这个接口不带 uid，只能按登录的人核对归属；原来知道任务 id 就能读任何人的任务
+    if not t or t.user_id != auth.me(request):
         raise HTTPException(404, "task not found")
     return t.to_dict()
 
@@ -1111,6 +1104,7 @@ def health():
             "model": cfg["model"] if cfg["enabled"] else "",
             "base_url": cfg["base_url"] if cfg["enabled"] else "",
         },
+        "auth": auth.status(),
     }
 
 
