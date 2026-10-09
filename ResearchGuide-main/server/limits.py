@@ -19,7 +19,7 @@ import urllib.request
 from concurrent.futures import CancelledError, Future, ThreadPoolExecutor
 from concurrent.futures import TimeoutError as FutureTimeout
 from collections import OrderedDict
-from typing import Any, Hashable
+from typing import Any, Hashable, Iterator, NoReturn
 
 CHUNK = 64 * 1024
 
@@ -262,13 +262,70 @@ def fetch(req: urllib.request.Request, *, timeout: float, max_bytes: int, idle: 
     except (urllib.error.HTTPError, ReadLimitError):
         raise
     except (OSError, http.client.HTTPException) as exc:
-        if isinstance(getattr(exc, "reason", None), ReadLimitError):
-            raise exc.reason from exc  # urllib 把连接阶段的错误包成 URLError
-        if watch.killed or time.monotonic() >= deadline:
-            raise ReadLimitError("超过总时限") from exc
-        if isinstance(exc, OSError):
-            raise
-        raise OSError(f"响应不完整（{type(exc).__name__}）") from exc
+        _translate(exc, watch, deadline)
+    finally:
+        watch.done = True
+        watch.close()
+
+
+def _translate(exc: BaseException, watch: _Watch, deadline: float) -> NoReturn:
+    """连接或读取阶段的错误 → 调用方认得的三种：HTTPError 原样、超时 ReadLimitError、其余 OSError。"""
+    if isinstance(getattr(exc, "reason", None), ReadLimitError):
+        raise exc.reason from exc  # urllib 把连接阶段的错误包成 URLError
+    if watch.killed or time.monotonic() >= deadline:
+        raise ReadLimitError("超过总时限") from exc
+    if isinstance(exc, OSError):
+        raise exc
+    raise OSError(f"响应不完整（{type(exc).__name__}）") from exc
+
+
+def stream(req: urllib.request.Request, *, timeout: float, max_bytes: int, idle: float | None = None) -> Iterator[bytes]:
+    """逐行产出响应正文（给 SSE 这类边收边用的响应）。约束和 fetch 一样：总时限 timeout 秒、idle 秒没数据就放弃、
+    正文累计超过 max_bytes 就停。原来的流式模型调用直接 urlopen，只有「多久没数据」的限制：
+    对方每隔几十秒发个空行，一个线程就能被占住一整天。"""
+    deadline = time.monotonic() + timeout
+    watch = _Watch(deadline, idle)
+    opener = urllib.request.build_opener(_HTTP(watch), _HTTPS(watch))
+    _WATCHDOG.add(watch)
+    try:
+        with opener.open(req, timeout=min(timeout, idle) if idle else timeout) as resp:
+            sock = _socket_of(resp)
+            read = getattr(resp, "read1", None) or resp.read
+            buf, total = bytearray(), 0
+            while True:
+                left = deadline - time.monotonic()
+                if left <= 0:
+                    raise ReadLimitError("超过总时限")
+                if sock is not None:
+                    try:
+                        sock.settimeout(min(left, idle) if idle else left)
+                    except OSError:
+                        pass
+                try:
+                    chunk = read(CHUNK)
+                except TimeoutError as exc:
+                    raise ReadLimitError("超过总时限" if not idle or deadline - time.monotonic() <= 0 else f"{idle:g} 秒没有收到数据") from exc
+                if not chunk:
+                    if watch.killed:
+                        raise ReadLimitError("超过总时限")  # 看门狗关了 socket，读到的「结束」是假的
+                    if buf:
+                        yield bytes(buf)
+                    return
+                total += len(chunk)
+                if total > max_bytes:
+                    raise ReadLimitError(f"响应超过 {max_bytes // 1024 // 1024} MB")
+                buf += chunk
+                while True:
+                    i = buf.find(b"\n")
+                    if i < 0:
+                        break
+                    line = bytes(buf[:i])
+                    del buf[:i + 1]
+                    yield line
+    except (urllib.error.HTTPError, ReadLimitError):
+        raise
+    except (OSError, http.client.HTTPException) as exc:
+        _translate(exc, watch, deadline)
     finally:
         watch.done = True
         watch.close()

@@ -25,7 +25,7 @@
 | §2「代码树」 | 未列 `memory.py` / `tools.py` / `dialogue.py` / `eval/` | 任务 2 新增，见 `DIALOGUE_CONTRACT.md` |
 | §3.1 | 可导出 | **未实现**：me 页只有可改 / 可删 |
 | §3.1 | interest 类 60 天自动衰减 | **未实现**：`valid_until` 只覆盖明文声明的 `constraint:*`，没有自动衰减 |
-| §6 ADR 8 | 部署：单机 Docker（W1 补 compose + DEPLOY.md） | **未实现**：仓库无 Dockerfile / compose / Makefile / DEPLOY.md，也无主体 CI |
+| §6 ADR 8 | 部署：单机 Docker（W1 补 compose + DEPLOY.md） | 已补：`Dockerfile` + `docker-compose.yml` + `docs/DEPLOY.md`；云上生产是函数计算 + GitHub Pages |
 
 > **判定权威顺序：运行中的代码 > `ARCHITECTURE.md` §3/§5 > `DIALOGUE_CONTRACT.md` > 其他任何文档。**
 > 当文档与代码冲突时，先读代码，再回来修正文档。

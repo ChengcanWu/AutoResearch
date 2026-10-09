@@ -12,16 +12,20 @@ import json
 import os
 import sys
 from concurrent.futures import ThreadPoolExecutor
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from fastapi import FastAPI, HTTPException, Request
+import anyio.to_thread
+from fastapi import Depends, FastAPI, HTTPException, Request
 from starlette.concurrency import run_in_threadpool
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
+import auth
 import catalog
 import curriculum
 import dialogue
@@ -44,15 +48,50 @@ from singleflight import AsyncFlight
 
 WEB_DIR = Path(__file__).resolve().parent.parent / "web"
 
-app = FastAPI(title="启研 · AI Research Mentor (W0 Demo)", version="0.1.0")
+# Starlette 的工作线程池默认 40 个：每个同步接口、每个流式对话各占一个线程直到做完。
+# 四十个学生同时在对话，第四十一个人的任何请求都要排队。线程等模型回话几乎不占资源，可以多开。
+THREADS = int(os.environ.get("QIYAN_THREADS") or 128)
+
+
+@asynccontextmanager
+async def _lifespan(_app: FastAPI):
+    anyio.to_thread.current_default_thread_limiter().total_tokens = THREADS
+    if store.ephemeral():
+        print(json.dumps({"warn": "db_ephemeral", "msg": "库在临时盘上，实例回收会丢掉所有账号和记录；设 QIYAN_DB 指到持久盘"},
+                         ensure_ascii=False))
+    yield
+
+
+app = FastAPI(title="启研 · AI Research Mentor (W0 Demo)", version="0.1.0", dependencies=[Depends(auth.guard)],
+              lifespan=_lifespan)
 store.init_db()
+app.include_router(auth.router)
+
+
+@app.middleware("http")
+async def prefer_inline_browse(request: Request, call_next):
+    """页面和静态资源按网页打开，不要被当成附件下载。
+
+    真要下载的接口自己带了 filename=（作业 zip、README），那些不动。
+    函数计算默认域名有时会补一个光秃秃的 attachment，这里改回 inline。
+    """
+    resp = await call_next(request)
+    cd = (resp.headers.get("content-disposition") or "").lower()
+    if "filename=" in cd:
+        return resp
+    resp.headers["content-disposition"] = "inline"
+    return resp
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 # ---------- 请求模型 ----------
-
-class LoginReq(BaseModel):
-    nickname: str
-
 
 class OnboardMsgReq(BaseModel):
     uid: str
@@ -202,16 +241,6 @@ def _user_or_404(uid: str) -> dict:
     if not u:
         raise HTTPException(404, "user not found")
     return u
-
-
-# ---------- auth ----------
-
-@app.post("/api/auth/login")
-def login(req: LoginReq):
-    nickname = req.nickname.strip()
-    if not nickname:
-        raise HTTPException(400, "nickname is required")
-    return store.create_user(nickname)
 
 
 # ---------- onboarding ----------
@@ -539,9 +568,9 @@ def task_generate(req: TaskGenerateReq):
 
 
 @app.get("/api/tasks/{tid}")
-def task_get(tid: str):
+def task_get(tid: str, request: Request):
     t = store.get_task(tid)
-    if not t:
+    if not t or t.user_id != auth.me(request):
         raise HTTPException(404, "task not found")
     return t.to_dict()
 
@@ -1111,6 +1140,9 @@ def health():
             "model": cfg["model"] if cfg["enabled"] else "",
             "base_url": cfg["base_url"] if cfg["enabled"] else "",
         },
+        "auth": auth.status(),
+        "db": {"ephemeral": store.ephemeral()},  # true 就是库会随实例一起没：上线前必须是 false
+        "threads": THREADS,
     }
 
 
@@ -1121,7 +1153,11 @@ app.mount("/static", StaticFiles(directory=str(WEB_DIR)), name="static")
 
 @app.get("/")
 def index():
-    return FileResponse(str(WEB_DIR / "index.html"))
+    return FileResponse(
+        str(WEB_DIR / "index.html"),
+        media_type="text/html; charset=utf-8",
+        headers={"Content-Disposition": "inline"},
+    )
 
 
 if __name__ == "__main__":

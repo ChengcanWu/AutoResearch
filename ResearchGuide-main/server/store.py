@@ -8,17 +8,32 @@
 """
 from __future__ import annotations
 
+import hashlib
 import json
+import os
+import secrets
 import sqlite3
 import threading
+import time
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 
 from schemas import MicroTask, UserFact, new_id, now_iso
 
-DB_PATH = Path(__file__).resolve().parent / "data" / "demo.db"
+# 部署时用 QIYAN_DB 指到持久盘（Dockerfile 指向卷 /data/qiyan.db）；不设就用仓库里的演示库。
+# 原来写死在 server/data/demo.db，Dockerfile 设的变量没人读，重建容器就丢光所有用户。
+DB_PATH = Path(os.environ.get("QIYAN_DB") or Path(__file__).resolve().parent / "data" / "demo.db")
 _LOCK = threading.Lock()
+
+
+def ephemeral() -> bool:
+    """库放在会被清掉的地方：/tmp 下，或者在函数计算上却没设 QIYAN_DB（默认路径在代码包里，实例回收就没了）。
+    只看路径，不碰磁盘。/api/health 把它报出来，线上一眼能看到。"""
+    path = str(DB_PATH).replace("\\", "/")
+    if path.startswith("/tmp/") or path.startswith("/private/tmp/"):
+        return True
+    return bool(os.environ.get("FC_FUNCTION_NAME")) and not os.environ.get("QIYAN_DB")
 
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS users (
@@ -207,6 +222,29 @@ CREATE TABLE IF NOT EXISTS enrollments (
   updated_at TEXT NOT NULL
 );
 
+-- 账号：会话只存令牌的哈希，库泄露了也拿不到能用的令牌。
+CREATE TABLE IF NOT EXISTS sessions (
+  token_hash TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  expires_at REAL NOT NULL,
+  last_seen REAL NOT NULL
+);
+-- 微信登录的一次登录请求：网页拿 ticket（只存哈希）和一个 6 位数字；学生在公众号里发这个数字，
+-- 消息回调把发信人的 openid 记到这一行；网页轮询到了就换成会话，这一行作废。
+CREATE TABLE IF NOT EXISTS wechat_tickets (
+  ticket_hash TEXT PRIMARY KEY,
+  code TEXT NOT NULL,
+  expires_at REAL NOT NULL,
+  openid TEXT,
+  guest_uid TEXT,
+  nickname TEXT NOT NULL DEFAULT '',
+  consent INTEGER NOT NULL DEFAULT 0,
+  used INTEGER NOT NULL DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS idx_wechat_code ON wechat_tickets(code);
+
+CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(user_id);
 CREATE INDEX IF NOT EXISTS idx_facts_user ON facts(user_id);
 CREATE INDEX IF NOT EXISTS idx_enroll_user ON enrollments(user_id);
 CREATE INDEX IF NOT EXISTS idx_projects_user ON projects(user_id);
@@ -229,6 +267,17 @@ _MIGRATIONS: list[tuple[str, str, str]] = [
     ("facts", "affects", "ALTER TABLE facts ADD COLUMN affects TEXT NOT NULL DEFAULT ''"),
     # 信息源边指向 knowledge/channels.json 的 id；早期本地库没有这一列（合并 10-03 的研读/定位层时补上）
     ("edges", "ref", "ALTER TABLE edges ADD COLUMN ref TEXT NOT NULL DEFAULT ''"),
+    # 账号：微信 openid（只对我们的公众号有效的编号）、同意隐私说明的时间与版本；
+    # claimed_at 为空的是「有账号之前」的老用户，可以凭 uid 认领一次
+    ("users", "wechat_openid", "ALTER TABLE users ADD COLUMN wechat_openid TEXT"),
+    ("users", "consent_at", "ALTER TABLE users ADD COLUMN consent_at TEXT"),
+    ("users", "consent_version", "ALTER TABLE users ADD COLUMN consent_version TEXT NOT NULL DEFAULT ''"),
+    ("users", "claimed_at", "ALTER TABLE users ADD COLUMN claimed_at TEXT"),
+]
+
+# 依赖补出来的列，必须在补列之后建
+_AFTER_MIGRATIONS = [
+    "CREATE UNIQUE INDEX IF NOT EXISTS idx_users_wechat ON users(wechat_openid) WHERE wechat_openid IS NOT NULL",
 ]
 
 
@@ -253,16 +302,20 @@ def init_db() -> None:
             have = {r["name"] for r in c.execute(f"PRAGMA table_info({table})")}
             if column not in have:
                 c.execute(ddl)
+        for ddl in _AFTER_MIGRATIONS:
+            c.execute(ddl)
 
 
 # ---------- users ----------
 
 def create_user(nickname: str) -> dict[str, Any]:
-    uid, token = new_id(), new_id()
+    """新用户一出生就算「已认领」：只有加账号之前的老用户能凭 uid 认领。
+    token 列是早期留下的，从没被校验过；登录凭证是 sessions 表里的会话。"""
+    uid, token, now = new_id(), new_id(), now_iso()
     with _LOCK, _conn() as c:
         c.execute(
-            "INSERT INTO users(id, nickname, token, onboard_state, created_at) VALUES(?,?,?,?,?)",
-            (uid, nickname, token, "{}", now_iso()),
+            "INSERT INTO users(id, nickname, token, onboard_state, created_at, claimed_at) VALUES(?,?,?,?,?,?)",
+            (uid, nickname, token, "{}", now, now),
         )
     return {"uid": uid, "token": token, "nickname": nickname}
 
@@ -271,6 +324,166 @@ def get_user(uid: str) -> dict[str, Any] | None:
     with _conn() as c:
         row = c.execute("SELECT * FROM users WHERE id=?", (uid,)).fetchone()
     return dict(row) if row else None
+
+
+# ---------- 账号：微信、会话、删号与导出 ----------
+# 规则（有效期、频率、签名校验）在 auth.py / wechat.py；这里只管读写。
+
+SESSION_REFRESH = 86400  # 会话一天续一次期，不在每个请求上写库
+
+
+def _token_hash(token: str) -> str:
+    return hashlib.sha256(token.encode("utf-8")).hexdigest()
+
+
+def user_by_openid(openid: str) -> dict[str, Any] | None:
+    with _conn() as c:
+        row = c.execute("SELECT * FROM users WHERE wechat_openid=?", (openid,)).fetchone()
+    return dict(row) if row else None
+
+
+def create_wechat_user(nickname: str, openid: str) -> str:
+    """微信新开一个号；同一个 openid 已有账号时抛 sqlite3.IntegrityError。"""
+    uid = create_user(nickname)["uid"]
+    try:
+        with _LOCK, _conn() as c:
+            c.execute("UPDATE users SET wechat_openid=? WHERE id=?", (openid, uid))
+    except sqlite3.IntegrityError:
+        with _LOCK, _conn() as c:
+            c.execute("DELETE FROM users WHERE id=?", (uid,))
+        raise
+    return uid
+
+
+def bind_wechat(uid: str, openid: str) -> bool:
+    """只给还没绑微信的账号（访客、老用户）绑；这个微信已有别的账号时抛 sqlite3.IntegrityError。"""
+    with _LOCK, _conn() as c:
+        cur = c.execute("UPDATE users SET wechat_openid=?, claimed_at=COALESCE(claimed_at, ?)"
+                        " WHERE id=? AND wechat_openid IS NULL", (openid, now_iso(), uid))
+    return cur.rowcount == 1
+
+
+def record_consent(uid: str, version: str) -> None:
+    with _LOCK, _conn() as c:
+        c.execute("UPDATE users SET consent_at=?, consent_version=? WHERE id=?", (now_iso(), version, uid))
+
+
+def claim_legacy(uid: str) -> bool:
+    """有账号之前的老用户凭 uid 认领一次；认领过、或已经绑了微信的，都不能再凭 uid 进来。"""
+    with _LOCK, _conn() as c:
+        cur = c.execute("UPDATE users SET claimed_at=? WHERE id=? AND claimed_at IS NULL AND wechat_openid IS NULL",
+                        (now_iso(), uid))
+    return cur.rowcount == 1
+
+
+def create_session(uid: str, ttl: float) -> str:
+    token = "qy_" + secrets.token_urlsafe(32)
+    now = time.time()
+    with _LOCK, _conn() as c:
+        c.execute("INSERT INTO sessions(token_hash, user_id, created_at, expires_at, last_seen) VALUES(?,?,?,?,?)",
+                  (_token_hash(token), uid, now_iso(), now + ttl, now))
+    return token
+
+
+def session_lookup(token: str) -> tuple[str | None, bool]:
+    """只读：(令牌对应的用户, 是否该续期)。过期的当作没有。
+    每个请求都在事件循环里调它，所以不写库；续期和清理交给 touch_session 在别的线程做。"""
+    now = time.time()
+    with _conn() as c:
+        row = c.execute("SELECT user_id, expires_at, last_seen FROM sessions WHERE token_hash=?",
+                        (_token_hash(token),)).fetchone()
+    if row is None or row["expires_at"] <= now:
+        return None, row is not None
+    return row["user_id"], now - row["last_seen"] > SESSION_REFRESH
+
+
+def touch_session(token: str, ttl: float) -> None:
+    """用着的会话续期（一天最多一次），过期的删掉。"""
+    h, now = _token_hash(token), time.time()
+    with _LOCK, _conn() as c:
+        c.execute("DELETE FROM sessions WHERE token_hash=? AND expires_at<=?", (h, now))
+        c.execute("UPDATE sessions SET last_seen=?, expires_at=? WHERE token_hash=?", (now, now + ttl, h))
+
+
+def session_user(token: str, ttl: float) -> str | None:
+    """同步版：查到就顺手续期。给登录接口这类本来就在线程池里跑的地方用。"""
+    uid, stale = session_lookup(token)
+    if stale:
+        touch_session(token, ttl)
+    return uid
+
+
+def drop_session(token: str) -> None:
+    with _LOCK, _conn() as c:
+        c.execute("DELETE FROM sessions WHERE token_hash=?", (_token_hash(token),))
+
+
+
+def wechat_ticket_new(ticket: str, code: str, expires_at: float, guest_uid: str | None, nickname: str,
+                      consent: bool) -> bool:
+    """记一次登录请求。同一个数字已经有人在用（还没过期、没用掉）就返回 False，调用方换一个数字。"""
+    now = time.time()
+    with _LOCK, _conn() as c:
+        c.execute("DELETE FROM wechat_tickets WHERE expires_at < ?", (now - 3600,))  # 过期一小时的顺手清掉
+        if c.execute("SELECT 1 FROM wechat_tickets WHERE code=? AND expires_at>? AND used=0", (code, now)).fetchone():
+            return False
+        c.execute("INSERT INTO wechat_tickets(ticket_hash, code, expires_at, guest_uid, nickname, consent)"
+                  " VALUES(?,?,?,?,?,?)", (_token_hash(ticket), code, expires_at, guest_uid, nickname, int(consent)))
+    return True
+
+
+def wechat_claim_code(code: str, openid: str) -> bool:
+    """公众号收到一个数字：配上还在等的那次登录请求。微信超时会重发同一条消息，所以重复配同一个 openid 也算成功。"""
+    with _LOCK, _conn() as c:
+        cur = c.execute("UPDATE wechat_tickets SET openid=? WHERE code=? AND expires_at>? AND used=0"
+                        " AND (openid IS NULL OR openid=?)", (openid, code, time.time(), openid))
+    return cur.rowcount == 1
+
+
+def wechat_ticket(ticket: str) -> dict[str, Any] | None:
+    with _conn() as c:
+        row = c.execute("SELECT * FROM wechat_tickets WHERE ticket_hash=?", (_token_hash(ticket),)).fetchone()
+    return dict(row) if row else None
+
+
+def wechat_use_ticket(ticket: str) -> bool:
+    """换成会话只能一次：两个轮询同时到，只有一个拿到。"""
+    with _LOCK, _conn() as c:
+        cur = c.execute("UPDATE wechat_tickets SET used=1 WHERE ticket_hash=? AND used=0 AND openid IS NOT NULL",
+                        (_token_hash(ticket),))
+    return cur.rowcount == 1
+
+
+def _user_tables(c: sqlite3.Connection) -> list[str]:
+    """所有带 user_id 列的表。按列找而不是写死表名：以后加了新表，删号和导出不会漏。"""
+    names = [r["name"] for r in c.execute("SELECT name FROM sqlite_master WHERE type='table'")]
+    return [n for n in names if "user_id" in {r["name"] for r in c.execute(f"PRAGMA table_info({n})")}]
+
+
+def export_user(uid: str) -> dict[str, Any]:
+    with _conn() as c:
+        user = c.execute("SELECT id, nickname, wechat_openid, created_at, consent_at, consent_version, onboard_state"
+                         " FROM users WHERE id=?", (uid,)).fetchone()
+        out: dict[str, Any] = {"user": dict(user) if user else None}
+        for t in _user_tables(c):
+            if t == "sessions":
+                continue  # 令牌哈希不是用户的数据，导出了也没用
+            out[t] = [dict(r) for r in c.execute(f"SELECT * FROM {t} WHERE user_id=?", (uid,))]
+    return out
+
+
+def delete_user(uid: str) -> dict[str, int]:
+    """真删：这个人在每张表里的行、会话、微信登录记录、账号本身。返回各表删了几行。"""
+    counts: dict[str, int] = {}
+    with _LOCK, _conn() as c:
+        row = c.execute("SELECT wechat_openid FROM users WHERE id=?", (uid,)).fetchone()
+        for t in _user_tables(c):
+            counts[t] = c.execute(f"DELETE FROM {t} WHERE user_id=?", (uid,)).rowcount
+        if row and row["wechat_openid"]:
+            c.execute("DELETE FROM wechat_tickets WHERE openid=?", (row["wechat_openid"],))
+        c.execute("DELETE FROM wechat_tickets WHERE guest_uid=?", (uid,))
+        counts["users"] = c.execute("DELETE FROM users WHERE id=?", (uid,)).rowcount
+    return counts
 
 
 def set_onboard_state(uid: str, state: dict[str, Any]) -> None:
