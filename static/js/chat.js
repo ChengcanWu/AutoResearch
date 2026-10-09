@@ -53,7 +53,7 @@ const ChatView = (() => {
     abort = new AbortController();
     let res;
     try {
-      res = await fetch(apiUrl("/api/dialogue/stream"), {
+      res = await apiFetch("/api/dialogue/stream", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

@@ -7,7 +7,11 @@
 
 const S = {
   uid: localStorage.getItem("rg_uid") || "",
+  token: localStorage.getItem("rg_token") || "",
   nickname: localStorage.getItem("rg_nick") || "",
+  wechat: false,
+  guest: true,
+  auth: null,
   view: "home",
   resume: "login",
   onboard: { facts: [], messages: [] },
@@ -47,13 +51,94 @@ function errText(data, status) {
   return `请求失败 (${status})`;
 }
 
+function authHeaders(extra) {
+  const h = Object.assign({}, extra || {});
+  if (S.token) h.Authorization = `Bearer ${S.token}`;
+  return h;
+}
+
+/* 改了这段就把 server/auth.py 的 PRIVACY_VERSION 换成当天日期 */
+const PRIVACY_HTML = `
+  <h4>存了什么</h4>
+  <ul>
+    <li><b>账号</b>：昵称；用微信登录的话还有公众号给的 openid——一串只对「启研」公众号有效的编号，不是你的微信号。我们拿不到你的手机号和微信资料，也不用密码。</li>
+    <li><b>你写下和做过的</b>：对话；从对话里记下的画像（每条都标来源，在「记录」里能改能删）；你粘贴的成绩单；任务和项目提交；阅读卡；定位里的边、陈述和下注。</li>
+    <li><b>登录会话</b>：只存令牌的哈希，三十天不用就失效。</li>
+  </ul>
+  <h4>谁能看到</h4>
+  <ul>
+    <li>只有登录的你能看到自己的记录。开发团队能在服务器上看到原始数据，只用来排查问题，不给别人。</li>
+    <li>公众号只用来登录，不推营销消息。</li>
+    <li>对话和成绩单会发给大模型服务（DeepSeek）生成回复。</li>
+    <li>「定位」的竞争地图和稀有度用的是所有人的匿名计数，只出数字，不出名字和原话。</li>
+  </ul>
+  <h4>存在哪、存多久</h4>
+  <ul>
+    <li>存在团队租用的阿里云服务器上。不卖数据，不做广告。</li>
+    <li>「记录」页随时可以导出全部数据或删除账号。删除会立刻清掉库里你的所有记录，备份最多再留 7 天。</li>
+  </ul>`;
+
+function lostUser(err) {
+  const m = String(err && err.message || err || "");
+  return /user not found|请先登录/i.test(m);
+}
+
+function setSession(r) {
+  S.uid = r.uid;
+  if (r.token) S.token = r.token;
+  S.nickname = r.nickname || S.nickname;
+  S.wechat = !!r.wechat;
+  S.guest = r.guest !== false && !r.wechat;
+  try {
+    localStorage.setItem("rg_uid", S.uid);
+    localStorage.setItem("rg_token", S.token);
+    localStorage.setItem("rg_nick", S.nickname);
+  } catch (_) { /* 无痕模式只在这一页有效 */ }
+  const chip = document.getElementById("userNickname");
+  if (chip) chip.textContent = S.nickname;
+}
+
+function clearSession() {
+  S.uid = ""; S.token = ""; S.wechat = false; S.guest = true;
+  S.myDir = undefined;
+  ["rg_uid", "rg_token", "rg_nick"].forEach((k) => {
+    try { localStorage.removeItem(k); } catch (_) { /* ignore */ }
+  });
+}
+
+function signedOut(msg) {
+  clearSession();
+  if (msg) toast(msg);
+  setView("login");
+}
+
+async function recoverUser(err) {
+  if (!lostUser(err) && !(err && /401/.test(String(err.message)))) return false;
+  signedOut("云上的会话过期了（函数实例会回收临时库）。重新起个称呼就能继续。");
+  return true;
+}
+
+async function apiFetch(path, opt = {}) {
+  const res = await fetch(apiUrl(path), { ...opt, headers: authHeaders(opt.headers) });
+  if (res.status === 401 && S.token && !String(path).startsWith("/api/auth/")) {
+    signedOut("登录过期了，请重新进入");
+  }
+  return res;
+}
+
 async function api(method, path, body) {
   const opt = { method, headers: { "Content-Type": "application/json" } };
   if (body !== undefined) opt.body = JSON.stringify(body);
-  const res = await fetch(apiUrl(path), opt);
+  const res = await apiFetch(path, opt);
   let data = null;
   try { data = await res.json(); } catch (_) { /* no body */ }
-  if (!res.ok) throw new Error(errText(data, res.status));
+  if (!res.ok) {
+    const msg = errText(data, res.status);
+    if (res.status === 404 && /user not found/i.test(msg)) {
+      signedOut("云上找不到这个账号了。重新起个称呼就能继续。");
+    }
+    throw new Error(msg);
+  }
   return data;
 }
 
@@ -623,6 +708,41 @@ function portraitTabs(active) {
   return nav;
 }
 
+async function logout() {
+  try { await api("POST", "/api/auth/logout"); } catch (_) { /* 已经没会话也照样退 */ }
+  clearSession();
+  setView("home");
+}
+
+function accountPanel() {
+  const box = el("section", "panel account-panel");
+  box.appendChild(el("h3", "section-label", "账号"));
+  box.appendChild(el("p", "panel-sub", S.wechat
+    ? `已用微信登录：${esc(S.nickname)}`
+    : `访客「${esc(S.nickname)}」。云上临时库回收后，这个浏览器里的旧账号会失效，重新进入即可。`));
+  const acts = el("div", "account-actions");
+  const add = (label, cls, fn) => {
+    const b = el("button", cls, label);
+    b.type = "button";
+    b.onclick = fn;
+    acts.appendChild(b);
+  };
+  add("退出", "btn small secondary", async () => { await logout(); });
+  add("删除账号", "btn small ghost", async () => {
+    const typed = window.prompt("删除后记录立刻清掉。确定的话输入「删除」：");
+    if (typed === null) return;
+    if (typed.trim() !== "删除") { toast("没有删除"); return; }
+    try {
+      await api("DELETE", "/api/me");
+      clearSession();
+      toast("账号和记录都删了");
+      setView("home");
+    } catch (e) { toast(e.message); }
+  });
+  box.appendChild(acts);
+  return box;
+}
+
 function renderLogin() {
   $nav.hidden = true; $header.hidden = true;
   $app.innerHTML = "";
@@ -640,13 +760,10 @@ function renderLogin() {
     if (!nick) { toast("先起个昵称吧"); input.focus(); return; }
     btn.disabled = true; btn.textContent = "进入中…";
     try {
-      const r = await api("POST", "/api/auth/login", { nickname: nick });
-      S.uid = r.uid; S.nickname = r.nickname; S.myDir = undefined;
-      localStorage.setItem("rg_uid", r.uid);
-      localStorage.setItem("rg_nick", r.nickname);
+      setSession(await api("POST", "/api/auth/login", { nickname: nick, consent: true }));
+      S.myDir = undefined;
       await api("POST", "/api/onboard/start", { uid: S.uid });
-      toast(`你好，${r.nickname}`);
-      document.getElementById("userNickname").textContent = r.nickname;
+      toast(`你好，${S.nickname}`);
       setView("dialogue");
     } catch (e) { toast(e.message); btn.disabled = false; btn.textContent = "进入启研"; }
   };
@@ -691,7 +808,7 @@ function openConnect() {
     go.disabled = true; go.textContent = "正在连通…";
     try {
       // 管理员口令走请求头，所以这里不用 api()
-      const res = await fetch(apiUrl("/api/llm/connect"), {
+      const res = await apiFetch("/api/llm/connect", {
         method: "POST",
         headers: { "Content-Type": "application/json", "X-Admin-Token": box.admin.value.trim() },
         body: JSON.stringify({ base_url: box.base.value.trim(), api_key: box.key.value.trim(), model: box.model.value.trim() }),
@@ -2660,17 +2777,32 @@ async function renderRead() {
   if (!S.kitId) useKit(DEFAULT_KIT);
   const kitId = S.kitId;
   const tab = S.readTab || "kit";
-  let kit; let cards;
+  let kit; let cards = { cards: [] };
   try {
-    [kit, cards] = await Promise.all([
-      api("GET", `/api/kits/${kitId}`),
-      api("GET", `/api/cards?uid=${S.uid}&kit=${kitId}`),
-    ]);
+    kit = await api("GET", `/api/kits/${kitId}`);
   } catch (e) {
     if (stale(seq)) return;
+    if (await recoverUser(e)) return;
     $app.innerHTML = "";
     $app.appendChild(workspaceHead("研读"));
     $app.appendChild(el("div", "note-box", `工具包加载失败：${esc(e.message)}`));
+    return;
+  }
+  if (!S.uid) {
+    if (stale(seq)) return;
+    $app.innerHTML = "";
+    $app.appendChild(workspaceHead("研读"));
+    $app.appendChild(el("div", "note-box", "先进入启研，再看你的阅读卡。工具包本身可以稍后打开。"));
+    return;
+  }
+  try {
+    cards = await api("GET", `/api/cards?uid=${S.uid}&kit=${kitId}`);
+  } catch (e) {
+    if (stale(seq)) return;
+    if (await recoverUser(e)) return;
+    $app.innerHTML = "";
+    $app.appendChild(workspaceHead("研读"));
+    $app.appendChild(el("div", "note-box", `阅读卡没取到：${esc(e.message)}`));
     return;
   }
   if (stale(seq)) return;
@@ -2811,15 +2943,16 @@ async function renderCard() {
   $app.appendChild(back);
   const loading = el("div", "note-box", "正在取原文（arXiv HTML 版，第一次稍慢）…");
   $app.appendChild(loading);
-  let kit; let paper; let cards;
+  let kit; let paper; let cards = { cards: [] };
   try {
-    [kit, paper, cards] = await Promise.all([
+    [kit, paper] = await Promise.all([
       api("GET", `/api/kits/${kitId}`),
       api("GET", `/api/papers/${aid}`),
-      api("GET", `/api/cards?uid=${S.uid}&kit=${kitId}`),
     ]);
+    if (S.uid) cards = await api("GET", `/api/cards?uid=${S.uid}&kit=${kitId}`);
   } catch (e) {
     if (stale(seq)) return;
+    if (await recoverUser(e)) return;
     loading.textContent = `原文取不到（如实说明）：${e.message}。可以先在 arXiv 上读：https://arxiv.org/abs/${aid}`;
     return;
   }
@@ -3096,7 +3229,9 @@ async function renderPosition() {
     else if (tab === "bets") await paintBets(seq, body);
     else await paintEdges(seq, body);
   } catch (e) {
-    if (!stale(seq)) body.appendChild(el("div", "note-box", `加载失败：${esc(e.message)}`));
+    if (stale(seq)) return;
+    if (await recoverUser(e)) return;
+    body.appendChild(el("div", "note-box", `加载失败：${esc(e.message)}`));
   }
 }
 
@@ -3398,7 +3533,8 @@ async function paintStatement(seq, body) {
 }
 
 async function paintBets(seq, body) {
-  const [b, kit] = await Promise.all([api("GET", `/api/bets?uid=${S.uid}`), api("GET", `/api/kits/${S.kitId}`)]);
+  const kit = await api("GET", `/api/kits/${S.kitId}`);
+  const b = await api("GET", `/api/bets?uid=${S.uid}`);
   if (stale(seq)) return;
   const panel = el("div", "panel");
   panel.appendChild(el("p", "panel-sub", `同时最多 ${b.max} 个目标，每个标「冲 / 稳 / 保」。申请像投资组合：全押一处风险太集中。有限也是信号——「这是我这学期联系的三个组之一」比群发可信。`));
@@ -3471,6 +3607,7 @@ async function renderMe() {
   const facts = r.facts.filter((f) => f.status !== "deleted" && f.status !== "dismissed");
   $app.innerHTML = "";
   $app.appendChild(workspaceHead("记录", "每条都写着从哪来。不对就改，不想留着就删。"));
+  $app.appendChild(accountPanel());
   const main = el("div", "panel");
 
   const groups = {};
@@ -3810,14 +3947,14 @@ async function renderProject() {
   const tpl = el("button", "btn small secondary", "下载 README 模板");
   tpl.type = "button";
   tpl.onclick = async () => {
-    const res = await fetch(apiUrl(`/api/projects/${p.id}/readme?uid=${S.uid}`));
+    const res = await apiFetch(`/api/projects/${p.id}/readme?uid=${S.uid}`);
     if (!res.ok) { toast("模板下载失败"); return; }
     downloadBlob(await res.blob(), "README.md");
   };
   const sample = el("button", "btn small ghost", "看一份示例压缩包");
   sample.type = "button";
   sample.onclick = async () => {
-    const res = await fetch(apiUrl(`/api/projects/${p.id}/sample.zip?uid=${S.uid}`));
+    const res = await apiFetch(`/api/projects/${p.id}/sample.zip?uid=${S.uid}`);
     if (!res.ok) { toast("示例生成失败"); return; }
     downloadBlob(await res.blob(), "示例成果.zip");
   };
@@ -3843,7 +3980,7 @@ async function renderProject() {
     drop.classList.add("busy");
     drop.querySelector("span").textContent = `正在看「${f.name}」…`;
     try {
-      const res = await fetch(apiUrl(`/api/projects/${p.id}/submit?uid=${S.uid}`), {
+      const res = await apiFetch(`/api/projects/${p.id}/submit?uid=${S.uid}`, {
         method: "POST", headers: { "Content-Type": "application/zip" }, body: f,
       });
       const data = await res.json().catch(() => null);
@@ -4009,21 +4146,28 @@ document.addEventListener("click", (e) => {
   try {
     const [h, paths] = await Promise.all([api("GET", "/api/health"), api("GET", "/api/paths").catch(() => null)]);
     applyLlmPill(h.llm);
+    S.auth = h.auth || null;
     if (paths) applyPaths(paths.paths);
   } catch (_) { /* 健康检查失败不挡页面 */ }
   buildTutorials();
-  if (S.uid) {
+  if (S.uid && !S.token) {
+    try { setSession(await api("POST", "/api/auth/legacy", { uid: S.uid })); } catch (_) { clearSession(); }
+  }
+  if (S.token) {
     try {
+      const me = await api("GET", "/api/auth/me");
+      setSession(me);
       const st = await api("GET", `/api/onboard/result?uid=${S.uid}`);
-      document.getElementById("userNickname").textContent = S.nickname;
       S.portraitTab = st.state && st.state.phase === "done" ? "confirm" : "dialogue";
       S.resume = "today";
       await ensurePortrait();
     } catch (_) {
-      S.uid = "";
+      clearSession();
       S.resume = "login";
-      localStorage.removeItem("rg_uid");
     }
+  } else if (S.uid) {
+    clearSession();
+    S.resume = "login";
   }
   setView("home");
   // 开场最多停 0.7 秒：数据到了就走，不再固定等 1.4 秒

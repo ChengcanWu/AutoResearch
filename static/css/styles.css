@@ -1437,3 +1437,17 @@ body.is-home .site-footer { display: none; }
 .proj-row:first-child { border-top: 0; }
 .proj-k { flex: 0 0 62px; font-size: 11px; color: var(--ink-3); padding-top: 2px; }
 .proj-v { flex: 1; font-size: 12px; line-height: 1.6; color: var(--ink); }
+
+.account-panel { margin-bottom: var(--gap-4); }
+.account-actions { display: flex; flex-wrap: wrap; gap: var(--gap-2); margin-top: var(--gap-3); }
+.login-step { margin: var(--gap-3) 0; }
+.login-nick { width: 100%; }
+.login-note { font-size: 13px; color: var(--ink-3); }
+.consent-row { display: flex; flex-wrap: wrap; align-items: center; font-size: 13px; }
+.privacy-box { width: min(560px, 100%); }
+.privacy-body { overflow-y: auto; font-size: 14px; line-height: 1.7; }
+.wx-box { margin-top: var(--gap-3); }
+.wx-qr { max-width: 180px; }
+.wx-steps { padding-left: 1.2em; font-size: 14px; }
+.wx-code { font-family: var(--mono); letter-spacing: 0.12em; }
+.wx-status { font-size: 13px; color: var(--ink-3); }
