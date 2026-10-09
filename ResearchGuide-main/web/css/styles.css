@@ -390,6 +390,22 @@ body[data-view="cards"] .site-footer, body[data-view="card"] .site-footer, body[
 .privacy-body ul { padding-left: 1.2em; }
 .privacy-body li + li { margin-top: 2px; }
 
+/* 微信登录：二维码、步骤、要发的数字 */
+.wx-box {
+  display: flex; flex-direction: column; align-items: flex-start; gap: var(--gap-2);
+  margin-top: var(--gap-3); padding: var(--gap-4);
+  border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface);
+}
+.wx-box[hidden] { display: none; }
+.wx-qr { width: 168px; height: 168px; border-radius: var(--r-md); border: 1px solid var(--line); background: #fff; }
+.wx-steps { padding-left: 1.2em; font-size: 14px; color: var(--ink-2); line-height: 1.9; }
+.wx-code {
+  display: inline-block; margin-left: 4px; padding: 2px 10px;
+  border-radius: var(--r-sm); background: var(--teal-soft); color: var(--teal-ink);
+  font-family: var(--mono); font-size: 22px; letter-spacing: 0.12em;
+}
+.wx-status { font-size: 13px; color: var(--ink-3); }
+
 /* 记录页的账号块 */
 .account-panel { margin-bottom: var(--gap-4); }
 .account-actions { display: flex; flex-wrap: wrap; gap: var(--gap-2); margin-top: var(--gap-3); }

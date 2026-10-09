@@ -9,7 +9,7 @@ const S = {
   uid: localStorage.getItem("rg_uid") || "",
   token: localStorage.getItem("rg_token") || "",
   nickname: localStorage.getItem("rg_nick") || "",
-  phone: "",
+  wechat: false,
   guest: true,
   auth: null,
   view: "home",
@@ -643,13 +643,13 @@ function portraitTabs(active) {
   return nav;
 }
 
-/* ---------- 账号：手机号验证码登录、访客、隐私说明 ---------- */
+/* ---------- 账号：微信登录（公众号发数字）、访客、隐私说明 ---------- */
 
 function setSession(r) {
   S.uid = r.uid;
   if (r.token) S.token = r.token;
   S.nickname = r.nickname || S.nickname;
-  S.phone = r.phone || "";
+  S.wechat = !!r.wechat;
   S.guest = !!r.guest;
   try {
     localStorage.setItem("rg_uid", S.uid);
@@ -661,7 +661,7 @@ function setSession(r) {
 }
 
 function clearSession() {
-  S.uid = ""; S.token = ""; S.phone = ""; S.guest = true;
+  S.uid = ""; S.token = ""; S.wechat = false; S.guest = true;
   S.myDir = undefined; S.portraitId = "";
   ["rg_uid", "rg_token", "rg_nick"].forEach((k) => {
     try { localStorage.removeItem(k); } catch (_) { /* 无痕模式等 */ }
@@ -696,14 +696,14 @@ async function afterLogin(isNew) {
 const PRIVACY_HTML = `
   <h4>存了什么</h4>
   <ul>
-    <li><b>账号</b>：昵称；用手机号登录的话还有手机号（页面上只显示中间打星的）。验证码由阿里云号码认证服务发送和核验，我们不存验证码，也不用密码。</li>
+    <li><b>账号</b>：昵称；用微信登录的话还有公众号给的 openid——一串只对「启研」公众号有效的编号，不是你的微信号。我们拿不到你的手机号和微信资料，也不用密码。</li>
     <li><b>你写下和做过的</b>：对话；从对话里记下的画像（每条都标来源，在「记录」里能改能删）；你粘贴的成绩单；任务和项目提交；阅读卡；定位里的边、陈述和下注。</li>
     <li><b>登录会话</b>：只存令牌的哈希，三十天不用就失效。</li>
   </ul>
   <h4>谁能看到</h4>
   <ul>
     <li>只有登录的你能看到自己的记录。开发团队能在服务器上看到原始数据，只用来排查问题，不给别人。</li>
-    <li>手机号只用来登录，不发营销短信，不给别人。</li>
+    <li>公众号只用来登录，不推营销消息。</li>
     <li>对话和成绩单会发给大模型服务（DeepSeek）生成回复。</li>
     <li>「定位」的竞争地图和稀有度用的是所有人的匿名计数，只出数字，不出名字和原话。</li>
   </ul>
@@ -758,91 +758,104 @@ function consentRow() {
   return { row, ok: () => box.checked };
 }
 
+let wxPoll = 0;  // 微信登录的轮询；离开登录页或换数字时停掉
+
+function stopWxPoll() {
+  clearTimeout(wxPoll);
+  wxPoll = 0;
+}
+
+/* 微信登录：网页拿一个 6 位数字，学生在公众号里发它，网页轮询到了就登进去 */
+async function startWechat(box, opts) {
+  stopWxPoll();
+  box.innerHTML = "";
+  box.hidden = false;
+  let r;
+  try {
+    r = await api("POST", "/api/auth/wechat/start", { nickname: opts.nickname, consent: true });
+  } catch (e) { box.hidden = true; toast(e.message); return; }
+  const name = r.account_name ? `「${esc(r.account_name)}」` : "启研";
+  if (r.qr_url) {
+    const qr = el("img", "wx-qr");
+    qr.src = r.qr_url;
+    qr.alt = "公众号二维码";
+    box.appendChild(qr);
+  }
+  const steps = el("ol", "wx-steps");
+  steps.appendChild(el("li", "", `微信扫码关注${name}公众号（已经关注的，直接打开它）`));
+  const li = el("li", "", "在公众号里发送这个数字：");
+  li.appendChild(el("b", "wx-code", `${r.code.slice(0, 3)} ${r.code.slice(3)}`));
+  steps.appendChild(li);
+  box.appendChild(steps);
+  const status = el("p", "wx-status", "等你在微信里发送…");
+  box.appendChild(status);
+  const acts = el("div", "account-actions");
+  const again = el("button", "btn small secondary", "换一个数字");
+  again.type = "button";
+  again.onclick = () => startWechat(box, opts);
+  acts.appendChild(again);
+  if (S.auth && S.auth.dev) {  // 本机开发没有公众号：假装从微信发了这个数字
+    const dev = el("button", "btn small ghost", "（开发）模拟微信发送");
+    dev.type = "button";
+    dev.onclick = () => api("POST", "/api/auth/wechat/dev-send", { code: r.code }).catch((e) => toast(e.message));
+    acts.appendChild(dev);
+  }
+  box.appendChild(acts);
+
+  const deadline = Date.now() + r.expires_in * 1000;
+  const tick = async () => {
+    if (!box.isConnected) { stopWxPoll(); return; }  // 离开了登录页
+    let res;
+    try {
+      res = await api("POST", "/api/auth/wechat/poll", { ticket: r.ticket });
+    } catch (e) {
+      status.textContent = `${e.message}`;
+      return;  // 过期或用过了：不再轮询，等学生点「换一个数字」
+    }
+    if (res.pending) {
+      const left = Math.max(0, Math.round((deadline - Date.now()) / 1000));
+      status.textContent = `等你在微信里发送…（还剩 ${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}）`;
+      wxPoll = setTimeout(tick, 2000);
+      return;
+    }
+    stopWxPoll();
+    setSession(res);
+    if (res.left_guest) toast("这个微信已经有账号，已登进去；刚才访客的记录留在访客号里");
+    else toast(res.bound ? "绑定好了，记录都在" : `你好，${res.nickname}`);
+    if (res.bound) { setView("me"); return; }
+    await afterLogin(res.created);
+  };
+  wxPoll = setTimeout(tick, 2000);
+}
+
 function renderLogin() {
   $nav.hidden = true; $header.hidden = true;
   $app.innerHTML = "";
-  const binding = !!(S.uid && S.guest);  // 访客来绑手机号：核验时带着访客会话，记录跟着走
-  const smsOn = !S.auth || S.auth.sms_login;
+  stopWxPoll();
+  const binding = !!(S.uid && S.guest);  // 访客来绑微信：start 时带着访客会话，记录跟着走
+  const wxOn = !S.auth || S.auth.wechat_login;
   const hero = el("section", "hero stagger");
-  hero.appendChild(el("p", "hero-kicker", binding ? "启研 · 绑定手机号" : "启研 · 登录"));
-  hero.appendChild(el("h2", "", binding ? "绑定手机号" : "手机号登录"));
+  hero.appendChild(el("p", "hero-kicker", binding ? "启研 · 绑定微信" : "启研 · 登录"));
+  hero.appendChild(el("h2", "", binding ? "绑定微信" : "微信登录"));
   hero.appendChild(el("p", "hero-lead", binding
     ? "绑定后换设备、清了浏览器也能接着用，访客期间的记录都会带过去。"
-    : "换手机、清了浏览器也能接着用。没注册过的号码，验证后自动注册。"));
+    : "换手机、清了浏览器也能接着用。不用密码，也不要手机号。"));
   const consent = consentRow();
   const need = () => { if (consent.ok()) return true; toast("先勾选同意隐私说明"); return false; };
 
-  const smsBox = el("div", "login-step");
-  const phoneRow = el("div", "login-row");
-  const phone = el("input");
-  phone.type = "tel"; phone.inputMode = "numeric"; phone.autocomplete = "tel-national"; phone.maxLength = 16;
-  phone.placeholder = "手机号";
-  phone.setAttribute("aria-label", "手机号");
-  const send = el("button", "btn secondary", "获取验证码");
-  send.type = "button";
-  phoneRow.append(phone, send);
-  const codeRow = el("div", "login-row");
-  codeRow.hidden = true;
-  const code = el("input");
-  code.inputMode = "numeric"; code.autocomplete = "one-time-code"; code.maxLength = 6;
-  code.placeholder = "6 位验证码";
-  code.setAttribute("aria-label", "验证码");
-  const go = el("button", "btn", binding ? "绑定" : "登录");
-  go.type = "button";
-  codeRow.append(code, go);
+  const wxStep = el("div", "login-step");
   const nick = el("input", "login-nick");
   nick.placeholder = "怎么称呼你（选填，新账号用）"; nick.maxLength = 24;
   nick.setAttribute("aria-label", "昵称");
-  smsBox.append(phoneRow, codeRow);
-  if (!binding) smsBox.appendChild(nick);
+  const go = el("button", "btn", binding ? "绑定微信" : "用微信登录");
+  go.type = "button";
+  const wxBox = el("div", "wx-box");
+  wxBox.hidden = true;
+  go.onclick = () => { if (need()) startWechat(wxBox, { nickname: nick.value.trim() }); };
+  if (!binding) wxStep.appendChild(nick);
+  wxStep.append(go, wxBox);
 
-  let timer = 0;
-  const countdown = (sec) => {
-    clearInterval(timer);
-    let left = sec;
-    send.disabled = true;
-    const tick = () => {
-      if (left <= 0) { clearInterval(timer); send.disabled = false; send.textContent = "重新获取"; return; }
-      send.textContent = `${left} 秒后重发`;
-      left -= 1;
-    };
-    tick();
-    timer = setInterval(tick, 1000);
-  };
-  send.onclick = async () => {
-    if (!need()) return;
-    const num = phone.value.trim();
-    if (!num) { toast("先填手机号"); phone.focus(); return; }
-    send.disabled = true;
-    try {
-      const r = await api("POST", "/api/auth/sms/send", { phone: num });
-      codeRow.hidden = false;
-      code.focus();
-      toast(`验证码已发到 ${r.phone}`);
-      countdown(r.resend_after || 60);
-    } catch (e) { toast(e.message); send.disabled = false; }
-  };
-  go.onclick = async () => {
-    if (!need()) return;
-    const c = code.value.trim();
-    if (!/^\d{6}$/.test(c)) { toast("验证码是 6 位数字"); code.focus(); return; }
-    go.disabled = true;
-    try {
-      const r = await api("POST", "/api/auth/sms/verify", {
-        phone: phone.value.trim(), code: c, nickname: nick.value.trim(), consent: true,
-      });
-      clearInterval(timer);
-      setSession(r);
-      if (r.left_guest) toast("这个手机号已经有账号，已登进去；刚才访客的记录留在访客号里");
-      else toast(r.bound ? "绑定好了，记录都在" : `你好，${r.nickname}`);
-      if (r.bound) { setView("me"); return; }
-      await afterLogin(r.created);
-    } catch (e) { toast(e.message); go.disabled = false; }
-  };
-  phone.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.isComposing) send.click(); });
-  code.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.isComposing) go.click(); });
-
-  // 访客：只要昵称，记录只能在这台浏览器里找回；之后可以绑手机号
+  // 访客：只要昵称，记录只能在这台浏览器里找回；之后可以绑微信
   const guestBox = el("div", "login-step");
   const guestRow = el("div", "login-row");
   const gname = el("input");
@@ -863,19 +876,19 @@ function renderLogin() {
   };
   gname.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.isComposing) gbtn.click(); });
   guestRow.append(gname, gbtn);
-  guestBox.append(guestRow, el("p", "form-note", "访客的记录只能在这台浏览器里找回，之后可以在「记录」页绑定手机号。"));
+  guestBox.append(guestRow, el("p", "form-note", "访客的记录只能在这台浏览器里找回，之后可以在「记录」页绑定微信。"));
 
   if (binding) {
-    hero.append(smsBox, consent.row);
-  } else if (smsOn) {
+    hero.append(consent.row, wxStep);
+  } else if (wxOn) {
     guestBox.hidden = true;
-    hero.append(smsBox, consent.row, guestBox);
+    hero.append(consent.row, wxStep, guestBox);
   } else {
-    hero.append(el("p", "login-note", "短信验证码还没开通，先以访客进入。"), guestBox, consent.row);
+    hero.append(el("p", "login-note", "微信登录还没开通，先以访客进入。"), guestBox, consent.row);
   }
 
   const links = el("div", "hero-links");
-  if (!binding && smsOn) {
+  if (!binding && wxOn) {
     const asGuest = el("button", "linkish", "先不登录，以访客进入");
     asGuest.type = "button";
     asGuest.onclick = () => { guestBox.hidden = false; asGuest.remove(); gname.focus(); };
@@ -890,7 +903,7 @@ function renderLogin() {
   links.append(link, back);
   hero.appendChild(links);
   $app.appendChild(hero);
-  (smsOn ? phone : gname).focus();
+  if (!wxOn) gname.focus();
 }
 
 async function logout() {
@@ -903,8 +916,8 @@ function accountPanel() {
   const box = el("section", "panel account-panel");
   box.appendChild(el("h3", "section-label", "账号"));
   box.appendChild(el("p", "panel-sub", S.guest
-    ? `访客「${esc(S.nickname)}」：记录只能在这台浏览器里找回。绑定手机号后换设备也能接着用。`
-    : `已登录：${esc(S.phone)}`));
+    ? `访客「${esc(S.nickname)}」：记录只能在这台浏览器里找回。绑定微信后换设备也能接着用。`
+    : `已用微信登录：${esc(S.nickname)}`));
   const acts = el("div", "account-actions");
   const add = (label, cls, fn) => {
     const b = el("button", cls, label);
@@ -912,7 +925,7 @@ function accountPanel() {
     b.onclick = fn;
     acts.appendChild(b);
   };
-  if (S.guest) add("绑定手机号", "btn small", () => setView("login"));
+  if (S.guest) add("绑定微信", "btn small", () => setView("login"));
   add("我们存什么", "btn small ghost", () => openPrivacy(false));
   add("导出我的数据", "btn small secondary", async () => {
     const res = await apiFetch("/api/me/export");
@@ -920,7 +933,7 @@ function accountPanel() {
     downloadBlob(await res.blob(), "启研-我的数据.json");
   });
   add("退出登录", "btn small secondary", async () => {
-    if (S.guest && !window.confirm("访客退出后，这些记录就找不回来了（除非先绑定手机号）。确定退出？")) return;
+    if (S.guest && !window.confirm("访客退出后，这些记录就找不回来了（除非先绑定微信）。确定退出？")) return;
     await logout();
   });
   add("删除账号", "btn small ghost danger", async () => {

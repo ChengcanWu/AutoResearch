@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-"""账号：默认要登录、uid 必须是本人、手机号短信验证码、访客绑手机号、老用户认领、删号与导出。
+"""账号：默认要登录、uid 必须是本人、微信登录（公众号消息）、访客绑微信、老用户认领、删号与导出。
 
-这里用真的 auth.guard（其余测试把它换成「信请求里的 uid」）。不联网、不发短信：
-阿里云那一侧用 texts 夹具假装（它出码、它核验），签名和报文另用本机假服务器测。
+这里用真的 auth.guard（其余测试把它换成「信请求里的 uid」）。不联网：
+微信服务器那一侧由测试自己签名、拼 XML，直接打 /api/wechat。
 """
 from __future__ import annotations
 
@@ -10,14 +10,11 @@ import hashlib
 import json
 import os
 import re
-import secrets
 import sqlite3
 import subprocess
 import sys
-import threading
 import time
-import urllib.parse
-from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 import pytest
@@ -27,22 +24,22 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import auth  # noqa: E402
 import main  # noqa: E402
-import sms  # noqa: E402
 import store  # noqa: E402
 
 pytestmark = pytest.mark.real_auth
 SERVER = Path(__file__).resolve().parent.parent
-PRIVACY_DIGEST = "b431f26a5d20"  # web/js/app.js 里 PRIVACY_HTML 的指纹，见最后一个测试
-PHONE = "13800138000"
+PRIVACY_DIGEST = "57f7d227c09e"  # web/js/app.js 里 PRIVACY_HTML 的指纹，见最后一个测试
+TOKEN = "test-token"
+OPENID = "o_test_user_1"
 
 
 @pytest.fixture(autouse=True)
 def fresh(tmp_path, monkeypatch):
     monkeypatch.setattr(store, "DB_PATH", tmp_path / "auth.db")
     store.init_db()
-    auth._IP_HITS.clear()
-    for k in ("AUTH_DEV_CODES", "TRUST_PROXY", "ALIBABA_CLOUD_ACCESS_KEY_ID", "ALIBABA_CLOUD_ACCESS_KEY_SECRET",
-              "ALIBABA_CLOUD_SECURITY_TOKEN", "SMS_SIGN_NAME", "SMS_TEMPLATE_CODE"):
+    auth._HITS.clear()
+    for k in ("AUTH_DEV_CODES", "TRUST_PROXY", "WECHAT_TOKEN", "WECHAT_ACCOUNT_ID", "WECHAT_QR_URL",
+              "WECHAT_ACCOUNT_NAME"):
         monkeypatch.delenv(k, raising=False)
 
 
@@ -51,31 +48,37 @@ def client():
     return TestClient(main.app)
 
 
-class FakeAliyun:
-    """假装阿里云短信认证：发的时候出一个码记下，核验时比对。"""
-
-    def __init__(self) -> None:
-        self.codes: dict[str, str] = {}
-        self.sent: list[str] = []
-        self.checks = 0
-
-    def send(self, phone: str, minutes: int) -> None:
-        self.codes[phone] = f"{secrets.randbelow(10 ** 6):06d}"
-        self.sent.append(phone)
-
-    def check(self, phone: str, code: str) -> bool:
-        self.checks += 1
-        return self.codes.get(phone) == code
-
-
 @pytest.fixture
-def texts(monkeypatch):
-    fake = FakeAliyun()
-    monkeypatch.setattr(sms, "configured", lambda: True)
-    monkeypatch.setattr(sms, "send", fake.send)
-    monkeypatch.setattr(sms, "check", fake.check)
-    monkeypatch.setattr(auth, "RESEND_GAP", 0)
-    return fake
+def wx(monkeypatch):
+    """开通了公众号：消息接口用 TOKEN 验签。"""
+    monkeypatch.setenv("WECHAT_TOKEN", TOKEN)
+    monkeypatch.setenv("WECHAT_ACCOUNT_ID", "gh_test")
+    monkeypatch.setenv("WECHAT_ACCOUNT_NAME", "启研")
+
+
+def _signed(ts: str | None = None, nonce: str = "n1", token: str = TOKEN) -> str:
+    ts = str(int(time.time())) if ts is None else ts
+    sig = hashlib.sha1("".join(sorted([token, ts, nonce])).encode()).hexdigest()
+    return f"signature={sig}&timestamp={ts}&nonce={nonce}"
+
+
+def _xml(openid: str, content: str | None = None, event: str | None = None) -> bytes:
+    head = (f"<xml><ToUserName><![CDATA[gh_test]]></ToUserName><FromUserName><![CDATA[{openid}]]></FromUserName>"
+            "<CreateTime>1700000000</CreateTime>")
+    if event:
+        return (head + f"<MsgType><![CDATA[event]]></MsgType><Event><![CDATA[{event}]]></Event></xml>").encode()
+    return (head + f"<MsgType><![CDATA[text]]></MsgType><Content><![CDATA[{content}]]></Content>"
+            "<MsgId>1234567890</MsgId></xml>").encode()
+
+
+def _send(client, openid: str, content: str, query: str | None = None):
+    """假装微信服务器把一条用户消息推给我们。"""
+    return client.post(f"/api/wechat?{query or _signed()}", content=_xml(openid, content),
+                       headers={"Content-Type": "text/xml"})
+
+
+def _reply(r) -> dict[str, str]:
+    return {c.tag: c.text or "" for c in ET.fromstring(r.content)}
 
 
 def _h(token: str) -> dict:
@@ -87,12 +90,12 @@ def _guest(client, nick="小北") -> tuple[str, str]:
     return r["uid"], r["token"]
 
 
-def _phone_login(client, texts, phone=PHONE, headers=None, **extra):
-    r = client.post("/api/auth/sms/send", json={"phone": phone})
-    assert r.status_code == 200, r.text
-    num = auth._check_phone(phone)
-    r = client.post("/api/auth/sms/verify", json={"phone": phone, "code": texts.codes[num], "consent": True, **extra},
-                    headers=headers or {})
+def _wechat_login(client, openid=OPENID, headers=None, **start):
+    s = client.post("/api/auth/wechat/start", json={"consent": True, **start}, headers=headers or {})
+    assert s.status_code == 200, s.text
+    s = s.json()
+    assert "登录成功" in _reply(_send(client, openid, s["code"]))["Content"]
+    r = client.post("/api/auth/wechat/poll", json={"ticket": s["ticket"]}, headers=headers or {})
     assert r.status_code == 200, r.text
     return r.json()
 
@@ -148,71 +151,93 @@ def test_upload_route_is_not_read_by_the_guard(client):
     assert r.status_code == 404  # 过了登录，接口自己说项目不存在
 
 
-# ---------- 手机号验证码 ----------
+# ---------- 微信登录 ----------
 
-def test_phone_code_logs_in_and_a_second_device_gets_the_same_account(client, texts):
-    first = _phone_login(client, texts, " 138 0013-8000 ", nickname="小北")
-    assert first["created"] and first["phone"] == "138****8000" and first["nickname"] == "小北"
-    assert texts.sent == [PHONE]
-    again = _phone_login(client, texts, "+86 13800138000")
+def test_server_verification_echoes_only_with_a_valid_signature(client, wx):
+    assert client.get(f"/api/wechat?{_signed()}&echostr=hello").text == "hello"
+    assert client.get(f"/api/wechat?{_signed(token='wrong')}&echostr=hello").status_code == 403
+    stale = str(int(time.time()) - 3600)
+    assert client.get(f"/api/wechat?{_signed(ts=stale)}&echostr=hello").status_code == 403
+    assert client.get("/api/wechat?echostr=hello").status_code == 403
+
+
+def test_wechat_login_end_to_end_and_a_second_device_gets_the_same_account(client, wx):
+    s = client.post("/api/auth/wechat/start", json={"consent": True, "nickname": "小北"}).json()
+    assert re.fullmatch(r"\d{6}", s["code"]) and s["expires_in"] == auth.TICKET_TTL
+    assert s["qr_url"] == "https://open.weixin.qq.com/qr/code?username=gh_test" and s["account_name"] == "启研"
+    assert client.post("/api/auth/wechat/poll", json={"ticket": s["ticket"]}).json()["pending"] is True
+    reply = _reply(_send(client, OPENID, f" {s['code'][:3]} {s['code'][3:]} "))  # 中间带空格也认
+    assert reply["ToUserName"] == OPENID and reply["FromUserName"] == "gh_test" and "登录成功" in reply["Content"]
+    first = client.post("/api/auth/wechat/poll", json={"ticket": s["ticket"]}).json()
+    assert first["created"] and first["wechat"] and not first["guest"] and first["nickname"] == "小北"
+    assert first["consent_ok"]
+    again = _wechat_login(client)
     assert again["uid"] == first["uid"] and not again["created"] and again["token"] != first["token"]
-    me = client.get("/api/auth/me", headers=_h(again["token"])).json()
-    assert me["phone"] == "138****8000" and not me["guest"]
 
 
-def test_only_mainland_mobile_numbers(client, texts):
-    for bad in ("12345", "23800138000", "+1 650 253 0000", "1380013800a", ""):
-        r = client.post("/api/auth/sms/send", json={"phone": bad})
-        assert r.status_code == 400 and "手机号" in r.json()["detail"], bad
-    assert not texts.sent
+def test_full_width_digits_are_accepted(client, wx):
+    s = client.post("/api/auth/wechat/start", json={}).json()
+    full = s["code"].translate({ord(c): ord(c) + 0xFEE0 for c in "0123456789"})
+    assert "登录成功" in _reply(_send(client, OPENID, full))["Content"]
 
 
-def test_wrong_codes_run_out_and_codes_are_single_use(client, texts):
-    client.post("/api/auth/sms/send", json={"phone": PHONE})
-    code = texts.codes[PHONE]
-    wrong = "000000" if code != "000000" else "111111"
-    r = client.post("/api/auth/sms/verify", json={"phone": PHONE, "code": wrong})
-    assert r.status_code == 400 and "4" in r.json()["detail"]
-    for _ in range(4):
-        client.post("/api/auth/sms/verify", json={"phone": PHONE, "code": wrong})
-    r = client.post("/api/auth/sms/verify", json={"phone": PHONE, "code": code})
-    assert r.status_code == 400 and "过期" in r.json()["detail"]  # 试满五次就作废，对的也不认了
-
-    client.post("/api/auth/sms/send", json={"phone": PHONE})
-    code = texts.codes[PHONE]
-    assert client.post("/api/auth/sms/verify", json={"phone": PHONE, "code": code}).status_code == 200
-    # 阿里云那边同一个码在有效期内可能还会 PASS；我们这边用过就作废，不再去问
-    checks = texts.checks
-    assert client.post("/api/auth/sms/verify", json={"phone": PHONE, "code": code}).status_code == 400
-    assert texts.checks == checks
+def test_unsigned_stale_or_hostile_messages_change_nothing(client, wx):
+    s = client.post("/api/auth/wechat/start", json={}).json()
+    assert _send(client, OPENID, s["code"], query=_signed(token="wrong")).status_code == 403
+    assert _send(client, OPENID, s["code"], query=_signed(ts=str(int(time.time()) - 3600))).status_code == 403
+    evil = b'<?xml version="1.0"?><!DOCTYPE x [<!ENTITY a "aaaa">]><xml><FromUserName>&a;</FromUserName></xml>'
+    assert client.post(f"/api/wechat?{_signed()}", content=evil).status_code == 400
+    assert client.post(f"/api/wechat?{_signed()}", content=b"<xml><oops").status_code == 400
+    assert client.post("/api/auth/wechat/poll", json={"ticket": s["ticket"]}).json()["pending"] is True
 
 
-def test_code_expires(client, texts):
-    client.post("/api/auth/sms/send", json={"phone": PHONE})
+def test_a_wrong_number_logs_nobody_in_and_guessing_is_limited(client, wx, monkeypatch):
+    monkeypatch.setattr(auth, "PER_OPENID_HOUR", 3)
+    s = client.post("/api/auth/wechat/start", json={}).json()
+    wrong = "000000" if s["code"] != "000000" else "111111"
+    replies = [_reply(_send(client, "o_attacker", wrong))["Content"] for _ in range(4)]
+    assert all("没找到" in r for r in replies[:3]) and "太多" in replies[3]
+    assert client.post("/api/auth/wechat/poll", json={"ticket": s["ticket"]}).json()["pending"] is True
+    assert "6 位数字" in _reply(_send(client, OPENID, "你好"))["Content"]
+
+
+def test_ticket_is_single_use_and_expires(client, wx):
+    s = client.post("/api/auth/wechat/start", json={}).json()
+    _send(client, OPENID, s["code"])
+    assert client.post("/api/auth/wechat/poll", json={"ticket": s["ticket"]}).status_code == 200
+    assert client.post("/api/auth/wechat/poll", json={"ticket": s["ticket"]}).status_code == 410
+    assert "没找到" in _reply(_send(client, OPENID, s["code"]))["Content"]  # 用过的数字不能再配
+
+    s = client.post("/api/auth/wechat/start", json={}).json()
     with sqlite3.connect(store.DB_PATH) as c:
-        c.execute("UPDATE sms_codes SET expires_at=?", (time.time() - 1,))
-    r = client.post("/api/auth/sms/verify", json={"phone": PHONE, "code": texts.codes[PHONE]})
-    assert r.status_code == 400 and "过期" in r.json()["detail"]
+        c.execute("UPDATE wechat_tickets SET expires_at=?", (time.time() - 1,))
+    assert client.post("/api/auth/wechat/poll", json={"ticket": s["ticket"]}).status_code == 410
+    assert "没找到" in _reply(_send(client, OPENID, s["code"]))["Content"]
+    assert client.post("/api/auth/wechat/poll", json={"ticket": "made-up"}).status_code == 410
 
 
-def test_sending_is_rate_limited_per_phone_and_per_day(client, texts, monkeypatch):
-    monkeypatch.setattr(auth, "RESEND_GAP", 60)
-    assert client.post("/api/auth/sms/send", json={"phone": PHONE}).status_code == 200
-    assert client.post("/api/auth/sms/send", json={"phone": PHONE}).status_code == 429
-    monkeypatch.setattr(auth, "RESEND_GAP", 0)
-    for _ in range(auth.PER_PHONE_HOUR - 1):
-        assert client.post("/api/auth/sms/send", json={"phone": PHONE}).status_code == 200
-    assert client.post("/api/auth/sms/send", json={"phone": PHONE}).status_code == 429
-    monkeypatch.setattr(auth, "SMS_DAILY", len(texts.sent))
-    r = client.post("/api/auth/sms/send", json={"phone": "13900139000"})
-    assert r.status_code == 503 and len(texts.sent) == auth.SMS_DAILY
+def test_wechat_retries_are_idempotent_but_another_sender_cannot_take_over(client, wx):
+    s = client.post("/api/auth/wechat/start", json={}).json()
+    assert "登录成功" in _reply(_send(client, OPENID, s["code"]))["Content"]
+    assert "登录成功" in _reply(_send(client, OPENID, s["code"]))["Content"]  # 微信超时重发同一条
+    assert "没找到" in _reply(_send(client, "o_someone_else", s["code"]))["Content"]
+    r = client.post("/api/auth/wechat/poll", json={"ticket": s["ticket"]}).json()
+    assert store.user_by_openid(OPENID)["id"] == r["uid"]
 
 
-def test_per_phone_daily_cap_counts_across_hours(client, texts, monkeypatch):
-    monkeypatch.setattr(auth, "PER_PHONE_HOUR", 100)
-    for _ in range(auth.PER_PHONE_DAY):
-        assert client.post("/api/auth/sms/send", json={"phone": PHONE}).status_code == 200
-    assert client.post("/api/auth/sms/send", json={"phone": PHONE}).status_code == 429
+def test_follow_event_gets_a_welcome_and_other_events_are_silent(client, wx):
+    r = client.post(f"/api/wechat?{_signed()}", content=_xml(OPENID, event="subscribe"))
+    assert "6 位数字" in _reply(r)["Content"]
+    r = client.post(f"/api/wechat?{_signed()}", content=_xml(OPENID, event="unsubscribe"))
+    assert r.text == "success"
+
+
+def test_waiting_codes_never_collide(client, wx, monkeypatch):
+    seq = iter([42, 42, 43])
+    monkeypatch.setattr(auth.secrets, "randbelow", lambda n: next(seq))
+    a = client.post("/api/auth/wechat/start", json={}).json()
+    b = client.post("/api/auth/wechat/start", json={}).json()
+    assert (a["code"], b["code"]) == ("000042", "000043")
 
 
 def test_per_source_limit_uses_forwarded_address_only_behind_a_proxy(client, monkeypatch):
@@ -228,141 +253,38 @@ def test_per_source_limit_uses_forwarded_address_only_behind_a_proxy(client, mon
     assert client.post("/api/auth/login", json={"nickname": "x"}, headers=other).status_code == 200
 
 
-def test_aliyun_errors_become_plain_messages(client, texts, monkeypatch):
-    def refuse(code):
-        def send(phone, minutes):
-            raise sms.SmsError(code, "原文")
-        return send
-
-    monkeypatch.setattr(sms, "send", refuse("BUSINESS_LIMIT_CONTROL"))
-    r = client.post("/api/auth/sms/send", json={"phone": PHONE})
-    assert r.status_code == 429 and "太多" in r.json()["detail"]
-    monkeypatch.setattr(sms, "send", refuse("SignatureDoesNotMatch"))
-    r = client.post("/api/auth/sms/send", json={"phone": PHONE})
-    assert r.status_code == 502 and "原文" not in r.text
-    assert store.sms_day_count(auth._today()) == 0  # 没发出去的不计数
-
-    monkeypatch.setattr(sms, "send", texts.send)
-    client.post("/api/auth/sms/send", json={"phone": PHONE})
-
-    def broken(phone, code):
-        raise OSError("网络断了")
-
-    monkeypatch.setattr(sms, "check", broken)
-    r = client.post("/api/auth/sms/verify", json={"phone": PHONE, "code": "123456"})
-    assert r.status_code == 502
-    assert store.sms_row(PHONE)["tries"] == 0  # 核验接口自己出错，不算用户试错
-
-
-def test_without_sms_config_codes_are_refused_or_only_logged(client, capsys, monkeypatch):
-    r = client.post("/api/auth/sms/send", json={"phone": PHONE})
-    assert r.status_code == 503
-    assert client.get("/api/health").json()["auth"]["sms_login"] is False
+def test_without_a_wechat_account_login_is_refused_and_dev_mode_can_simulate(client, monkeypatch):
+    assert client.post("/api/auth/wechat/start", json={}).status_code == 503
+    assert client.get("/api/health").json()["auth"]["wechat_login"] is False
+    assert client.post("/api/auth/wechat/dev-send", json={"code": "123456"}).status_code == 404
 
     monkeypatch.setenv("AUTH_DEV_CODES", "1")
-    assert client.get("/api/health").json()["auth"]["sms_login"] is True
-    r = client.post("/api/auth/sms/send", json={"phone": PHONE})
-    assert r.status_code == 200
-    logged = [ln for ln in capsys.readouterr().out.splitlines() if "dev_code" in ln]
-    code = json.loads(logged[-1])["code"]
-    assert code not in r.text  # 验证码只在服务器日志里，不在响应里
-    assert client.post("/api/auth/sms/verify", json={"phone": PHONE, "code": code}).status_code == 200
+    assert client.get("/api/health").json()["auth"]["wechat_login"] is True
+    s = client.post("/api/auth/wechat/start", json={}).json()
+    assert "登录成功" in client.post("/api/auth/wechat/dev-send", json={"code": s["code"]}).json()["reply"]
+    assert client.post("/api/auth/wechat/poll", json={"ticket": s["ticket"]}).json()["wechat"] is True
 
-
-def test_dev_codes_are_ignored_once_aliyun_is_configured(monkeypatch):
-    monkeypatch.setenv("AUTH_DEV_CODES", "1")
-    for k, v in {"ALIBABA_CLOUD_ACCESS_KEY_ID": "id", "ALIBABA_CLOUD_ACCESS_KEY_SECRET": "s",
-                 "SMS_SIGN_NAME": "签名", "SMS_TEMPLATE_CODE": "100001"}.items():
-        monkeypatch.setenv(k, v)
-    assert sms.configured() and not auth._dev_codes()
-
-
-# ---------- 阿里云接口：签名与报文 ----------
-
-def test_signature_matches_aliyun_documented_example():
-    params = {"AccessKeyId": "testid", "Action": "DescribeRegions", "Format": "XML", "SignatureMethod": "HMAC-SHA1",
-              "SignatureNonce": "3ee8c1b8-83d3-44af-a94f-4e0ad82fd6cf", "SignatureVersion": "1.0",
-              "Timestamp": "2016-02-23T12:46:24Z", "Version": "2014-05-26"}
-    assert sms.sign(params, "testsecret") == "OLeaidS1JvxuMvnyHOwuJ+uX5qY="
-
-
-@pytest.fixture
-def aliyun_stub(monkeypatch):
-    """本机假的 dypnsapi：记下收到的查询参数，按 replies 回话。"""
-    seen: list[dict] = []
-    replies: list[tuple[int, dict]] = []
-
-    class H(BaseHTTPRequestHandler):
-        def do_GET(self):
-            seen.append(dict(urllib.parse.parse_qsl(urllib.parse.urlsplit(self.path).query)))
-            status, body = replies.pop(0)
-            raw = json.dumps(body).encode()
-            self.send_response(status)
-            self.send_header("Content-Type", "application/json")
-            self.send_header("Content-Length", str(len(raw)))
-            self.end_headers()
-            self.wfile.write(raw)
-
-        def log_message(self, *a):
-            pass
-
-    srv = ThreadingHTTPServer(("127.0.0.1", 0), H)
-    threading.Thread(target=srv.serve_forever, daemon=True).start()
-    monkeypatch.setattr(sms, "ENDPOINT", f"http://127.0.0.1:{srv.server_address[1]}/")
-    for k, v in {"ALIBABA_CLOUD_ACCESS_KEY_ID": "kid", "ALIBABA_CLOUD_ACCESS_KEY_SECRET": "ksecret",
-                 "SMS_SIGN_NAME": "速通互联验证码", "SMS_TEMPLATE_CODE": "100001"}.items():
-        monkeypatch.setenv(k, v)
-    yield seen, replies
-    srv.shutdown()
-
-
-def test_send_and_check_are_signed_requests_with_the_right_fields(aliyun_stub):
-    seen, replies = aliyun_stub
-    replies += [(200, {"Code": "OK", "Success": True, "Model": {"BizId": "b"}}),
-                (200, {"Code": "OK", "Success": True, "Model": {"VerifyResult": "PASS"}}),
-                (200, {"Code": "OK", "Success": True, "Model": {"VerifyResult": "UNKNOWN"}})]
-    sms.send(PHONE, 5)
-    assert sms.check(PHONE, "123456") is True
-    assert sms.check(PHONE, "654321") is False
-    sent = seen[0]
-    assert sent["Action"] == "SendSmsVerifyCode" and sent["Version"] == "2017-05-25"
-    assert sent["PhoneNumber"] == PHONE and sent["SignName"] == "速通互联验证码" and sent["TemplateCode"] == "100001"
-    assert json.loads(sent["TemplateParam"]) == {"code": "##code##", "min": "5"}  # 阿里云出码，我们不碰验证码
-    assert sent["CodeLength"] == "6" and sent["ValidTime"] == "300" and sent["ReturnVerifyCode"] == "false"
-    assert seen[1]["Action"] == "CheckSmsVerifyCode" and seen[1]["VerifyCode"] == "123456"
-    for q in seen:
-        sig = q.pop("Signature")
-        assert sig == sms.sign(q, "ksecret") and q["AccessKeyId"] == "kid"
-        assert "SecurityToken" not in q
-
-
-def test_error_replies_and_sts_tokens(aliyun_stub, monkeypatch):
-    seen, replies = aliyun_stub
-    monkeypatch.setenv("ALIBABA_CLOUD_SECURITY_TOKEN", "sts-token")
-    replies.append((400, {"Code": "isv.BUSINESS_LIMIT_CONTROL", "Message": "触发天级流控"}))
-    with pytest.raises(sms.SmsError) as err:
-        sms.send(PHONE, 5)
-    assert err.value.code == "BUSINESS_LIMIT_CONTROL"
-    assert seen[0]["SecurityToken"] == "sts-token"  # 函数计算挂角色时用临时密钥
+    monkeypatch.setenv("WECHAT_TOKEN", TOKEN)  # 配了公众号，开发捷径自动关掉
+    assert client.post("/api/auth/wechat/dev-send", json={"code": "123456"}).status_code == 404
 
 
 # ---------- 访客、老用户、会话 ----------
 
-def test_guest_binding_a_phone_keeps_the_guest_data(client, texts):
+def test_guest_binding_wechat_keeps_the_guest_data(client, wx):
     uid, token = _guest(client)
     client.post("/api/edges", json={"uid": uid, "kind": "language", "text": "粤语母语", "evidence_url": ""},
                 headers=_h(token))
-    r = _phone_login(client, texts, headers=_h(token))
+    r = _wechat_login(client, headers=_h(token))
     assert r["bound"] and r["uid"] == uid and not r["left_guest"]
     assert client.get("/api/auth/me", headers=_h(token)).status_code == 401  # 访客会话换成了新会话
     edges = client.get(f"/api/edges?uid={uid}", headers=_h(r["token"])).json()
     assert "粤语母语" in str(edges)
 
 
-def test_guest_logging_into_an_existing_phone_switches_account_and_says_so(client, texts):
-    owner = _phone_login(client, texts)
+def test_guest_logging_into_an_existing_wechat_switches_account_and_says_so(client, wx):
+    owner = _wechat_login(client)
     _, guest_token = _guest(client)
-    r = _phone_login(client, texts, headers=_h(guest_token))
+    r = _wechat_login(client, headers=_h(guest_token))
     assert r["uid"] == owner["uid"] and r["left_guest"] and not r["bound"]
 
 
@@ -406,8 +328,8 @@ def test_consent_is_recorded_against_the_current_privacy_version(client):
 
 # ---------- 删号与导出 ----------
 
-def test_delete_account_removes_every_row_and_the_session(client, texts):
-    r = _phone_login(client, texts)
+def test_delete_account_removes_every_row_and_the_session(client, wx):
+    r = _wechat_login(client)
     uid, h = r["uid"], _h(r["token"])
     client.post("/api/edges", json={"uid": uid, "kind": "language", "text": "粤语母语", "evidence_url": ""}, headers=h)
     client.post("/api/tasks/generate", json={"uid": uid, "direction": "ai", "level": 1}, headers=h)
@@ -417,7 +339,7 @@ def test_delete_account_removes_every_row_and_the_session(client, texts):
     exported = client.get("/api/me/export", headers=h)
     assert exported.status_code == 200 and "attachment" in exported.headers["content-disposition"]
     data = exported.json()
-    assert data["user"]["phone"] == PHONE and data["edges"] and data["tasks"]
+    assert data["user"]["wechat_openid"] == OPENID and data["edges"] and data["tasks"]
     assert "sessions" not in data and "token" not in data["user"]
 
     out = client.delete("/api/me", headers=h).json()
@@ -426,10 +348,10 @@ def test_delete_account_removes_every_row_and_the_session(client, texts):
         c.row_factory = sqlite3.Row
         for t in store._user_tables(c):
             assert c.execute(f"SELECT COUNT(*) FROM {t} WHERE user_id=?", (uid,)).fetchone()[0] == 0, t
-        assert c.execute("SELECT COUNT(*) FROM sms_codes WHERE phone=?", (PHONE,)).fetchone()[0] == 0
+        assert c.execute("SELECT COUNT(*) FROM wechat_tickets WHERE openid=?", (OPENID,)).fetchone()[0] == 0
     assert store.get_user(other)  # 别人不受影响
     assert client.get("/api/auth/me", headers=h).status_code == 401
-    again = _phone_login(client, texts)  # 同一号码可以重新注册，是个新号
+    again = _wechat_login(client)  # 同一个微信可以重新注册，是个新号
     assert again["created"] and again["uid"] != uid
 
 
@@ -476,7 +398,7 @@ def test_every_frontend_request_goes_through_the_authenticated_helper():
 def test_new_account_classes_have_rules():
     css = (WEB / "css" / "styles.css").read_text(encoding="utf-8")
     for cls in ("login-step", "login-nick", "login-note", "consent-row", "privacy-box", "privacy-body",
-                "account-panel", "account-actions"):
+                "account-panel", "account-actions", "wx-box", "wx-qr", "wx-steps", "wx-code", "wx-status"):
         assert re.search(rf"\.{re.escape(cls)}(?![\w-])", css), cls
 
 

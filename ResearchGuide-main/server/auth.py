@@ -1,16 +1,17 @@
 # -*- coding: utf-8 -*-
-"""账号：手机号 + 短信验证码登录，和国内 App 一样；访客可以先用，之后绑手机号把数据带走。
+"""账号：微信登录（关注公众号、发网页上的 6 位数字）；访客可以先用，之后绑微信把数据带走。
 
-- 短信走阿里云号码认证服务的「短信认证」（sms.py）：个人实名账号就能用，平台给签名和模板，验证码由阿里云生成、核验。
-  手机号还顺带做到一人一号，以后送模型额度才不会被随手开的小号领光。
+- 为什么是公众号消息：网站扫码登录要微信开放平台的企业认证和备案域名，个人拿不到；
+  个人订阅号能收用户发来的消息，消息里带发信人的 openid，够认出是谁（细节见 wechat.py）。
+  不存手机号、不用密码；openid 只对我们的公众号有效，拿不到微信号和微信资料。
+- 流程：网页 start 拿到 ticket（只在这个浏览器里）和 6 位数字 → 学生在公众号里发这个数字
+  → 消息回调把 openid 记到这次请求上 → 网页轮询 poll，拿 ticket 换成会话。一次请求只能换一次。
 - 令牌放在请求头 Authorization: Bearer，不用 cookie：页面在 github.io、接口在 fcapp.run，跨站 cookie 会被浏览器拦。
 - 所有接口默认要登录，PUBLIC 里的才放行；请求里带的 uid（查询串、路径、JSON 体）必须就是登录的这个人。
   原来 uid 就是唯一凭证：知道别人的 uid 就能读他的成绩单和对话。
 """
 from __future__ import annotations
 
-import hashlib
-import hmac
 import ipaddress
 import json
 import os
@@ -19,26 +20,22 @@ import secrets
 import sqlite3
 import threading
 import time
+import unicodedata
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from fastapi import APIRouter, HTTPException, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, PlainTextResponse, Response
 from pydantic import BaseModel
+from starlette.concurrency import run_in_threadpool
 
-import sms
 import store
+import wechat
 
 SESSION_TTL = 30 * 86400   # 三十天不用才过期；用着的一天续一次
-CODE_MINUTES = 5           # 验证码五分钟有效
-CODE_TRIES = 5             # 一条验证码最多试五次
-RESEND_GAP = 60            # 同一号码一分钟发一次
-PER_PHONE_HOUR = 5         # 同一号码一小时最多五条
-PER_PHONE_DAY = 10         # 同一号码一天最多十条
-PER_IP_HOUR = 30           # 同一来源一小时最多发三十条、开三十个访客号
-SMS_DAILY = int(os.environ.get("AUTH_SMS_DAILY") or 200)  # 全站每天最多发这么多条：短信按条收费，这是费用的上限
-CN = timezone(timedelta(hours=8))  # 「一天」按北京时间算
+TICKET_TTL = 300           # 网页上的数字五分钟有效
+PER_IP_HOUR = 30           # 同一来源一小时最多开三十次登录、三十个访客号
+PER_OPENID_HOUR = 10       # 同一个微信一小时最多发错十次数字（防止乱发数字把别人的网页登进自己的号）
 
 # 隐私说明改了就改这个日期：老用户下次打开会再看到一次说明并重新同意。说明正文在 web/js/app.js 的 PRIVACY_HTML。
 PRIVACY_VERSION = "2026-10-09"
@@ -46,7 +43,9 @@ PRIVACY_VERSION = "2026-10-09"
 # 不登录也能用的接口（按路由模板写）。新加的接口默认要登录：要么带 uid，要么加到这里并说明为什么可以公开。
 PUBLIC = frozenset({
     "/", "/api/health",
-    "/api/auth/login", "/api/auth/sms/send", "/api/auth/sms/verify", "/api/auth/legacy",
+    "/api/auth/login", "/api/auth/legacy",
+    "/api/auth/wechat/start", "/api/auth/wechat/poll", "/api/auth/wechat/dev-send",
+    "/api/wechat",  # 微信服务器回调，自己验签
     # 公开知识：课程、老师、专业、培养方案、方向路径、阅读工具包、论文原文、给学生自己 agent 的简报
     "/api/explore/courses", "/api/explore/teachers", "/api/explore/majors", "/api/explore/major",
     "/api/explore/minor", "/api/explore/course", "/api/curriculum/match", "/api/curriculum/stats",
@@ -106,27 +105,10 @@ def me(request: Request) -> str | None:
     return getattr(request.state, "uid", None)
 
 
-# ---------- 频率与手机号 ----------
+# ---------- 频率 ----------
 
-_PHONE = re.compile(r"^1[3-9]\d{9}$")
-_IP_HITS: dict[str, list[float]] = {}
-_IP_LOCK = threading.Lock()
-
-
-def _check_phone(raw: str) -> str:
-    """只收大陆手机号（短信认证只支持 +86）。容忍空格、横杠和 +86 前缀。"""
-    phone = re.sub(r"[\s-]", "", raw or "")
-    if phone.startswith("+86"):
-        phone = phone[3:]
-    elif phone.startswith("86") and len(phone) == 13:
-        phone = phone[2:]
-    if not _PHONE.match(phone):
-        raise HTTPException(400, "请填 11 位大陆手机号")
-    return phone
-
-
-def mask(phone: str | None) -> str | None:
-    return f"{phone[:3]}****{phone[-4:]}" if phone else None
+_HITS: dict[str, list[float]] = {}
+_HITS_LOCK = threading.Lock()
 
 
 def _client_ip(request: Request) -> str | None:
@@ -143,35 +125,30 @@ def _client_ip(request: Request) -> str | None:
         return None
 
 
-def _ip_allows(request: Request, kind: str) -> bool:
-    ip = _client_ip(request)
-    if ip is None:
-        return True
-    now, key = time.time(), f"{kind}:{ip}"
-    with _IP_LOCK:
-        if len(_IP_HITS) > 10000:  # 有界：一小时内的才有用，旧的整体清掉
-            for k in [k for k, v in _IP_HITS.items() if not v or now - v[-1] > 3600]:
-                del _IP_HITS[k]
-        hits = [t for t in _IP_HITS.get(key, []) if now - t < 3600]
-        if len(hits) >= PER_IP_HOUR:
-            _IP_HITS[key] = hits
+def _allow(key: str, limit: int) -> bool:
+    """一小时内同一个 key 最多 limit 次。内存计数，有界。"""
+    now = time.time()
+    with _HITS_LOCK:
+        if len(_HITS) > 10000:  # 一小时内的才有用，旧的整体清掉
+            for k in [k for k, v in _HITS.items() if not v or now - v[-1] > 3600]:
+                del _HITS[k]
+        hits = [t for t in _HITS.get(key, []) if now - t < 3600]
+        if len(hits) >= limit:
+            _HITS[key] = hits
             return False
         hits.append(now)
-        _IP_HITS[key] = hits
+        _HITS[key] = hits
     return True
 
 
-def _code_hash(salt: str, code: str) -> str:
-    return hmac.new(salt.encode(), code.encode(), hashlib.sha256).hexdigest()
+def _ip_allows(request: Request, kind: str) -> bool:
+    ip = _client_ip(request)
+    return True if ip is None else _allow(f"{kind}:{ip}", PER_IP_HOUR)
 
 
-def _today() -> str:
-    return datetime.now(CN).strftime("%Y-%m-%d")
-
-
-def _dev_codes() -> bool:
-    """本机开发、没配阿里云：验证码自己出，只打印在服务器日志里。线上不要设 AUTH_DEV_CODES。"""
-    return os.environ.get("AUTH_DEV_CODES") == "1" and not sms.configured()
+def _dev() -> bool:
+    """本机开发、没配公众号：用 /api/auth/wechat/dev-send 假装从微信发数字。线上不要设 AUTH_DEV_CODES。"""
+    return os.environ.get("AUTH_DEV_CODES") == "1" and not wechat.configured()
 
 
 def account(uid: str) -> dict[str, Any]:
@@ -179,17 +156,17 @@ def account(uid: str) -> dict[str, Any]:
     return {
         "uid": uid,
         "nickname": u.get("nickname", ""),
-        "phone": mask(u.get("phone")),
-        "guest": not u.get("phone"),
+        "wechat": bool(u.get("wechat_openid")),
+        "guest": not u.get("wechat_openid"),
         "consent_ok": u.get("consent_version") == PRIVACY_VERSION,
         "privacy_version": PRIVACY_VERSION,
     }
 
 
 def status() -> dict[str, Any]:
-    """给 /api/health：页面据此决定显示「手机号登录」还是只给访客入口。"""
-    return {"sms_login": sms.configured() or _dev_codes(), "dev_codes": _dev_codes(),
-            "privacy_version": PRIVACY_VERSION}
+    """给 /api/health：页面据此决定显示「微信登录」还是只给访客入口，以及公众号二维码。"""
+    return {"wechat_login": wechat.configured() or _dev(), "dev": _dev(), "qr_url": wechat.qr_url(),
+            "account_name": wechat.account_name(), "privacy_version": PRIVACY_VERSION}
 
 
 # ---------- 接口 ----------
@@ -199,15 +176,18 @@ class GuestReq(BaseModel):
     consent: bool = False
 
 
-class SmsSendReq(BaseModel):
-    phone: str
-
-
-class SmsVerifyReq(BaseModel):
-    phone: str
-    code: str
+class WechatStartReq(BaseModel):
     nickname: str = ""
     consent: bool = False
+
+
+class WechatPollReq(BaseModel):
+    ticket: str
+
+
+class DevSendReq(BaseModel):
+    code: str
+    openid: str = "dev-openid"
 
 
 class LegacyReq(BaseModel):
@@ -220,7 +200,7 @@ class ConsentReq(BaseModel):
 
 @router.post("/api/auth/login")
 def guest_login(req: GuestReq, request: Request):
-    """访客：只要昵称。数据只能凭这台浏览器里的令牌找回，之后绑手机号就能换设备。"""
+    """访客：只要昵称。数据只能凭这台浏览器里的令牌找回，之后绑微信就能换设备。"""
     nickname = req.nickname.strip()[:24]
     if not nickname:
         raise HTTPException(400, "nickname is required")
@@ -232,102 +212,123 @@ def guest_login(req: GuestReq, request: Request):
     return {**account(uid), "token": store.create_session(uid, SESSION_TTL)}
 
 
-# 阿里云的错误码 → 给用户的话。没列出来的一律「没发出去」，错误码记日志。
-_SMS_ERRORS = {
-    "MOBILE_NUMBER_ILLEGAL": (400, "手机号不对"),
-    "BUSINESS_LIMIT_CONTROL": (429, "这个号码今天收的验证码太多了，明天再试"),
-    "FREQUENCY_FAIL": (429, "发得太频繁了，过一分钟再试"),
-}
-
-
-@router.post("/api/auth/sms/send")
-def sms_send(req: SmsSendReq, request: Request):
-    phone = _check_phone(req.phone)
-    now, today = time.time(), _today()
-    row = store.sms_row(phone) or {}
-    if now - row.get("sent_at", 0) < RESEND_GAP:
-        raise HTTPException(429, f"{int(RESEND_GAP - (now - row['sent_at'])) + 1} 秒后可以再发")
-    hour_start, hour_count = (row["hour_start"], row["hour_count"]) if now - row.get("hour_start", 0) < 3600 else (now, 0)
-    day_count = row["day_count"] if row.get("day") == today else 0
-    if hour_count >= PER_PHONE_HOUR or day_count >= PER_PHONE_DAY:
-        raise HTTPException(429, "这个号码收的验证码太多了，过一会儿再试")
-    if not _ip_allows(request, "sms"):
-        raise HTTPException(429, "发得太频繁了，过一会儿再试")
-    if store.sms_day_count(today) >= SMS_DAILY:
-        raise HTTPException(503, "今天的验证码发完了，明天再来，或先用访客进入")
-    salt = code_hash = ""
-    if sms.configured():
-        try:
-            sms.send(phone, CODE_MINUTES)
-        except sms.SmsError as exc:
-            status_code, msg = _SMS_ERRORS.get(exc.code, (502, "验证码没发出去，请稍后再试"))
-            print(json.dumps({"auth": "sms_send_failed", "code": exc.code}, ensure_ascii=False))
-            raise HTTPException(status_code, msg) from exc
-        except OSError as exc:
-            raise HTTPException(502, "验证码没发出去，请稍后再试") from exc
-    elif _dev_codes():
+@router.post("/api/auth/wechat/start")
+def wechat_start(req: WechatStartReq, request: Request):
+    """开一次微信登录：给网页一个 ticket（留在浏览器里换会话用）和一个 6 位数字（让学生发到公众号）。
+    带着访客会话来的，登录成功时把微信绑到这个访客号上，记录跟着走。"""
+    if not (wechat.configured() or _dev()):
+        raise HTTPException(503, "微信登录还没开通，暂时只能用访客进入")
+    if not _ip_allows(request, "wechat"):
+        raise HTTPException(429, "试得太频繁了，过一会儿再试")
+    guest_uid = None
+    token = _bearer(request)
+    if token:
+        uid = store.session_user(token, SESSION_TTL)
+        if uid and account(uid)["guest"]:
+            guest_uid = uid
+    ticket = secrets.token_urlsafe(32)
+    for _ in range(20):  # 同一时刻在等的数字不能重
         code = f"{secrets.randbelow(10 ** 6):06d}"
-        salt = secrets.token_hex(8)
-        code_hash = _code_hash(salt, code)
-        print(json.dumps({"auth": "dev_code", "phone": phone, "code": code}, ensure_ascii=False))  # 只进日志，绝不进响应
+        if store.wechat_ticket_new(ticket, code, time.time() + TICKET_TTL, guest_uid,
+                                   req.nickname.strip()[:24], req.consent):
+            break
     else:
-        raise HTTPException(503, "短信验证码还没开通，暂时只能用访客进入")
-    store.sms_sent(phone, expires_at=now + CODE_MINUTES * 60, sent_at=now, hour_start=hour_start,
-                   hour_count=hour_count + 1, day=today, day_count=day_count + 1, salt=salt, code_hash=code_hash)
-    return {"ok": True, "phone": mask(phone), "resend_after": RESEND_GAP}
+        raise HTTPException(503, "登录的人太多了，过一会儿再试")
+    return {"ticket": ticket, "code": code, "expires_in": TICKET_TTL,
+            "qr_url": wechat.qr_url(), "account_name": wechat.account_name()}
 
 
-@router.post("/api/auth/sms/verify")
-def sms_verify(req: SmsVerifyReq, request: Request):
-    """验证码对了：这个号码有账号就登进去；没有的话，带着访客会话来的就把号码绑到访客号上（数据跟着走），
-    否则新开一个。一条验证码只能用一次。"""
-    phone = _check_phone(req.phone)
-    code = re.sub(r"\s", "", req.code or "")
-    row = store.sms_row(phone)
-    if not row or not row["armed"] or row["expires_at"] <= time.time():
-        raise HTTPException(400, "验证码过期了，请重新获取")
-    if row["tries"] >= CODE_TRIES:
-        store.sms_disarm(phone)
-        raise HTTPException(400, "错的次数太多，请重新获取")
-    if row["code_hash"]:  # 本机开发模式自己出的码
-        ok = hmac.compare_digest(row["code_hash"], _code_hash(row["salt"], code))
-    elif not re.fullmatch(r"\d{6}", code):
-        ok = False
-    else:
-        try:
-            ok = sms.check(phone, code)
-        except (sms.SmsError, OSError) as exc:  # 核验接口自己出错：不算用户试错一次
-            print(json.dumps({"auth": "sms_check_failed", "error": getattr(exc, "code", type(exc).__name__)},
-                             ensure_ascii=False))
-            raise HTTPException(502, "暂时核验不了，请稍后再试") from exc
-    if not ok:
-        store.sms_failed_try(phone)
-        left = CODE_TRIES - row["tries"] - 1
-        if not left:
-            store.sms_disarm(phone)
-        raise HTTPException(400, f"验证码不对，还能再试 {left} 次" if left else "错的次数太多，请重新获取")
-    store.sms_disarm(phone)
+@router.post("/api/auth/wechat/poll")
+def wechat_poll(req: WechatPollReq, request: Request):
+    """网页每两秒问一次：学生在公众号里发了数字没有。发了就把这次请求换成会话（只能换一次）。
+    ticket 放在请求体里，不放 URL，免得进访问日志。"""
+    row = store.wechat_ticket(req.ticket)
+    if not row or row["used"]:
+        raise HTTPException(410, "这次登录已经结束了，请重新开始")
+    openid = row["openid"]
+    if not openid:
+        left = row["expires_at"] - time.time()
+        if left <= 0:
+            raise HTTPException(410, "数字过期了，请重新开始")
+        return {"pending": True, "expires_in": int(left)}
+    if not store.wechat_use_ticket(req.ticket):
+        raise HTTPException(410, "这次登录已经结束了，请重新开始")
 
-    guest_token = _bearer(request)
-    guest_uid = store.session_user(guest_token, SESSION_TTL) if guest_token else None
-    user = store.user_by_phone(phone)
+    guest_uid = row["guest_uid"]
+    user = store.user_by_openid(openid)
     created = bound = False
     if user:
         uid = user["id"]
     else:
         try:
-            if guest_uid and store.bind_phone(guest_uid, phone):
+            if guest_uid and store.bind_wechat(guest_uid, openid):
                 uid, bound = guest_uid, True
             else:
-                uid, created = store.create_phone_user((req.nickname or "").strip()[:24] or "同学", phone), True
-        except sqlite3.IntegrityError:  # 两个请求同时用同一号码开号：后到的登进先开的那个
-            uid = store.user_by_phone(phone)["id"]
-    if req.consent:
+                uid, created = store.create_wechat_user(row["nickname"] or "微信用户", openid), True
+        except sqlite3.IntegrityError:  # 同一个微信同时登两次：后到的登进先开的那个
+            uid = store.user_by_openid(openid)["id"]
+    if row["consent"]:
         store.record_consent(uid, PRIVACY_VERSION)
-    if guest_token and guest_uid:
-        store.drop_session(guest_token)
+    old = _bearer(request)
+    if old:
+        store.drop_session(old)  # 访客会话换成新会话
     return {**account(uid), "token": store.create_session(uid, SESSION_TTL),
             "created": created, "bound": bound, "left_guest": bool(guest_uid and guest_uid != uid)}
+
+
+WELCOME = "欢迎关注启研。登录网页时，把网页上显示的 6 位数字发到这里就行。"
+
+
+def _on_message(msg: dict[str, str]) -> str | None:
+    """公众号收到一条消息该回什么。返回 None 表示不回。"""
+    openid = msg.get("FromUserName", "")
+    if not openid:
+        return None
+    if msg.get("MsgType") == "event":
+        return WELCOME if msg.get("Event") == "subscribe" else None
+    if msg.get("MsgType") != "text":
+        return "要登录启研，把网页上显示的 6 位数字发过来就行。"
+    digits = re.sub(r"\D", "", unicodedata.normalize("NFKC", msg.get("Content", "")))
+    if len(digits) != 6:
+        return "要登录启研，把网页上显示的 6 位数字发过来就行。"
+    if store.wechat_claim_code(digits, openid):
+        return "登录成功，回到网页就好，网页会自己跳转。"
+    if not _allow(f"openid:{openid}", PER_OPENID_HOUR):
+        return "发错的次数太多了，过一会儿再试。"
+    return "没找到这个数字。请看网页上显示的 6 位数字，5 分钟内有效。"
+
+
+@router.get("/api/wechat")
+def wechat_verify(signature: str = "", timestamp: str = "", nonce: str = "", echostr: str = ""):
+    """公众号后台「启用服务器配置」时微信来验一次：签名对就原样回 echostr。"""
+    if not wechat.check_signature(signature, timestamp, nonce):
+        raise HTTPException(403, "签名不对")
+    return PlainTextResponse(echostr)
+
+
+@router.post("/api/wechat")
+async def wechat_message(request: Request, signature: str = "", timestamp: str = "", nonce: str = ""):
+    """公众号收到的消息。微信要求五秒内回，所以这里只做一次查库和一次写库。"""
+    if not wechat.check_signature(signature, timestamp, nonce):
+        raise HTTPException(403, "签名不对")
+    body = await request.body()
+    try:
+        msg = wechat.parse(body)
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc
+    text = await run_in_threadpool(_on_message, msg)  # 要写库、拿写锁，不在事件循环上做
+    if text is None:
+        return PlainTextResponse("success")  # 微信约定：回 success 表示收到、不回复
+    return Response(wechat.reply_text(msg, text), media_type="application/xml")
+
+
+@router.post("/api/auth/wechat/dev-send")
+def wechat_dev_send(req: DevSendReq):
+    """本机开发没有公众号：假装某个微信发了这个数字。只有 AUTH_DEV_CODES=1 且没配公众号时存在。"""
+    if not _dev():
+        raise HTTPException(404, "Not Found")
+    return {"reply": _on_message({"FromUserName": req.openid, "ToUserName": "dev", "MsgType": "text",
+                                  "Content": req.code})}
 
 
 @router.post("/api/auth/legacy")

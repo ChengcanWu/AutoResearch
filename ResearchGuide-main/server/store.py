@@ -221,25 +221,19 @@ CREATE TABLE IF NOT EXISTS sessions (
   expires_at REAL NOT NULL,
   last_seen REAL NOT NULL
 );
--- 短信验证码：每个手机号一行，记发送频率和核验次数（多实例时内存计数对不上，所以放库里）。
--- 验证码本身由阿里云生成和核验，这里不存；只有本机开发模式自己出码，才用 salt / code_hash。
-CREATE TABLE IF NOT EXISTS sms_codes (
-  phone TEXT PRIMARY KEY,
-  armed INTEGER NOT NULL DEFAULT 0,
-  tries INTEGER NOT NULL DEFAULT 0,
-  expires_at REAL NOT NULL DEFAULT 0,
-  salt TEXT NOT NULL DEFAULT '',
-  code_hash TEXT NOT NULL DEFAULT '',
-  sent_at REAL NOT NULL DEFAULT 0,
-  hour_start REAL NOT NULL DEFAULT 0,
-  hour_count INTEGER NOT NULL DEFAULT 0,
-  day TEXT NOT NULL DEFAULT '',
-  day_count INTEGER NOT NULL DEFAULT 0
+-- 微信登录的一次登录请求：网页拿 ticket（只存哈希）和一个 6 位数字；学生在公众号里发这个数字，
+-- 消息回调把发信人的 openid 记到这一行；网页轮询到了就换成会话，这一行作废。
+CREATE TABLE IF NOT EXISTS wechat_tickets (
+  ticket_hash TEXT PRIMARY KEY,
+  code TEXT NOT NULL,
+  expires_at REAL NOT NULL,
+  openid TEXT,
+  guest_uid TEXT,
+  nickname TEXT NOT NULL DEFAULT '',
+  consent INTEGER NOT NULL DEFAULT 0,
+  used INTEGER NOT NULL DEFAULT 0
 );
-CREATE TABLE IF NOT EXISTS sms_days (
-  day TEXT PRIMARY KEY,
-  sent INTEGER NOT NULL DEFAULT 0
-);
+CREATE INDEX IF NOT EXISTS idx_wechat_code ON wechat_tickets(code);
 
 CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(user_id);
 CREATE INDEX IF NOT EXISTS idx_facts_user ON facts(user_id);
@@ -264,8 +258,9 @@ _MIGRATIONS: list[tuple[str, str, str]] = [
     ("facts", "affects", "ALTER TABLE facts ADD COLUMN affects TEXT NOT NULL DEFAULT ''"),
     # 信息源边指向 knowledge/channels.json 的 id；早期本地库没有这一列（合并 10-03 的研读/定位层时补上）
     ("edges", "ref", "ALTER TABLE edges ADD COLUMN ref TEXT NOT NULL DEFAULT ''"),
-    # 账号：手机号、同意隐私说明的时间与版本；claimed_at 为空的是「有账号之前」的老用户，可以凭 uid 认领一次
-    ("users", "phone", "ALTER TABLE users ADD COLUMN phone TEXT"),
+    # 账号：微信 openid（只对我们的公众号有效的编号）、同意隐私说明的时间与版本；
+    # claimed_at 为空的是「有账号之前」的老用户，可以凭 uid 认领一次
+    ("users", "wechat_openid", "ALTER TABLE users ADD COLUMN wechat_openid TEXT"),
     ("users", "consent_at", "ALTER TABLE users ADD COLUMN consent_at TEXT"),
     ("users", "consent_version", "ALTER TABLE users ADD COLUMN consent_version TEXT NOT NULL DEFAULT ''"),
     ("users", "claimed_at", "ALTER TABLE users ADD COLUMN claimed_at TEXT"),
@@ -273,7 +268,7 @@ _MIGRATIONS: list[tuple[str, str, str]] = [
 
 # 依赖补出来的列，必须在补列之后建
 _AFTER_MIGRATIONS = [
-    "CREATE UNIQUE INDEX IF NOT EXISTS idx_users_phone ON users(phone) WHERE phone IS NOT NULL",
+    "CREATE UNIQUE INDEX IF NOT EXISTS idx_users_wechat ON users(wechat_openid) WHERE wechat_openid IS NOT NULL",
 ]
 
 
@@ -322,8 +317,8 @@ def get_user(uid: str) -> dict[str, Any] | None:
     return dict(row) if row else None
 
 
-# ---------- 账号：手机号、会话、短信频率、删号与导出 ----------
-# 规则（有效期、频率、核验次数）在 auth.py；这里只管读写。
+# ---------- 账号：微信、会话、删号与导出 ----------
+# 规则（有效期、频率、签名校验）在 auth.py / wechat.py；这里只管读写。
 
 SESSION_REFRESH = 86400  # 会话一天续一次期，不在每个请求上写库
 
@@ -332,18 +327,18 @@ def _token_hash(token: str) -> str:
     return hashlib.sha256(token.encode("utf-8")).hexdigest()
 
 
-def user_by_phone(phone: str) -> dict[str, Any] | None:
+def user_by_openid(openid: str) -> dict[str, Any] | None:
     with _conn() as c:
-        row = c.execute("SELECT * FROM users WHERE phone=?", (phone,)).fetchone()
+        row = c.execute("SELECT * FROM users WHERE wechat_openid=?", (openid,)).fetchone()
     return dict(row) if row else None
 
 
-def create_phone_user(nickname: str, phone: str) -> str:
-    """手机号新开一个号；同一号码已有账号时抛 sqlite3.IntegrityError。"""
+def create_wechat_user(nickname: str, openid: str) -> str:
+    """微信新开一个号；同一个 openid 已有账号时抛 sqlite3.IntegrityError。"""
     uid = create_user(nickname)["uid"]
     try:
         with _LOCK, _conn() as c:
-            c.execute("UPDATE users SET phone=? WHERE id=?", (phone, uid))
+            c.execute("UPDATE users SET wechat_openid=? WHERE id=?", (openid, uid))
     except sqlite3.IntegrityError:
         with _LOCK, _conn() as c:
             c.execute("DELETE FROM users WHERE id=?", (uid,))
@@ -351,11 +346,11 @@ def create_phone_user(nickname: str, phone: str) -> str:
     return uid
 
 
-def bind_phone(uid: str, phone: str) -> bool:
-    """只给还没绑手机号的账号（访客、老用户）绑；号码已被别的账号占用时抛 sqlite3.IntegrityError。"""
+def bind_wechat(uid: str, openid: str) -> bool:
+    """只给还没绑微信的账号（访客、老用户）绑；这个微信已有别的账号时抛 sqlite3.IntegrityError。"""
     with _LOCK, _conn() as c:
-        cur = c.execute("UPDATE users SET phone=?, claimed_at=COALESCE(claimed_at, ?) WHERE id=? AND phone IS NULL",
-                        (phone, now_iso(), uid))
+        cur = c.execute("UPDATE users SET wechat_openid=?, claimed_at=COALESCE(claimed_at, ?)"
+                        " WHERE id=? AND wechat_openid IS NULL", (openid, now_iso(), uid))
     return cur.rowcount == 1
 
 
@@ -365,9 +360,9 @@ def record_consent(uid: str, version: str) -> None:
 
 
 def claim_legacy(uid: str) -> bool:
-    """有账号之前的老用户凭 uid 认领一次；认领过、或已经绑了手机号的，都不能再凭 uid 进来。"""
+    """有账号之前的老用户凭 uid 认领一次；认领过、或已经绑了微信的，都不能再凭 uid 进来。"""
     with _LOCK, _conn() as c:
-        cur = c.execute("UPDATE users SET claimed_at=? WHERE id=? AND claimed_at IS NULL AND phone IS NULL",
+        cur = c.execute("UPDATE users SET claimed_at=? WHERE id=? AND claimed_at IS NULL AND wechat_openid IS NULL",
                         (now_iso(), uid))
     return cur.rowcount == 1
 
@@ -415,41 +410,39 @@ def drop_session(token: str) -> None:
 
 
 
-def sms_row(phone: str) -> dict[str, Any] | None:
+def wechat_ticket_new(ticket: str, code: str, expires_at: float, guest_uid: str | None, nickname: str,
+                      consent: bool) -> bool:
+    """记一次登录请求。同一个数字已经有人在用（还没过期、没用掉）就返回 False，调用方换一个数字。"""
+    now = time.time()
+    with _LOCK, _conn() as c:
+        c.execute("DELETE FROM wechat_tickets WHERE expires_at < ?", (now - 3600,))  # 过期一小时的顺手清掉
+        if c.execute("SELECT 1 FROM wechat_tickets WHERE code=? AND expires_at>? AND used=0", (code, now)).fetchone():
+            return False
+        c.execute("INSERT INTO wechat_tickets(ticket_hash, code, expires_at, guest_uid, nickname, consent)"
+                  " VALUES(?,?,?,?,?,?)", (_token_hash(ticket), code, expires_at, guest_uid, nickname, int(consent)))
+    return True
+
+
+def wechat_claim_code(code: str, openid: str) -> bool:
+    """公众号收到一个数字：配上还在等的那次登录请求。微信超时会重发同一条消息，所以重复配同一个 openid 也算成功。"""
+    with _LOCK, _conn() as c:
+        cur = c.execute("UPDATE wechat_tickets SET openid=? WHERE code=? AND expires_at>? AND used=0"
+                        " AND (openid IS NULL OR openid=?)", (openid, code, time.time(), openid))
+    return cur.rowcount == 1
+
+
+def wechat_ticket(ticket: str) -> dict[str, Any] | None:
     with _conn() as c:
-        row = c.execute("SELECT * FROM sms_codes WHERE phone=?", (phone,)).fetchone()
+        row = c.execute("SELECT * FROM wechat_tickets WHERE ticket_hash=?", (_token_hash(ticket),)).fetchone()
     return dict(row) if row else None
 
 
-def sms_sent(phone: str, *, expires_at: float, sent_at: float, hour_start: float, hour_count: int,
-             day: str, day_count: int, salt: str = "", code_hash: str = "") -> None:
-    """发出一条：重新上膛（可以核验一次通过），核验次数清零，频率计数记上。"""
+def wechat_use_ticket(ticket: str) -> bool:
+    """换成会话只能一次：两个轮询同时到，只有一个拿到。"""
     with _LOCK, _conn() as c:
-        c.execute(
-            "INSERT INTO sms_codes(phone, armed, tries, expires_at, salt, code_hash, sent_at, hour_start, hour_count,"
-            " day, day_count) VALUES(?,1,0,?,?,?,?,?,?,?,?) ON CONFLICT(phone) DO UPDATE SET armed=1, tries=0,"
-            " expires_at=excluded.expires_at, salt=excluded.salt, code_hash=excluded.code_hash,"
-            " sent_at=excluded.sent_at, hour_start=excluded.hour_start, hour_count=excluded.hour_count,"
-            " day=excluded.day, day_count=excluded.day_count",
-            (phone, expires_at, salt, code_hash, sent_at, hour_start, hour_count, day, day_count))
-        c.execute("INSERT INTO sms_days(day, sent) VALUES(?, 1) ON CONFLICT(day) DO UPDATE SET sent=sent+1", (day,))
-
-
-def sms_failed_try(phone: str) -> None:
-    with _LOCK, _conn() as c:
-        c.execute("UPDATE sms_codes SET tries=tries+1 WHERE phone=?", (phone,))
-
-
-def sms_disarm(phone: str) -> None:
-    """核验通过（或试满）就作废：同一条验证码不能再用第二次，频率计数照留。"""
-    with _LOCK, _conn() as c:
-        c.execute("UPDATE sms_codes SET armed=0, code_hash='' WHERE phone=?", (phone,))
-
-
-def sms_day_count(day: str) -> int:
-    with _conn() as c:
-        row = c.execute("SELECT sent FROM sms_days WHERE day=?", (day,)).fetchone()
-    return row["sent"] if row else 0
+        cur = c.execute("UPDATE wechat_tickets SET used=1 WHERE ticket_hash=? AND used=0 AND openid IS NOT NULL",
+                        (_token_hash(ticket),))
+    return cur.rowcount == 1
 
 
 def _user_tables(c: sqlite3.Connection) -> list[str]:
@@ -460,7 +453,7 @@ def _user_tables(c: sqlite3.Connection) -> list[str]:
 
 def export_user(uid: str) -> dict[str, Any]:
     with _conn() as c:
-        user = c.execute("SELECT id, nickname, phone, created_at, consent_at, consent_version, onboard_state"
+        user = c.execute("SELECT id, nickname, wechat_openid, created_at, consent_at, consent_version, onboard_state"
                          " FROM users WHERE id=?", (uid,)).fetchone()
         out: dict[str, Any] = {"user": dict(user) if user else None}
         for t in _user_tables(c):
@@ -471,14 +464,15 @@ def export_user(uid: str) -> dict[str, Any]:
 
 
 def delete_user(uid: str) -> dict[str, int]:
-    """真删：这个人在每张表里的行、会话、短信记录、账号本身。返回各表删了几行。"""
+    """真删：这个人在每张表里的行、会话、微信登录记录、账号本身。返回各表删了几行。"""
     counts: dict[str, int] = {}
     with _LOCK, _conn() as c:
-        row = c.execute("SELECT phone FROM users WHERE id=?", (uid,)).fetchone()
+        row = c.execute("SELECT wechat_openid FROM users WHERE id=?", (uid,)).fetchone()
         for t in _user_tables(c):
             counts[t] = c.execute(f"DELETE FROM {t} WHERE user_id=?", (uid,)).rowcount
-        if row and row["phone"]:
-            c.execute("DELETE FROM sms_codes WHERE phone=?", (row["phone"],))
+        if row and row["wechat_openid"]:
+            c.execute("DELETE FROM wechat_tickets WHERE openid=?", (row["wechat_openid"],))
+        c.execute("DELETE FROM wechat_tickets WHERE guest_uid=?", (uid,))
         counts["users"] = c.execute("DELETE FROM users WHERE id=?", (uid,)).rowcount
     return counts
 
