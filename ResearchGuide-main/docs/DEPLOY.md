@@ -41,7 +41,8 @@ python deploy_fc.py qiyan-test
 - 为什么是公众号消息：网站扫码登录要微信开放平台企业认证 + 备案域名，公众号网页授权要认证服务号，个人都拿不到。个人订阅号能收用户消息，消息里带 openid（只对这个公众号有效），够认出是谁。不存手机号，不用密码。
 - 开通（一次）：
   1. 用个人身份注册一个订阅号（mp.weixin.qq.com，免费）。
-  2. 后台「设置与开发 → 基本配置 → 服务器配置」：URL 填 `<接口地址>/api/wechat`（现在是 `https://qiyan-caxplsowco.cn-hangzhou.fcapp.run/api/wechat`），Token 填一串长随机字符，消息加解密方式选「明文模式」，提交、启用。提交时微信会来验一次签名，所以要先把同一串 Token 设成函数的 `WECHAT_TOKEN` 并发布。
+  2. 后台「设置与开发 → 基本配置 → 服务器配置」：URL 填 `<接口地址>/api/wechat`（现在是 `https://qiyan-caxplsowco.cn-hangzhou.fcapp.run/api/wechat`），Token 填一串长随机字符，EncodingAESKey 点「随机生成」，消息加解密方式选「**安全模式**」，提交、启用。提交时微信会来验一次签名，所以要先把同一串 Token 设成函数的 `WECHAT_TOKEN`、EncodingAESKey 设成 `WECHAT_AES_KEY`、公众号 AppID 设成 `WECHAT_APP_ID`，发布之后再提交。
+     为什么必须安全模式：明文模式下微信只签 token、timestamp、nonce，不签消息体；谁拿到一条签过名的回调 URL（函数访问日志里就有），五分钟内就能伪造「某个 openid 发了某个数字」登进别人的号。安全模式的 msg_signature 把密文签进去，消息体才可信。服务端设了 `WECHAT_AES_KEY` 就只收加密消息。
   3. 设 `WECHAT_ACCOUNT_ID`（公众号原始 ID，gh_ 开头，在「设置与开发 → 公众号设置」里）和 `WECHAT_ACCOUNT_NAME`，登录页就会显示关注二维码。二维码也可以下载下来放到页面里，用 `WECHAT_QR_URL` 指过去。
   没配时页面只给访客入口。`AUTH_DEV_CODES=1` 只在本机用（登录页多一个「模拟微信发送」），配了 `WECHAT_TOKEN` 就自动失效。
 - **函数计算必须只跑一个实例，且库在会保留的盘上。** 微信的消息回调和网页的轮询是两个请求：落到两个实例上，各自的库里只有一半，登录就永远等不到。所以：函数实例数上限设 1（自定义运行时把单实例并发调高，比如 20），`QIYAN_DB` 指到挂载的 NAS。`/tmp` 实例回收就清空，账号、记录一起丢。或者换一台常驻的机器跑 Docker 镜像（香港轻量服务器不用备案）。

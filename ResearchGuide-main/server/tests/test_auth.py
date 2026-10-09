@@ -6,11 +6,13 @@
 """
 from __future__ import annotations
 
+import base64
 import hashlib
 import json
 import os
 import re
 import sqlite3
+import struct
 import subprocess
 import sys
 import time
@@ -266,6 +268,90 @@ def test_without_a_wechat_account_login_is_refused_and_dev_mode_can_simulate(cli
 
     monkeypatch.setenv("WECHAT_TOKEN", TOKEN)  # 配了公众号，开发捷径自动关掉
     assert client.post("/api/auth/wechat/dev-send", json={"code": "123456"}).status_code == 404
+
+
+# ---------- 安全模式：消息体加密并签名 ----------
+
+AES_KEY = base64.b64encode(bytes(range(32))).decode().rstrip("=")  # 43 位，和后台的 EncodingAESKey 一样
+APP_ID = "wx_test_app"
+
+
+@pytest.fixture
+def wx_secure(wx, monkeypatch):
+    monkeypatch.setenv("WECHAT_AES_KEY", AES_KEY)
+    monkeypatch.setenv("WECHAT_APP_ID", APP_ID)
+
+
+def _seal(xml: bytes, appid: str = APP_ID, key_b64: str = AES_KEY) -> str:
+    """按微信文档自己拼一遍密文（不用 wechat.encrypt），好让测试独立于被测代码。"""
+    from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+    key = base64.b64decode(key_b64 + "=")
+    plain = b"\x01" * 16 + struct.pack("!I", len(xml)) + xml + appid.encode()
+    pad = 32 - len(plain) % 32
+    plain += bytes([pad]) * pad
+    e = Cipher(algorithms.AES(key), modes.CBC(key[:16])).encryptor()
+    return base64.b64encode(e.update(plain) + e.finalize()).decode()
+
+
+def _open(enc: str) -> dict[str, str]:
+    from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+    key = base64.b64decode(AES_KEY + "=")
+    d = Cipher(algorithms.AES(key), modes.CBC(key[:16])).decryptor()
+    plain = d.update(base64.b64decode(enc)) + d.finalize()
+    plain = plain[:-plain[-1]]
+    (n,) = struct.unpack("!I", plain[16:20])
+    assert plain[20 + n:] == APP_ID.encode()
+    return {c.tag: c.text or "" for c in ET.fromstring(plain[20:20 + n])}
+
+
+def _send_secure(client, openid: str, content: str, *, enc: str | None = None, msg_sig: str | None = None,
+                 nonce: str = "n2"):
+    ts = str(int(time.time()))
+    enc = enc if enc is not None else _seal(_xml(openid, content))
+    msg_sig = msg_sig if msg_sig is not None else hashlib.sha1("".join(sorted([TOKEN, ts, nonce, enc])).encode()).hexdigest()
+    body = f"<xml><ToUserName><![CDATA[gh_test]]></ToUserName><Encrypt><![CDATA[{enc}]]></Encrypt></xml>".encode()
+    return client.post(f"/api/wechat?{_signed(ts=ts, nonce=nonce)}&encrypt_type=aes&msg_signature={msg_sig}",
+                       content=body, headers={"Content-Type": "text/xml"})
+
+
+def test_secure_mode_logs_in_and_replies_encrypted(client, wx_secure):
+    s = client.post("/api/auth/wechat/start", json={"consent": True}).json()
+    r = _send_secure(client, OPENID, s["code"])
+    assert r.status_code == 200, r.text
+    outer = {c.tag: c.text or "" for c in ET.fromstring(r.content)}
+    assert set(outer) == {"Encrypt", "MsgSignature", "TimeStamp", "Nonce"}  # 回复里没有明文
+    expect = hashlib.sha1("".join(sorted([TOKEN, outer["TimeStamp"], outer["Nonce"], outer["Encrypt"]])).encode()).hexdigest()
+    assert outer["MsgSignature"] == expect
+    inner = _open(outer["Encrypt"])
+    assert inner["ToUserName"] == OPENID and "登录成功" in inner["Content"]
+    assert client.post("/api/auth/wechat/poll", json={"ticket": s["ticket"]}).json()["wechat"] is True
+
+
+def test_secure_mode_rejects_plaintext_forged_and_foreign_messages(client, wx_secure):
+    s = client.post("/api/auth/wechat/start", json={}).json()
+    # 明文消息：安全模式下一律不收（这正是明文模式的漏洞：消息体没签名）
+    assert _send(client, OPENID, s["code"]).status_code == 400
+    # 密文签名不对
+    assert _send_secure(client, OPENID, s["code"], msg_sig="0" * 40).status_code == 403
+    # 没带 msg_signature
+    assert _send_secure(client, OPENID, s["code"], msg_sig="").status_code == 403
+    # 用别的 AppID 加密的（发给别的公众号的消息）
+    other = _seal(_xml(OPENID, s["code"]), appid="wx_other")
+    assert _send_secure(client, OPENID, s["code"], enc=other).status_code == 400
+    # 用别的密钥加密的
+    wrong_key = base64.b64encode(bytes(32)).decode().rstrip("=")
+    bad = _seal(_xml(OPENID, s["code"]), key_b64=wrong_key)
+    assert _send_secure(client, OPENID, s["code"], enc=bad).status_code == 400
+    assert _send_secure(client, OPENID, s["code"], enc="not base64!").status_code == 400
+    assert client.post("/api/auth/wechat/poll", json={"ticket": s["ticket"]}).json()["pending"] is True
+
+
+def test_secure_mode_round_trip_and_key_validation(wx_secure, monkeypatch):
+    import wechat
+    assert wechat.decrypt(wechat.encrypt(b"<xml><a>1</a></xml>")) == b"<xml><a>1</a></xml>"
+    monkeypatch.setenv("WECHAT_AES_KEY", "too-short")
+    with pytest.raises(ValueError):
+        wechat.decrypt(_seal(b"<xml/>"))
 
 
 # ---------- 访客、老用户、会话 ----------

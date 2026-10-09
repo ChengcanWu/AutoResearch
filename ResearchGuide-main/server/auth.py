@@ -309,13 +309,17 @@ def wechat_verify(signature: str = "", timestamp: str = "", nonce: str = "", ech
 
 
 @router.post("/api/wechat")
-async def wechat_message(request: Request, signature: str = "", timestamp: str = "", nonce: str = ""):
-    """公众号收到的消息。微信要求五秒内回，所以这里只做一次查库和一次写库。"""
+async def wechat_message(request: Request, signature: str = "", timestamp: str = "", nonce: str = "",
+                         msg_signature: str = ""):
+    """公众号收到的消息。微信要求五秒内回，所以这里只做一次查库和一次写库。
+    安全模式下 parse 会核对签了密文的 msg_signature 并解密；明文模式只核 URL 签名，消息体是不可信的（只给本机调试）。"""
     if not wechat.check_signature(signature, timestamp, nonce):
         raise HTTPException(403, "签名不对")
     body = await request.body()
     try:
-        msg = wechat.parse(body)
+        msg = wechat.parse(body, msg_signature=msg_signature, timestamp=timestamp, nonce=nonce)
+    except wechat.SignatureError as exc:
+        raise HTTPException(403, str(exc)) from exc
     except ValueError as exc:
         raise HTTPException(400, str(exc)) from exc
     text = await run_in_threadpool(_on_message, msg)  # 要写库、拿写锁，不在事件循环上做
