@@ -221,18 +221,22 @@ CREATE TABLE IF NOT EXISTS sessions (
   expires_at REAL NOT NULL,
   last_seen REAL NOT NULL
 );
--- 邮箱验证码：一个邮箱同时只有一条；发送频率也记在这里（多实例时各自的内存计数对不上）。
-CREATE TABLE IF NOT EXISTS login_codes (
-  email TEXT PRIMARY KEY,
-  salt TEXT NOT NULL,
-  code_hash TEXT NOT NULL,
-  expires_at REAL NOT NULL,
+-- 短信验证码：每个手机号一行，记发送频率和核验次数（多实例时内存计数对不上，所以放库里）。
+-- 验证码本身由阿里云生成和核验，这里不存；只有本机开发模式自己出码，才用 salt / code_hash。
+CREATE TABLE IF NOT EXISTS sms_codes (
+  phone TEXT PRIMARY KEY,
+  armed INTEGER NOT NULL DEFAULT 0,
   tries INTEGER NOT NULL DEFAULT 0,
-  sent_at REAL NOT NULL,
-  hour_start REAL NOT NULL,
-  hour_count INTEGER NOT NULL DEFAULT 0
+  expires_at REAL NOT NULL DEFAULT 0,
+  salt TEXT NOT NULL DEFAULT '',
+  code_hash TEXT NOT NULL DEFAULT '',
+  sent_at REAL NOT NULL DEFAULT 0,
+  hour_start REAL NOT NULL DEFAULT 0,
+  hour_count INTEGER NOT NULL DEFAULT 0,
+  day TEXT NOT NULL DEFAULT '',
+  day_count INTEGER NOT NULL DEFAULT 0
 );
-CREATE TABLE IF NOT EXISTS mail_days (
+CREATE TABLE IF NOT EXISTS sms_days (
   day TEXT PRIMARY KEY,
   sent INTEGER NOT NULL DEFAULT 0
 );
@@ -260,8 +264,8 @@ _MIGRATIONS: list[tuple[str, str, str]] = [
     ("facts", "affects", "ALTER TABLE facts ADD COLUMN affects TEXT NOT NULL DEFAULT ''"),
     # 信息源边指向 knowledge/channels.json 的 id；早期本地库没有这一列（合并 10-03 的研读/定位层时补上）
     ("edges", "ref", "ALTER TABLE edges ADD COLUMN ref TEXT NOT NULL DEFAULT ''"),
-    # 账号：学校邮箱、同意隐私说明的时间与版本；claimed_at 为空的是「有账号之前」的老用户，可以凭 uid 认领一次
-    ("users", "email", "ALTER TABLE users ADD COLUMN email TEXT"),
+    # 账号：手机号、同意隐私说明的时间与版本；claimed_at 为空的是「有账号之前」的老用户，可以凭 uid 认领一次
+    ("users", "phone", "ALTER TABLE users ADD COLUMN phone TEXT"),
     ("users", "consent_at", "ALTER TABLE users ADD COLUMN consent_at TEXT"),
     ("users", "consent_version", "ALTER TABLE users ADD COLUMN consent_version TEXT NOT NULL DEFAULT ''"),
     ("users", "claimed_at", "ALTER TABLE users ADD COLUMN claimed_at TEXT"),
@@ -269,7 +273,7 @@ _MIGRATIONS: list[tuple[str, str, str]] = [
 
 # 依赖补出来的列，必须在补列之后建
 _AFTER_MIGRATIONS = [
-    "CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users(email) WHERE email IS NOT NULL",
+    "CREATE UNIQUE INDEX IF NOT EXISTS idx_users_phone ON users(phone) WHERE phone IS NOT NULL",
 ]
 
 
@@ -300,15 +304,14 @@ def init_db() -> None:
 
 # ---------- users ----------
 
-def create_user(nickname: str, email: str | None = None) -> dict[str, Any]:
+def create_user(nickname: str) -> dict[str, Any]:
     """新用户一出生就算「已认领」：只有加账号之前的老用户能凭 uid 认领。
     token 列是早期留下的，从没被校验过；登录凭证是 sessions 表里的会话。"""
     uid, token, now = new_id(), new_id(), now_iso()
     with _LOCK, _conn() as c:
         c.execute(
-            "INSERT INTO users(id, nickname, token, onboard_state, created_at, email, claimed_at)"
-            " VALUES(?,?,?,?,?,?,?)",
-            (uid, nickname, token, "{}", now, email, now),
+            "INSERT INTO users(id, nickname, token, onboard_state, created_at, claimed_at) VALUES(?,?,?,?,?,?)",
+            (uid, nickname, token, "{}", now, now),
         )
     return {"uid": uid, "token": token, "nickname": nickname}
 
@@ -319,8 +322,8 @@ def get_user(uid: str) -> dict[str, Any] | None:
     return dict(row) if row else None
 
 
-# ---------- 账号：邮箱、会话、验证码、删号与导出 ----------
-# 规则（有效期、频率、哪些邮箱能用）在 auth.py；这里只管读写。
+# ---------- 账号：手机号、会话、短信频率、删号与导出 ----------
+# 规则（有效期、频率、核验次数）在 auth.py；这里只管读写。
 
 SESSION_REFRESH = 86400  # 会话一天续一次期，不在每个请求上写库
 
@@ -329,17 +332,30 @@ def _token_hash(token: str) -> str:
     return hashlib.sha256(token.encode("utf-8")).hexdigest()
 
 
-def user_by_email(email: str) -> dict[str, Any] | None:
+def user_by_phone(phone: str) -> dict[str, Any] | None:
     with _conn() as c:
-        row = c.execute("SELECT * FROM users WHERE email=?", (email,)).fetchone()
+        row = c.execute("SELECT * FROM users WHERE phone=?", (phone,)).fetchone()
     return dict(row) if row else None
 
 
-def bind_email(uid: str, email: str) -> bool:
-    """只给还没绑邮箱的账号绑；邮箱已被别的账号占用时抛 sqlite3.IntegrityError。"""
+def create_phone_user(nickname: str, phone: str) -> str:
+    """手机号新开一个号；同一号码已有账号时抛 sqlite3.IntegrityError。"""
+    uid = create_user(nickname)["uid"]
+    try:
+        with _LOCK, _conn() as c:
+            c.execute("UPDATE users SET phone=? WHERE id=?", (phone, uid))
+    except sqlite3.IntegrityError:
+        with _LOCK, _conn() as c:
+            c.execute("DELETE FROM users WHERE id=?", (uid,))
+        raise
+    return uid
+
+
+def bind_phone(uid: str, phone: str) -> bool:
+    """只给还没绑手机号的账号（访客、老用户）绑；号码已被别的账号占用时抛 sqlite3.IntegrityError。"""
     with _LOCK, _conn() as c:
-        cur = c.execute("UPDATE users SET email=?, claimed_at=COALESCE(claimed_at, ?) WHERE id=? AND email IS NULL",
-                        (email, now_iso(), uid))
+        cur = c.execute("UPDATE users SET phone=?, claimed_at=COALESCE(claimed_at, ?) WHERE id=? AND phone IS NULL",
+                        (phone, now_iso(), uid))
     return cur.rowcount == 1
 
 
@@ -349,9 +365,9 @@ def record_consent(uid: str, version: str) -> None:
 
 
 def claim_legacy(uid: str) -> bool:
-    """有账号之前的老用户凭 uid 认领一次；认领过、或已经绑了邮箱的，都不能再凭 uid 进来。"""
+    """有账号之前的老用户凭 uid 认领一次；认领过、或已经绑了手机号的，都不能再凭 uid 进来。"""
     with _LOCK, _conn() as c:
-        cur = c.execute("UPDATE users SET claimed_at=? WHERE id=? AND claimed_at IS NULL AND email IS NULL",
+        cur = c.execute("UPDATE users SET claimed_at=? WHERE id=? AND claimed_at IS NULL AND phone IS NULL",
                         (now_iso(), uid))
     return cur.rowcount == 1
 
@@ -398,44 +414,42 @@ def drop_session(token: str) -> None:
         c.execute("DELETE FROM sessions WHERE token_hash=?", (_token_hash(token),))
 
 
-def code_row(email: str) -> dict[str, Any] | None:
+
+def sms_row(phone: str) -> dict[str, Any] | None:
     with _conn() as c:
-        row = c.execute("SELECT * FROM login_codes WHERE email=?", (email,)).fetchone()
+        row = c.execute("SELECT * FROM sms_codes WHERE phone=?", (phone,)).fetchone()
     return dict(row) if row else None
 
 
-def put_code(email: str, salt: str, code_hash: str, expires_at: float, sent_at: float,
-             hour_start: float, hour_count: int) -> None:
+def sms_sent(phone: str, *, expires_at: float, sent_at: float, hour_start: float, hour_count: int,
+             day: str, day_count: int, salt: str = "", code_hash: str = "") -> None:
+    """发出一条：重新上膛（可以核验一次通过），核验次数清零，频率计数记上。"""
     with _LOCK, _conn() as c:
         c.execute(
-            "INSERT INTO login_codes(email, salt, code_hash, expires_at, tries, sent_at, hour_start, hour_count)"
-            " VALUES(?,?,?,?,0,?,?,?) ON CONFLICT(email) DO UPDATE SET salt=excluded.salt,"
-            " code_hash=excluded.code_hash, expires_at=excluded.expires_at, tries=0, sent_at=excluded.sent_at,"
-            " hour_start=excluded.hour_start, hour_count=excluded.hour_count",
-            (email, salt, code_hash, expires_at, sent_at, hour_start, hour_count),
-        )
+            "INSERT INTO sms_codes(phone, armed, tries, expires_at, salt, code_hash, sent_at, hour_start, hour_count,"
+            " day, day_count) VALUES(?,1,0,?,?,?,?,?,?,?,?) ON CONFLICT(phone) DO UPDATE SET armed=1, tries=0,"
+            " expires_at=excluded.expires_at, salt=excluded.salt, code_hash=excluded.code_hash,"
+            " sent_at=excluded.sent_at, hour_start=excluded.hour_start, hour_count=excluded.hour_count,"
+            " day=excluded.day, day_count=excluded.day_count",
+            (phone, expires_at, salt, code_hash, sent_at, hour_start, hour_count, day, day_count))
+        c.execute("INSERT INTO sms_days(day, sent) VALUES(?, 1) ON CONFLICT(day) DO UPDATE SET sent=sent+1", (day,))
 
 
-def bump_code_tries(email: str) -> None:
+def sms_failed_try(phone: str) -> None:
     with _LOCK, _conn() as c:
-        c.execute("UPDATE login_codes SET tries=tries+1 WHERE email=?", (email,))
+        c.execute("UPDATE sms_codes SET tries=tries+1 WHERE phone=?", (phone,))
 
 
-def spend_code(email: str) -> None:
-    """用掉就作废，但留着发送记录，频率限制照样算。"""
+def sms_disarm(phone: str) -> None:
+    """核验通过（或试满）就作废：同一条验证码不能再用第二次，频率计数照留。"""
     with _LOCK, _conn() as c:
-        c.execute("UPDATE login_codes SET code_hash='', expires_at=0 WHERE email=?", (email,))
+        c.execute("UPDATE sms_codes SET armed=0, code_hash='' WHERE phone=?", (phone,))
 
 
-def mail_count(day: str) -> int:
+def sms_day_count(day: str) -> int:
     with _conn() as c:
-        row = c.execute("SELECT sent FROM mail_days WHERE day=?", (day,)).fetchone()
+        row = c.execute("SELECT sent FROM sms_days WHERE day=?", (day,)).fetchone()
     return row["sent"] if row else 0
-
-
-def count_mail(day: str) -> None:
-    with _LOCK, _conn() as c:
-        c.execute("INSERT INTO mail_days(day, sent) VALUES(?, 1) ON CONFLICT(day) DO UPDATE SET sent=sent+1", (day,))
 
 
 def _user_tables(c: sqlite3.Connection) -> list[str]:
@@ -446,7 +460,7 @@ def _user_tables(c: sqlite3.Connection) -> list[str]:
 
 def export_user(uid: str) -> dict[str, Any]:
     with _conn() as c:
-        user = c.execute("SELECT id, nickname, email, created_at, consent_at, consent_version, onboard_state"
+        user = c.execute("SELECT id, nickname, phone, created_at, consent_at, consent_version, onboard_state"
                          " FROM users WHERE id=?", (uid,)).fetchone()
         out: dict[str, Any] = {"user": dict(user) if user else None}
         for t in _user_tables(c):
@@ -457,14 +471,14 @@ def export_user(uid: str) -> dict[str, Any]:
 
 
 def delete_user(uid: str) -> dict[str, int]:
-    """真删：这个人在每张表里的行、会话、验证码记录、账号本身。返回各表删了几行。"""
+    """真删：这个人在每张表里的行、会话、短信记录、账号本身。返回各表删了几行。"""
     counts: dict[str, int] = {}
     with _LOCK, _conn() as c:
-        row = c.execute("SELECT email FROM users WHERE id=?", (uid,)).fetchone()
+        row = c.execute("SELECT phone FROM users WHERE id=?", (uid,)).fetchone()
         for t in _user_tables(c):
             counts[t] = c.execute(f"DELETE FROM {t} WHERE user_id=?", (uid,)).rowcount
-        if row and row["email"]:
-            c.execute("DELETE FROM login_codes WHERE email=?", (row["email"],))
+        if row and row["phone"]:
+            c.execute("DELETE FROM sms_codes WHERE phone=?", (row["phone"],))
         counts["users"] = c.execute("DELETE FROM users WHERE id=?", (uid,)).rowcount
     return counts
 

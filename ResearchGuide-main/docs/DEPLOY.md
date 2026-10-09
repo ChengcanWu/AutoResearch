@@ -37,8 +37,12 @@ python deploy_fc.py qiyan-test
 
 ## 账号与数据
 
-- 登录：学校邮箱验证码（默认只收 `edu.cn` 结尾），或访客昵称。会话令牌放请求头 `Authorization: Bearer`；所有接口默认要登录，公开的列在 `server/auth.py` 的 `PUBLIC`，请求里带的 `uid` 必须是登录的这个人。
-- 发信：设 `SMTP_HOST / SMTP_PORT / SMTP_USER / SMTP_PASSWORD`（QQ / 163 邮箱开 SMTP 用授权码）。不设时页面只给访客入口。`AUTH_DEV_CODES=1` 只在本机用，线上不要设。
+- 登录：手机号 + 短信验证码（没注册过的号码自动注册），或访客昵称。会话令牌放请求头 `Authorization: Bearer`；所有接口默认要登录，公开的列在 `server/auth.py` 的 `PUBLIC`，请求里带的 `uid` 必须是登录的这个人。
+- 短信：阿里云号码认证服务的「短信认证」，个人实名账号就能开，不用企业资质、不用自己申请签名。步骤：
+  1. 号码认证服务控制台开通「短信认证」，记下赠送的签名名称和验证码模板编号，设成 `SMS_SIGN_NAME`、`SMS_TEMPLATE_CODE`。
+  2. 密钥二选一：给函数挂一个 RAM 角色，权限最好是只含 `dypns:SendSmsVerifyCode`、`dypns:CheckSmsVerifyCode` 的自定义策略（省事就用系统策略 `AliyunDypnsFullAccess`），平台会注入 `ALIBABA_CLOUD_ACCESS_KEY_ID / SECRET / SECURITY_TOKEN`；或者建一个只有这个权限的 RAM 用户，把它的 AccessKey 设进环境变量。不要用主账号的 AccessKey。
+  3. 按条计费、发送失败不收费、核验免费；`AUTH_SMS_DAILY`（默认 200）是全站每天的条数上限。
+  没配时页面只给访客入口。`AUTH_DEV_CODES=1` 只在本机用（验证码打到服务器日志），配了阿里云就自动失效。
 - 库文件：`QIYAN_DB` 指到会保留的盘。云函数的 `/tmp` 实例回收就清空，账号、记录一起丢；多实例时每个实例各有一份。要么函数挂 NAS 并把实例数限成 1，要么换一台常驻的机器（香港轻量服务器不用备案）。
 - 备份：每天跑一次 `python tools/backup_db.py --out <备份目录> --keep 7`。隐私说明承诺删号后备份最多留 7 天，`--keep` 改大要同步改 `web/js/app.js` 的 `PRIVACY_HTML` 和 `server/auth.py` 的 `PRIVACY_VERSION`。
 - 上线顺序：前端和接口一起发。旧前端不带令牌，新接口会一律回 401；老用户浏览器里只有 uid 的，新前端会自动认领一次（`/api/auth/legacy`）。

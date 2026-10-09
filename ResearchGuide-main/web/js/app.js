@@ -9,7 +9,7 @@ const S = {
   uid: localStorage.getItem("rg_uid") || "",
   token: localStorage.getItem("rg_token") || "",
   nickname: localStorage.getItem("rg_nick") || "",
-  email: "",
+  phone: "",
   guest: true,
   auth: null,
   view: "home",
@@ -643,13 +643,13 @@ function portraitTabs(active) {
   return nav;
 }
 
-/* ---------- 账号：学校邮箱验证码登录、访客、隐私说明 ---------- */
+/* ---------- 账号：手机号验证码登录、访客、隐私说明 ---------- */
 
 function setSession(r) {
   S.uid = r.uid;
   if (r.token) S.token = r.token;
   S.nickname = r.nickname || S.nickname;
-  S.email = r.email || "";
+  S.phone = r.phone || "";
   S.guest = !!r.guest;
   try {
     localStorage.setItem("rg_uid", S.uid);
@@ -661,7 +661,7 @@ function setSession(r) {
 }
 
 function clearSession() {
-  S.uid = ""; S.token = ""; S.email = ""; S.guest = true;
+  S.uid = ""; S.token = ""; S.phone = ""; S.guest = true;
   S.myDir = undefined; S.portraitId = "";
   ["rg_uid", "rg_token", "rg_nick"].forEach((k) => {
     try { localStorage.removeItem(k); } catch (_) { /* 无痕模式等 */ }
@@ -696,13 +696,14 @@ async function afterLogin(isNew) {
 const PRIVACY_HTML = `
   <h4>存了什么</h4>
   <ul>
-    <li><b>账号</b>：昵称；用邮箱登录的话还有学校邮箱。不用密码，所以我们也没有你的密码。</li>
+    <li><b>账号</b>：昵称；用手机号登录的话还有手机号（页面上只显示中间打星的）。验证码由阿里云号码认证服务发送和核验，我们不存验证码，也不用密码。</li>
     <li><b>你写下和做过的</b>：对话；从对话里记下的画像（每条都标来源，在「记录」里能改能删）；你粘贴的成绩单；任务和项目提交；阅读卡；定位里的边、陈述和下注。</li>
     <li><b>登录会话</b>：只存令牌的哈希，三十天不用就失效。</li>
   </ul>
   <h4>谁能看到</h4>
   <ul>
     <li>只有登录的你能看到自己的记录。开发团队能在服务器上看到原始数据，只用来排查问题，不给别人。</li>
+    <li>手机号只用来登录，不发营销短信，不给别人。</li>
     <li>对话和成绩单会发给大模型服务（DeepSeek）生成回复。</li>
     <li>「定位」的竞争地图和稀有度用的是所有人的匿名计数，只出数字，不出名字和原话。</li>
   </ul>
@@ -760,27 +761,26 @@ function consentRow() {
 function renderLogin() {
   $nav.hidden = true; $header.hidden = true;
   $app.innerHTML = "";
-  const binding = !!(S.uid && S.guest);  // 访客来绑邮箱：验证时带着访客会话，记录跟着走
-  const emailOn = !S.auth || S.auth.email_login;
+  const binding = !!(S.uid && S.guest);  // 访客来绑手机号：核验时带着访客会话，记录跟着走
+  const smsOn = !S.auth || S.auth.sms_login;
   const hero = el("section", "hero stagger");
-  hero.appendChild(el("p", "hero-kicker", binding ? "启研 · 绑定邮箱" : "启研 · 登录"));
-  hero.appendChild(el("h2", "", binding ? "绑定学校邮箱" : "用学校邮箱登录"));
+  hero.appendChild(el("p", "hero-kicker", binding ? "启研 · 绑定手机号" : "启研 · 登录"));
+  hero.appendChild(el("h2", "", binding ? "绑定手机号" : "手机号登录"));
   hero.appendChild(el("p", "hero-lead", binding
     ? "绑定后换设备、清了浏览器也能接着用，访客期间的记录都会带过去。"
-    : "换手机、清了浏览器也能接着用。验证码发到学校邮箱，不用设密码。"));
+    : "换手机、清了浏览器也能接着用。没注册过的号码，验证后自动注册。"));
   const consent = consentRow();
   const need = () => { if (consent.ok()) return true; toast("先勾选同意隐私说明"); return false; };
 
-  const mailBox = el("div", "login-step");
-  const emailRow = el("div", "login-row");
-  const email = el("input");
-  email.type = "email"; email.autocomplete = "email"; email.maxLength = 254;
-  const domains = (S.auth && S.auth.email_domains) || ["edu.cn"];
-  email.placeholder = domains.includes("*") ? "你的邮箱" : `学校邮箱（${domains.join("、")} 结尾）`;
-  email.setAttribute("aria-label", "学校邮箱");
-  const send = el("button", "btn secondary", "发验证码");
+  const smsBox = el("div", "login-step");
+  const phoneRow = el("div", "login-row");
+  const phone = el("input");
+  phone.type = "tel"; phone.inputMode = "numeric"; phone.autocomplete = "tel-national"; phone.maxLength = 16;
+  phone.placeholder = "手机号";
+  phone.setAttribute("aria-label", "手机号");
+  const send = el("button", "btn secondary", "获取验证码");
   send.type = "button";
-  emailRow.append(email, send);
+  phoneRow.append(phone, send);
   const codeRow = el("div", "login-row");
   codeRow.hidden = true;
   const code = el("input");
@@ -793,8 +793,8 @@ function renderLogin() {
   const nick = el("input", "login-nick");
   nick.placeholder = "怎么称呼你（选填，新账号用）"; nick.maxLength = 24;
   nick.setAttribute("aria-label", "昵称");
-  mailBox.append(emailRow, codeRow);
-  if (!binding) mailBox.appendChild(nick);
+  smsBox.append(phoneRow, codeRow);
+  if (!binding) smsBox.appendChild(nick);
 
   let timer = 0;
   const countdown = (sec) => {
@@ -802,7 +802,7 @@ function renderLogin() {
     let left = sec;
     send.disabled = true;
     const tick = () => {
-      if (left <= 0) { clearInterval(timer); send.disabled = false; send.textContent = "重发验证码"; return; }
+      if (left <= 0) { clearInterval(timer); send.disabled = false; send.textContent = "重新获取"; return; }
       send.textContent = `${left} 秒后重发`;
       left -= 1;
     };
@@ -811,14 +811,14 @@ function renderLogin() {
   };
   send.onclick = async () => {
     if (!need()) return;
-    const addr = email.value.trim();
-    if (!addr) { toast("先填学校邮箱"); email.focus(); return; }
+    const num = phone.value.trim();
+    if (!num) { toast("先填手机号"); phone.focus(); return; }
     send.disabled = true;
     try {
-      const r = await api("POST", "/api/auth/code", { email: addr });
+      const r = await api("POST", "/api/auth/sms/send", { phone: num });
       codeRow.hidden = false;
       code.focus();
-      toast(`验证码已发到 ${r.email}，没收到就看看垃圾邮件`);
+      toast(`验证码已发到 ${r.phone}`);
       countdown(r.resend_after || 60);
     } catch (e) { toast(e.message); send.disabled = false; }
   };
@@ -828,21 +828,21 @@ function renderLogin() {
     if (!/^\d{6}$/.test(c)) { toast("验证码是 6 位数字"); code.focus(); return; }
     go.disabled = true;
     try {
-      const r = await api("POST", "/api/auth/verify", {
-        email: email.value.trim(), code: c, nickname: nick.value.trim(), consent: true,
+      const r = await api("POST", "/api/auth/sms/verify", {
+        phone: phone.value.trim(), code: c, nickname: nick.value.trim(), consent: true,
       });
       clearInterval(timer);
       setSession(r);
-      if (r.left_guest) toast("这个邮箱已经有账号，已登进去；刚才访客的记录留在访客号里");
+      if (r.left_guest) toast("这个手机号已经有账号，已登进去；刚才访客的记录留在访客号里");
       else toast(r.bound ? "绑定好了，记录都在" : `你好，${r.nickname}`);
       if (r.bound) { setView("me"); return; }
       await afterLogin(r.created);
     } catch (e) { toast(e.message); go.disabled = false; }
   };
-  email.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.isComposing) send.click(); });
+  phone.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.isComposing) send.click(); });
   code.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.isComposing) go.click(); });
 
-  // 访客：只要昵称，记录只能在这台浏览器里找回；之后可以绑邮箱
+  // 访客：只要昵称，记录只能在这台浏览器里找回；之后可以绑手机号
   const guestBox = el("div", "login-step");
   const guestRow = el("div", "login-row");
   const gname = el("input");
@@ -863,19 +863,19 @@ function renderLogin() {
   };
   gname.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.isComposing) gbtn.click(); });
   guestRow.append(gname, gbtn);
-  guestBox.append(guestRow, el("p", "form-note", "访客的记录只能在这台浏览器里找回，之后可以在「记录」页绑定学校邮箱。"));
+  guestBox.append(guestRow, el("p", "form-note", "访客的记录只能在这台浏览器里找回，之后可以在「记录」页绑定手机号。"));
 
   if (binding) {
-    hero.append(mailBox, consent.row);
-  } else if (emailOn) {
+    hero.append(smsBox, consent.row);
+  } else if (smsOn) {
     guestBox.hidden = true;
-    hero.append(mailBox, consent.row, guestBox);
+    hero.append(smsBox, consent.row, guestBox);
   } else {
-    hero.append(el("p", "login-note", "邮箱登录还没开通（服务器没配发信邮箱），先以访客进入。"), guestBox, consent.row);
+    hero.append(el("p", "login-note", "短信验证码还没开通，先以访客进入。"), guestBox, consent.row);
   }
 
   const links = el("div", "hero-links");
-  if (!binding && emailOn) {
+  if (!binding && smsOn) {
     const asGuest = el("button", "linkish", "先不登录，以访客进入");
     asGuest.type = "button";
     asGuest.onclick = () => { guestBox.hidden = false; asGuest.remove(); gname.focus(); };
@@ -890,7 +890,7 @@ function renderLogin() {
   links.append(link, back);
   hero.appendChild(links);
   $app.appendChild(hero);
-  (emailOn ? email : gname).focus();
+  (smsOn ? phone : gname).focus();
 }
 
 async function logout() {
@@ -903,8 +903,8 @@ function accountPanel() {
   const box = el("section", "panel account-panel");
   box.appendChild(el("h3", "section-label", "账号"));
   box.appendChild(el("p", "panel-sub", S.guest
-    ? `访客「${esc(S.nickname)}」：记录只能在这台浏览器里找回。绑定学校邮箱后换设备也能接着用。`
-    : `已登录：${esc(S.email)}`));
+    ? `访客「${esc(S.nickname)}」：记录只能在这台浏览器里找回。绑定手机号后换设备也能接着用。`
+    : `已登录：${esc(S.phone)}`));
   const acts = el("div", "account-actions");
   const add = (label, cls, fn) => {
     const b = el("button", cls, label);
@@ -912,7 +912,7 @@ function accountPanel() {
     b.onclick = fn;
     acts.appendChild(b);
   };
-  if (S.guest) add("绑定学校邮箱", "btn small", () => setView("login"));
+  if (S.guest) add("绑定手机号", "btn small", () => setView("login"));
   add("我们存什么", "btn small ghost", () => openPrivacy(false));
   add("导出我的数据", "btn small secondary", async () => {
     const res = await apiFetch("/api/me/export");
@@ -920,7 +920,7 @@ function accountPanel() {
     downloadBlob(await res.blob(), "启研-我的数据.json");
   });
   add("退出登录", "btn small secondary", async () => {
-    if (S.guest && !window.confirm("访客退出后，这些记录就找不回来了（除非先绑定学校邮箱）。确定退出？")) return;
+    if (S.guest && !window.confirm("访客退出后，这些记录就找不回来了（除非先绑定手机号）。确定退出？")) return;
     await logout();
   });
   add("删除账号", "btn small ghost danger", async () => {

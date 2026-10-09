@@ -1,17 +1,23 @@
 # -*- coding: utf-8 -*-
-"""账号：默认要登录、uid 必须是本人、学校邮箱验证码、访客绑邮箱、老用户认领、删号与导出。
+"""账号：默认要登录、uid 必须是本人、手机号短信验证码、访客绑手机号、老用户认领、删号与导出。
 
-这里用真的 auth.guard（其余测试把它换成「信请求里的 uid」）。不联网、不发邮件。
+这里用真的 auth.guard（其余测试把它换成「信请求里的 uid」）。不联网、不发短信：
+阿里云那一侧用 texts 夹具假装（它出码、它核验），签名和报文另用本机假服务器测。
 """
 from __future__ import annotations
 
 import hashlib
+import json
 import os
 import re
+import secrets
 import sqlite3
 import subprocess
 import sys
+import threading
 import time
+import urllib.parse
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 import pytest
@@ -20,13 +26,14 @@ from fastapi.testclient import TestClient
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import auth  # noqa: E402
-import mailer  # noqa: E402
 import main  # noqa: E402
+import sms  # noqa: E402
 import store  # noqa: E402
 
 pytestmark = pytest.mark.real_auth
 SERVER = Path(__file__).resolve().parent.parent
-PRIVACY_DIGEST = "dd379f9b13eb"  # web/js/app.js 里 PRIVACY_HTML 的指纹，见最后一个测试
+PRIVACY_DIGEST = "b431f26a5d20"  # web/js/app.js 里 PRIVACY_HTML 的指纹，见最后一个测试
+PHONE = "13800138000"
 
 
 @pytest.fixture(autouse=True)
@@ -34,7 +41,8 @@ def fresh(tmp_path, monkeypatch):
     monkeypatch.setattr(store, "DB_PATH", tmp_path / "auth.db")
     store.init_db()
     auth._IP_HITS.clear()
-    for k in ("AUTH_EMAIL_DOMAINS", "AUTH_DEV_CODES", "TRUST_PROXY"):
+    for k in ("AUTH_DEV_CODES", "TRUST_PROXY", "ALIBABA_CLOUD_ACCESS_KEY_ID", "ALIBABA_CLOUD_ACCESS_KEY_SECRET",
+              "ALIBABA_CLOUD_SECURITY_TOKEN", "SMS_SIGN_NAME", "SMS_TEMPLATE_CODE"):
         monkeypatch.delenv(k, raising=False)
 
 
@@ -43,13 +51,31 @@ def client():
     return TestClient(main.app)
 
 
+class FakeAliyun:
+    """假装阿里云短信认证：发的时候出一个码记下，核验时比对。"""
+
+    def __init__(self) -> None:
+        self.codes: dict[str, str] = {}
+        self.sent: list[str] = []
+        self.checks = 0
+
+    def send(self, phone: str, minutes: int) -> None:
+        self.codes[phone] = f"{secrets.randbelow(10 ** 6):06d}"
+        self.sent.append(phone)
+
+    def check(self, phone: str, code: str) -> bool:
+        self.checks += 1
+        return self.codes.get(phone) == code
+
+
 @pytest.fixture
-def outbox(monkeypatch):
-    sent: list[tuple[str, str]] = []
-    monkeypatch.setattr(mailer, "configured", lambda: True)
-    monkeypatch.setattr(mailer, "send_code", lambda to, code, minutes: sent.append((to, code)))
+def texts(monkeypatch):
+    fake = FakeAliyun()
+    monkeypatch.setattr(sms, "configured", lambda: True)
+    monkeypatch.setattr(sms, "send", fake.send)
+    monkeypatch.setattr(sms, "check", fake.check)
     monkeypatch.setattr(auth, "RESEND_GAP", 0)
-    return sent
+    return fake
 
 
 def _h(token: str) -> dict:
@@ -61,10 +87,11 @@ def _guest(client, nick="小北") -> tuple[str, str]:
     return r["uid"], r["token"]
 
 
-def _email_login(client, outbox, email, headers=None, **extra):
-    assert client.post("/api/auth/code", json={"email": email}).status_code == 200
-    code = outbox[-1][1]
-    r = client.post("/api/auth/verify", json={"email": email, "code": code, "consent": True, **extra},
+def _phone_login(client, texts, phone=PHONE, headers=None, **extra):
+    r = client.post("/api/auth/sms/send", json={"phone": phone})
+    assert r.status_code == 200, r.text
+    num = auth._check_phone(phone)
+    r = client.post("/api/auth/sms/verify", json={"phone": phone, "code": texts.codes[num], "consent": True, **extra},
                     headers=headers or {})
     assert r.status_code == 200, r.text
     return r.json()
@@ -121,65 +148,71 @@ def test_upload_route_is_not_read_by_the_guard(client):
     assert r.status_code == 404  # 过了登录，接口自己说项目不存在
 
 
-# ---------- 邮箱验证码 ----------
+# ---------- 手机号验证码 ----------
 
-def test_school_email_code_logs_in_and_a_second_device_gets_the_same_account(client, outbox):
-    first = _email_login(client, outbox, " Xiao@Stu.PKU.edu.cn ", nickname="小北")
-    assert first["created"] and first["email"] == "xiao@stu.pku.edu.cn" and first["nickname"] == "小北"
-    assert outbox[-1][0] == "xiao@stu.pku.edu.cn"
-    again = _email_login(client, outbox, "xiao@stu.pku.edu.cn")
+def test_phone_code_logs_in_and_a_second_device_gets_the_same_account(client, texts):
+    first = _phone_login(client, texts, " 138 0013-8000 ", nickname="小北")
+    assert first["created"] and first["phone"] == "138****8000" and first["nickname"] == "小北"
+    assert texts.sent == [PHONE]
+    again = _phone_login(client, texts, "+86 13800138000")
     assert again["uid"] == first["uid"] and not again["created"] and again["token"] != first["token"]
     me = client.get("/api/auth/me", headers=_h(again["token"])).json()
-    assert me["email"] == "xiao@stu.pku.edu.cn" and not me["guest"]
+    assert me["phone"] == "138****8000" and not me["guest"]
 
 
-def test_only_school_domains_by_default(client, outbox, monkeypatch):
-    r = client.post("/api/auth/code", json={"email": "someone@gmail.com"})
-    assert r.status_code == 400 and "edu.cn" in r.json()["detail"]
-    assert client.post("/api/auth/code", json={"email": "not-an-email"}).status_code == 400
-    assert not outbox
-    monkeypatch.setenv("AUTH_EMAIL_DOMAINS", "*")
-    assert client.post("/api/auth/code", json={"email": "someone@gmail.com"}).status_code == 200
+def test_only_mainland_mobile_numbers(client, texts):
+    for bad in ("12345", "23800138000", "+1 650 253 0000", "1380013800a", ""):
+        r = client.post("/api/auth/sms/send", json={"phone": bad})
+        assert r.status_code == 400 and "手机号" in r.json()["detail"], bad
+    assert not texts.sent
 
 
-def test_wrong_codes_run_out_and_codes_are_single_use(client, outbox):
-    email = "a@pku.edu.cn"
-    client.post("/api/auth/code", json={"email": email})
-    code = outbox[-1][1]
+def test_wrong_codes_run_out_and_codes_are_single_use(client, texts):
+    client.post("/api/auth/sms/send", json={"phone": PHONE})
+    code = texts.codes[PHONE]
     wrong = "000000" if code != "000000" else "111111"
-    r = client.post("/api/auth/verify", json={"email": email, "code": wrong})
+    r = client.post("/api/auth/sms/verify", json={"phone": PHONE, "code": wrong})
     assert r.status_code == 400 and "4" in r.json()["detail"]
     for _ in range(4):
-        client.post("/api/auth/verify", json={"email": email, "code": wrong})
-    r = client.post("/api/auth/verify", json={"email": email, "code": code})
-    assert r.status_code == 400 and "太多" in r.json()["detail"]  # 试满五次，对的也不认了
+        client.post("/api/auth/sms/verify", json={"phone": PHONE, "code": wrong})
+    r = client.post("/api/auth/sms/verify", json={"phone": PHONE, "code": code})
+    assert r.status_code == 400 and "过期" in r.json()["detail"]  # 试满五次就作废，对的也不认了
 
-    client.post("/api/auth/code", json={"email": email})
-    code = outbox[-1][1]
-    assert client.post("/api/auth/verify", json={"email": email, "code": code}).status_code == 200
-    assert client.post("/api/auth/verify", json={"email": email, "code": code}).status_code == 400
+    client.post("/api/auth/sms/send", json={"phone": PHONE})
+    code = texts.codes[PHONE]
+    assert client.post("/api/auth/sms/verify", json={"phone": PHONE, "code": code}).status_code == 200
+    # 阿里云那边同一个码在有效期内可能还会 PASS；我们这边用过就作废，不再去问
+    checks = texts.checks
+    assert client.post("/api/auth/sms/verify", json={"phone": PHONE, "code": code}).status_code == 400
+    assert texts.checks == checks
 
 
-def test_code_expires(client, outbox):
-    email = "a@pku.edu.cn"
-    client.post("/api/auth/code", json={"email": email})
+def test_code_expires(client, texts):
+    client.post("/api/auth/sms/send", json={"phone": PHONE})
     with sqlite3.connect(store.DB_PATH) as c:
-        c.execute("UPDATE login_codes SET expires_at=?", (time.time() - 1,))
-    r = client.post("/api/auth/verify", json={"email": email, "code": outbox[-1][1]})
+        c.execute("UPDATE sms_codes SET expires_at=?", (time.time() - 1,))
+    r = client.post("/api/auth/sms/verify", json={"phone": PHONE, "code": texts.codes[PHONE]})
     assert r.status_code == 400 and "过期" in r.json()["detail"]
 
 
-def test_sending_is_rate_limited_per_email_and_per_day(client, outbox, monkeypatch):
+def test_sending_is_rate_limited_per_phone_and_per_day(client, texts, monkeypatch):
     monkeypatch.setattr(auth, "RESEND_GAP", 60)
-    assert client.post("/api/auth/code", json={"email": "a@pku.edu.cn"}).status_code == 200
-    assert client.post("/api/auth/code", json={"email": "a@pku.edu.cn"}).status_code == 429
+    assert client.post("/api/auth/sms/send", json={"phone": PHONE}).status_code == 200
+    assert client.post("/api/auth/sms/send", json={"phone": PHONE}).status_code == 429
     monkeypatch.setattr(auth, "RESEND_GAP", 0)
-    for _ in range(auth.PER_EMAIL_HOUR - 1):
-        assert client.post("/api/auth/code", json={"email": "a@pku.edu.cn"}).status_code == 200
-    assert client.post("/api/auth/code", json={"email": "a@pku.edu.cn"}).status_code == 429
-    monkeypatch.setattr(auth, "MAIL_DAILY", len(outbox))
-    r = client.post("/api/auth/code", json={"email": "b@pku.edu.cn"})
-    assert r.status_code == 503 and len(outbox) == auth.MAIL_DAILY
+    for _ in range(auth.PER_PHONE_HOUR - 1):
+        assert client.post("/api/auth/sms/send", json={"phone": PHONE}).status_code == 200
+    assert client.post("/api/auth/sms/send", json={"phone": PHONE}).status_code == 429
+    monkeypatch.setattr(auth, "SMS_DAILY", len(texts.sent))
+    r = client.post("/api/auth/sms/send", json={"phone": "13900139000"})
+    assert r.status_code == 503 and len(texts.sent) == auth.SMS_DAILY
+
+
+def test_per_phone_daily_cap_counts_across_hours(client, texts, monkeypatch):
+    monkeypatch.setattr(auth, "PER_PHONE_HOUR", 100)
+    for _ in range(auth.PER_PHONE_DAY):
+        assert client.post("/api/auth/sms/send", json={"phone": PHONE}).status_code == 200
+    assert client.post("/api/auth/sms/send", json={"phone": PHONE}).status_code == 429
 
 
 def test_per_source_limit_uses_forwarded_address_only_behind_a_proxy(client, monkeypatch):
@@ -195,38 +228,141 @@ def test_per_source_limit_uses_forwarded_address_only_behind_a_proxy(client, mon
     assert client.post("/api/auth/login", json={"nickname": "x"}, headers=other).status_code == 200
 
 
-def test_without_mail_config_codes_are_refused_or_only_logged(client, monkeypatch, capsys):
-    monkeypatch.setattr(mailer, "configured", lambda: False)
-    r = client.post("/api/auth/code", json={"email": "a@pku.edu.cn"})
+def test_aliyun_errors_become_plain_messages(client, texts, monkeypatch):
+    def refuse(code):
+        def send(phone, minutes):
+            raise sms.SmsError(code, "原文")
+        return send
+
+    monkeypatch.setattr(sms, "send", refuse("BUSINESS_LIMIT_CONTROL"))
+    r = client.post("/api/auth/sms/send", json={"phone": PHONE})
+    assert r.status_code == 429 and "太多" in r.json()["detail"]
+    monkeypatch.setattr(sms, "send", refuse("SignatureDoesNotMatch"))
+    r = client.post("/api/auth/sms/send", json={"phone": PHONE})
+    assert r.status_code == 502 and "原文" not in r.text
+    assert store.sms_day_count(auth._today()) == 0  # 没发出去的不计数
+
+    monkeypatch.setattr(sms, "send", texts.send)
+    client.post("/api/auth/sms/send", json={"phone": PHONE})
+
+    def broken(phone, code):
+        raise OSError("网络断了")
+
+    monkeypatch.setattr(sms, "check", broken)
+    r = client.post("/api/auth/sms/verify", json={"phone": PHONE, "code": "123456"})
+    assert r.status_code == 502
+    assert store.sms_row(PHONE)["tries"] == 0  # 核验接口自己出错，不算用户试错
+
+
+def test_without_sms_config_codes_are_refused_or_only_logged(client, capsys, monkeypatch):
+    r = client.post("/api/auth/sms/send", json={"phone": PHONE})
     assert r.status_code == 503
-    assert client.get("/api/health").json()["auth"]["email_login"] is False
+    assert client.get("/api/health").json()["auth"]["sms_login"] is False
 
     monkeypatch.setenv("AUTH_DEV_CODES", "1")
-    r = client.post("/api/auth/code", json={"email": "a@pku.edu.cn"})
+    assert client.get("/api/health").json()["auth"]["sms_login"] is True
+    r = client.post("/api/auth/sms/send", json={"phone": PHONE})
     assert r.status_code == 200
     logged = [ln for ln in capsys.readouterr().out.splitlines() if "dev_code" in ln]
-    code = __import__("json").loads(logged[-1])["code"]
+    code = json.loads(logged[-1])["code"]
     assert code not in r.text  # 验证码只在服务器日志里，不在响应里
-    assert client.post("/api/auth/verify", json={"email": "a@pku.edu.cn", "code": code}).status_code == 200
+    assert client.post("/api/auth/sms/verify", json={"phone": PHONE, "code": code}).status_code == 200
+
+
+def test_dev_codes_are_ignored_once_aliyun_is_configured(monkeypatch):
+    monkeypatch.setenv("AUTH_DEV_CODES", "1")
+    for k, v in {"ALIBABA_CLOUD_ACCESS_KEY_ID": "id", "ALIBABA_CLOUD_ACCESS_KEY_SECRET": "s",
+                 "SMS_SIGN_NAME": "签名", "SMS_TEMPLATE_CODE": "100001"}.items():
+        monkeypatch.setenv(k, v)
+    assert sms.configured() and not auth._dev_codes()
+
+
+# ---------- 阿里云接口：签名与报文 ----------
+
+def test_signature_matches_aliyun_documented_example():
+    params = {"AccessKeyId": "testid", "Action": "DescribeRegions", "Format": "XML", "SignatureMethod": "HMAC-SHA1",
+              "SignatureNonce": "3ee8c1b8-83d3-44af-a94f-4e0ad82fd6cf", "SignatureVersion": "1.0",
+              "Timestamp": "2016-02-23T12:46:24Z", "Version": "2014-05-26"}
+    assert sms.sign(params, "testsecret") == "OLeaidS1JvxuMvnyHOwuJ+uX5qY="
+
+
+@pytest.fixture
+def aliyun_stub(monkeypatch):
+    """本机假的 dypnsapi：记下收到的查询参数，按 replies 回话。"""
+    seen: list[dict] = []
+    replies: list[tuple[int, dict]] = []
+
+    class H(BaseHTTPRequestHandler):
+        def do_GET(self):
+            seen.append(dict(urllib.parse.parse_qsl(urllib.parse.urlsplit(self.path).query)))
+            status, body = replies.pop(0)
+            raw = json.dumps(body).encode()
+            self.send_response(status)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(raw)))
+            self.end_headers()
+            self.wfile.write(raw)
+
+        def log_message(self, *a):
+            pass
+
+    srv = ThreadingHTTPServer(("127.0.0.1", 0), H)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    monkeypatch.setattr(sms, "ENDPOINT", f"http://127.0.0.1:{srv.server_address[1]}/")
+    for k, v in {"ALIBABA_CLOUD_ACCESS_KEY_ID": "kid", "ALIBABA_CLOUD_ACCESS_KEY_SECRET": "ksecret",
+                 "SMS_SIGN_NAME": "速通互联验证码", "SMS_TEMPLATE_CODE": "100001"}.items():
+        monkeypatch.setenv(k, v)
+    yield seen, replies
+    srv.shutdown()
+
+
+def test_send_and_check_are_signed_requests_with_the_right_fields(aliyun_stub):
+    seen, replies = aliyun_stub
+    replies += [(200, {"Code": "OK", "Success": True, "Model": {"BizId": "b"}}),
+                (200, {"Code": "OK", "Success": True, "Model": {"VerifyResult": "PASS"}}),
+                (200, {"Code": "OK", "Success": True, "Model": {"VerifyResult": "UNKNOWN"}})]
+    sms.send(PHONE, 5)
+    assert sms.check(PHONE, "123456") is True
+    assert sms.check(PHONE, "654321") is False
+    sent = seen[0]
+    assert sent["Action"] == "SendSmsVerifyCode" and sent["Version"] == "2017-05-25"
+    assert sent["PhoneNumber"] == PHONE and sent["SignName"] == "速通互联验证码" and sent["TemplateCode"] == "100001"
+    assert json.loads(sent["TemplateParam"]) == {"code": "##code##", "min": "5"}  # 阿里云出码，我们不碰验证码
+    assert sent["CodeLength"] == "6" and sent["ValidTime"] == "300" and sent["ReturnVerifyCode"] == "false"
+    assert seen[1]["Action"] == "CheckSmsVerifyCode" and seen[1]["VerifyCode"] == "123456"
+    for q in seen:
+        sig = q.pop("Signature")
+        assert sig == sms.sign(q, "ksecret") and q["AccessKeyId"] == "kid"
+        assert "SecurityToken" not in q
+
+
+def test_error_replies_and_sts_tokens(aliyun_stub, monkeypatch):
+    seen, replies = aliyun_stub
+    monkeypatch.setenv("ALIBABA_CLOUD_SECURITY_TOKEN", "sts-token")
+    replies.append((400, {"Code": "isv.BUSINESS_LIMIT_CONTROL", "Message": "触发天级流控"}))
+    with pytest.raises(sms.SmsError) as err:
+        sms.send(PHONE, 5)
+    assert err.value.code == "BUSINESS_LIMIT_CONTROL"
+    assert seen[0]["SecurityToken"] == "sts-token"  # 函数计算挂角色时用临时密钥
 
 
 # ---------- 访客、老用户、会话 ----------
 
-def test_guest_binding_a_school_email_keeps_the_guest_data(client, outbox):
+def test_guest_binding_a_phone_keeps_the_guest_data(client, texts):
     uid, token = _guest(client)
     client.post("/api/edges", json={"uid": uid, "kind": "language", "text": "粤语母语", "evidence_url": ""},
                 headers=_h(token))
-    r = _email_login(client, outbox, "b@stu.pku.edu.cn", headers=_h(token))
+    r = _phone_login(client, texts, headers=_h(token))
     assert r["bound"] and r["uid"] == uid and not r["left_guest"]
-    assert client.get(f"/api/auth/me", headers=_h(token)).status_code == 401  # 访客会话换成了新会话
+    assert client.get("/api/auth/me", headers=_h(token)).status_code == 401  # 访客会话换成了新会话
     edges = client.get(f"/api/edges?uid={uid}", headers=_h(r["token"])).json()
     assert "粤语母语" in str(edges)
 
 
-def test_guest_logging_into_an_existing_email_switches_account_and_says_so(client, outbox):
-    owner = _email_login(client, outbox, "c@pku.edu.cn")
+def test_guest_logging_into_an_existing_phone_switches_account_and_says_so(client, texts):
+    owner = _phone_login(client, texts)
     _, guest_token = _guest(client)
-    r = _email_login(client, outbox, "c@pku.edu.cn", headers=_h(guest_token))
+    r = _phone_login(client, texts, headers=_h(guest_token))
     assert r["uid"] == owner["uid"] and r["left_guest"] and not r["bound"]
 
 
@@ -270,8 +406,8 @@ def test_consent_is_recorded_against_the_current_privacy_version(client):
 
 # ---------- 删号与导出 ----------
 
-def test_delete_account_removes_every_row_and_the_session(client, outbox):
-    r = _email_login(client, outbox, "d@pku.edu.cn")
+def test_delete_account_removes_every_row_and_the_session(client, texts):
+    r = _phone_login(client, texts)
     uid, h = r["uid"], _h(r["token"])
     client.post("/api/edges", json={"uid": uid, "kind": "language", "text": "粤语母语", "evidence_url": ""}, headers=h)
     client.post("/api/tasks/generate", json={"uid": uid, "direction": "ai", "level": 1}, headers=h)
@@ -281,7 +417,7 @@ def test_delete_account_removes_every_row_and_the_session(client, outbox):
     exported = client.get("/api/me/export", headers=h)
     assert exported.status_code == 200 and "attachment" in exported.headers["content-disposition"]
     data = exported.json()
-    assert data["user"]["email"] == "d@pku.edu.cn" and data["edges"] and data["tasks"]
+    assert data["user"]["phone"] == PHONE and data["edges"] and data["tasks"]
     assert "sessions" not in data and "token" not in data["user"]
 
     out = client.delete("/api/me", headers=h).json()
@@ -290,10 +426,10 @@ def test_delete_account_removes_every_row_and_the_session(client, outbox):
         c.row_factory = sqlite3.Row
         for t in store._user_tables(c):
             assert c.execute(f"SELECT COUNT(*) FROM {t} WHERE user_id=?", (uid,)).fetchone()[0] == 0, t
-        assert c.execute("SELECT COUNT(*) FROM login_codes WHERE email='d@pku.edu.cn'").fetchone()[0] == 0
+        assert c.execute("SELECT COUNT(*) FROM sms_codes WHERE phone=?", (PHONE,)).fetchone()[0] == 0
     assert store.get_user(other)  # 别人不受影响
     assert client.get("/api/auth/me", headers=h).status_code == 401
-    again = _email_login(client, outbox, "d@pku.edu.cn")  # 同一邮箱可以重新注册，是个新号
+    again = _phone_login(client, texts)  # 同一号码可以重新注册，是个新号
     assert again["created"] and again["uid"] != uid
 
 

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-"""账号：学校邮箱验证码登录 + 会话；访客可以先用，之后绑邮箱把数据带走。
+"""账号：手机号 + 短信验证码登录，和国内 App 一样；访客可以先用，之后绑手机号把数据带走。
 
-- 为什么是学校邮箱：短信签名要企业资质，微信网站登录要企业认证和备案域名，团队都没有；
-  学校邮箱还顺带证明「是学生」，一人一号，送的模型额度才有意义（昵称账号随手能开一百个）。
+- 短信走阿里云号码认证服务的「短信认证」（sms.py）：个人实名账号就能用，平台给签名和模板，验证码由阿里云生成、核验。
+  手机号还顺带做到一人一号，以后送模型额度才不会被随手开的小号领光。
 - 令牌放在请求头 Authorization: Bearer，不用 cookie：页面在 github.io、接口在 fcapp.run，跨站 cookie 会被浏览器拦。
 - 所有接口默认要登录，PUBLIC 里的才放行；请求里带的 uid（查询串、路径、JSON 体）必须就是登录的这个人。
   原来 uid 就是唯一凭证：知道别人的 uid 就能读他的成绩单和对话。
@@ -20,23 +20,25 @@ import sqlite3
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
-import mailer
+import sms
 import store
 
 SESSION_TTL = 30 * 86400   # 三十天不用才过期；用着的一天续一次
-CODE_TTL = 600             # 验证码十分钟有效
-CODE_TRIES = 5             # 一个验证码最多试五次
-RESEND_GAP = 60            # 同一邮箱一分钟发一次
-PER_EMAIL_HOUR = 5         # 同一邮箱一小时最多五封
-PER_IP_HOUR = 30           # 同一来源一小时最多发三十封、开三十个访客号
-MAIL_DAILY = int(os.environ.get("AUTH_MAIL_DAILY") or 300)  # 全站每天最多发这么多封（QQ / 163 邮箱的发信上限在这个量级）
+CODE_MINUTES = 5           # 验证码五分钟有效
+CODE_TRIES = 5             # 一条验证码最多试五次
+RESEND_GAP = 60            # 同一号码一分钟发一次
+PER_PHONE_HOUR = 5         # 同一号码一小时最多五条
+PER_PHONE_DAY = 10         # 同一号码一天最多十条
+PER_IP_HOUR = 30           # 同一来源一小时最多发三十条、开三十个访客号
+SMS_DAILY = int(os.environ.get("AUTH_SMS_DAILY") or 200)  # 全站每天最多发这么多条：短信按条收费，这是费用的上限
+CN = timezone(timedelta(hours=8))  # 「一天」按北京时间算
 
 # 隐私说明改了就改这个日期：老用户下次打开会再看到一次说明并重新同意。说明正文在 web/js/app.js 的 PRIVACY_HTML。
 PRIVACY_VERSION = "2026-10-09"
@@ -44,7 +46,7 @@ PRIVACY_VERSION = "2026-10-09"
 # 不登录也能用的接口（按路由模板写）。新加的接口默认要登录：要么带 uid，要么加到这里并说明为什么可以公开。
 PUBLIC = frozenset({
     "/", "/api/health",
-    "/api/auth/login", "/api/auth/code", "/api/auth/verify", "/api/auth/legacy",
+    "/api/auth/login", "/api/auth/sms/send", "/api/auth/sms/verify", "/api/auth/legacy",
     # 公开知识：课程、老师、专业、培养方案、方向路径、阅读工具包、论文原文、给学生自己 agent 的简报
     "/api/explore/courses", "/api/explore/teachers", "/api/explore/majors", "/api/explore/major",
     "/api/explore/minor", "/api/explore/course", "/api/curriculum/match", "/api/curriculum/stats",
@@ -104,28 +106,27 @@ def me(request: Request) -> str | None:
     return getattr(request.state, "uid", None)
 
 
-# ---------- 频率与邮箱 ----------
+# ---------- 频率与手机号 ----------
 
-_EMAIL = re.compile(r"^[a-z0-9._%+-]{1,64}@(?:[a-z0-9-]+\.)+[a-z]{2,}$")
+_PHONE = re.compile(r"^1[3-9]\d{9}$")
 _IP_HITS: dict[str, list[float]] = {}
 _IP_LOCK = threading.Lock()
 
 
-def email_domains() -> list[str]:
-    """允许的邮箱后缀，默认 edu.cn（北大的 pku.edu.cn、stu.pku.edu.cn 都在内）。填 * 就不限。"""
-    raw = os.environ.get("AUTH_EMAIL_DOMAINS") or "edu.cn"
-    return [d.strip().lower().lstrip(".@") for d in raw.split(",") if d.strip()]
+def _check_phone(raw: str) -> str:
+    """只收大陆手机号（短信认证只支持 +86）。容忍空格、横杠和 +86 前缀。"""
+    phone = re.sub(r"[\s-]", "", raw or "")
+    if phone.startswith("+86"):
+        phone = phone[3:]
+    elif phone.startswith("86") and len(phone) == 13:
+        phone = phone[2:]
+    if not _PHONE.match(phone):
+        raise HTTPException(400, "请填 11 位大陆手机号")
+    return phone
 
 
-def _check_email(raw: str) -> str:
-    email = (raw or "").strip().lower()
-    if len(email) > 254 or not _EMAIL.match(email):
-        raise HTTPException(400, "邮箱格式不对")
-    domain = email.rsplit("@", 1)[1]
-    allowed = email_domains()
-    if not any(d == "*" or domain == d or domain.endswith("." + d) for d in allowed):
-        raise HTTPException(400, f"请用学校邮箱（{'、'.join(allowed)} 结尾）")
-    return email
+def mask(phone: str | None) -> str | None:
+    return f"{phone[:3]}****{phone[-4:]}" if phone else None
 
 
 def _client_ip(request: Request) -> str | None:
@@ -165,7 +166,12 @@ def _code_hash(salt: str, code: str) -> str:
 
 
 def _today() -> str:
-    return datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    return datetime.now(CN).strftime("%Y-%m-%d")
+
+
+def _dev_codes() -> bool:
+    """本机开发、没配阿里云：验证码自己出，只打印在服务器日志里。线上不要设 AUTH_DEV_CODES。"""
+    return os.environ.get("AUTH_DEV_CODES") == "1" and not sms.configured()
 
 
 def account(uid: str) -> dict[str, Any]:
@@ -173,18 +179,17 @@ def account(uid: str) -> dict[str, Any]:
     return {
         "uid": uid,
         "nickname": u.get("nickname", ""),
-        "email": u.get("email"),
-        "guest": not u.get("email"),
+        "phone": mask(u.get("phone")),
+        "guest": not u.get("phone"),
         "consent_ok": u.get("consent_version") == PRIVACY_VERSION,
         "privacy_version": PRIVACY_VERSION,
     }
 
 
 def status() -> dict[str, Any]:
-    """给 /api/health：页面据此决定显示「邮箱登录」还是只给访客入口。"""
-    dev = os.environ.get("AUTH_DEV_CODES") == "1"
-    return {"email_login": mailer.configured() or dev, "dev_codes": dev and not mailer.configured(),
-            "email_domains": email_domains(), "privacy_version": PRIVACY_VERSION}
+    """给 /api/health：页面据此决定显示「手机号登录」还是只给访客入口。"""
+    return {"sms_login": sms.configured() or _dev_codes(), "dev_codes": _dev_codes(),
+            "privacy_version": PRIVACY_VERSION}
 
 
 # ---------- 接口 ----------
@@ -194,12 +199,12 @@ class GuestReq(BaseModel):
     consent: bool = False
 
 
-class CodeReq(BaseModel):
-    email: str
+class SmsSendReq(BaseModel):
+    phone: str
 
 
-class VerifyReq(BaseModel):
-    email: str
+class SmsVerifyReq(BaseModel):
+    phone: str
     code: str
     nickname: str = ""
     consent: bool = False
@@ -215,7 +220,7 @@ class ConsentReq(BaseModel):
 
 @router.post("/api/auth/login")
 def guest_login(req: GuestReq, request: Request):
-    """访客：只要昵称。数据只能凭这台浏览器里的令牌找回，之后绑学校邮箱就能换设备。"""
+    """访客：只要昵称。数据只能凭这台浏览器里的令牌找回，之后绑手机号就能换设备。"""
     nickname = req.nickname.strip()[:24]
     if not nickname:
         raise HTTPException(400, "nickname is required")
@@ -227,68 +232,96 @@ def guest_login(req: GuestReq, request: Request):
     return {**account(uid), "token": store.create_session(uid, SESSION_TTL)}
 
 
-@router.post("/api/auth/code")
-def send_code(req: CodeReq, request: Request):
-    email = _check_email(req.email)
-    now = time.time()
-    row = store.code_row(email)
-    if row and now - row["sent_at"] < RESEND_GAP:
+# 阿里云的错误码 → 给用户的话。没列出来的一律「没发出去」，错误码记日志。
+_SMS_ERRORS = {
+    "MOBILE_NUMBER_ILLEGAL": (400, "手机号不对"),
+    "BUSINESS_LIMIT_CONTROL": (429, "这个号码今天收的验证码太多了，明天再试"),
+    "FREQUENCY_FAIL": (429, "发得太频繁了，过一分钟再试"),
+}
+
+
+@router.post("/api/auth/sms/send")
+def sms_send(req: SmsSendReq, request: Request):
+    phone = _check_phone(req.phone)
+    now, today = time.time(), _today()
+    row = store.sms_row(phone) or {}
+    if now - row.get("sent_at", 0) < RESEND_GAP:
         raise HTTPException(429, f"{int(RESEND_GAP - (now - row['sent_at'])) + 1} 秒后可以再发")
-    hour_start, hour_count = (row["hour_start"], row["hour_count"]) if row and now - row["hour_start"] < 3600 else (now, 0)
-    if hour_count >= PER_EMAIL_HOUR:
-        raise HTTPException(429, "这个邮箱一小时内收了太多验证码，过一会儿再试")
-    if not _ip_allows(request, "code"):
+    hour_start, hour_count = (row["hour_start"], row["hour_count"]) if now - row.get("hour_start", 0) < 3600 else (now, 0)
+    day_count = row["day_count"] if row.get("day") == today else 0
+    if hour_count >= PER_PHONE_HOUR or day_count >= PER_PHONE_DAY:
+        raise HTTPException(429, "这个号码收的验证码太多了，过一会儿再试")
+    if not _ip_allows(request, "sms"):
         raise HTTPException(429, "发得太频繁了，过一会儿再试")
-    if store.mail_count(_today()) >= MAIL_DAILY:
+    if store.sms_day_count(today) >= SMS_DAILY:
         raise HTTPException(503, "今天的验证码发完了，明天再来，或先用访客进入")
-    code = f"{secrets.randbelow(10 ** 6):06d}"
-    if mailer.configured():
+    salt = code_hash = ""
+    if sms.configured():
         try:
-            mailer.send_code(email, code, CODE_TTL // 60)
-        except Exception as exc:  # noqa: BLE001 — SMTP 的错误种类很多，对用户都是「没发出去」
-            print(json.dumps({"auth": "mail_failed", "error": type(exc).__name__}, ensure_ascii=False))
+            sms.send(phone, CODE_MINUTES)
+        except sms.SmsError as exc:
+            status_code, msg = _SMS_ERRORS.get(exc.code, (502, "验证码没发出去，请稍后再试"))
+            print(json.dumps({"auth": "sms_send_failed", "code": exc.code}, ensure_ascii=False))
+            raise HTTPException(status_code, msg) from exc
+        except OSError as exc:
             raise HTTPException(502, "验证码没发出去，请稍后再试") from exc
-    elif os.environ.get("AUTH_DEV_CODES") == "1":
-        # 本机开发没配发信邮箱：验证码只打印在服务器日志里，绝不放进响应
-        print(json.dumps({"auth": "dev_code", "email": email, "code": code}, ensure_ascii=False))
+    elif _dev_codes():
+        code = f"{secrets.randbelow(10 ** 6):06d}"
+        salt = secrets.token_hex(8)
+        code_hash = _code_hash(salt, code)
+        print(json.dumps({"auth": "dev_code", "phone": phone, "code": code}, ensure_ascii=False))  # 只进日志，绝不进响应
     else:
-        raise HTTPException(503, "服务器还没配发信邮箱，暂时只能用访客进入")
-    salt = secrets.token_hex(8)
-    store.put_code(email, salt, _code_hash(salt, code), now + CODE_TTL, now, hour_start, hour_count + 1)
-    store.count_mail(_today())
-    return {"ok": True, "email": email, "resend_after": RESEND_GAP}
+        raise HTTPException(503, "短信验证码还没开通，暂时只能用访客进入")
+    store.sms_sent(phone, expires_at=now + CODE_MINUTES * 60, sent_at=now, hour_start=hour_start,
+                   hour_count=hour_count + 1, day=today, day_count=day_count + 1, salt=salt, code_hash=code_hash)
+    return {"ok": True, "phone": mask(phone), "resend_after": RESEND_GAP}
 
 
-@router.post("/api/auth/verify")
-def verify_code(req: VerifyReq, request: Request):
-    """验证码对了：这个邮箱有账号就登进去；没有的话，带着访客会话来的就把邮箱绑到访客号上（数据跟着走），
-    否则新开一个。"""
-    email = _check_email(req.email)
-    row = store.code_row(email)
-    if not row or not row["code_hash"] or row["expires_at"] <= time.time():
-        raise HTTPException(400, "验证码过期了，请重新发送")
+@router.post("/api/auth/sms/verify")
+def sms_verify(req: SmsVerifyReq, request: Request):
+    """验证码对了：这个号码有账号就登进去；没有的话，带着访客会话来的就把号码绑到访客号上（数据跟着走），
+    否则新开一个。一条验证码只能用一次。"""
+    phone = _check_phone(req.phone)
+    code = re.sub(r"\s", "", req.code or "")
+    row = store.sms_row(phone)
+    if not row or not row["armed"] or row["expires_at"] <= time.time():
+        raise HTTPException(400, "验证码过期了，请重新获取")
     if row["tries"] >= CODE_TRIES:
-        raise HTTPException(400, "错的次数太多，请重新发送")
-    if not hmac.compare_digest(row["code_hash"], _code_hash(row["salt"], req.code.strip())):
-        store.bump_code_tries(email)
+        store.sms_disarm(phone)
+        raise HTTPException(400, "错的次数太多，请重新获取")
+    if row["code_hash"]:  # 本机开发模式自己出的码
+        ok = hmac.compare_digest(row["code_hash"], _code_hash(row["salt"], code))
+    elif not re.fullmatch(r"\d{6}", code):
+        ok = False
+    else:
+        try:
+            ok = sms.check(phone, code)
+        except (sms.SmsError, OSError) as exc:  # 核验接口自己出错：不算用户试错一次
+            print(json.dumps({"auth": "sms_check_failed", "error": getattr(exc, "code", type(exc).__name__)},
+                             ensure_ascii=False))
+            raise HTTPException(502, "暂时核验不了，请稍后再试") from exc
+    if not ok:
+        store.sms_failed_try(phone)
         left = CODE_TRIES - row["tries"] - 1
-        raise HTTPException(400, f"验证码不对，还能再试 {left} 次" if left else "错的次数太多，请重新发送")
-    store.spend_code(email)
+        if not left:
+            store.sms_disarm(phone)
+        raise HTTPException(400, f"验证码不对，还能再试 {left} 次" if left else "错的次数太多，请重新获取")
+    store.sms_disarm(phone)
 
     guest_token = _bearer(request)
     guest_uid = store.session_user(guest_token, SESSION_TTL) if guest_token else None
-    user = store.user_by_email(email)
+    user = store.user_by_phone(phone)
     created = bound = False
     if user:
         uid = user["id"]
     else:
         try:
-            if guest_uid and store.bind_email(guest_uid, email):
+            if guest_uid and store.bind_phone(guest_uid, phone):
                 uid, bound = guest_uid, True
             else:
-                uid, created = store.create_user((req.nickname or "").strip()[:24] or "同学", email=email)["uid"], True
-        except sqlite3.IntegrityError:  # 两个请求同时用同一邮箱开号：后到的登进先开的那个
-            uid = store.user_by_email(email)["id"]
+                uid, created = store.create_phone_user((req.nickname or "").strip()[:24] or "同学", phone), True
+        except sqlite3.IntegrityError:  # 两个请求同时用同一号码开号：后到的登进先开的那个
+            uid = store.user_by_phone(phone)["id"]
     if req.consent:
         store.record_consent(uid, PRIVACY_VERSION)
     if guest_token and guest_uid:
