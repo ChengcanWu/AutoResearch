@@ -136,8 +136,10 @@ const ChatView = (() => {
 
   async function render($app) {
     const mySeq = ++seq;
+    const pageSeq = S.renderSeq;
+    const stillHere = () => mySeq === seq && S.view === "dialogue" && pageSeq === S.renderSeq;
     const resumeFrom = turnDone;  // 打开这一页时上一轮还在生成（在别的页等过）：见最后
-    if (mySeq !== seq || S.view !== "dialogue") return;  // 等待期间切到了别的页：不能再往页面上写
+    if (!stillHere()) return;  // 等待期间切到了别的页：不能再往页面上写
 
     $app.innerHTML = "";
     $app.appendChild(dialogueHead());
@@ -210,10 +212,10 @@ const ChatView = (() => {
     try {
       history = await api("GET", `/api/dialogue/history?uid=${encodeURIComponent(S.uid)}`);
     } catch (e) { toast(e.message); }
-    if (mySeq !== seq || S.view !== "dialogue") return;  // 等待期间切到了别的页：不能再往页面上写
+    if (!stillHere()) return;  // 等待期间切到了别的页：不能再往页面上写
     history.messages.forEach((m) => addBubble(m.role, m.text));
     await refreshFacts();
-    if (mySeq !== seq || S.view !== "dialogue") return;  // 等待期间切到了别的页：不能再往页面上写
+    if (!stillHere()) return;  // 等待期间切到了别的页：不能再往页面上写
     if (history.guide && !S.entered) renderGuide(history.guide);
     if (history.onboard_done && !S.entered) enterCard(history.guide);
     if (!history.messages.length) {
@@ -256,7 +258,7 @@ const ChatView = (() => {
             }
           },
         );
-        if (mySeq !== seq || S.view !== "dialogue") return;  // 等待期间切到了别的页：不能再往页面上写
+        if (!stillHere()) return;  // 等待期间切到了别的页：不能再往页面上写
 
         if (result) {
           history.conversation_id = result.conversation_id;
@@ -267,7 +269,7 @@ const ChatView = (() => {
           bubble.remove();
         }
       } catch (e) {
-        if (mySeq === seq) {
+        if (stillHere()) {
           if (acc) { bubble.innerHTML = mdLite(acc); toast("生成中断：" + e.message); }
           else { bubble.remove(); toast(e.message); }
         } else if (e.name !== "AbortError") {
@@ -277,7 +279,7 @@ const ChatView = (() => {
         bubble.classList.remove("streaming");
         busy = false; abort = null; turnDone = null;
         finish();
-        if (mySeq === seq) {
+        if (stillHere()) {
           input.disabled = false; sendBtn.disabled = false; stopBtn.hidden = true;
           setStage("");
           input.focus({ preventScroll: true });
@@ -475,7 +477,7 @@ const ChatView = (() => {
       try {
         if (!S.entered) {
           const profile = await api("GET", `/api/onboard/readiness?uid=${encodeURIComponent(S.uid)}`);
-          if (mySeq === seq) renderGuide(profile);
+          if (stillHere()) renderGuide(profile);
           return;
         }
         const [rank, mem, mine] = await Promise.all([
@@ -483,6 +485,7 @@ const ChatView = (() => {
           api("GET", `/api/memory?uid=${encodeURIComponent(S.uid)}`).catch(() => ({ layers: [] })),
           api("GET", `/api/me/facts?uid=${encodeURIComponent(S.uid)}`).catch(() => ({ facts: [] })),
         ]);
+        if (!stillHere()) return;
         const items = rank.items || [];
         const layers = (mem.layers || []).filter((L) => (L.facts || []).length);
         const nFacts = layers.reduce((n, L) => n + (L.facts || []).length, 0);
@@ -576,7 +579,7 @@ const ChatView = (() => {
         stageLine.classList.add("on");
       }
       resumeFrom.then(() => {
-        if (mySeq !== seq || S.view !== "dialogue") return;
+        if (!stillHere()) return;
         // 正在改一条记忆：重画会把输入框拔掉，失焦保存不一定触发，改动就没了（Codex 复现）。改完再画
         if (editingCard) { redrawQueued = true; return; }
         render($app);

@@ -1418,10 +1418,10 @@ body.is-home .site-footer { display: none; }
   padding: 6px 2px;
   border: 0; background: none; cursor: pointer;
   font-size: 13px; letter-spacing: 0.06em;
-  color: var(--night-2);
+  color: var(--night-1);
   text-decoration: underline;
   text-underline-offset: 5px;
-  text-decoration-color: rgba(237, 241, 238, 0.35);
+  text-decoration-color: rgba(237, 241, 238, 0.55);
   transition: color var(--fast), text-decoration-color var(--fast);
 }
 .land-skip:hover { color: var(--tone); text-decoration-color: var(--tone); }

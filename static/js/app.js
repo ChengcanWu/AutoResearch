@@ -155,16 +155,14 @@ function sessionGoneMsg() {
 
 async function recoverUser(err) {
   if (!lostUser(err)) return false;
-  const was = { uid: S.uid, token: S.token };
-  try {
-    await api("GET", "/api/auth/me", undefined, { timeoutMs: 20000 });
-    return false;
-  } catch (e) {
-    if (S.uid !== was.uid || S.token !== was.token) return false;  // 核验期间换了账号：不动
-    if (e && (e.status === 401 || e.status === 410)) { signedOut(sessionGoneMsg()); return true; }
-    toast("暂时无法核验登录状态，请稍后再试");  // 503、429、网络错误、超时：身份和草稿都留着
-    return false;
+  if (S.token) {
+    try {
+      const me = await apiFetch("/api/auth/me");
+      if (me.ok) return false;
+    } catch (_) { return false; }
   }
+  signedOut("登录已失效，请用用户名和密码重新登录。提示用户名不存在的话，说明服务器数据被重置过，需要重新注册");
+  return true;
 }
 
 /* 函数多实例时，登录写在 A、下一请求落到 B，B 的临时库里没有这份会话，会回 401。
@@ -172,14 +170,11 @@ async function recoverUser(err) {
 let sessionKick = null;
 
 async function confirmSessionGone() {
-  const was = { uid: S.uid, token: S.token };
   try {
-    await api("GET", "/api/auth/me", undefined, { timeoutMs: 20000 });
-  } catch (e) {
-    if (S.uid !== was.uid || S.token !== was.token) return;  // 核验期间换了账号：不动
-    if (e && (e.status === 401 || e.status === 410)) { signedOut(sessionGoneMsg()); return; }
-    toast("暂时无法核验登录状态，请稍后再试");  // 503、429、网络错误、超时：身份和草稿都留着
-  }
+    const me = await apiFetch("/api/auth/me");
+    if (me.ok) return;
+    signedOut("登录已失效，请用用户名和密码重新登录。提示用户名不存在的话，说明服务器数据被重置过，需要重新注册");
+  } catch (_) { /* 网络抖一下不踢人 */ }
 }
 
 async function apiFetch(path, opt = {}) {
@@ -195,25 +190,10 @@ async function apiFetch(path, opt = {}) {
   return res;
 }
 
-async function api(method, path, body, opt = {}) {
-  const req = { method, headers: { "Content-Type": "application/json" } };
-  if (body !== undefined) req.body = JSON.stringify(body);
-  let res;
-  if (opt.timeoutMs) {
-    const slowMsg = "服务器响应慢（可能在冷启动），请 10 秒后再试";
-    const ctrl = new AbortController();
-    req.signal = ctrl.signal;
-    let timer;
-    const slow = new Promise((_, reject) => {
-      timer = setTimeout(() => { ctrl.abort(); reject(new Error(slowMsg)); }, opt.timeoutMs);
-    });
-    try {
-      res = await Promise.race([apiFetch(path, req), slow]);
-    } catch (e) {
-      if (e && e.name === "AbortError") throw new Error(slowMsg);
-      throw e;
-    } finally { clearTimeout(timer); }
-  } else res = await apiFetch(path, req);
+async function api(method, path, body) {
+  const opt = { method, headers: { "Content-Type": "application/json" } };
+  if (body !== undefined) opt.body = JSON.stringify(body);
+  const res = await apiFetch(path, opt);
   let data = null;
   try { data = await res.json(); } catch (_) { /* no body */ }
   if (!res.ok) {
@@ -375,22 +355,28 @@ async function render() {
   const seq = S.renderSeq = (S.renderSeq || 0) + 1;
   if (S.view === "home") { renderHome(); return; }
   if (!S.uid && S.view !== "login") { renderLogin(); return; }
+  // 先清掉上一页。研读/今日的接口可能要等好几秒，不先清的话侧栏已经亮着新栏，
+  // 主栏还停在对话——看起来像「研读页在显示对话」，再点今日会被迟到的写入盖成空白。
+  if (S.view !== "login") {
+    $app.innerHTML = "";
+    $app.appendChild(skeleton(3));
+  }
   try {
-    switch (S.view) {
-      case "login": renderLogin(); break;
+  switch (S.view) {
+    case "login": renderLogin(); break;
       case "dialogue": await ChatView.render($app); break;  // 要 await：不然它取画像失败时绕过下面的提示
       case "confirm": await renderMe(); break;
-      case "cards": await renderCards(); break;
-      case "workbench": await renderWorkbench(); break;
+    case "cards": await renderCards(); break;
+    case "workbench": await renderWorkbench(); break;
       case "projects":
       case "project": renderProjectsSoon(); break;
       case "position": renderPositionSoon(); break;
       case "read": await renderRead(); break;
       case "card": await renderCard(); break;
       case "feedback": await renderFeedback(); break;
-      case "me": await renderMe(); break;
-      case "today":
-      default: await renderToday(); break;
+    case "me": await renderMe(); break;
+    case "today":
+    default: await renderToday(); break;
     }
   } catch (e) {
     // 这一页要的数据没取到：原来变成没人接的 Promise 错误，菜单关了、页面却还停在上一页，也没有提示（Codex 复现）
@@ -482,8 +468,8 @@ function renderHome() {
       + (points ? `<ul class="land-points">${points}</ul>` : "")
       + (page.closing ? `<p class="land-closing">${page.closing}</p>` : "")
       + `</div>`;
-    if (i === HOME_PAGES.length - 1) {
-      const btn = el("button", "btn land-cta", "立即开始体验");
+    if (i === 0 || i === HOME_PAGES.length - 1) {
+      const btn = el("button", "btn land-cta", i === 0 ? "进入启研" : "立即开始体验");
       btn.type = "button";
       btn.onclick = beginExperience;
       sec.querySelector(".snap-inner").appendChild(btn);
@@ -493,7 +479,7 @@ function renderHome() {
   const hintEl = el("div", "land-hint");
   hintEl.setAttribute("aria-hidden", "true");
   hintEl.append(el("span", "", "滚动以继续"), el("i"));
-  const skip = el("button", "land-skip", "跳过，直接开始");
+  const skip = el("button", "land-skip", "跳过介绍，直接开始");
   skip.type = "button";
   skip.onclick = beginExperience;
   land.append(canvas, buildSteps(), hintEl, skip, snap);
@@ -1275,12 +1261,8 @@ function mountSketch(canvas, scroller) {
     if (!canvas.isConnected) return;
     let moving = false;
     if (intro < 1) {
-      const boot = document.getElementById("boot");
-      const bootGone = !boot || boot.classList.contains("out");
-      if (bootGone) {
-        if (!introStart) introStart = now;
-        intro = Math.min(1, (now - introStart) / 900);
-      }
+      if (!introStart) introStart = now;
+      intro = Math.min(1, (now - introStart) / 900);
       moving = true;
     }
     if (busy && intro >= 1) { // 开场聚形先走完，剧本才开始——00 屏的过程要看得见
@@ -1553,7 +1535,7 @@ function openPrivacy(gate) {
     ok.type = "button";
     ok.onclick = async () => {
       try {
-        await api("POST", "/api/auth/consent", { version: S.auth ? S.auth.privacy_version : "" }, { timeoutMs: 20000 });
+        await api("POST", "/api/auth/consent", { version: S.auth ? S.auth.privacy_version : "" });
         mask.remove();
       } catch (e) { toast(e.message); }
     };
@@ -1704,14 +1686,6 @@ function renderLogin() {
   const binding = !!(S.uid && S.guest);  // 访客来绑微信：start 时带着访客会话，记录跟着走
   const wxOn = !S.auth || S.auth.wechat_login;
   const hero = el("section", "hero stagger");
-  let recovery = "";
-  try { recovery = localStorage.getItem("rg_recovery_state") || ""; } catch (_) { /* 无痕模式等 */ }
-  const RECOVERY_NOTE = {
-    lost: "服务器确认原账号数据无法恢复，请重新注册；旧记录不会自动找回。",
-    accounts_restored: "用户名账号已恢复，请用原用户名和密码登录；原访客、仅微信账号无法找回。",
-    recovering: "账号正在恢复，请稍后重试。",
-  };
-  if (RECOVERY_NOTE[recovery]) hero.appendChild(el("p", "login-note login-recovery", RECOVERY_NOTE[recovery]));
   hero.appendChild(el("p", "hero-kicker", binding ? "启研 · 绑定微信" : "启研 · 登录"));
   hero.appendChild(el("h2", "", binding ? "绑定微信" : "登录"));
   hero.appendChild(el("p", "hero-lead", binding
@@ -1747,30 +1721,13 @@ function renderLogin() {
     sbtn.disabled = true; sbtn.textContent = "登录中…";
     stopWxPoll();  // 走密码就作废正在等的微信登录，免得它的结果回来盖掉这次会话
     try {
-      const r = await api("POST", "/api/auth/signin", { username: suser.value.trim(), password: spass.value }, { timeoutMs: 20000 });
-      try { localStorage.removeItem("rg_reset_hint"); localStorage.removeItem("rg_last_uid"); } catch (_) { /* 无痕模式等 */ }
-      try { localStorage.removeItem("rg_recovery_state"); } catch (_) { /* 无痕模式等 */ }
+      const r = await api("POST", "/api/auth/signin", { username: suser.value.trim(), password: spass.value });
       const previous = S.token;  // 访客登进自己的账号：采用新令牌之后再吊销访客的
       if (previous && previous !== r.token) revokeToken(previous);
       if (setSession(r, "today")) return;
-      let slowTimer;
-      const slow = new Promise((_, rej) => { slowTimer = setTimeout(() => rej(new Error("after_enter_timeout")), 15000); });
-      try {
-        await Promise.race([afterEnter(), slow]);
-      } catch (e) {
-        if (!e || e.message !== "after_enter_timeout") throw e;
-        toast("登录成功，页面资料暂未加载，请刷新重试");  // 会话已生效，不重发登录
-        sbtn.disabled = false; sbtn.textContent = "登录";
-      } finally { clearTimeout(slowTimer); slow.catch(() => {}); }
+      await afterEnter();
       if (!r.consent_ok) openPrivacy(true);
-    } catch (e) {
-      toast(e.message); sbtn.disabled = false; sbtn.textContent = "登录";
-      let reset = false;
-      try { reset = e.status === 401 && localStorage.getItem("rg_reset_hint") === "1"; } catch (_) { /* 无痕模式等 */ }
-      if (reset && !signinStep.querySelector(".login-reset-hint")) {
-        signinStep.appendChild(el("p", "login-note login-reset-hint", "登录已失效且这个账号现在不存在：服务器在 2026-10-18 更换过数据库，之前的账号需要重新注册（用户名可以沿用）。如果你刚才只是密码输错，再试一次即可。"));
-      }
-    }
+    } catch (e) { toast(e.message); sbtn.disabled = false; sbtn.textContent = "登录"; }
   };
   spass.addEventListener("keydown", onEnter(sbtn));
   signinStep.append(suser, spass, sbtn);
@@ -1793,22 +1750,11 @@ function renderLogin() {
       const r = await api("POST", "/api/auth/register", {
         username: ruser.value.trim(), password: rpass.value,
         nickname: rnick.value.trim() || ruser.value.trim(), consent: true,
-      }, { timeoutMs: 20000 });
-      try { localStorage.removeItem("rg_reset_hint"); localStorage.removeItem("rg_last_uid"); } catch (_) { /* 无痕模式等 */ }
-      try { localStorage.removeItem("rg_recovery_state"); } catch (_) { /* 无痕模式等 */ }
+      });
       if (setSession(r, "dialogue")) return;
-      let slowTimer;
-      const slow = new Promise((_, rej) => { slowTimer = setTimeout(() => rej(new Error("after_enter_timeout")), 15000); });
-      try {
-        await Promise.race([afterEnter(), slow]);
-      } catch (e) {
-        if (!e || e.message !== "after_enter_timeout") throw e;
-        toast("登录成功，页面资料暂未加载，请刷新重试");  // 会话已生效，不重发注册
-        rbtn.disabled = false; rbtn.textContent = "注册并进入";
-      } finally { clearTimeout(slowTimer); slow.catch(() => {}); }
+      await afterEnter();
     } catch (e) { toast(e.message); rbtn.disabled = false; rbtn.textContent = "注册并进入"; }
   };
-  if (recovery === "recovering") rbtn.disabled = true;
   rpass.addEventListener("keydown", onEnter(rbtn));
   registerStep.append(ruser, rnick, rpass, rbtn);
 
@@ -1836,7 +1782,7 @@ function renderLogin() {
   guestBox.append(guestRow, el("p", "form-note", "访客的记录只能在这台浏览器里找回，之后可以在「记录」页绑定微信或设用户名密码。"));
 
   const steps = { wechat: wxStep, signin: signinStep, register: registerStep };
-  let mode = recovery === "lost" ? "register" : wxOn ? "wechat" : "signin";
+  let mode = wxOn ? "wechat" : "signin";
   const tabs = el("div", "login-tabs");
   const paint = () => {
     tabs.querySelectorAll("button").forEach((b) => b.classList.toggle("on", b.dataset.mode === mode));
@@ -2224,7 +2170,7 @@ async function loadPrefs(c) {
     S.myDirs = Array.isArray(p.directions) ? p.directions : [];
     if (p.kit_id) useKit(p.kit_id);
     return true;
-  } catch (e) {
+    } catch (e) {
     if (e === STALE_DIR) throw e;
     S.myDirs = undefined;  // 渲染缓存不是写入授权：读失败就当不知道
     return false;
@@ -2605,14 +2551,14 @@ function confirmDrafts(facts) {
     const actions = el("div", "submit-actions");
     const ok = el("button", "btn", "保存核对");
     ok.type = "button";
-    ok.onclick = async () => {
-      const payload = Object.entries(edits).map(([id, value]) => ({ id, value }))
-        .concat([...dismissed].map((id) => ({ id, dismissed: true })));
+  ok.onclick = async () => {
+    const payload = Object.entries(edits).map(([id, value]) => ({ id, value }))
+      .concat([...dismissed].map((id) => ({ id, dismissed: true })));
       ok.disabled = true;
-      try {
-        await api("POST", "/api/onboard/confirm", { uid: S.uid, edits: payload });
+    try {
+      await api("POST", "/api/onboard/confirm", { uid: S.uid, edits: payload });
         toast("已保存，接下来看方向");
-        setView("cards");
+      setView("cards");
       } catch (e) { toast(e.message); ok.disabled = false; }
     };
     actions.appendChild(ok);
@@ -4016,7 +3962,7 @@ function renderPositionSoon() {
 }
 
 function emptyPanel(text, label, view) {
-  const p = el("div", "panel");
+    const p = el("div", "panel");
   p.appendChild(el("p", "panel-sub", text));
   if (label) {
     const b = el("button", "btn", label);
@@ -4688,6 +4634,7 @@ async function renderRead() {
       catalog = d.items || [];
     } catch (_) { catalog = []; }
   }
+  if (stale(seq)) return;
   if (!S.kitId && !catalog.length) useKit(DEFAULT_KIT);
   const kitId = S.kitId || "";
   const tab = S.readTab || "kit";
@@ -4895,6 +4842,7 @@ async function renderRead() {
       });
     }
   } catch (_) { /* 没有导入就不画 */ }
+  if (stale(seq)) return;
   search.onsubmit = async (ev) => {
     ev.preventDefault();
     const term = q.value.trim();
@@ -5498,7 +5446,7 @@ async function renderCard() {
     jumped.add(sec.label);
     const b = el("button", "sec-chip", esc(sec.label));
     b.type = "button";
-    b.onclick = () => {
+      b.onclick = () => {
       if (currentJump) currentJump.classList.remove("on");
       b.classList.add("on");
       currentJump = b;
@@ -7367,17 +7315,34 @@ document.addEventListener("keydown", (e) => {
 });
 
 (async function boot() {
-  const t0 = performance.now();
-  const removeSplash = () => {
-    const splash = document.getElementById("boot");
-    if (!splash || splash.classList.contains("out")) return;
+  const splash = document.getElementById("boot");
+  const hideSplash = () => {
+    if (!splash || !splash.isConnected) return;
     splash.classList.add("out");
-    setTimeout(() => splash.remove(), 600);
+    setTimeout(() => { if (splash.isConnected) splash.remove(); }, 600);
   };
-  setTimeout(removeSplash, 5000);  // 开场遮罩最多挡 5 秒：health、me 卡住也不让人对着遮罩干等
+  // 接口再慢也不挡开场：现网冷启动曾把「启研」盖住十几秒，看起来像打不开。
+  setTimeout(hideSplash, 700);
+
+  const consumeNote = () => {
+    let next = "home", note = "";
+    try {
+      next = sessionStorage.getItem("rg_next_view") || sessionStorage.getItem("rg_last_view") || "home";
+      note = sessionStorage.getItem("rg_toast") || "";
+    } catch (_) { /* 无痕模式等 */ }
+    return { next, note };
+  };
+  const pickLanding = (next) => {
+    let landing = next === "login" && !S.uid ? "login" : next !== "home" && S.uid ? next : "home";
+    if (S.uid && !S.entered && !["home", "me", "login", "dialogue"].includes(landing)) landing = "dialogue";
+    return landing;
+  };
+  const first = consumeNote();
+  let bootHeldView = pickLanding(first.next);
+  setView(bootHeldView);
+
   try {
-    const [h, paths] = await Promise.all([api("GET", "/api/health", undefined, { timeoutMs: 5000 }),
-      api("GET", "/api/paths", undefined, { timeoutMs: 5000 }).catch(() => null)]);
+    const [h, paths] = await Promise.all([api("GET", "/api/health"), api("GET", "/api/paths").catch(() => null)]);
     S.llmInfo = h.llm || null;  // 服务器那把兜底密钥的状态，登录、退出时重画侧栏的模型钮要用
     applyLlmPill(h.llm);
     S.auth = h.auth || null;
@@ -7395,23 +7360,16 @@ document.addEventListener("keydown", (e) => {
   }
   if (S.token) {
     try {
-      const me = await api("GET", "/api/auth/me", undefined, { timeoutMs: 20000 });
+      const me = await api("GET", "/api/auth/me");
       setSession(me);
       needConsent = !me.consent_ok;
       await loadPrefs();  // 工具包与收藏方向一起恢复；读不到就用本地的工具包、方向留空
       await ensurePortrait();
     } catch (e) {
-      if ([401, 410].includes(e.status)) {  // 会话确实没了：清身份（草稿不动），落到登录页并说清为什么；404 是发版瞬间路由缺失，不算
-        // 提示文案写死了 10-18 换库这件事：12 月起会话自然过期就不再挂这个提示
-        if (Date.now() < Date.parse("2026-12-01T00:00:00+08:00")) {
-          try { localStorage.setItem("rg_last_uid", S.uid); localStorage.setItem("rg_reset_hint", "1"); } catch (_) { /* 无痕模式等 */ }
-        }
-        if (S.auth && S.auth.recovery && S.auth.recovery.state !== "normal") {
-          try { localStorage.setItem("rg_recovery_state", S.auth.recovery.state); } catch (_) { /* 无痕模式等 */ }
-        }
+      if ([401, 404, 410].includes(e.status)) {  // 会话确实没了：清身份（草稿不动），落到登录页并说清为什么
         clearSession();
         reloadInto("login", sessionGoneMsg());
-        return;
+      return;
       } else {
         // 网络断了、服务器在重启：会话和草稿都留着，原来这里一律清掉，草稿就永久没了（Codex 复现）
         setTimeout(() => toast("暂时连不上服务器，稍后刷新一下"), 800);
@@ -7421,20 +7379,16 @@ document.addEventListener("keydown", (e) => {
     // 只有 uid、认领没成（网络错误）：先去登录页，但 uid 留着，下次打开再认领——它是这个人唯一的凭证
     setTimeout(() => toast("暂时连不上服务器，稍后刷新一下"), 800);
   }
-  let next = "home", note = "";
   try {
-    next = sessionStorage.getItem("rg_next_view") || sessionStorage.getItem("rg_last_view") || "home";
-    note = sessionStorage.getItem("rg_toast") || "";
     sessionStorage.removeItem("rg_next_view");
     sessionStorage.removeItem("rg_toast");
   } catch (_) { /* 无痕模式等 */ }
-  let landing = next === "login" && !S.uid ? "login" : next !== "home" && S.uid ? next : "home";
-  if (S.uid && !S.entered && !["home", "me", "login", "dialogue"].includes(landing)) landing = "dialogue";  // 还没进入：先把开场聊完或点「进入启研」
-  setView(landing);
-  if (note) toast(note);
+  const landing = pickLanding(first.next);
+  // 人已经点了「进入启研」或侧栏：不要把他们拽回粒子首页
+  if (S.view === bootHeldView) setView(landing);
+  if (first.note) toast(first.note);
   if (needConsent) openPrivacy(true);
-  // 开场最多停 0.7 秒：数据到了就走，不再固定等 1.4 秒
-  setTimeout(removeSplash, Math.max(0, 700 - (performance.now() - t0)));
+  hideSplash();
 })();
 
 function transcriptImportPanel() {
