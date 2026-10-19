@@ -355,22 +355,28 @@ async function render() {
   const seq = S.renderSeq = (S.renderSeq || 0) + 1;
   if (S.view === "home") { renderHome(); return; }
   if (!S.uid && S.view !== "login") { renderLogin(); return; }
+  // 先清掉上一页。研读/今日的接口可能要等好几秒，不先清的话侧栏已经亮着新栏，
+  // 主栏还停在对话——看起来像「研读页在显示对话」，再点今日会被迟到的写入盖成空白。
+  if (S.view !== "login") {
+    $app.innerHTML = "";
+    $app.appendChild(skeleton(3));
+  }
   try {
-    switch (S.view) {
-      case "login": renderLogin(); break;
+  switch (S.view) {
+    case "login": renderLogin(); break;
       case "dialogue": await ChatView.render($app); break;  // 要 await：不然它取画像失败时绕过下面的提示
       case "confirm": await renderMe(); break;
-      case "cards": await renderCards(); break;
-      case "workbench": await renderWorkbench(); break;
+    case "cards": await renderCards(); break;
+    case "workbench": await renderWorkbench(); break;
       case "projects":
       case "project": renderProjectsSoon(); break;
       case "position": renderPositionSoon(); break;
       case "read": await renderRead(); break;
       case "card": await renderCard(); break;
       case "feedback": await renderFeedback(); break;
-      case "me": await renderMe(); break;
-      case "today":
-      default: await renderToday(); break;
+    case "me": await renderMe(); break;
+    case "today":
+    default: await renderToday(); break;
     }
   } catch (e) {
     // 这一页要的数据没取到：原来变成没人接的 Promise 错误，菜单关了、页面却还停在上一页，也没有提示（Codex 复现）
@@ -462,8 +468,8 @@ function renderHome() {
       + (points ? `<ul class="land-points">${points}</ul>` : "")
       + (page.closing ? `<p class="land-closing">${page.closing}</p>` : "")
       + `</div>`;
-    if (i === HOME_PAGES.length - 1) {
-      const btn = el("button", "btn land-cta", "立即开始体验");
+    if (i === 0 || i === HOME_PAGES.length - 1) {
+      const btn = el("button", "btn land-cta", i === 0 ? "进入启研" : "立即开始体验");
       btn.type = "button";
       btn.onclick = beginExperience;
       sec.querySelector(".snap-inner").appendChild(btn);
@@ -473,7 +479,7 @@ function renderHome() {
   const hintEl = el("div", "land-hint");
   hintEl.setAttribute("aria-hidden", "true");
   hintEl.append(el("span", "", "滚动以继续"), el("i"));
-  const skip = el("button", "land-skip", "跳过，直接开始");
+  const skip = el("button", "land-skip", "跳过介绍，直接开始");
   skip.type = "button";
   skip.onclick = beginExperience;
   land.append(canvas, buildSteps(), hintEl, skip, snap);
@@ -1255,12 +1261,8 @@ function mountSketch(canvas, scroller) {
     if (!canvas.isConnected) return;
     let moving = false;
     if (intro < 1) {
-      const boot = document.getElementById("boot");
-      const bootGone = !boot || boot.classList.contains("out");
-      if (bootGone) {
-        if (!introStart) introStart = now;
-        intro = Math.min(1, (now - introStart) / 900);
-      }
+      if (!introStart) introStart = now;
+      intro = Math.min(1, (now - introStart) / 900);
       moving = true;
     }
     if (busy && intro >= 1) { // 开场聚形先走完，剧本才开始——00 屏的过程要看得见
@@ -2168,7 +2170,7 @@ async function loadPrefs(c) {
     S.myDirs = Array.isArray(p.directions) ? p.directions : [];
     if (p.kit_id) useKit(p.kit_id);
     return true;
-  } catch (e) {
+    } catch (e) {
     if (e === STALE_DIR) throw e;
     S.myDirs = undefined;  // 渲染缓存不是写入授权：读失败就当不知道
     return false;
@@ -2549,14 +2551,14 @@ function confirmDrafts(facts) {
     const actions = el("div", "submit-actions");
     const ok = el("button", "btn", "保存核对");
     ok.type = "button";
-    ok.onclick = async () => {
-      const payload = Object.entries(edits).map(([id, value]) => ({ id, value }))
-        .concat([...dismissed].map((id) => ({ id, dismissed: true })));
+  ok.onclick = async () => {
+    const payload = Object.entries(edits).map(([id, value]) => ({ id, value }))
+      .concat([...dismissed].map((id) => ({ id, dismissed: true })));
       ok.disabled = true;
-      try {
-        await api("POST", "/api/onboard/confirm", { uid: S.uid, edits: payload });
+    try {
+      await api("POST", "/api/onboard/confirm", { uid: S.uid, edits: payload });
         toast("已保存，接下来看方向");
-        setView("cards");
+      setView("cards");
       } catch (e) { toast(e.message); ok.disabled = false; }
     };
     actions.appendChild(ok);
@@ -3960,7 +3962,7 @@ function renderPositionSoon() {
 }
 
 function emptyPanel(text, label, view) {
-  const p = el("div", "panel");
+    const p = el("div", "panel");
   p.appendChild(el("p", "panel-sub", text));
   if (label) {
     const b = el("button", "btn", label);
@@ -4632,6 +4634,7 @@ async function renderRead() {
       catalog = d.items || [];
     } catch (_) { catalog = []; }
   }
+  if (stale(seq)) return;
   if (!S.kitId && !catalog.length) useKit(DEFAULT_KIT);
   const kitId = S.kitId || "";
   const tab = S.readTab || "kit";
@@ -4839,6 +4842,7 @@ async function renderRead() {
       });
     }
   } catch (_) { /* 没有导入就不画 */ }
+  if (stale(seq)) return;
   search.onsubmit = async (ev) => {
     ev.preventDefault();
     const term = q.value.trim();
@@ -5442,7 +5446,7 @@ async function renderCard() {
     jumped.add(sec.label);
     const b = el("button", "sec-chip", esc(sec.label));
     b.type = "button";
-    b.onclick = () => {
+      b.onclick = () => {
       if (currentJump) currentJump.classList.remove("on");
       b.classList.add("on");
       currentJump = b;
@@ -7311,7 +7315,32 @@ document.addEventListener("keydown", (e) => {
 });
 
 (async function boot() {
-  const t0 = performance.now();
+  const splash = document.getElementById("boot");
+  const hideSplash = () => {
+    if (!splash || !splash.isConnected) return;
+    splash.classList.add("out");
+    setTimeout(() => { if (splash.isConnected) splash.remove(); }, 600);
+  };
+  // 接口再慢也不挡开场：现网冷启动曾把「启研」盖住十几秒，看起来像打不开。
+  setTimeout(hideSplash, 700);
+
+  const consumeNote = () => {
+    let next = "home", note = "";
+    try {
+      next = sessionStorage.getItem("rg_next_view") || sessionStorage.getItem("rg_last_view") || "home";
+      note = sessionStorage.getItem("rg_toast") || "";
+    } catch (_) { /* 无痕模式等 */ }
+    return { next, note };
+  };
+  const pickLanding = (next) => {
+    let landing = next === "login" && !S.uid ? "login" : next !== "home" && S.uid ? next : "home";
+    if (S.uid && !S.entered && !["home", "me", "login", "dialogue"].includes(landing)) landing = "dialogue";
+    return landing;
+  };
+  const first = consumeNote();
+  let bootHeldView = pickLanding(first.next);
+  setView(bootHeldView);
+
   try {
     const [h, paths] = await Promise.all([api("GET", "/api/health"), api("GET", "/api/paths").catch(() => null)]);
     S.llmInfo = h.llm || null;  // 服务器那把兜底密钥的状态，登录、退出时重画侧栏的模型钮要用
@@ -7340,7 +7369,7 @@ document.addEventListener("keydown", (e) => {
       if ([401, 404, 410].includes(e.status)) {  // 会话确实没了：清身份（草稿不动），落到登录页并说清为什么
         clearSession();
         reloadInto("login", sessionGoneMsg());
-        return;
+      return;
       } else {
         // 网络断了、服务器在重启：会话和草稿都留着，原来这里一律清掉，草稿就永久没了（Codex 复现）
         setTimeout(() => toast("暂时连不上服务器，稍后刷新一下"), 800);
@@ -7350,25 +7379,16 @@ document.addEventListener("keydown", (e) => {
     // 只有 uid、认领没成（网络错误）：先去登录页，但 uid 留着，下次打开再认领——它是这个人唯一的凭证
     setTimeout(() => toast("暂时连不上服务器，稍后刷新一下"), 800);
   }
-  let next = "home", note = "";
   try {
-    next = sessionStorage.getItem("rg_next_view") || sessionStorage.getItem("rg_last_view") || "home";
-    note = sessionStorage.getItem("rg_toast") || "";
     sessionStorage.removeItem("rg_next_view");
     sessionStorage.removeItem("rg_toast");
   } catch (_) { /* 无痕模式等 */ }
-  let landing = next === "login" && !S.uid ? "login" : next !== "home" && S.uid ? next : "home";
-  if (S.uid && !S.entered && !["home", "me", "login", "dialogue"].includes(landing)) landing = "dialogue";  // 还没进入：先把开场聊完或点「进入启研」
-  setView(landing);
-  if (note) toast(note);
+  const landing = pickLanding(first.next);
+  // 人已经点了「进入启研」或侧栏：不要把他们拽回粒子首页
+  if (S.view === bootHeldView) setView(landing);
+  if (first.note) toast(first.note);
   if (needConsent) openPrivacy(true);
-  // 开场最多停 0.7 秒：数据到了就走，不再固定等 1.4 秒
-  const splash = document.getElementById("boot");
-  setTimeout(() => {
-    if (!splash) return;
-    splash.classList.add("out");
-    setTimeout(() => splash.remove(), 600);
-  }, Math.max(0, 700 - (performance.now() - t0)));
+  hideSplash();
 })();
 
 function transcriptImportPanel() {
