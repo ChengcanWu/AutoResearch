@@ -12,6 +12,7 @@ const S = {
   wechat: false,
   guest: true,
   username: "",
+  isAdmin: false,  // 只存内存：启动/登录时服务端 account() 带出，不写 localStorage（服务端读库复核，改这个只会多出个入口按钮）
   hasLlmKey: false,
   llmKeyTail: "",
   llmKeyInvalid: false,
@@ -155,14 +156,16 @@ function sessionGoneMsg() {
 
 async function recoverUser(err) {
   if (!lostUser(err)) return false;
-  if (S.token) {
-    try {
-      const me = await apiFetch("/api/auth/me");
-      if (me.ok) return false;
-    } catch (_) { return false; }
+  const was = { uid: S.uid, token: S.token };
+  try {
+    await api("GET", "/api/auth/me", undefined, { timeoutMs: 20000 });
+    return false;
+  } catch (e) {
+    if (S.uid !== was.uid || S.token !== was.token) return false;  // 核验期间换了账号：不动
+    if (e && (e.status === 401 || e.status === 410)) { signedOut(sessionGoneMsg()); return true; }
+    toast("暂时无法核验登录状态，请稍后再试");  // 503、429、网络错误、超时：身份和草稿都留着
+    return false;
   }
-  signedOut("登录已失效，请用用户名和密码重新登录。提示用户名不存在的话，说明服务器数据被重置过，需要重新注册");
-  return true;
 }
 
 /* 函数多实例时，登录写在 A、下一请求落到 B，B 的临时库里没有这份会话，会回 401。
@@ -170,11 +173,14 @@ async function recoverUser(err) {
 let sessionKick = null;
 
 async function confirmSessionGone() {
+  const was = { uid: S.uid, token: S.token };
   try {
-    const me = await apiFetch("/api/auth/me");
-    if (me.ok) return;
-    signedOut("登录已失效，请用用户名和密码重新登录。提示用户名不存在的话，说明服务器数据被重置过，需要重新注册");
-  } catch (_) { /* 网络抖一下不踢人 */ }
+    await api("GET", "/api/auth/me", undefined, { timeoutMs: 20000 });
+  } catch (e) {
+    if (S.uid !== was.uid || S.token !== was.token) return;  // 核验期间换了账号：不动
+    if (e && (e.status === 401 || e.status === 410)) { signedOut(sessionGoneMsg()); return; }
+    toast("暂时无法核验登录状态，请稍后再试");  // 503、429、网络错误、超时：身份和草稿都留着
+  }
 }
 
 async function apiFetch(path, opt = {}) {
@@ -190,20 +196,38 @@ async function apiFetch(path, opt = {}) {
   return res;
 }
 
-async function api(method, path, body) {
-  const opt = { method, headers: { "Content-Type": "application/json" } };
-  if (body !== undefined) opt.body = JSON.stringify(body);
-  const res = await apiFetch(path, opt);
-  let data = null;
-  try { data = await res.json(); } catch (_) { /* no body */ }
-  if (!res.ok) {
-    const msg = errText(data, res.status);
-    if (res.status === 404 && /user not found/i.test(msg)) await recoverUser(new Error(msg));
-    const err = new Error(msg);
-    err.status = res.status;
-    throw err;
+async function api(method, path, body, opt = {}) {
+  const req = { method, headers: { "Content-Type": "application/json" } };
+  if (body !== undefined) req.body = JSON.stringify(body);
+  async function request() {
+    const res = await apiFetch(path, req);
+    let data = null;
+    try { data = await res.json(); } catch (e) { if (e && e.name === "AbortError") throw e; /* no body */ }
+    if (!res.ok) {
+      const msg = errText(data, res.status);
+      if (res.status === 404 && /user not found/i.test(msg)) await recoverUser(new Error(msg));
+      const err = new Error(msg);
+      err.status = res.status;
+      throw err;
+    }
+    return data;
   }
-  return data;
+  if (!opt.timeoutMs) return request();
+  const slowMsg = "服务器响应慢（可能在冷启动），请 10 秒后再试";
+  const ctrl = new AbortController();
+  req.signal = ctrl.signal;
+  let timer;
+  const slow = new Promise((_, reject) => {
+    timer = setTimeout(() => { ctrl.abort(); reject(new Error(slowMsg)); }, opt.timeoutMs);
+  });
+  const pending = request();
+  try {
+    return await Promise.race([pending, slow]);
+  } catch (e) {
+    pending.catch(() => {});  // 超时后被 abort 的那次请求自己会再拒绝一次：别让它变成控制台里的未处理 rejection
+    if (e && e.name === "AbortError") throw new Error(slowMsg);
+    throw e;
+  } finally { clearTimeout(timer); }
 }
 
 /* ---------- 工具 ---------- */
@@ -246,6 +270,7 @@ const WORKSPACE = {
   card: "read",
   me: "me",
   feedback: "feedback",
+  monitor: "monitor",
 };
 
 /* ---------- 视图切换 ---------- */
@@ -253,7 +278,7 @@ const WORKSPACE = {
 /* 刷新停在原来那一栏：记在这个标签页的 sessionStorage（新开标签页照样从首页进）。
    原来已登录的学生一刷新就回到粒子首页（Codex 复现）。要 id 的详情页回到它所在的栏目。 */
 const RESUMABLE = { today: "today", workbench: "workbench", projects: "projects", project: "projects", read: "read",
-  card: "read", position: "position", dialogue: "dialogue", confirm: "me", me: "me", cards: "cards" };
+  card: "read", position: "position", dialogue: "dialogue", confirm: "me", me: "me", cards: "cards", monitor: "monitor" };
 
 function firstView() {
   return S.entered ? "today" : "dialogue";
@@ -336,6 +361,9 @@ function setView(name) {
   });
   const dlgBtn = document.querySelector('.nav-btn[data-view="dialogue"]');
   if (dlgBtn) dlgBtn.hidden = !S.entered;
+  const mbtn = document.querySelector('.nav-btn[data-view="monitor"]');
+  if (mbtn) mbtn.hidden = !S.isAdmin;  // 运营监测只有管理员看得见
+  if (name !== "monitor" && S.monitorTimer) { clearInterval(S.monitorTimer); S.monitorTimer = null; }
   const dirChip = document.getElementById("dirChip");
   if (dirChip) dirChip.hidden = !S.entered;
   $nav.hidden = !inApp || !S.entered;
@@ -352,31 +380,27 @@ function stale(seq) {
 }
 
 async function render() {
+  stopPaperSpy?.(); stopPaperSpy = null;
   const seq = S.renderSeq = (S.renderSeq || 0) + 1;
   if (S.view === "home") { renderHome(); return; }
   if (!S.uid && S.view !== "login") { renderLogin(); return; }
-  // 先清掉上一页。研读/今日的接口可能要等好几秒，不先清的话侧栏已经亮着新栏，
-  // 主栏还停在对话——看起来像「研读页在显示对话」，再点今日会被迟到的写入盖成空白。
-  if (S.view !== "login") {
-    $app.innerHTML = "";
-    $app.appendChild(skeleton(3));
-  }
   try {
-  switch (S.view) {
-    case "login": renderLogin(); break;
+    switch (S.view) {
+      case "login": renderLogin(); break;
       case "dialogue": await ChatView.render($app); break;  // 要 await：不然它取画像失败时绕过下面的提示
       case "confirm": await renderMe(); break;
-    case "cards": await renderCards(); break;
-    case "workbench": await renderWorkbench(); break;
+      case "cards": await renderCards(); break;
+      case "workbench": await renderWorkbench(); break;
       case "projects":
       case "project": renderProjectsSoon(); break;
       case "position": renderPositionSoon(); break;
       case "read": await renderRead(); break;
       case "card": await renderCard(); break;
       case "feedback": await renderFeedback(); break;
-    case "me": await renderMe(); break;
-    case "today":
-    default: await renderToday(); break;
+      case "monitor": await renderMonitor(); break;
+      case "me": await renderMe(); break;
+      case "today":
+      default: await renderToday(); break;
     }
   } catch (e) {
     // 这一页要的数据没取到：原来变成没人接的 Promise 错误，菜单关了、页面却还停在上一页，也没有提示（Codex 复现）
@@ -468,8 +492,8 @@ function renderHome() {
       + (points ? `<ul class="land-points">${points}</ul>` : "")
       + (page.closing ? `<p class="land-closing">${page.closing}</p>` : "")
       + `</div>`;
-    if (i === 0 || i === HOME_PAGES.length - 1) {
-      const btn = el("button", "btn land-cta", i === 0 ? "进入启研" : "立即开始体验");
+    if (i === HOME_PAGES.length - 1) {
+      const btn = el("button", "btn land-cta", "立即开始体验");
       btn.type = "button";
       btn.onclick = beginExperience;
       sec.querySelector(".snap-inner").appendChild(btn);
@@ -479,7 +503,7 @@ function renderHome() {
   const hintEl = el("div", "land-hint");
   hintEl.setAttribute("aria-hidden", "true");
   hintEl.append(el("span", "", "滚动以继续"), el("i"));
-  const skip = el("button", "land-skip", "跳过介绍，直接开始");
+  const skip = el("button", "land-skip", "跳过，直接开始");
   skip.type = "button";
   skip.onclick = beginExperience;
   land.append(canvas, buildSteps(), hintEl, skip, snap);
@@ -1261,8 +1285,12 @@ function mountSketch(canvas, scroller) {
     if (!canvas.isConnected) return;
     let moving = false;
     if (intro < 1) {
-      if (!introStart) introStart = now;
-      intro = Math.min(1, (now - introStart) / 900);
+      const boot = document.getElementById("boot");
+      const bootGone = !boot || boot.classList.contains("out");
+      if (bootGone) {
+        if (!introStart) introStart = now;
+        intro = Math.min(1, (now - introStart) / 900);
+      }
       moving = true;
     }
     if (busy && intro >= 1) { // 开场聚形先走完，剧本才开始——00 屏的过程要看得见
@@ -1464,6 +1492,7 @@ function setSession(r, nextView, msg) {
   S.wechat = !!r.wechat;
   S.guest = !!r.guest;
   S.username = r.username || "";
+  S.isAdmin = !!r.is_admin;
   S.hasLlmKey = !!r.has_llm_key;
   S.llmKeyTail = r.llm_key_tail || "";
   S.llmKeyInvalid = !!r.llm_key_invalid;  // 换过 QIYAN_SECRET 后解不开的个人密钥：提示重存（16-F03）
@@ -1502,8 +1531,10 @@ function clearLocalDrafts(keep, owners) {
 function clearSession(purge) {
   ++directionEpoch;
   S.uid = ""; S.token = ""; S.wechat = false; S.guest = true;
-  S.username = ""; S.hasLlmKey = false; S.llmKeyTail = ""; S.llmKeyInvalid = false;
+  S.username = ""; S.isAdmin = false;
+  S.hasLlmKey = false; S.llmKeyTail = ""; S.llmKeyInvalid = false;
   S.entered = false;
+  if (S.monitorTimer) { clearInterval(S.monitorTimer); S.monitorTimer = null; }
   S.myDir = undefined; S.portraitId = ""; S.portraitName = ""; S.mePortrait = "";
   S.kitId = "";
   try { localStorage.removeItem("rg_kit"); } catch (_) { /* 无痕模式等 */ }
@@ -1535,7 +1566,7 @@ function openPrivacy(gate) {
     ok.type = "button";
     ok.onclick = async () => {
       try {
-        await api("POST", "/api/auth/consent", { version: S.auth ? S.auth.privacy_version : "" });
+        await api("POST", "/api/auth/consent", { version: S.auth ? S.auth.privacy_version : "" }, { timeoutMs: 20000 });
         mask.remove();
       } catch (e) { toast(e.message); }
     };
@@ -1686,6 +1717,18 @@ function renderLogin() {
   const binding = !!(S.uid && S.guest);  // 访客来绑微信：start 时带着访客会话，记录跟着走
   const wxOn = !S.auth || S.auth.wechat_login;
   const hero = el("section", "hero stagger");
+  let recovery = "";
+  try {
+    const raw = localStorage.getItem("rg_recovery_state");
+    const saved = raw ? JSON.parse(raw) : null;
+    recovery = saved && typeof saved === "object" && typeof saved.state === "string" ? saved.state : "normal";
+  } catch (_) { recovery = "normal"; /* 旧的纯字符串值、无痕模式等 */ }
+  const RECOVERY_NOTE = {
+    lost: "服务器确认原账号数据无法恢复，请重新注册；旧记录不会自动找回。",
+    accounts_restored: "用户名账号已恢复，请用原用户名和密码登录；原访客、仅微信账号无法找回。",
+    recovering: "账号正在恢复，请稍后重试。",
+  };
+  if (RECOVERY_NOTE[recovery]) hero.appendChild(el("p", "login-note login-recovery", RECOVERY_NOTE[recovery]));
   hero.appendChild(el("p", "hero-kicker", binding ? "启研 · 绑定微信" : "启研 · 登录"));
   hero.appendChild(el("h2", "", binding ? "绑定微信" : "登录"));
   hero.appendChild(el("p", "hero-lead", binding
@@ -1714,6 +1757,8 @@ function renderLogin() {
   suser.setAttribute("aria-label", "用户名");
   const spass = el("input"); spass.type = "password"; spass.placeholder = "密码"; spass.autocomplete = "current-password";
   spass.setAttribute("aria-label", "密码");
+  const sinv = el("input"); sinv.type = "password"; sinv.placeholder = "邀请码（选填，管理员填）"; sinv.maxLength = 128;
+  sinv.setAttribute("aria-label", "邀请码");
   const sbtn = el("button", "btn", "登录");
   sbtn.type = "button";
   sbtn.onclick = async () => {
@@ -1721,16 +1766,37 @@ function renderLogin() {
     sbtn.disabled = true; sbtn.textContent = "登录中…";
     stopWxPoll();  // 走密码就作废正在等的微信登录，免得它的结果回来盖掉这次会话
     try {
-      const r = await api("POST", "/api/auth/signin", { username: suser.value.trim(), password: spass.value });
+      const r = await api("POST", "/api/auth/signin", { username: suser.value.trim(), password: spass.value, invite_code: sinv.value.trim() }, { timeoutMs: 20000 });
+      try { localStorage.removeItem("rg_reset_hint"); localStorage.removeItem("rg_last_uid"); } catch (_) { /* 无痕模式等 */ }
+      try {
+        if (S.auth && S.auth.recovery) localStorage.setItem("rg_seen_event", S.auth.recovery.event_id);
+        localStorage.removeItem("rg_recovery_state");
+      } catch (_) { /* 无痕模式等 */ }
       const previous = S.token;  // 访客登进自己的账号：采用新令牌之后再吊销访客的
       if (previous && previous !== r.token) revokeToken(previous);
       if (setSession(r, "today")) return;
-      await afterEnter();
+      let slowTimer;
+      const slow = new Promise((_, rej) => { slowTimer = setTimeout(() => rej(new Error("after_enter_timeout")), 15000); });
+      try {
+        await Promise.race([afterEnter(), slow]);
+      } catch (e) {
+        if (!e || e.message !== "after_enter_timeout") throw e;
+        toast("登录成功，页面资料暂未加载，请刷新重试");  // 会话已生效，不重发登录
+        sbtn.disabled = false; sbtn.textContent = "登录";
+      } finally { clearTimeout(slowTimer); slow.catch(() => {}); }
       if (!r.consent_ok) openPrivacy(true);
-    } catch (e) { toast(e.message); sbtn.disabled = false; sbtn.textContent = "登录"; }
+    } catch (e) {
+      toast(e.message); sbtn.disabled = false; sbtn.textContent = "登录";
+      let reset = false;
+      try { reset = e.status === 401 && localStorage.getItem("rg_reset_hint") === "1"; } catch (_) { /* 无痕模式等 */ }
+      if (reset && !signinStep.querySelector(".login-reset-hint")) {
+        signinStep.appendChild(el("p", "login-note login-reset-hint", "登录已失效且这个账号现在不存在：服务器在 2026-10-18 更换过数据库，之前的账号需要重新注册（用户名可以沿用）。如果你刚才只是密码输错，再试一次即可。"));
+      }
+    }
   };
   spass.addEventListener("keydown", onEnter(sbtn));
-  signinStep.append(suser, spass, sbtn);
+  sinv.addEventListener("keydown", onEnter(sbtn));
+  signinStep.append(suser, sinv, spass, sbtn);
 
   const registerStep = el("div", "login-step login-body");
   const ruser = el("input"); ruser.placeholder = "用户名，例如 xiaobei（2–24 个字母、数字、下划线）"; ruser.autocomplete = "username"; ruser.maxLength = 24;
@@ -1750,11 +1816,25 @@ function renderLogin() {
       const r = await api("POST", "/api/auth/register", {
         username: ruser.value.trim(), password: rpass.value,
         nickname: rnick.value.trim() || ruser.value.trim(), consent: true,
-      });
+      }, { timeoutMs: 20000 });
+      try { localStorage.removeItem("rg_reset_hint"); localStorage.removeItem("rg_last_uid"); } catch (_) { /* 无痕模式等 */ }
+      try {
+        if (S.auth && S.auth.recovery) localStorage.setItem("rg_seen_event", S.auth.recovery.event_id);
+        localStorage.removeItem("rg_recovery_state");
+      } catch (_) { /* 无痕模式等 */ }
       if (setSession(r, "dialogue")) return;
-      await afterEnter();
+      let slowTimer;
+      const slow = new Promise((_, rej) => { slowTimer = setTimeout(() => rej(new Error("after_enter_timeout")), 15000); });
+      try {
+        await Promise.race([afterEnter(), slow]);
+      } catch (e) {
+        if (!e || e.message !== "after_enter_timeout") throw e;
+        toast("登录成功，页面资料暂未加载，请刷新重试");  // 会话已生效，不重发注册
+        rbtn.disabled = false; rbtn.textContent = "注册并进入";
+      } finally { clearTimeout(slowTimer); slow.catch(() => {}); }
     } catch (e) { toast(e.message); rbtn.disabled = false; rbtn.textContent = "注册并进入"; }
   };
+  if (recovery === "recovering") rbtn.disabled = true;
   rpass.addEventListener("keydown", onEnter(rbtn));
   registerStep.append(ruser, rnick, rpass, rbtn);
 
@@ -1782,7 +1862,7 @@ function renderLogin() {
   guestBox.append(guestRow, el("p", "form-note", "访客的记录只能在这台浏览器里找回，之后可以在「记录」页绑定微信或设用户名密码。"));
 
   const steps = { wechat: wxStep, signin: signinStep, register: registerStep };
-  let mode = wxOn ? "wechat" : "signin";
+  let mode = recovery === "lost" ? "register" : wxOn ? "wechat" : "signin";
   const tabs = el("div", "login-tabs");
   const paint = () => {
     tabs.querySelectorAll("button").forEach((b) => b.classList.toggle("on", b.dataset.mode === mode));
@@ -2115,11 +2195,13 @@ function applyNavCollapsed() {
 function paintChrome() {
   const nick = document.getElementById("userNickname");
   if (nick) nick.textContent = S.nickname || "";
+  const dot = document.querySelector("#userMenuBtn .dot");
+  if (dot) dot.textContent = (S.nickname || "")[0] || "我";
   applyNavCollapsed();
   const chip = document.getElementById("dirChip");
   if (!chip) return;
   const name = portraitChipLabel();
-  chip.textContent = name || "还没有方向";
+  chip.textContent = name || "选个方向 ▾";
   chip.classList.toggle("empty", !name);
 }
 
@@ -2136,6 +2218,84 @@ function accountKind() {
   if (S.username) return "注册账号";
   if (S.wechat) return "微信登录";
   return "访客";
+}
+
+/* ---------- 运营监测（管理员） ----------
+   数据复用 /api/admin/stats 与 /api/health：管理员登录会话本身就是凭证（服务端 _admin 第二通道），
+   页面不存管理员口令。30 秒自动刷新，切走视图就停。 */
+
+function monitorCard(label, value, sub, warn) {
+  const card = el("div", "monitor-card" + (warn ? " monitor-warn" : ""));
+  card.appendChild(el("p", "monitor-label", label));
+  card.appendChild(el("p", "monitor-value", String(value)));
+  if (sub) card.appendChild(el("p", "monitor-sub", sub));
+  return card;
+}
+
+async function renderMonitor() {
+  const seq = S.renderSeq;
+  const wrap = el("div", "monitor panel");
+  $app.replaceChildren(wrap);
+  const paint = async () => {
+    let s = null, h = null;
+    try {
+      [s, h] = await Promise.all([
+        api("GET", "/api/admin/stats"),
+        api("GET", "/api/health").catch(() => null),
+      ]);
+    } catch (e) {
+      if (stale(seq)) return;
+      wrap.replaceChildren(emptyPanel(`运营数据没取到：${esc((e && e.message) || e)}`, "再试一次", "monitor"));
+      return;
+    }
+    if (stale(seq)) return;
+    const mb = (n) => (n >= 1048576 ? (n / 1048576).toFixed(1) + " MB"
+      : n >= 1024 ? (n / 1024).toFixed(1) + " KB" : (n || 0) + " B");
+    const pool = (h && h.model_pool) || {};
+    const acc = (h && h.db && h.db.account_store) || {};
+    const head = el("div", "ws-head");
+    head.appendChild(el("h2", "", "运营监测"));
+    head.appendChild(el("p", "", "30 秒自动刷新一次。数据来自 /api/admin/stats 与 /api/health。"));
+    // 注意：el() 第三参数是 innerHTML 字符串，卡片是元素，只能用 append 塞进去
+    const grid1 = el("div", "monitor-grid");
+    grid1.append(
+      monitorCard("注册用户", s.users, `会话 ${s.sessions} · 已过期 ${s.expired_sessions}`),
+      monitorCard("今日模型调用", s.today_star, `研究 ${s.today_star} · 访客 ${s.today_guest} · 翻译 ${s.xlate_today}`),
+      monitorCard("库大小", mb(s.db_bytes), `WAL ${mb(s.wal_bytes)} · 空闲页 ${s.freelist_count}`),
+      monitorCard("临时盘", s.ephemeral ? "是（危险）" : "否", `剩余 ${mb(s.tmp_free)}`, !!s.ephemeral),
+      monitorCard("论文缓存", mb(s.arxiv_bytes), `正文 ${s.arxiv_files} 篇 · 用户收藏 ${s.user_papers}`),
+      monitorCard("方向目录", s.paper_dir_rows, `${s.paper_dir_nodes} 个节点 · 缺口 ${(s.paper_dir_gaps || []).length} 个`),
+      monitorCard("构建", esc(s.build || "—"), `线程池 ${s.pools && s.pools.threads}`),
+      monitorCard("账号副本", acc.enabled ? "开" : "关",
+        acc.enabled ? `${acc.users || 0} 人 · ${esc(String(acc.via || ""))}` : "没配 QIYAN_ACCOUNT_STORE / BACKUP_OSS_BUCKET", !acc.enabled),
+    );
+    const grid2 = el("div", "monitor-grid");
+    grid2.append(
+      monitorCard("模型池", pool.workers, `排队 ${pool.queued} / 运行 ${pool.running} · 借用线程 ${pool.threads_borrowed}`),
+      monitorCard("库可写", h && h.db ? (h.db.writable ? "是" : "否") : "—",
+        h && h.db && h.db.blocked ? `blocked: ${h.db.blocked}` : "", h && h.db && !h.db.writable),
+      monitorCard("个人密钥数", s.user_secrets, "user_secrets 行数"),
+    );
+    wrap.replaceChildren(head, grid1, grid2);
+    if (s.ephemeral) {
+      wrap.appendChild(el("p", "monitor-banner", "⚠️ 数据库还在临时盘：实例回收或发版会清掉所有账号。挂 NAS 前先别推广。"));
+    }
+    if ((s.top_uids || []).length) {
+      const tbl = el("table", "monitor-table");
+      const hdr = el("tr");
+      hdr.append(el("th", "", "用户"), el("th", "", "今日调用"));
+      tbl.appendChild(hdr);
+      for (const r of s.top_uids.slice(0, 10)) {
+        const row = el("tr");
+        row.append(el("td", "", esc(String(r.user_id || ""))), el("td", "", String(r.calls)));
+        tbl.appendChild(row);
+      }
+      wrap.appendChild(el("h3", "section-label", "今日调用 Top"));
+      wrap.appendChild(tbl);
+    }
+  };
+  await paint();
+  S.monitorTimer = setInterval(paint, 30000);
 }
 
 async function openUserMenu() {
@@ -2157,21 +2317,24 @@ async function openUserMenu() {
     return b;
   };
   menu.appendChild(go("我的", () => setView("me")));
+  if (S.isAdmin) menu.appendChild(go("运营监测", () => setView("monitor")));
   if (!S.guest) menu.appendChild(go("我的 DeepSeek", () => openMineKey()));
   menu.appendChild(go("退出", () => { if (confirmLeave()) logout("home"); }));
   menu.appendChild(go("换账号", () => { if (confirmLeave()) logout("login"); }));
   wrap.appendChild(menu);  // 画像切换不再放菜单里（11 号：在「我的」页）
 }
 
-async function loadPrefs(c) {
+async function loadPrefs(c, ctx) {
   try {
     const run = () => api("GET", "/api/me/prefs");
     const p = await (c ? dirAwait(c, run) : run());
+    if (ctx && !ctx.live()) return;
     S.myDirs = Array.isArray(p.directions) ? p.directions : [];
     if (p.kit_id) useKit(p.kit_id);
     return true;
-    } catch (e) {
+  } catch (e) {
     if (e === STALE_DIR) throw e;
+    if (ctx && !ctx.live()) return;
     S.myDirs = undefined;  // 渲染缓存不是写入授权：读失败就当不知道
     return false;
   }
@@ -2551,14 +2714,14 @@ function confirmDrafts(facts) {
     const actions = el("div", "submit-actions");
     const ok = el("button", "btn", "保存核对");
     ok.type = "button";
-  ok.onclick = async () => {
-    const payload = Object.entries(edits).map(([id, value]) => ({ id, value }))
-      .concat([...dismissed].map((id) => ({ id, dismissed: true })));
+    ok.onclick = async () => {
+      const payload = Object.entries(edits).map(([id, value]) => ({ id, value }))
+        .concat([...dismissed].map((id) => ({ id, dismissed: true })));
       ok.disabled = true;
-    try {
-      await api("POST", "/api/onboard/confirm", { uid: S.uid, edits: payload });
+      try {
+        await api("POST", "/api/onboard/confirm", { uid: S.uid, edits: payload });
         toast("已保存，接下来看方向");
-      setView("cards");
+        setView("cards");
       } catch (e) { toast(e.message); ok.disabled = false; }
     };
     actions.appendChild(ok);
@@ -3001,25 +3164,29 @@ async function portraitOp(run, nextView, wasActive = false, after = null) {
   }
 }
 
-async function ensurePortrait() {
+async function ensurePortrait(ctx) {
   if (S.portraitId) return S.portraitId;
   try {
     const r = await api("GET", `/api/portraits?uid=${S.uid}`);
+    if (ctx && !ctx.live()) return;
     const active = (r.portraits || []).find((p) => p.active);
     S.portraitId = active ? active.id : "";
     S.portraitName = (active && active.name) || "";
   } catch (_) {
+    if (ctx && !ctx.live()) return;
     S.portraitId = "";
     S.portraitName = "";
   }
   if (S.portraitId) adoptLegacyTrail(S.portraitId);
-  const state = await pullTrail();
+  const state = await pullTrail(ctx);
+  if (ctx && !ctx.live()) return;
   // 老数据迁移：方向原来存在全局 prefs 里，第一次进画像时收进这份画像的 trail
   // 只有成功读到、且远端同时缺 dirs/sel 的旧 schema 才迁移；读失败是未知，空数组是明确选择
   const t = trail();
   if (state.loaded && !state.modern && !t.dirs.length && Array.isArray(S.myDirs) && S.myDirs.length) {
     const dirs = S.myDirs.filter((id) => !window.RG_DIR || RG_DIR.byId[id]);
     if (dirs.length) await saveTrail({ ...t, dirs, sel: dirs });
+    if (ctx && !ctx.live()) return;
   }
   if (state.loaded) ensureSelKey();
   return S.portraitId;
@@ -3098,11 +3265,12 @@ function saveTrail(t, force, c) {
   return Promise.resolve();
 }
 
-async function pullTrail() {
+async function pullTrail(ctx) {
   if (!S.token) return { loaded: true, modern: false };
   const pid = S.portraitId || "default";
   try {
     const remote = await api("GET", `/api/projects/${pid}/trail`);
+    if (ctx && !ctx.live()) return { loaded: false, modern: false };
     const modern = Array.isArray(remote?.dirs) || Array.isArray(remote?.sel);
     if (modern || remote?.code) {
       localStorage.setItem(trailStorageKey(), JSON.stringify(remote));
@@ -3962,7 +4130,7 @@ function renderPositionSoon() {
 }
 
 function emptyPanel(text, label, view) {
-    const p = el("div", "panel");
+  const p = el("div", "panel");
   p.appendChild(el("p", "panel-sub", text));
   if (label) {
     const b = el("button", "btn", label);
@@ -4553,7 +4721,7 @@ async function renderToday() {
   const wrap = el("div", "stagger");
   wrap.appendChild(workspaceHead("今日", "打开就看这一件。"));
   const status = el("div", "status-chips");
-  status.appendChild(el("span", "status-chip" + (field ? " on" : ""), field ? esc(dirTitle(saved.dir, field)) : "还没有方向"));
+  status.appendChild(el("span", "status-chip" + (field ? " on" : ""), field ? esc(dirTitle(saved.dir, field)) : "还没选方向"));
   if (node) status.appendChild(el("span", "status-chip", `正在「${esc(node.label)}」`));
   if (doneTasks) status.appendChild(el("span", "status-chip", `交过 ${doneTasks} 次`));
   wrap.appendChild(status);
@@ -4634,7 +4802,6 @@ async function renderRead() {
       catalog = d.items || [];
     } catch (_) { catalog = []; }
   }
-  if (stale(seq)) return;
   if (!S.kitId && !catalog.length) useKit(DEFAULT_KIT);
   const kitId = S.kitId || "";
   const tab = S.readTab || "kit";
@@ -4687,7 +4854,7 @@ async function renderRead() {
   rightH.appendChild(readTabs(tab));
   const search = el("form", "read-search");
   const q = el("input");
-  q.placeholder = "英文关键词，例如 evaluation benchmark";
+  q.placeholder = "搜论文（arXiv 只认英文关键词）";
   q.name = "q";
   const goSearch = el("button", "btn small", "搜索");
   goSearch.type = "submit";
@@ -4745,7 +4912,7 @@ async function renderRead() {
   const leftPane = el("section", "read-pane");
   const leftHead = el("div", "read-pane-head");
   leftHead.appendChild(el("h3", "panel-title", "经典文献推荐"));
-  leftHead.appendChild(el("small", "", `过线 ${passed} 张`));
+  if (passed > 0) leftHead.appendChild(el("small", "", `已完成 ${passed} 张阅读卡`));
   const leftBody = el("div", "read-pane-body");
   const recPapers = catalog.length ? catalog.map((p, i) => ({
     arxiv_id: p.paper_id || p.id,
@@ -4780,15 +4947,16 @@ async function renderRead() {
       const li = el("li", "kit-paper");
       const main = el("div", "kp-main");
       const kitForCard = fromSearch ? (p.card_kit || "") : (p.card_kit || (!catalog.length && kit.id) || "");
-      const title = el("button", "linkish", esc(p.title));
+      const title = el("button", "linkish");
+      title.textContent = p.title_zh || p.title;
       title.type = "button";
       title.onclick = () => { S.cardFrom = "read"; openCard(aid, kitForCard); };
       main.appendChild(el("span", "kp-n", String(p.order || i + 1)));
       main.appendChild(title);
       if (p.title_zh) {
-        const zh = el("p", "kp-zh");
-        zh.textContent = p.title_zh;
-        main.appendChild(zh);
+        const en = el("p", "kp-en");
+        en.textContent = p.title;
+        main.appendChild(en);
       }
       if ((p.keywords || []).length) {
         const kws = el("p", "kp-kw");
@@ -4805,11 +4973,11 @@ async function renderRead() {
       }
       if (c) {
         main.appendChild(el("span", c.status === "pass" ? "kp-state pass" : "kp-state revise",
-          c.status === "pass" ? `✓ 过线 v${c.version}` : `待改 v${c.version}`));
+          c.status === "pass" ? `✓ 已完成 v${c.version}` : `待改 v${c.version}`));
       }
       if (p.why) main.appendChild(el("p", "form-note", esc(p.why)));
       li.appendChild(main);
-      const goLabel = fromSearch ? "打开" : (c ? (c.status === "pass" ? "看卡" : "改这张卡") : (kitForCard ? "写阅读卡" : "打开"));
+      const goLabel = fromSearch ? "打开" : (c ? (c.status === "pass" ? "看卡" : "改这张卡") : (kitForCard ? "带读答题" : "打开"));
       const go = el("button", primary ? "btn small" : "btn small secondary", goLabel);
       go.type = "button";
       go.onclick = () => { S.cardFrom = "read"; openCard(aid, kitForCard); };
@@ -4842,7 +5010,6 @@ async function renderRead() {
       });
     }
   } catch (_) { /* 没有导入就不画 */ }
-  if (stale(seq)) return;
   search.onsubmit = async (ev) => {
     ev.preventDefault();
     const term = q.value.trim();
@@ -5239,8 +5406,14 @@ function tutorPanel({ aid, kitId, scrollTo, selection, onPrefill, session }) {
   return box;
 }
 
+let stopPaperSpy = null;
+let paperRenderEpoch = 0;
+
 async function renderCard() {
+  stopPaperSpy?.(); stopPaperSpy = null;
+  const epoch = ++paperRenderEpoch;
   const seq = S.renderSeq;
+  const isCurrent = () => epoch === paperRenderEpoch && !stale(seq);
   const kitId = S.cardKit || "";
   const aid = S.cardId;
   if (!aid) { setView("read"); return; }
@@ -5257,15 +5430,15 @@ async function renderCard() {
     const jobs = [api("GET", `/api/papers/${encodeURIComponent(aid)}`)];
     if (!isLocal && kitId) jobs.unshift(api("GET", `/api/kits/${kitId}`));
     const got = await Promise.all(jobs);
-    if (stale(seq)) return;
+    if (!isCurrent()) return;
     if (!isLocal && kitId) { kit = got[0]; paper = got[1]; }
     else paper = got[0];
     const inKit = !!(kit.papers || []).some((p) => p.arxiv_id === aid);
     const showCards = !isLocal && inKit;
     if (S.uid && showCards) cards = await api("GET", `/api/cards?uid=${S.uid}&kit=${kitId}`);
-    if (stale(seq)) return;
+    if (!isCurrent()) return;
   } catch (e) {
-    if (stale(seq)) return;
+    if (!isCurrent()) return;
     if (await recoverUser(e)) return;
     const why = e.message || "";
     if (/503|排队|忙/.test(why)) {
@@ -5275,7 +5448,7 @@ async function renderCard() {
     }
     return;
   }
-  if (stale(seq)) return;
+  if (!isCurrent()) return;
   loading.remove();
   const showCard = !isLocal && !!(kit.papers || []).some((p) => p.arxiv_id === aid);
   const prev = (cards.cards || []).find((c) => c.arxiv_id === aid);
@@ -5290,9 +5463,26 @@ async function renderCard() {
 
   const head = el("div", "card-head");
   head.appendChild(back);
-  head.appendChild(el("h2", "", esc(paper.title)));
   const kitP = (kit.papers || []).find((p) => p.arxiv_id === aid);
   const titleZh = paper.title_zh || (kitP && kitP.title_zh) || "";
+  const zhNote = /（[^（）]*）\s*$/.exec(titleZh);
+  const zhTitle = zhNote ? titleZh.slice(0, zhNote.index).trim() : titleZh;
+  if (zhTitle) {
+    const h2 = el("h2");
+    h2.textContent = zhTitle;
+    head.appendChild(h2);
+    const en = el("p", "paper-en");
+    en.textContent = paper.title;
+    head.appendChild(en);
+  } else {
+    head.appendChild(el("h2", "", esc(paper.title)));
+  }
+  const ledeText = (kitP && kitP.why) || paper.why || "";
+  if (ledeText) {
+    const lede = el("p", "paper-lede");
+    lede.textContent = ledeText;
+    head.appendChild(lede);
+  }
   const kws = (paper.keywords && paper.keywords.length) ? paper.keywords : ((kitP && kitP.keywords) || []);
   let absNote = "正文已取到，引文可逐字核对";
   if (paper.source === "pdf") absNote = "你导入的 PDF · 只有你能看到";
@@ -5302,6 +5492,11 @@ async function renderCard() {
     status.appendChild(el("span", "", `<a href="${esc(paper.url)}" target="_blank" rel="noopener">arXiv:${esc(aid)} ↗</a>`));
   }
   status.appendChild(el("span", "", absNote));
+  if (zhNote) {
+    const noteSpan = el("span");
+    noteSpan.textContent = zhNote[0].replace(/^（|）$/g, "");
+    status.appendChild(noteSpan);
+  }
   if (prev) status.appendChild(el("span", "", `上一版 v${prev.version} · ${prev.status === "pass" ? "过线" : "待改"}`));
   if (paper.source !== "html" && paper.source !== "pdf") {
     const retry = el("button", "linkish", "重新取正文");
@@ -5318,11 +5513,6 @@ async function renderCard() {
   }
   head.appendChild(status);
   $app.appendChild(head);
-  if (titleZh) {
-    const zh = el("p", "paper-zh");
-    zh.textContent = titleZh;
-    $app.appendChild(zh);
-  }
   if (kws.length) {
     const row = el("p", "paper-kw");
     kws.slice(0, 5).forEach((k) => {
@@ -5337,7 +5527,7 @@ async function renderCard() {
   if (S.uid) {
     try { tutorMeta = await api("GET", `/api/tutor/${encodeURIComponent(aid)}?uid=${S.uid}&kit=${kitId}`); }
     catch (_) { /* 没有会话就当没开始 */ }
-    if (stale(seq)) return;
+    if (!isCurrent()) return;
   }
   const canGrade = !!(tutorMeta && tutorMeta.can_grade);
   const inKit = !tutorMeta || tutorMeta.in_kit !== false;
@@ -5351,11 +5541,11 @@ async function renderCard() {
     passedCount, canGrade, inKit: showCard && inKit,
   });
 
-  const tabs = el("nav", "ws-tabs bench-modes");
-  const tabTutor = el("button", "ws-tab", "AI 带读");
+  const tabs = el("div", "bench-cta");
+  const tabTutor = el("button", "btn", "带读答题");
   tabTutor.type = "button";
   tabTutor.dataset.mode = "tutor";
-  const tabCard = el("button", "ws-tab", "写阅读卡");
+  const tabCard = el("button", "linkish", "或：写阅读卡");
   tabCard.type = "button";
   tabCard.dataset.mode = "card";
   if (!canGrade) {
@@ -5385,6 +5575,11 @@ async function renderCard() {
   tools.append(tutorQuote, cardQuote);
   const quoteFields = (cards.fields || []).filter((f) => f.quote);
   const pane = el("div", "paper-text");
+  const inside = () => getComputedStyle(left).position === "sticky" || pane.scrollHeight > pane.clientHeight + 1;
+  const edge = () => Math.max(0, ...[...document.querySelectorAll(".side-nav,.app-top")].filter((n) => /^(sticky|fixed)$/.test(getComputedStyle(n).position)).map((n) => n.getBoundingClientRect().bottom));
+  const jumpTo = (n) => (inside()
+    ? pane.scrollTo({ top: n.offsetTop - 8, behavior: "smooth" })
+    : window.scrollTo({ top: Math.max(0, window.scrollY + n.getBoundingClientRect().top - edge() - 8), behavior: "smooth" }));
   const jump = el("div", "sec-jump", "<span>跳到</span>");
   const starts = new Map((paper.sections || []).map((sec) => [sec.at, sec]));
   const jumped = new Set(["参考文献", "附录", "致谢"]);
@@ -5446,11 +5641,11 @@ async function renderCard() {
     jumped.add(sec.label);
     const b = el("button", "sec-chip", esc(sec.label));
     b.type = "button";
-      b.onclick = () => {
+    b.onclick = () => {
       if (currentJump) currentJump.classList.remove("on");
       b.classList.add("on");
       currentJump = b;
-      pane.scrollTo({ top: node.offsetTop - 8, behavior: "smooth" });
+      jumpTo(node);
     };
     jump.appendChild(b);
     jumpTargets.push({ node, btn: b });
@@ -5474,7 +5669,7 @@ async function renderCard() {
   // 「跳到」滚动联动：读到哪一节，对应按钮就亮哪一节。
   // 判定标准是「最后一个已经滚过视口上沿的标题」；还在最前面的作者区时都不亮。
   const spy = () => {
-    const base = pane.getBoundingClientRect().top;
+    const base = inside() ? pane.getBoundingClientRect().top : edge();
     let hit = null;
     for (const t of jumpTargets) {
       if (t.node.getBoundingClientRect().top - base <= 28) hit = t;
@@ -5487,18 +5682,23 @@ async function renderCard() {
     currentJump = next;
   };
   let spyTick = false;
-  pane.addEventListener("scroll", () => {
+  const schedule = () => {
     if (spyTick) return;
     spyTick = true;
-    window.requestAnimationFrame(() => { spyTick = false; spy(); });
-  }, { passive: true });
+    window.requestAnimationFrame(() => { spyTick = false; if (bench.isConnected && isCurrent()) spy(); });
+  };
   // 初次判定要等面板挂进页面之后再做：挂载前坐标全是 0，会把最后一节误判成当前节
-  window.requestAnimationFrame(() => window.requestAnimationFrame(spy));
+  window.requestAnimationFrame(() => window.requestAnimationFrame(() => { if (bench.isConnected && isCurrent()) spy(); }));
 
   // 「选中原文」和「跳到章节」的按钮收进同一个工具栏，放不下就换行，不再横向滚动
-  const toolBar = el("div", "paper-tools");
+  const toolBar = el("details", "paper-tools");
+  toolBar.open = !!(window.matchMedia && window.matchMedia("(min-width: 921px)").matches);
+  toolBar.appendChild(el("summary", "", "原文工具（选句、跳转）"));
   toolBar.append(tools, jump);
   left.append(toolBar, pane);
+  const hooks = [[pane, "scroll"], [window, "scroll"], [window, "resize"], [toolBar, "toggle"]];
+  hooks.forEach(([n, e]) => n.addEventListener(e, schedule, { passive: true }));
+  stopPaperSpy = () => hooks.forEach(([n, e]) => n.removeEventListener(e, schedule));
 
   // 右：卡
   const right = el("section", "bench-card");
@@ -5511,7 +5711,7 @@ async function renderCard() {
     if (!hit && start != null) hit = lineIndex.find((x) => x.start <= start && start < x.end);
     if (hit) {
       hit.node.classList.add("tutor-hit");
-      pane.scrollTo({ top: hit.node.offsetTop - 8, behavior: "smooth" });
+      jumpTo(hit.node);
     }
   };
   const readSelection = () => {
@@ -7315,37 +7515,33 @@ document.addEventListener("keydown", (e) => {
 });
 
 (async function boot() {
-  const splash = document.getElementById("boot");
-  const hideSplash = () => {
-    if (!splash || !splash.isConnected) return;
+  const t0 = performance.now();
+  const removeSplash = () => {
+    const splash = document.getElementById("boot");
+    if (!splash || splash.classList.contains("out")) return;
     splash.classList.add("out");
-    setTimeout(() => { if (splash.isConnected) splash.remove(); }, 600);
+    setTimeout(() => splash.remove(), 600);
   };
-  // 接口再慢也不挡开场：现网冷启动曾把「启研」盖住十几秒，看起来像打不开。
-  setTimeout(hideSplash, 700);
-
-  const consumeNote = () => {
-    let next = "home", note = "";
-    try {
-      next = sessionStorage.getItem("rg_next_view") || sessionStorage.getItem("rg_last_view") || "home";
-      note = sessionStorage.getItem("rg_toast") || "";
-    } catch (_) { /* 无痕模式等 */ }
-    return { next, note };
-  };
-  const pickLanding = (next) => {
-    let landing = next === "login" && !S.uid ? "login" : next !== "home" && S.uid ? next : "home";
-    if (S.uid && !S.entered && !["home", "me", "login", "dialogue"].includes(landing)) landing = "dialogue";
-    return landing;
-  };
-  const first = consumeNote();
-  let bootHeldView = pickLanding(first.next);
-  setView(bootHeldView);
-
+  setTimeout(removeSplash, 5000);  // 开场遮罩最多挡 5 秒：health、me 卡住也不让人对着遮罩干等
   try {
-    const [h, paths] = await Promise.all([api("GET", "/api/health"), api("GET", "/api/paths").catch(() => null)]);
+    const [h, paths] = await Promise.all([api("GET", "/api/health", undefined, { timeoutMs: 5000 }),
+      api("GET", "/api/paths", undefined, { timeoutMs: 5000 }).catch(() => null)]);
     S.llmInfo = h.llm || null;  // 服务器那把兜底密钥的状态，登录、退出时重画侧栏的模型钮要用
     applyLlmPill(h.llm);
     S.auth = h.auth || null;
+    const current = S.auth && S.auth.recovery;
+    if (current) {
+      try {
+        if (current.state === "normal") localStorage.removeItem("rg_recovery_state");
+        else {
+          let saved = null;
+          try { saved = JSON.parse(localStorage.getItem("rg_recovery_state") || "null"); } catch (_) { /* 旧的纯字符串值 */ }
+          if (saved && typeof saved === "object" && saved.event_id !== current.event_id) {
+            localStorage.setItem("rg_recovery_state", JSON.stringify({ event_id: current.event_id, state: current.state }));
+          }
+        }
+      } catch (_) { /* 无痕模式等 */ }
+    }
     if (paths) applyPaths(paths.paths);
   } catch (_) { /* 健康检查失败不挡页面 */ }
   buildTutorials();
@@ -7358,18 +7554,27 @@ document.addEventListener("keydown", (e) => {
       if (e.status === 401) clearSession();  // 认领过或不存在；网络错误时 uid 是这个人唯一的凭证，不能扔
     }
   }
+  let me = null;
   if (S.token) {
     try {
-      const me = await api("GET", "/api/auth/me");
-      setSession(me);
-      needConsent = !me.consent_ok;
-      await loadPrefs();  // 工具包与收藏方向一起恢复；读不到就用本地的工具包、方向留空
-      await ensurePortrait();
+      me = await api("GET", "/api/auth/me", undefined, { timeoutMs: 20000 });
     } catch (e) {
-      if ([401, 404, 410].includes(e.status)) {  // 会话确实没了：清身份（草稿不动），落到登录页并说清为什么
+      if ([401, 410].includes(e.status)) {  // 会话确实没了：清身份（草稿不动），落到登录页并说清为什么；404 是发版瞬间路由缺失，不算
+        // 提示文案写死了 10-18 换库这件事：12 月起会话自然过期就不再挂这个提示
+        if (Date.now() < Date.parse("2026-12-01T00:00:00+08:00")) {
+          try { localStorage.setItem("rg_last_uid", S.uid); localStorage.setItem("rg_reset_hint", "1"); } catch (_) { /* 无痕模式等 */ }
+        }
+        const current = S.auth && S.auth.recovery;
+        if (current && current.state !== "normal") {
+          try {
+            if (localStorage.getItem("rg_seen_event") !== current.event_id) {
+              localStorage.setItem("rg_recovery_state", JSON.stringify({ event_id: current.event_id, state: current.state }));
+            }
+          } catch (_) { /* 无痕模式等 */ }
+        }
         clearSession();
         reloadInto("login", sessionGoneMsg());
-      return;
+        return;
       } else {
         // 网络断了、服务器在重启：会话和草稿都留着，原来这里一律清掉，草稿就永久没了（Codex 复现）
         setTimeout(() => toast("暂时连不上服务器，稍后刷新一下"), 800);
@@ -7379,16 +7584,35 @@ document.addEventListener("keydown", (e) => {
     // 只有 uid、认领没成（网络错误）：先去登录页，但 uid 留着，下次打开再认领——它是这个人唯一的凭证
     setTimeout(() => toast("暂时连不上服务器，稍后刷新一下"), 800);
   }
+  if (me) {
+    setSession(me);
+    needConsent = !me.consent_ok;
+  }
+  let next = "home", note = "";
   try {
+    next = sessionStorage.getItem("rg_next_view") || sessionStorage.getItem("rg_last_view") || "home";
+    note = sessionStorage.getItem("rg_toast") || "";
     sessionStorage.removeItem("rg_next_view");
     sessionStorage.removeItem("rg_toast");
   } catch (_) { /* 无痕模式等 */ }
-  const landing = pickLanding(first.next);
-  // 人已经点了「进入启研」或侧栏：不要把他们拽回粒子首页
-  if (S.view === bootHeldView) setView(landing);
-  if (first.note) toast(first.note);
+  let landing = next === "login" && !S.uid ? "login" : next !== "home" && S.uid ? next : "home";
+  if (S.uid && !S.entered && !["home", "me", "login", "dialogue"].includes(landing)) landing = "dialogue";  // 还没进入：先把开场聊完或点「进入启研」
+  setView(landing);
+  if (note) toast(note);
   if (needConsent) openPrivacy(true);
-  hideSplash();
+  // 开场最多停 0.7 秒：数据到了就走，不再固定等 1.4 秒
+  setTimeout(removeSplash, Math.max(0, 700 - (performance.now() - t0)));
+  if (!me) return;
+  // 页面先画出来，资料（工具包、收藏方向、画像）最多再等 15 秒；超时后迟到的结果作废
+  const uid = S.uid, token = S.token;
+  let expired = false;
+  const ctx = { uid, token, live: () => S.uid === uid && S.token === token && !expired };
+  let initTimer;
+  const deadline = new Promise((r) => { initTimer = setTimeout(() => { expired = true; r(); }, 15000); });
+  await Promise.race([loadPrefs(undefined, ctx), deadline]);  // 工具包与收藏方向一起恢复；读不到就用本地的工具包、方向留空
+  if (ctx.live()) await Promise.race([ensurePortrait(ctx), deadline]);
+  clearTimeout(initTimer);
+  if (expired) toast("页面资料暂未加载，请刷新重试");  // 身份和草稿都留着
 })();
 
 function transcriptImportPanel() {
