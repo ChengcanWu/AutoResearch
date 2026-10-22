@@ -266,6 +266,7 @@ function paperHarness(cfg = {}) {
   let stopPaperSpy = null;
   let paperRenderEpoch = 0;
   eval(extract("stale"));
+  eval(extract("splitZhTitle"));
   eval(extract("tutorPanel"));
   eval(extract("render"));
   const at0 = src.search(/async\s+function\s+renderCard\s*\(/);

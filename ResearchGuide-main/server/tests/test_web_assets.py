@@ -478,7 +478,7 @@ def test_phone_reading_pane_not_sticky():
 def test_no_empty_direction_copy():
     js = (WEB / "js" / "app.js").read_text(encoding="utf-8")
     assert "还没有方向" not in js
-    assert "还没选方向" in js
+    assert 'if (field) status.appendChild(el("span", "status-chip on"' in js  # 没方向时不再挂「还没选方向」胶囊（Haiku 面板第三轮 C）
 
 
 def test_soon_rooms_hidden_and_pass_copy():
@@ -493,7 +493,7 @@ def test_soon_rooms_hidden_and_pass_copy():
 def test_read_list_zh_first_and_search_placeholder():
     js = (WEB / "js" / "app.js").read_text(encoding="utf-8")
     assert "kp-en" in js
-    assert "搜论文（arXiv 只认英文关键词）" in js
+    assert "搜论文（英文关键词）" in js
 
 
 def test_tutor_draft_key_and_resume_gate_present():
