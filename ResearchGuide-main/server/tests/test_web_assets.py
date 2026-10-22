@@ -502,3 +502,17 @@ def test_tutor_draft_key_and_resume_gate_present():
     assert "tutor-draft-note" in js
     assert "if (!canGrade && !hasSession) {" in js
     assert "  if (!canGrade) {\n    tabTutor.disabled = true;" not in js
+
+
+def test_login_admin_fold_footer_and_chat_shortcut_present():
+    app = (WEB / "js" / "app.js").read_text(encoding="utf-8")
+    chat = (WEB / "js" / "chat.js").read_text(encoding="utf-8")
+    html = (WEB / "index.html").read_text(encoding="utf-8")
+    assert "管理员？填邀请码" in app
+    assert "sinv.hidden = true;" in app
+    assert "以访客进入（记录只存在这个浏览器）" in app
+    assert "consent-brief" in app
+    assert "直接去读论文" in chat
+    assert "不用聊完，随时可以进去。" in chat
+    assert '<p class="build-stamp">界面版本 <b>w105</b></p>' in html
+    assert "Ctrl+Shift+R" not in html

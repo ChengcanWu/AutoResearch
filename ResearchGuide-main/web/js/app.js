@@ -368,6 +368,7 @@ function setView(name) {
   if (dirChip) dirChip.hidden = !S.entered;
   $nav.hidden = !inApp || !S.entered;
   $header.hidden = !inApp;
+  const foot = document.querySelector(".site-footer"); if (foot) foot.hidden = !inApp;  // 首页、登录页不放页脚（Haiku 面板 8/8 看不懂）
   paintChrome();
   render();
   window.scrollTo({ top: 0 });
@@ -1591,6 +1592,7 @@ function consentRow() {
   read.type = "button";
   read.onclick = (e) => { e.preventDefault(); openPrivacy(false); };
   row.append(box, document.createTextNode("我读过"), read, document.createTextNode("，同意按这个方式保存我的记录"));
+  row.appendChild(el("span", "consent-brief", "存：用户名、密码（加密后）、你的作答和对话；不存手机号；随时可在「我的」删号。"));
   return { row, ok: () => box.checked };
 }
 
@@ -1712,6 +1714,7 @@ function parkCurrent(owner) {
 
 function renderLogin() {
   $nav.hidden = true; $header.hidden = true;
+  const foot = document.querySelector(".site-footer"); if (foot) foot.hidden = true;
   $app.innerHTML = "";
   stopWxPoll();
   const binding = !!(S.uid && S.guest);  // 访客来绑微信：start 时带着访客会话，记录跟着走
@@ -1733,7 +1736,8 @@ function renderLogin() {
   hero.appendChild(el("h2", "", binding ? "绑定微信" : "登录"));
   hero.appendChild(el("p", "hero-lead", binding
     ? "绑定后换设备、清了浏览器也能接着用，访客期间的记录都会带过去。"
-    : "换手机、清了浏览器也能接着用。微信不用密码、不要手机号；没有微信的设备用用户名和密码。"));
+    : wxOn ? "换手机、清了浏览器也能接着用。微信不用密码、不要手机号；没有微信的设备用用户名和密码。"
+    : "用用户名和密码登录；没有账号点「注册」；只想先看看，点「以访客进入」。"));
   const consent = consentRow();
   const need = () => { if (consent.ok()) return true; toast("先勾选同意隐私说明"); return false; };
   const onEnter = (btn) => (e) => { if (e.key === "Enter" && !e.isComposing) btn.click(); };
@@ -1759,6 +1763,7 @@ function renderLogin() {
   spass.setAttribute("aria-label", "密码");
   const sinv = el("input"); sinv.type = "password"; sinv.placeholder = "邀请码（选填，管理员填）"; sinv.maxLength = 128;
   sinv.setAttribute("aria-label", "邀请码");
+  sinv.hidden = true;
   const sbtn = el("button", "btn", "登录");
   sbtn.type = "button";
   sbtn.onclick = async () => {
@@ -1797,6 +1802,9 @@ function renderLogin() {
   spass.addEventListener("keydown", onEnter(sbtn));
   sinv.addEventListener("keydown", onEnter(sbtn));
   signinStep.append(suser, sinv, spass, sbtn);
+  const adm = el("button", "linkish login-admin", "管理员？填邀请码"); adm.type = "button";
+  adm.onclick = () => { sinv.hidden = false; adm.hidden = true; link.hidden = false; sinv.focus(); };
+  signinStep.appendChild(adm);
 
   const registerStep = el("div", "login-step login-body");
   const ruser = el("input"); ruser.placeholder = "用户名，例如 xiaobei（2–24 个字母、数字、下划线）"; ruser.autocomplete = "username"; ruser.maxLength = 24;
@@ -1882,19 +1890,19 @@ function renderLogin() {
     hero.append(consent.row, wxStep);
   } else {
     guestBox.hidden = true;
-    if (!wxOn) hero.appendChild(el("p", "login-note", "微信登录还没开通：用用户名密码，或先以访客进入。"));
     hero.append(consent.row, tabs, wxStep, signinStep, registerStep, guestBox);
     paint();
   }
 
   const links = el("div", "hero-links");
   if (!binding) {
-    const asGuest = el("button", "linkish", "先不登录，以访客进入");
+    const asGuest = el("button", "linkish", "以访客进入（记录只存在这个浏览器）");
     asGuest.type = "button";
     asGuest.onclick = () => { guestBox.hidden = false; asGuest.remove(); gname.focus(); };
     links.appendChild(asGuest);
   }
   const link = el("button", "linkish", "服务器共用模型（管理员）");
+  link.hidden = true;
   link.type = "button";
   link.onclick = () => openConnect();
   const back = el("button", "linkish", binding ? "返回" : "返回首页");
