@@ -16,4 +16,6 @@ def test_round4_copy_and_continue_card():
     assert "说说你的院系和年级，我才知道从哪开始" in chat
     welcome = onb.split("WELCOME_MESSAGE = ", 1)[1].split("\n", 1)[0]  # 第三遍后开场只有一行字符串
     assert "进入启研" not in welcome and "直接去读论文" not in welcome  # 两个按钮改名后开场不再点名旧按钮
+    css = (ROOT / "web" / "css" / "styles.css").read_text(encoding="utf-8")
+    assert "(pointer: coarse) { .composer-hint { display: none; } }" in css  # 手机上不显示「Enter 发送 · Shift+Enter 换行」
     assert "树洞" not in welcome and "成绩单" not in welcome

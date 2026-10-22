@@ -672,6 +672,7 @@ body[data-view="card"] .site-footer { max-width: 1600px; }
 .chat-suggestions .offer-row { margin: 0 0 var(--gap-3); gap: var(--gap-2); }
 .chat-suggestions .chip { white-space: normal; text-align: left; line-height: 1.5; padding: 7px 12px; }
 .composer-hint { font-size: 11px; color: var(--ink-3); margin: 8px 0 0; }
+@media (max-width: 480px), (pointer: coarse) { .composer-hint { display: none; } }  /* 手机没有 Shift 键：第四轮吐槽 2/3 点名这行 */
 .bubble-transcript { width: min(84%, 680px); }
 .pasted-transcript > summary { cursor: pointer; font-size: 13px; }
 .pasted-text { white-space: pre-wrap; max-height: 280px; overflow-y: auto; margin-top: 12px; }
