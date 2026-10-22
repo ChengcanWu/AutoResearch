@@ -121,7 +121,7 @@ const ChatView = (() => {
     head.appendChild(el("h2", "", S.entered ? "对话" : "先认识一下"));
     head.appendChild(el("p", "", S.entered
       ? "继续聊你的问题和阅读近况。"
-      : "先聊院系、专业、年级和课程，再顺着你的想法慢慢了解。随时可以先进入使用。"));
+      : "说说你的院系和年级，我才知道从哪开始；不想聊就直接进去。"));
     if (!S.entered) {
       const bar = el("div", "enter-bar");
       const go = el("button", "btn", "进入启研");
@@ -158,7 +158,7 @@ const ChatView = (() => {
     const inputRow = el("div", "chat-input-row");
     const input = el("textarea");
     input.rows = 1;
-    input.placeholder = S.entered ? "想聊什么，直接说…" : "说说你的想法，也可以粘贴成绩单…";
+    input.placeholder = S.entered ? "想聊什么，直接说…" : "说说你的院系、年级，或直接问我…";
     input.setAttribute("aria-label", "对话输入");
     const sendBtn = el("button", "btn small", "发送");
     sendBtn.type = "button";
@@ -170,6 +170,10 @@ const ChatView = (() => {
     // 所以它归输入区，不归行动区——否则它会跟着行动卡一起滚走。
     inputZone.append(suggestions, stageLine, inputRow);
     inputZone.appendChild(el("p", "composer-hint", "Enter 发送 · Shift+Enter 换行"));
+    const extra = el("details", "composer-extra");
+    extra.appendChild(el("summary", "", "可选：粘贴成绩单，让我更了解你的基础"));
+    extra.appendChild(el("p", "", "打开树洞的成绩单页，全选复制后粘贴到上面的输入框；会存到你的资料里，先去掉不想分享的信息。"));
+    inputZone.appendChild(extra);
     chat.append(scroll, inputZone);
 
     const side = el("div", "panel side-panel mem-sum");
