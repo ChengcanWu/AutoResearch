@@ -383,15 +383,15 @@ def judge(slot: dict[str, Any], answer: str, paper: dict[str, Any], station: dic
         if loc["found"] and _is_paper_title(ans, paper, loc):
             ok, note = False, "这是标题，不是主张原句"
         else:
-            ok, note = loc["found"], ("已定位" if loc["found"] else (loc.get("reason") or f"这句不在「{station['label']}」"))
+            ok, note = loc["found"], ("引文和原文对上了" if loc["found"] else (loc.get("reason") or f"这句不在「{station['label']}」"))
     elif typ == "number":
         if not NUM_RE.search(ans):
             return {"pass": False, "note": "表格里的字核对不了，选正文句子", "where": station["label"], "at": None}
         loc = quotes.locate(ans, paper, within=within)
-        ok, note = loc["found"], ("已定位" if loc["found"] else (loc.get("reason") or "选正文里带数字的句子"))
+        ok, note = loc["found"], ("引文和原文对上了" if loc["found"] else (loc.get("reason") or "选正文里带数字的句子"))
     elif typ == "limitation":
         loc = reading.check_limitation(ans, paper)
-        ok, note = loc.get("pass"), ("已定位" if loc.get("pass") else loc.get("reason", "局限要从局限 / 讨论段引"))
+        ok, note = loc.get("pass"), ("引文和原文对上了" if loc.get("pass") else loc.get("reason", "局限要从局限 / 讨论段引"))
     else:
         ok, note = reading._check_own(ans, paper, slot.get("field") or "理解")
         body = paper.get("text") or ""
