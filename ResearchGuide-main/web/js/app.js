@@ -1592,7 +1592,7 @@ function consentRow() {
   read.type = "button";
   read.onclick = (e) => { e.preventDefault(); openPrivacy(false); };
   row.append(box, document.createTextNode("我读过"), read, document.createTextNode("，同意按这个方式保存我的记录"));
-  row.appendChild(el("span", "consent-brief", "存：用户名、密码（加密后）、你的作答和对话；不存手机号；随时可在「我的」删号。"));
+  row.appendChild(el("span", "consent-brief", "勾上后会保存你在这里写的答案和聊天，下次能接着来；不存手机号；随时可在「我的」删号。"));
   return { row, ok: () => box.checked };
 }
 
@@ -1737,7 +1737,7 @@ function renderLogin() {
   hero.appendChild(el("p", "hero-lead", binding
     ? "绑定后换设备、清了浏览器也能接着用，访客期间的记录都会带过去。"
     : wxOn ? "换手机、清了浏览器也能接着用。微信不用密码、不要手机号；没有微信的设备用用户名和密码。"
-    : "用用户名和密码登录；没有账号点「注册」；只想先看看，点「以访客进入」。"));
+    : "启研是本科生读论文、答题、找方向的入门练习。用用户名和密码登录；没有账号点「注册」；只想先看看，点「以访客进入」。"));
   const consent = consentRow();
   const need = () => { if (consent.ok()) return true; toast("先勾选同意隐私说明"); return false; };
   const onEnter = (btn) => (e) => { if (e.key === "Enter" && !e.isComposing) btn.click(); };
@@ -1802,7 +1802,7 @@ function renderLogin() {
   spass.addEventListener("keydown", onEnter(sbtn));
   sinv.addEventListener("keydown", onEnter(sbtn));
   signinStep.append(suser, sinv, spass, sbtn);
-  const adm = el("button", "linkish login-admin", "管理员？填邀请码"); adm.type = "button";
+  const adm = el("button", "linkish login-admin", "管理员入口"); adm.type = "button";
   adm.onclick = () => { sinv.hidden = false; adm.hidden = true; link.hidden = false; sinv.focus(); };
   signinStep.appendChild(adm);
 
@@ -1896,7 +1896,7 @@ function renderLogin() {
 
   const links = el("div", "hero-links");
   if (!binding) {
-    const asGuest = el("button", "linkish", "以访客进入（记录只存在这个浏览器）");
+    const asGuest = el("button", "linkish", "以访客进入（不注册；换设备或清了浏览器就找不回）");
     asGuest.type = "button";
     asGuest.onclick = () => { guestBox.hidden = false; asGuest.remove(); gname.focus(); };
     links.appendChild(asGuest);
@@ -4926,6 +4926,7 @@ async function renderRead() {
   const leftPane = el("section", "read-pane");
   const leftHead = el("div", "read-pane-head");
   leftHead.appendChild(el("h3", "panel-title", "经典文献推荐"));
+  leftHead.appendChild(el("p", "panel-sub", "点「带读答题」：AI 按节出 8 道题，你边读原文边答，它判对错、给提示。"));
   if (passed > 0) leftHead.appendChild(el("small", "", `已完成 ${passed} 张阅读卡`));
   const leftBody = el("div", "read-pane-body");
   const recPapers = catalog.length ? catalog.map((p, i) => ({
@@ -4999,6 +5000,7 @@ async function renderRead() {
       li.appendChild(main);
       const goLabel = fromSearch ? "打开" : (c ? (c.status === "pass" ? "看卡" : "改这张卡") : (kitForCard ? "带读答题" : "打开"));
       const go = el("button", primary ? "btn small" : "btn small secondary", goLabel);
+      if (goLabel === "带读答题") go.title = "AI 按节出 8 道题，你边读原文边答，它判对错";
       go.type = "button";
       go.onclick = () => { S.cardFrom = "read"; openCard(aid, kitForCard); };
       li.appendChild(go);
