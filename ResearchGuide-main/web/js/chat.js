@@ -121,7 +121,7 @@ const ChatView = (() => {
     head.appendChild(el("h2", "", S.entered ? "对话" : "先认识一下"));
     head.appendChild(el("p", "", S.entered
       ? "继续聊你的问题和阅读近况。"
-      : "说说你的院系和年级，我才知道从哪开始；不想聊就直接进去。"));
+      : "启研带你读论文、答题、找方向。说说你的院系和年级，我才知道从哪开始；不想聊就直接进去。"));
     if (!S.entered) {
       const bar = el("div", "enter-bar");
       const go = el("button", "btn", "进入启研");
@@ -173,6 +173,7 @@ const ChatView = (() => {
     const extra = el("details", "composer-extra");
     extra.appendChild(el("summary", "", "可选：粘贴成绩单，让我更了解你的基础"));
     extra.appendChild(el("p", "", "打开树洞的成绩单页，全选复制后粘贴到上面的输入框；会存到你的资料里，先去掉不想分享的信息。"));
+    extra.hidden = true;  // 第一屏不提成绩单（面板三轮 3/3 被它吓到）；发过一句话或已进入后才露出
     inputZone.appendChild(extra);
     chat.append(scroll, inputZone);
 
@@ -217,12 +218,13 @@ const ChatView = (() => {
     } catch (e) { toast(e.message); }
     if (mySeq !== seq || S.view !== "dialogue") return;  // 等待期间切到了别的页：不能再往页面上写
     history.messages.forEach((m) => addBubble(m.role, m.text));
+    extra.hidden = !(S.entered || history.messages.some((m) => m.role === "user"));
     await refreshFacts();
     if (mySeq !== seq || S.view !== "dialogue") return;  // 等待期间切到了别的页：不能再往页面上写
     if (history.guide && !S.entered) renderGuide(history.guide);
     if (history.onboard_done && !S.entered) enterCard(history.guide);
     if (!history.messages.length) {
-      addBubble("assistant", history.welcome_message || "你好，我是启研。你可以直接问问题，不用先把背景填齐。也可以在树洞成绩单页全选、复制，再粘贴到这里，帮助我了解你的学习基础；这完全可选，粘贴后会保存到当前画像。");
+      addBubble("assistant", history.welcome_message || "你好，我是启研。先说说你的院系、专业和年级，我好知道从哪开始；也可以直接问我问题。不想聊也行：点上面的「进入启研」或「直接去读论文」。");
     }
 
     /* --- 发送 --- */
@@ -241,6 +243,7 @@ const ChatView = (() => {
       actions.remove();
       suggestions.innerHTML = "";
       addBubble("user", msg);
+      extra.hidden = false;
 
       const bubble = addBubble("assistant", "");
       bubble.classList.add("streaming");
@@ -451,6 +454,7 @@ const ChatView = (() => {
     }
 
     function renderGuide(profile) {
+      side.hidden = !S.entered && !(profile.areas || []).some((a) => a.known);  // 什么都还不知道时不摆「目前对你的了解」（面板 3/3 说像在建档）
       sideList.innerHTML = "";
       sideEmpty.style.display = "none";
       (profile.areas || []).forEach((area) => {

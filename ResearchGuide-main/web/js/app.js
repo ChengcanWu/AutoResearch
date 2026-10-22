@@ -5239,7 +5239,7 @@ function pickBenchMode({ saved, session, hasDraft, hasCard, passedCount, canGrad
   return "tutor";
 }
 
-function tutorPanel({ aid, kitId, scrollTo, selection, onPrefill, session, canGrade }) {
+function tutorPanel({ aid, kitId, scrollTo, selection, onPrefill, session, canGrade, title }) {
   const box = el("section", "tutor-panel");
   box.hidden = false;
   let sess = session || null;
@@ -5446,6 +5446,7 @@ function tutorPanel({ aid, kitId, scrollTo, selection, onPrefill, session, canGr
   async function startTutor(restart) {
     try {
       sess = await api("POST", `/api/tutor/${encodeURIComponent(aid)}/start`, { uid: S.uid, kit: kitId, restart: !!restart });
+      rememberTutor(aid, kitId, sess, title || aid);
       focusQid = null;
       box.hidden = false;
       paint();
@@ -5457,7 +5458,7 @@ function tutorPanel({ aid, kitId, scrollTo, selection, onPrefill, session, canGr
         uid: S.uid, kit: kitId, qid, answer, skip: !!skip, rev: sess ? sess.rev : 0, regrade: !!regrade,
       });
       sess = out.session;
-      { const prev = lastTutor(); rememberTutor(aid, kitId, sess, prev && prev.aid === aid ? prev.title : aid); }
+      rememberTutor(aid, kitId, sess, title || aid);
       const answered = (sess.slots || []).find((s) => s.qid === qid);
       last = out.verdict && answered ? { qid, question: answered.question || "", status: answered.status, feedback: out.verdict.feedback || out.verdict.note || "" } : null;
       const done = (sess.slots || []).find((s) => s.qid === qid);
@@ -5476,7 +5477,7 @@ function tutorPanel({ aid, kitId, scrollTo, selection, onPrefill, session, canGr
     try {
       const out = await api("POST", `/api/tutor/${encodeURIComponent(aid)}/finish`, { uid: S.uid, kit: kitId });
       sess = out.session;
-      rememberTutor(aid, kitId, sess, aid);
+      rememberTutor(aid, kitId, sess, title || aid);
       const alts = onPrefill ? onPrefill(out.prefill || {}, out.missing || []) : [];
       paint();
       (alts || []).forEach((a) => {
@@ -5832,6 +5833,7 @@ async function renderCard() {
     },
     session: tutorMeta && tutorMeta.session,
     canGrade,
+    title: zhTitle || paper.title,
   });
   fillChip.onclick = () => {
     const got = readSelection();
