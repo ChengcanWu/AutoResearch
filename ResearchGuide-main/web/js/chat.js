@@ -124,11 +124,11 @@ const ChatView = (() => {
       : "启研带你读论文、答题、找方向。说说你的院系和年级，我才知道从哪开始；不想聊就直接进去。"));
     if (!S.entered) {
       const bar = el("div", "enter-bar");
-      const go = el("button", "btn", "进入启研");
+      const go = el("button", "btn", "开始今天的一件事");  // 第四轮第三遍吐槽 3/3：「进入启研」不知道进去干嘛——按钮直接说去向（今日页）
       go.type = "button";
       go.onclick = () => enterApp();
       bar.appendChild(go);
-      const read = el("button", "btn ghost", "直接去读论文"); read.type = "button"; read.onclick = () => enterApp("read"); bar.appendChild(read);
+      const read = el("button", "btn ghost", "先挑一篇论文读"); read.type = "button"; read.onclick = () => enterApp("read"); bar.appendChild(read);
       head.appendChild(bar);
     }
     return head;
@@ -223,7 +223,7 @@ const ChatView = (() => {
     if (history.guide && !S.entered) renderGuide(history.guide);
     if (history.onboard_done && !S.entered) enterCard(history.guide);
     if (!history.messages.length) {
-      addBubble("assistant", history.welcome_message || "你好，我是启研。先说说你的院系、专业和年级，我好知道从哪开始；也可以直接问我问题。不想聊也行：点上面的「进入启研」或「直接去读论文」。");
+      addBubble("assistant", history.welcome_message || "你好，我是启研。你是哪个院系、几年级？也可以直接问我；不想聊就点上面的按钮。");
     }
 
     /* --- 发送 --- */
