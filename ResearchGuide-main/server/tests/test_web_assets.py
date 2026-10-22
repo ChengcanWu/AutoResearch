@@ -514,5 +514,5 @@ def test_login_admin_fold_footer_and_chat_shortcut_present():
     assert "consent-brief" in app
     assert "直接去读论文" in chat
     assert "不用聊完，随时可以进去。" in chat
-    assert '<p class="build-stamp">界面版本 <b>w105</b></p>' in html
+    assert re.search(r'<p class="build-stamp">界面版本 <b>w\d+</b></p>', html)
     assert "Ctrl+Shift+R" not in html
