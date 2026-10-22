@@ -4721,16 +4721,16 @@ async function renderToday() {
   const wrap = el("div", "stagger");
   wrap.appendChild(workspaceHead("今日", "打开就看这一件。"));
   const status = el("div", "status-chips");
-  status.appendChild(el("span", "status-chip" + (field ? " on" : ""), field ? esc(dirTitle(saved.dir, field)) : "还没选方向"));
+  if (field) status.appendChild(el("span", "status-chip on", esc(dirTitle(saved.dir, field))));
   if (node) status.appendChild(el("span", "status-chip", `正在「${esc(node.label)}」`));
   if (doneTasks) status.appendChild(el("span", "status-chip", `交过 ${doneTasks} 次`));
   wrap.appendChild(status);
   const confirmed = facts.filter((f) => f.status === "confirmed" || f.status === "active").length;
   const steps = [
-    { label: "聊过", done: !!talked, view: "dialogue" },
-    { label: "我的", done: !!talked && drafts === 0 && confirmed > 0, view: "me" },
-    { label: "方向", done: !!field, view: "cards" },
-    { label: "这一步", done: doneTasks > 0, view: "workbench" },
+    { label: "聊过了", done: !!talked, view: "dialogue" },
+    { label: "填了资料", done: !!talked && drafts === 0 && confirmed > 0, view: "me" },
+    { label: "选了方向", done: !!field, view: "cards" },
+    { label: "今天这一步", done: doneTasks > 0, view: "workbench" },
   ];
   wrap.appendChild(loopStrip(steps, steps.findIndex((s) => !s.done)));
   const ruleCard = el("div", "nba-card");
@@ -4753,12 +4753,14 @@ async function renderToday() {
   else {
     const slot = el("div", "today-papers panel daily", '<p class="panel-sub">正在取最近的新论文…</p>');
     wrap.appendChild(slot);
-    const next = el("p", "today-next", `继续：${esc(title)} `);
-    const more = el("button", "linkish", esc(primary.label));
-    more.type = "button";
-    more.onclick = primary.run;
-    next.appendChild(more);
-    wrap.appendChild(next);
+    if (field) {
+      const next = el("p", "today-next", `继续：${esc(title)} `);
+      const more = el("button", "linkish", esc(primary.label));
+      more.type = "button";
+      more.onclick = primary.run;
+      next.appendChild(more);
+      wrap.appendChild(next);
+    }
     dailyBlock(seq).then((box) => { if (!stale(seq)) slot.replaceWith(box); });
   }
   $app.appendChild(wrap);
@@ -4767,12 +4769,16 @@ async function renderToday() {
 /* ---------- 研读：工具包 / 阅读卡 / 矩阵（docs/DESIGN_PROPOSAL.md §1C） ---------- */
 
 const DEFAULT_KIT = "llm-eval";
+
+function splitZhTitle(t) {
+  return { zh: String(t || "").replace(/[（(]机器待核[）)]\s*$/, "").trim(), unverified: /机器待核/.test(String(t || "")) };
+}
 const DIR_LABEL = { up: "↑ 提升", down: "↓ 下降 / 失效", mixed: "~ 有好有坏", none: "? 没报告" };
 
 function readTabs(active) {
   document.body.dataset.readTab = active || "kit";
   const nav = el("nav", "ws-tabs");
-  [["kit", "工具包"], ["cards", "阅读卡"], ["matrix", "矩阵"]].forEach(([key, label]) => {
+  [["kit", "推荐论文"], ["cards", "我的阅读卡"], ["matrix", "对比表"]].forEach(([key, label]) => {
     const b = el("button", `ws-tab${key === active ? " on" : ""}`, label);
     b.type = "button";
     b.onclick = () => { S.readTab = key; setView("read"); };
@@ -4854,7 +4860,7 @@ async function renderRead() {
   rightH.appendChild(readTabs(tab));
   const search = el("form", "read-search");
   const q = el("input");
-  q.placeholder = "搜论文（arXiv 只认英文关键词）";
+  q.placeholder = "搜论文（英文关键词）";
   q.name = "q";
   const goSearch = el("button", "btn small", "搜索");
   goSearch.type = "submit";
@@ -4933,7 +4939,7 @@ async function renderRead() {
       leftBody.appendChild(back);
     }
     if (!papers.length) {
-      leftBody.appendChild(el("p", "panel-sub", "没有结果。arXiv 只认英文关键词。"));
+      leftBody.appendChild(el("p", "panel-sub", "没有结果。arXiv 只认英文。"));
       return;
     }
     const list = el("ol", "kit-papers");
@@ -4948,11 +4954,17 @@ async function renderRead() {
       const main = el("div", "kp-main");
       const kitForCard = fromSearch ? (p.card_kit || "") : (p.card_kit || (!catalog.length && kit.id) || "");
       const title = el("button", "linkish");
-      title.textContent = p.title_zh || p.title;
+      const zt = splitZhTitle(p.title_zh);
+      title.textContent = zt.zh || p.title;
       title.type = "button";
       title.onclick = () => { S.cardFrom = "read"; openCard(aid, kitForCard); };
       main.appendChild(el("span", "kp-n", String(p.order || i + 1)));
       main.appendChild(title);
+      if (zt.unverified) {
+        const flag = el("i", "kp-flag", "译名待校");
+        flag.title = "中文译名由机器生成，还没人工核对";
+        main.appendChild(flag);
+      }
       if (p.title_zh) {
         const en = el("p", "kp-en");
         en.textContent = p.title;
@@ -4968,7 +4980,7 @@ async function renderRead() {
         main.appendChild(kws);
       }
       if (p.lib === "html" || p.lib === "abstract") {
-        const badge = el("i", "kp-lib", p.lib === "html" ? "库内" : "只有摘要");
+        const badge = el("i", "kp-lib", p.lib === "html" ? "有全文" : "只有摘要");
         main.appendChild(badge);
       }
       if (c) {
@@ -5014,7 +5026,7 @@ async function renderRead() {
     ev.preventDefault();
     const term = q.value.trim();
     if (!term) return;
-    if (/[\u4e00-\u9fff]/.test(term)) { toast("arXiv 只认英文关键词"); return; }
+    if (/[\u4e00-\u9fff]/.test(term)) { toast("arXiv 只认英文"); return; }
     try {
       const r = await api("GET", `/api/papers/search?q=${encodeURIComponent(term)}&uid=${S.uid}`);
       paintPapers(r.items || [], true);
@@ -5478,12 +5490,17 @@ async function renderCard() {
   head.appendChild(back);
   const kitP = (kit.papers || []).find((p) => p.arxiv_id === aid);
   const titleZh = paper.title_zh || (kitP && kitP.title_zh) || "";
-  const zhNote = /（[^（）]*）\s*$/.exec(titleZh);
-  const zhTitle = zhNote ? titleZh.slice(0, zhNote.index).trim() : titleZh;
+  const zt = splitZhTitle(titleZh);
+  const zhTitle = zt.zh;
   if (zhTitle) {
     const h2 = el("h2");
     h2.textContent = zhTitle;
     head.appendChild(h2);
+    if (zt.unverified) {
+      const flag = el("i", "kp-flag", "译名待校");
+      flag.title = "中文译名由机器生成，还没人工核对";
+      head.appendChild(flag);
+    }
     const en = el("p", "paper-en");
     en.textContent = paper.title;
     head.appendChild(en);
@@ -5505,11 +5522,6 @@ async function renderCard() {
     status.appendChild(el("span", "", `<a href="${esc(paper.url)}" target="_blank" rel="noopener">arXiv:${esc(aid)} ↗</a>`));
   }
   status.appendChild(el("span", "", absNote));
-  if (zhNote) {
-    const noteSpan = el("span");
-    noteSpan.textContent = zhNote[0].replace(/^（|）$/g, "");
-    status.appendChild(noteSpan);
-  }
   if (prev) status.appendChild(el("span", "", `上一版 v${prev.version} · ${prev.status === "pass" ? "过线" : "待改"}`));
   if (paper.source !== "html" && paper.source !== "pdf") {
     const retry = el("button", "linkish", "重新取正文");
@@ -5956,7 +5968,7 @@ async function dailyBlock(seq) {
   if (d.day) box.dataset.day = d.day;
   const dirName = d.direction && d.direction.name ? `按你的方向「${d.direction.name}」` : "按你的兴趣";
   const head = el("div", "daily-head");
-  head.innerHTML = `<div><p class="section-label">最近的新论文 · 约 5 分钟 · 可跳过</p><h3 class="panel-title">分拣最近的新论文</h3><p class="panel-sub">${esc(dirName)}的新论文。只看标题和摘要原文，决定留还是过。</p></div><div class="score-ring"><span class="num">${d.done_today}</span>/ ${d.goal} 今天</div>`;
+  head.innerHTML = `<div><p class="section-label">新论文 · 约 5 分钟 · 可跳过</p><h3 class="panel-title">挑几篇新论文</h3><p class="panel-sub">${esc(dirName)}的新论文。只看标题和摘要原文，决定留还是过。</p></div><div class="score-ring"><span class="num">${d.done_today}</span>/ ${d.goal} 今天</div>`;
   box.appendChild(head);
   if (d.error) box.appendChild(el("div", "note-box", `arXiv 暂时连不上（如实说明）：${esc(d.error)}`));
   if (!d.items.length) {
@@ -5969,7 +5981,7 @@ async function dailyBlock(seq) {
     } else if (reason === "exhausted") box.appendChild(el("p", "panel-sub", "这个话题最近的都分拣完了。"));
     else if (reason === "upstream" || d.stale) box.appendChild(el("p", "panel-sub", `连不上来源，这是已缓存的候选。`));
     else if (reason === "no_topics") {
-      const tip = el("p", "panel-sub", "还没有能用来检索的兴趣话题。先聊几句或选定方向。");
+      const tip = el("p", "panel-sub", "先选一个方向，才知道给你推哪些论文。");
       const go = el("button", "btn small", "去选方向");
       go.type = "button";
       go.onclick = () => setView("dialogue");
@@ -5983,7 +5995,7 @@ async function dailyBlock(seq) {
     title.textContent = it.title;
     row.appendChild(title);
     if (it.lib === "html" || it.lib === "abstract") {
-      row.appendChild(el("i", "kp-lib", it.lib === "html" ? "库内" : "只有摘要"));
+      row.appendChild(el("i", "kp-lib", it.lib === "html" ? "有全文" : "只有摘要"));
     }
     if (it.title_zh) {
       const zh = el("p", "triage-zh");
