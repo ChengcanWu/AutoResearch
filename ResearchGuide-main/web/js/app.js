@@ -4743,7 +4743,7 @@ async function renderToday() {
     { label: "选了方向", done: !!field, view: "cards" },
     { label: "今天这一步", done: doneTasks > 0, view: "workbench" },
   ];
-  if (field || talked) wrap.appendChild(loopStrip(steps, steps.findIndex((s) => !s.done)));  // 新号什么都没做过时不摆四步条：卡片里只有一件事
+  if (field) wrap.appendChild(loopStrip(steps, steps.findIndex((s) => !s.done)));  // 没选方向前不摆四步条：卡片里只有一件事（面板 5/5 把「当前步」读成「已做过」）
   const ruleCard = el("div", "nba-card");
   ruleCard.appendChild(el("h3", "nba-title", esc(title)));
   ruleCard.appendChild(el("p", "nba-why", esc(why)));

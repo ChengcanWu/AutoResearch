@@ -10,7 +10,7 @@ def test_round4_copy_and_continue_card():
     chat = (ROOT / "web" / "js" / "chat.js").read_text(encoding="utf-8")
     onb = (ROOT / "server" / "onboarding.py").read_text(encoding="utf-8")
     for s in ("function rememberTutor(", "function lastTutor(", "function continueCard(", "继续上次：", "接着答",
-              "if (field || talked) wrap.appendChild(loopStrip(", "rg_last_tutor_"):
+              "if (field) wrap.appendChild(loopStrip(", "rg_last_tutor_"):
         assert s in app, s
     assert "可选：粘贴成绩单" in chat and "也可以粘贴成绩单…" not in chat
     assert "说说你的院系和年级，我才知道从哪开始" in chat
