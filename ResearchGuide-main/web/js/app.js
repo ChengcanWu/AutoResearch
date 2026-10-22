@@ -5184,6 +5184,7 @@ function tutorPanel({ aid, kitId, scrollTo, selection, onPrefill, session, canGr
   let draft = {}; try { draft = JSON.parse(localStorage.getItem(draftKey) || "{}") || {}; } catch (_) { draft = {}; }
   const saveDraft = () => { try { const keep = Object.fromEntries(Object.entries(draft).filter(([, v]) => String(v || "").trim())); if (Object.keys(keep).length) localStorage.setItem(draftKey, JSON.stringify(keep)); else localStorage.removeItem(draftKey); } catch (_) { /* 存不了就只留在内存 */ } };
   let focusQid = null;
+  let last = null;
   const paint = () => {
     box.innerHTML = "";
     if (!sess) {
@@ -5196,11 +5197,8 @@ function tutorPanel({ aid, kitId, scrollTo, selection, onPrefill, session, canGr
       return;
     }
     const head = el("div", "tutor-head");
-    const voice = el("span", "tutor-voice");
-    voice.textContent = sess.voice === "llm" ? "模型出题" : sess.voice === "mixed" ? "模型出题 / 规则版" : "规则版";
-    head.appendChild(voice);
     const prog = el("span", "tutor-prog");
-    prog.textContent = `${sess.cur || 0}/${sess.total || 0}`;
+    prog.textContent = `第 ${Math.min((sess.cur || 0) + 1, sess.total || 0)} 题 / 共 ${sess.total || 0} 题`;
     head.appendChild(prog);
     box.appendChild(head);
     if (canGrade === false) {
@@ -5208,22 +5206,40 @@ function tutorPanel({ aid, kitId, scrollTo, selection, onPrefill, session, canGr
       off.textContent = "模型暂时用不了：可以看题、改答案、存草稿；现在作答会先存着，模型恢复后点「重判」。";
       box.appendChild(off);
     }
+    const slots = sess.slots || [];
+    const cur = sess.cur || 0;
+    const sl = (focusQid && slots.find((s) => s.qid === focusQid)) || slots[cur];
+    if (last && sl && last.qid !== sl.qid) {
+      const strip = el("div", "tutor-last");
+      const lp = el("p");
+      lp.textContent = last.status === "pass" ? "上一题 ✓ 通过" + (last.feedback ? `：${last.feedback}` : "")
+        : last.status === "pending" ? "上一题已保存，等模型恢复后判分"
+        : last.status === "skipped" ? "上一题已跳过"
+        : "上一题：" + last.feedback;
+      strip.appendChild(lp);
+      const look = el("button", "linkish", "看判语");
+      look.type = "button";
+      look.onclick = () => { focusQid = last.qid; paint(); };
+      const ok = el("button", "linkish", "知道了");
+      ok.type = "button";
+      ok.onclick = () => { last = null; paint(); };
+      strip.append(look, ok);
+      box.appendChild(strip);
+    }
     if (sess.notice) {
       const n = el("p", "tutor-notice");
       n.textContent = sess.notice;
       box.appendChild(n);
     }
-    const slots = sess.slots || [];
-    const cur = sess.cur || 0;
-    const sl = (focusQid && slots.find((s) => s.qid === focusQid)) || slots[cur];
     const followups = slots.filter((s) => s.status === "pending" || s.status === "retry");
     const paintFollowups = () => {
       followups.forEach((s) => {
         if (sl && s.qid === sl.qid) return;
         const row = el("p", "tutor-pending");
-        row.textContent = s.status === "pending" ? `这题稍后再判：${s.question || s.qid}` : `再改一改：${s.question || s.qid}`;
-        if (s.status === "pending") {
-          const rg = el("button", "linkish", "重判");
+        const idx = slots.indexOf(s);
+        row.textContent = s.status === "pending" ? `第 ${idx + 1} 题「${s.question || s.qid}」已保存，等模型恢复后判分` : `第 ${idx + 1} 题「${s.question || s.qid}」要再改一改`;
+        if (s.status === "pending" && canGrade !== false) {
+          const rg = el("button", "linkish", "现在重判");
           rg.type = "button";
           rg.onclick = () => turnTutor(s.qid, s.last || "", false, true);
           row.appendChild(rg);
@@ -5331,14 +5347,14 @@ function tutorPanel({ aid, kitId, scrollTo, selection, onPrefill, session, canGr
     }
     const st = (sess.stations || []).find((x) => x.key === sl.station);
     if (st && scrollTo) {
-      const jump = el("button", "linkish", `跳到本节`);
+      const jump = el("button", "linkish", "看原文这一节");
       jump.type = "button";
       jump.onclick = () => scrollTo(st.heading || st.label, st.start);
       box.appendChild(jump);
     }
     if (sl.status === "pending") {
       const pend = el("p", "tutor-pending");
-      pend.textContent = "这题稍后再判";
+      pend.textContent = "这题已保存，等模型恢复后判分";
       box.appendChild(pend);
     }
     if (sl.feedback || sl.note) {
@@ -5378,6 +5394,8 @@ function tutorPanel({ aid, kitId, scrollTo, selection, onPrefill, session, canGr
         uid: S.uid, kit: kitId, qid, answer, skip: !!skip, rev: sess ? sess.rev : 0, regrade: !!regrade,
       });
       sess = out.session;
+      const answered = (sess.slots || []).find((s) => s.qid === qid);
+      last = out.verdict && answered ? { qid, question: answered.question || "", status: answered.status, feedback: out.verdict.feedback || out.verdict.note || "" } : null;
       const done = (sess.slots || []).find((s) => s.qid === qid);
       if (done && ["pass", "pending", "skipped"].includes(done.status)) { delete draft[qid]; saveDraft(); }
       if (focusQid) {
