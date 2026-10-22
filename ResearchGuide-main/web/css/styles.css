@@ -2019,3 +2019,8 @@ body.is-home .site-footer { display: none; }
 .monitor-table tr:last-child td { border-bottom: 0; }
 @media (max-width: 1000px) { .monitor-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 600px) { .monitor-grid { grid-template-columns: minmax(0, 1fr); } }
+
+@media (max-width: 480px) {
+  .hero-links { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .hero-links .linkish { white-space: normal; text-align: left; }
+}
