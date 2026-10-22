@@ -368,7 +368,7 @@ function setView(name) {
   if (dirChip) dirChip.hidden = !S.entered;
   $nav.hidden = !inApp || !S.entered;
   $header.hidden = !inApp;
-  const foot = document.querySelector(".site-footer"); if (foot) foot.hidden = !inApp;  // 首页、登录页不放页脚（Haiku 面板 8/8 看不懂）
+  const foot = document.querySelector(".site-footer"); if (foot) foot.hidden = name !== "me";  // 页脚（课名来源、版本号）只在「我的」页：别的页三轮面板都当噪音
   paintChrome();
   render();
   window.scrollTo({ top: 0 });

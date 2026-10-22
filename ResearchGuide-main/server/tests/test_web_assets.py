@@ -513,6 +513,6 @@ def test_login_admin_fold_footer_and_chat_shortcut_present():
     assert "以访客进入（不注册；换设备或清了浏览器就找不回）" in app
     assert "consent-brief" in app
     assert "直接去读论文" in chat
-    assert "不用聊完，随时可以进去。" in chat
+    assert "不用聊完" not in chat  # 第四轮：两个按钮旁的那句解释删掉，开场第二段已说「不想聊也行」
     assert re.search(r'<p class="build-stamp">界面版本 <b>w\d+</b></p>', html)
     assert "Ctrl+Shift+R" not in html
