@@ -787,6 +787,13 @@ function r6Dom() {
       set innerHTML(v) { html = String(v); n.children.forEach((c) => { c.parent = null; }); n.children = []; },
       appendChild(c) { if (c.parent) c.remove(); c.parent = n; n.children.push(c); return c; },
       append(...cs) { cs.forEach((c) => n.appendChild(c)); },
+      insertBefore(c, ref) {
+        if (c.parent) c.remove();
+        const i = ref ? n.children.indexOf(ref) : -1;
+        if (i < 0) n.appendChild(c);
+        else { n.children.splice(i, 0, c); c.parent = n; }
+        return c;
+      },
       remove() { if (n.parent) { n.parent.children = n.parent.children.filter((x) => x !== n); n.parent = null; } },
       setAttribute(k, v) { n.attrs[k] = v; },
       removeAttribute(k) { delete n.attrs[k]; },
@@ -1198,7 +1205,7 @@ async function loginResetHint() {
 
 async function apiTimeout() {
   console.log("=== L03 登录类请求超时 ===");
-  const SLOW = "服务器响应慢（可能在冷启动），请 10 秒后再试";
+  const SLOW = "服务器响应慢，请 10 秒后再试";
   const signals = [];
   const fetch = (url, opt) => { signals.push(opt.signal); return new Promise(() => {}); };
   const src = ["api", "apiFetch", "authHeaders"].map((n) => l03Extract(n)).join("\n");
@@ -1464,7 +1471,7 @@ function r9LoginEnv(fetch) {
 
 async function r9ApiBodyTimeout() {
   console.log("=== R9-04 认证 deadline 盖住响应正文 ===");
-  const SLOW = "服务器响应慢（可能在冷启动），请 10 秒后再试";
+  const SLOW = "服务器响应慢，请 10 秒后再试";
   const ends = [["POST", "/api/auth/signin", 20000], ["POST", "/api/auth/register", 20000], ["GET", "/api/auth/me", 20000],
     ["POST", "/api/auth/consent", 20000], ["GET", "/api/health", 5000], ["GET", "/api/paths", 5000]];
   for (const [m, url, ms] of ends) {
@@ -1508,7 +1515,7 @@ async function r9ApiBodyTimeout() {
     const env = r9LoginEnv((url, opt) => { fetches.push(url); return Promise.resolve(r9HangRes(opt)); });
     env.renderLogin();
     const btn = env.btn("登录");
-    const [u, p] = btn.parent.children;
+    const [u, inv, p] = btn.parent.children;  // 用户名、邀请码（选填）、密码；按钮不算
     u.value = "xiaobei"; p.value = "pw123456";
     let done = false;
     btn.onclick().then(() => { done = true; });

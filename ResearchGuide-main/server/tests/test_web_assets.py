@@ -147,8 +147,8 @@ def test_task_panel_hides_rubric_behind_toggle():
 def test_matrix_copy_no_longer_asks_for_three_cards():
     js = (WEB / "js" / "app.js").read_text(encoding="utf-8")
     assert "再交 3" not in js
-    assert "先交一张过线的阅读卡" in js
-    assert "格子只来自你自己的过线卡" in js
+    assert "先交一张合格的阅读卡" in js
+    assert "矩阵只来自你自己的合格卡" in js
 
 
 def test_the_mark_done_button_is_gone():
