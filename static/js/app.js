@@ -213,7 +213,7 @@ async function api(method, path, body, opt = {}) {
     return data;
   }
   if (!opt.timeoutMs) return request();
-  const slowMsg = "服务器响应慢（可能在冷启动），请 10 秒后再试";
+  const slowMsg = "服务器响应慢，请 10 秒后再试";
   const ctrl = new AbortController();
   req.signal = ctrl.signal;
   let timer;
@@ -297,10 +297,10 @@ function confirmEarlyEntry(profile) {
       : "暂时无法确认已了解的信息。你仍可以直接进入，或留在这里继续聊。"));
     if (profile) {
       const missing = (profile.areas || []).filter((a) => !a.known).map((a) => a.label);
-      if (missing.length) dialog.appendChild(el("p", "form-note", "还可以聊聊：" + esc(missing.join("、")) + "。这些都不是必填项。"));
+      if (missing.length) dialog.appendChild(el("p", "form-note", "还可以继续对话：" + esc(missing.join("、")) + "。这些都不是必填项。"));
     }
     const row = el("div", "submit-actions");
-    const more = el("button", "btn", "再聊一聊");
+    const more = el("button", "btn", "继续对话");
     const go = el("button", "btn secondary", "直接进入");
     more.type = go.type = "button";
     const finish = (yes) => { dialog.close(); dialog.remove(); resolve(yes); };
@@ -368,6 +368,7 @@ function setView(name) {
   if (dirChip) dirChip.hidden = !S.entered;
   $nav.hidden = !inApp || !S.entered;
   $header.hidden = !inApp;
+  const foot = document.querySelector(".site-footer"); if (foot) foot.hidden = name !== "me";  // 页脚（课名来源、版本号）只在「我的」页：别的页三轮面板都当噪音
   paintChrome();
   render();
   window.scrollTo({ top: 0 });
@@ -1411,7 +1412,7 @@ const ROOM_GUIDES = {
   },
   read: {
     key: "rg_guide_read",
-    steps: ["挑一篇能打开的论文。", "先读原文，再在阅读卡里写；原句从正文里圈。", "过线之后再看矩阵。一张卡也能看。"],
+    steps: ["挑一篇能打开的论文。", "先读原文，再在阅读卡里写；原句从正文里圈。", "合格之后再看矩阵。一张卡也能看。"],
   },
   position: {
     key: "rg_guide_position",
@@ -1555,7 +1556,7 @@ function openPrivacy(gate) {
   const mask = el("div", "connect-mask");
   const box = el("div", "connect-box privacy-box");
   box.appendChild(el("p", "hero-kicker", "PRIVACY"));
-  box.appendChild(el("h3", "", gate ? "继续之前，看一眼我们存什么" : "我们存什么"));
+  box.appendChild(el("h3", "", gate ? "继续之前，请阅读并确认用户隐私政策说明" : "用户隐私政策说明"));
   box.appendChild(el("div", "privacy-body", PRIVACY_HTML));
   const acts = el("div", "connect-actions");
   if (gate) {
@@ -1587,10 +1588,11 @@ function consentRow() {
   const row = el("label", "consent-row");
   const box = el("input");
   box.type = "checkbox";
-  const read = el("button", "linkish", "我们存什么");
+  const read = el("button", "linkish", "用户隐私政策说明");
   read.type = "button";
   read.onclick = (e) => { e.preventDefault(); openPrivacy(false); };
-  row.append(box, document.createTextNode("我读过"), read, document.createTextNode("，同意按这个方式保存我的记录"));
+  row.append(box, document.createTextNode("已阅读"), read, document.createTextNode("，同意按这个方式保存我的记录"));
+  row.appendChild(el("span", "consent-brief", "勾上后会保存你在这里写的答案和聊天，下次能接着来；不存手机号；随时可在「我的」删号。"));
   return { row, ok: () => box.checked };
 }
 
@@ -1712,6 +1714,7 @@ function parkCurrent(owner) {
 
 function renderLogin() {
   $nav.hidden = true; $header.hidden = true;
+  const foot = document.querySelector(".site-footer"); if (foot) foot.hidden = true;
   $app.innerHTML = "";
   stopWxPoll();
   const binding = !!(S.uid && S.guest);  // 访客来绑微信：start 时带着访客会话，记录跟着走
@@ -1731,9 +1734,6 @@ function renderLogin() {
   if (RECOVERY_NOTE[recovery]) hero.appendChild(el("p", "login-note login-recovery", RECOVERY_NOTE[recovery]));
   hero.appendChild(el("p", "hero-kicker", binding ? "启研 · 绑定微信" : "启研 · 登录"));
   hero.appendChild(el("h2", "", binding ? "绑定微信" : "登录"));
-  hero.appendChild(el("p", "hero-lead", binding
-    ? "绑定后换设备、清了浏览器也能接着用，访客期间的记录都会带过去。"
-    : "换手机、清了浏览器也能接着用。微信不用密码、不要手机号；没有微信的设备用用户名和密码。"));
   const consent = consentRow();
   const need = () => { if (consent.ok()) return true; toast("先勾选同意隐私说明"); return false; };
   const onEnter = (btn) => (e) => { if (e.key === "Enter" && !e.isComposing) btn.click(); };
@@ -1741,7 +1741,7 @@ function renderLogin() {
   // 微信：昵称（选填）+ 开一次登录，等学生在公众号里发数字
   const wxStep = el("div", "login-step");
   const nick = el("input", "login-nick");
-  nick.placeholder = "怎么称呼你（选填，新账号用）"; nick.maxLength = 24;
+  nick.placeholder = "账号名称"; nick.maxLength = 24;
   nick.setAttribute("aria-label", "昵称");
   const go = el("button", "btn", binding ? "绑定微信" : "用微信登录");
   go.type = "button";
@@ -1759,6 +1759,7 @@ function renderLogin() {
   spass.setAttribute("aria-label", "密码");
   const sinv = el("input"); sinv.type = "password"; sinv.placeholder = "邀请码（选填，管理员填）"; sinv.maxLength = 128;
   sinv.setAttribute("aria-label", "邀请码");
+  sinv.hidden = true;
   const sbtn = el("button", "btn", "登录");
   sbtn.type = "button";
   sbtn.onclick = async () => {
@@ -1797,6 +1798,9 @@ function renderLogin() {
   spass.addEventListener("keydown", onEnter(sbtn));
   sinv.addEventListener("keydown", onEnter(sbtn));
   signinStep.append(suser, sinv, spass, sbtn);
+  const adm = el("button", "linkish login-admin", "管理员入口"); adm.type = "button";
+  adm.onclick = () => { sinv.hidden = false; adm.hidden = true; link.hidden = false; sinv.focus(); };
+  signinStep.appendChild(adm);
 
   const registerStep = el("div", "login-step login-body");
   const ruser = el("input"); ruser.placeholder = "用户名，例如 xiaobei（2–24 个字母、数字、下划线）"; ruser.autocomplete = "username"; ruser.maxLength = 24;
@@ -1864,10 +1868,18 @@ function renderLogin() {
   const steps = { wechat: wxStep, signin: signinStep, register: registerStep };
   let mode = recovery === "lost" ? "register" : wxOn ? "wechat" : "signin";
   const tabs = el("div", "login-tabs");
+  /* 同意行不钉在页头：跟着当前标签走，永远贴在正要点的那颗按钮上方
+     （账号登录→登录、注册→注册并进入、微信→用微信登录），勾完就能点。 */
+  const parkConsent = () => {
+    const step = steps[mode];
+    const btn = Array.from(step.children).filter((n) => n.classList && n.classList.contains("btn"))[0];
+    if (btn) step.insertBefore(consent.row, btn);
+  };
   const paint = () => {
     tabs.querySelectorAll("button").forEach((b) => b.classList.toggle("on", b.dataset.mode === mode));
     Object.entries(steps).forEach(([k, node]) => { node.hidden = k !== mode; });
     if (mode !== "wechat") { stopWxPoll(); wxBox.hidden = true; }  // 离开微信这一栏就作废正在等的数字
+    parkConsent();
   };
   [["wechat", "微信"], ["signin", "账号登录"], ["register", "注册"]].forEach(([id, label]) => {
     if (id === "wechat" && !wxOn) return;
@@ -1882,19 +1894,24 @@ function renderLogin() {
     hero.append(consent.row, wxStep);
   } else {
     guestBox.hidden = true;
-    if (!wxOn) hero.appendChild(el("p", "login-note", "微信登录还没开通：用用户名密码，或先以访客进入。"));
     hero.append(consent.row, tabs, wxStep, signinStep, registerStep, guestBox);
     paint();
   }
 
   const links = el("div", "hero-links");
   if (!binding) {
-    const asGuest = el("button", "linkish", "先不登录，以访客进入");
+    const asGuest = el("button", "linkish", "访客模式");
     asGuest.type = "button";
-    asGuest.onclick = () => { guestBox.hidden = false; asGuest.remove(); gname.focus(); };
+    asGuest.onclick = () => {
+      guestBox.hidden = false;
+      const first = guestBox.children[0];
+      if (first) guestBox.insertBefore(consent.row, first); else guestBox.appendChild(consent.row);
+      asGuest.remove(); gname.focus();
+    };
     links.appendChild(asGuest);
   }
   const link = el("button", "linkish", "服务器共用模型（管理员）");
+  link.hidden = true;
   link.type = "button";
   link.onclick = () => openConnect();
   const back = el("button", "linkish", binding ? "返回" : "返回首页");
@@ -1953,7 +1970,7 @@ function accountPanel() {
       setSession(parked, "me", parked.guest ? "已切回访客号" : "已切回那个账号");
     });
   }
-  add("我们存什么", "btn small ghost", () => openPrivacy(false));
+  add("用户隐私政策", "btn small ghost", () => openPrivacy(false));
   add("导出我的数据", "btn small secondary", async () => {
     const res = await apiFetch("/api/me/export");
     if (!res.ok) { toast("导出失败"); return; }
@@ -2202,6 +2219,7 @@ function paintChrome() {
   if (!chip) return;
   const name = portraitChipLabel();
   chip.textContent = name || "选个方向 ▾";
+  chip.title = name ? "换方向：今日任务和推荐论文都跟着方向走" : "选一个方向：今日任务和推荐论文都跟着方向走";
   chip.classList.toggle("empty", !name);
 }
 
@@ -2320,7 +2338,6 @@ async function openUserMenu() {
   if (S.isAdmin) menu.appendChild(go("运营监测", () => setView("monitor")));
   if (!S.guest) menu.appendChild(go("我的 DeepSeek", () => openMineKey()));
   menu.appendChild(go("退出", () => { if (confirmLeave()) logout("home"); }));
-  menu.appendChild(go("换账号", () => { if (confirmLeave()) logout("login"); }));
   wrap.appendChild(menu);  // 画像切换不再放菜单里（11 号：在「我的」页）
 }
 
@@ -4719,20 +4736,22 @@ async function renderToday() {
 
   $app.innerHTML = "";
   const wrap = el("div", "stagger");
-  wrap.appendChild(workspaceHead("今日", "打开就看这一件。"));
+  wrap.appendChild(workspaceHead("今日", "每日文献速递。"));
   const status = el("div", "status-chips");
-  status.appendChild(el("span", "status-chip" + (field ? " on" : ""), field ? esc(dirTitle(saved.dir, field)) : "还没选方向"));
+  if (field) status.appendChild(el("span", "status-chip on", esc(dirTitle(saved.dir, field))));
   if (node) status.appendChild(el("span", "status-chip", `正在「${esc(node.label)}」`));
   if (doneTasks) status.appendChild(el("span", "status-chip", `交过 ${doneTasks} 次`));
   wrap.appendChild(status);
+  const cont = continueCard("today");
+  if (cont) wrap.appendChild(cont);
   const confirmed = facts.filter((f) => f.status === "confirmed" || f.status === "active").length;
   const steps = [
-    { label: "聊过", done: !!talked, view: "dialogue" },
-    { label: "我的", done: !!talked && drafts === 0 && confirmed > 0, view: "me" },
-    { label: "方向", done: !!field, view: "cards" },
-    { label: "这一步", done: doneTasks > 0, view: "workbench" },
+    { label: "聊过了", done: !!talked, view: "dialogue" },
+    { label: "填了资料", done: !!talked && drafts === 0 && confirmed > 0, view: "me" },
+    { label: "选了方向", done: !!field, view: "cards" },
+    { label: "今天这一步", done: doneTasks > 0, view: "workbench" },
   ];
-  wrap.appendChild(loopStrip(steps, steps.findIndex((s) => !s.done)));
+  if (field) wrap.appendChild(loopStrip(steps, steps.findIndex((s) => !s.done)));  // 没选方向前不摆四步条：卡片里只有一件事（面板 5/5 把「当前步」读成「已做过」）
   const ruleCard = el("div", "nba-card");
   ruleCard.appendChild(el("h3", "nba-title", esc(title)));
   ruleCard.appendChild(el("p", "nba-why", esc(why)));
@@ -4753,12 +4772,14 @@ async function renderToday() {
   else {
     const slot = el("div", "today-papers panel daily", '<p class="panel-sub">正在取最近的新论文…</p>');
     wrap.appendChild(slot);
-    const next = el("p", "today-next", `继续：${esc(title)} `);
-    const more = el("button", "linkish", esc(primary.label));
-    more.type = "button";
-    more.onclick = primary.run;
-    next.appendChild(more);
-    wrap.appendChild(next);
+    if (field) {
+      const next = el("p", "today-next", `继续：${esc(title)} `);
+      const more = el("button", "linkish", esc(primary.label));
+      more.type = "button";
+      more.onclick = primary.run;
+      next.appendChild(more);
+      wrap.appendChild(next);
+    }
     dailyBlock(seq).then((box) => { if (!stale(seq)) slot.replaceWith(box); });
   }
   $app.appendChild(wrap);
@@ -4767,12 +4788,49 @@ async function renderToday() {
 /* ---------- 研读：工具包 / 阅读卡 / 矩阵（docs/DESIGN_PROPOSAL.md §1C） ---------- */
 
 const DEFAULT_KIT = "llm-eval";
+
+function splitZhTitle(t) {
+  return { zh: String(t || "").replace(/[（(]机器待核[）)]\s*$/, "").trim(), unverified: /机器待核/.test(String(t || "")) };
+}
+// 「继续上次」：最近一次没读完的带读记在本机，研读页和今日页顶上给一张卡直接回到那道题（Luna 试用 UX-04：别把人送回目录）
+function rememberTutor(aid, kitId, sess, title) {
+  const key = `rg_last_tutor_${S.uid || "anon"}`;
+  try {
+    if (!sess || !["active", "read"].includes(sess.status)) {
+      const cur = JSON.parse(localStorage.getItem(key) || "null");
+      if (cur && cur.aid === aid) localStorage.removeItem(key);
+      return;
+    }
+    localStorage.setItem(key, JSON.stringify({ aid, kitId: kitId || "", title: title || aid, cur: sess.cur || 0, total: sess.total || 0, at: Date.now() }));
+  } catch (_) { /* 存不了就没有「继续上次」 */ }
+}
+
+function lastTutor() {
+  try {
+    const v = JSON.parse(localStorage.getItem(`rg_last_tutor_${S.uid || "anon"}`) || "null");
+    return v && v.aid ? v : null;
+  } catch (_) { return null; }
+}
+
+function continueCard(from) {
+  const last = lastTutor();
+  if (!last) return null;
+  const box = el("div", "continue-card");
+  const text = el("div", "continue-text");
+  text.appendChild(el("p", "continue-title", `继续上次：${esc(last.title)}`));
+  text.appendChild(el("p", "continue-sub", `第 ${Math.min((last.cur || 0) + 1, last.total || 0)} 题 / 共 ${last.total || 0} 题`));
+  const go = el("button", "btn small", "接着答");
+  go.type = "button";
+  go.onclick = () => { S.cardFrom = from; openCard(last.aid, last.kitId); };
+  box.append(text, go);
+  return box;
+}
 const DIR_LABEL = { up: "↑ 提升", down: "↓ 下降 / 失效", mixed: "~ 有好有坏", none: "? 没报告" };
 
 function readTabs(active) {
   document.body.dataset.readTab = active || "kit";
   const nav = el("nav", "ws-tabs");
-  [["kit", "工具包"], ["cards", "阅读卡"], ["matrix", "矩阵"]].forEach(([key, label]) => {
+  [["kit", "推荐论文"], ["cards", "我的阅读卡"], ["matrix", "对比表"]].forEach(([key, label]) => {
     const b = el("button", `ws-tab${key === active ? " on" : ""}`, label);
     b.type = "button";
     b.onclick = () => { S.readTab = key; setView("read"); };
@@ -4854,7 +4912,7 @@ async function renderRead() {
   rightH.appendChild(readTabs(tab));
   const search = el("form", "read-search");
   const q = el("input");
-  q.placeholder = "搜论文（arXiv 只认英文关键词）";
+  q.placeholder = "搜论文（英文关键词）";
   q.name = "q";
   const goSearch = el("button", "btn small", "搜索");
   goSearch.type = "submit";
@@ -4911,7 +4969,10 @@ async function renderRead() {
   const grid = el("div", "read-grid");
   const leftPane = el("section", "read-pane");
   const leftHead = el("div", "read-pane-head");
+  const cont = continueCard("read");
+  if (cont) leftHead.appendChild(cont);
   leftHead.appendChild(el("h3", "panel-title", "经典文献推荐"));
+  leftHead.appendChild(el("p", "panel-sub", "点「带读答题」：AI 按节出 8 道题，你边读原文边答，它判对错、给提示。"));
   if (passed > 0) leftHead.appendChild(el("small", "", `已完成 ${passed} 张阅读卡`));
   const leftBody = el("div", "read-pane-body");
   const recPapers = catalog.length ? catalog.map((p, i) => ({
@@ -4933,7 +4994,7 @@ async function renderRead() {
       leftBody.appendChild(back);
     }
     if (!papers.length) {
-      leftBody.appendChild(el("p", "panel-sub", "没有结果。arXiv 只认英文关键词。"));
+      leftBody.appendChild(el("p", "panel-sub", "没有结果。arXiv 只认英文。"));
       return;
     }
     const list = el("ol", "kit-papers");
@@ -4948,11 +5009,17 @@ async function renderRead() {
       const main = el("div", "kp-main");
       const kitForCard = fromSearch ? (p.card_kit || "") : (p.card_kit || (!catalog.length && kit.id) || "");
       const title = el("button", "linkish");
-      title.textContent = p.title_zh || p.title;
+      const zt = splitZhTitle(p.title_zh);
+      title.textContent = zt.zh || p.title;
       title.type = "button";
       title.onclick = () => { S.cardFrom = "read"; openCard(aid, kitForCard); };
       main.appendChild(el("span", "kp-n", String(p.order || i + 1)));
       main.appendChild(title);
+      if (zt.unverified) {
+        const flag = el("i", "kp-flag", "译名待校");
+        flag.title = "中文译名由机器生成，还没人工核对";
+        main.appendChild(flag);
+      }
       if (p.title_zh) {
         const en = el("p", "kp-en");
         en.textContent = p.title;
@@ -4963,12 +5030,14 @@ async function renderRead() {
         (p.keywords || []).slice(0, 4).forEach((k) => {
           const s = el("span");
           s.textContent = k.zh || k.en || k;
+          s.title = "这篇论文的主题标签";
           kws.appendChild(s);
         });
         main.appendChild(kws);
       }
       if (p.lib === "html" || p.lib === "abstract") {
-        const badge = el("i", "kp-lib", p.lib === "html" ? "库内" : "只有摘要");
+        const badge = el("i", "kp-lib", p.lib === "html" ? "有全文" : "只有摘要");
+        badge.title = p.lib === "html" ? "全文已在站内，带读时引文可逐字核对" : "只取到摘要，引文题会改成用自己的话答";
         main.appendChild(badge);
       }
       if (c) {
@@ -4979,6 +5048,7 @@ async function renderRead() {
       li.appendChild(main);
       const goLabel = fromSearch ? "打开" : (c ? (c.status === "pass" ? "看卡" : "改这张卡") : (kitForCard ? "带读答题" : "打开"));
       const go = el("button", primary ? "btn small" : "btn small secondary", goLabel);
+      if (goLabel === "带读答题") go.title = "AI 按节出 8 道题，你边读原文边答，它判对错";
       go.type = "button";
       go.onclick = () => { S.cardFrom = "read"; openCard(aid, kitForCard); };
       li.appendChild(go);
@@ -5014,7 +5084,7 @@ async function renderRead() {
     ev.preventDefault();
     const term = q.value.trim();
     if (!term) return;
-    if (/[\u4e00-\u9fff]/.test(term)) { toast("arXiv 只认英文关键词"); return; }
+    if (/[\u4e00-\u9fff]/.test(term)) { toast("arXiv 只认英文"); return; }
     try {
       const r = await api("GET", `/api/papers/search?q=${encodeURIComponent(term)}&uid=${S.uid}`);
       paintPapers(r.items || [], true);
@@ -5074,7 +5144,7 @@ function renderCardList(kit, byPaper) {
   cards.sort((a, b) => (order[a.arxiv_id] ?? 99) - (order[b.arxiv_id] ?? 99)).forEach((c) => {
     const row = el("button", "mine-row");
     row.type = "button";
-    const badge = c.status === "pass" ? '<span class="kp-state pass">过线</span>' : '<span class="kp-state revise">待改</span>';
+    const badge = c.status === "pass" ? '<span class="kp-state pass">合格</span>' : '<span class="kp-state revise">待改</span>';
     row.innerHTML = `<span class="mine-name">${esc(c.title)} ${badge}</span><span class="mine-meta">v${c.version}${c.status === "pass" ? "" : ` · ${esc(c.review.next_step || "")}`}</span>`;
     row.onclick = () => openCard(c.arxiv_id);
     rows.appendChild(row);
@@ -5089,7 +5159,7 @@ async function renderMatrix(seq, kit) {
   const panel = el("div", "panel");
   if (m.error) { panel.appendChild(el("div", "note-box", esc(m.error))); $app.appendChild(panel); return; }
   if (!m.ready) {
-    panel.appendChild(el("p", "panel-sub", "先交一张过线的阅读卡。格子只来自你自己的过线卡。卡越多，空格和冲突才有意义。"));
+    panel.appendChild(el("p", "panel-sub", "先交一张合格的阅读卡。"));
     if (kit && kit.papers && kit.papers[0]) {
       panel.appendChild(el("p", "panel-sub", esc(kit.papers[0].title)));
       const go = el("button", "btn", "写第一张阅读卡");
@@ -5106,7 +5176,7 @@ async function renderMatrix(seq, kit) {
   const conflict = new Set(m.rows.filter((r) => r.conflict).map((r) => r.arxiv_id));  // 完整成员；c.up / c.down 只是预览
   const titleOf = Object.fromEntries(m.rows.map((r) => [r.arxiv_id, clip(r.title, 28)]));
   const names = (ids, total) => ids.map((id) => `《${esc(titleOf[id] || id)}》`).join("") + (total > ids.length ? ` 等 ${total} 篇` : "");
-  panel.appendChild(el("p", "panel-sub", "格子只来自你自己的过线卡。卡越多，空格和冲突才有意义。"));
+  panel.appendChild(el("p", "panel-sub", "矩阵只来自你自己的合格卡"));
   const wrap = el("div", "matrix-wrap");
   const table = el("table", "matrix");
   table.innerHTML = `<thead><tr><th>论文</th>${m.dimensions.map((d) => `<th class="${emptyCols.has(d.key) ? "col-empty" : ""}" title="${esc(d.hint || "")}">${esc(d.label)}${emptyCols.has(d.key) ? " ·空列" : ""}</th>`).join("")}</tr></thead>`;
@@ -5176,12 +5246,15 @@ function pickBenchMode({ saved, session, hasDraft, hasCard, passedCount, canGrad
   return "tutor";
 }
 
-function tutorPanel({ aid, kitId, scrollTo, selection, onPrefill, session }) {
+function tutorPanel({ aid, kitId, scrollTo, selection, onPrefill, session, canGrade, title }) {
   const box = el("section", "tutor-panel");
   box.hidden = false;
   let sess = session || null;
-  const draft = {};
+  const draftKey = `rg_tutor_${S.uid || "anon"}_${kitId}_${aid}`;
+  let draft = {}; try { draft = JSON.parse(localStorage.getItem(draftKey) || "{}") || {}; } catch (_) { draft = {}; }
+  const saveDraft = () => { try { const keep = Object.fromEntries(Object.entries(draft).filter(([, v]) => String(v || "").trim())); if (Object.keys(keep).length) localStorage.setItem(draftKey, JSON.stringify(keep)); else localStorage.removeItem(draftKey); } catch (_) { /* 存不了就只留在内存 */ } };
   let focusQid = null;
+  let last = null;
   const paint = () => {
     box.innerHTML = "";
     if (!sess) {
@@ -5194,29 +5267,49 @@ function tutorPanel({ aid, kitId, scrollTo, selection, onPrefill, session }) {
       return;
     }
     const head = el("div", "tutor-head");
-    const voice = el("span", "tutor-voice");
-    voice.textContent = sess.voice === "llm" ? "模型出题" : sess.voice === "mixed" ? "模型出题 / 规则版" : "规则版";
-    head.appendChild(voice);
     const prog = el("span", "tutor-prog");
-    prog.textContent = `${sess.cur || 0}/${sess.total || 0}`;
+    prog.textContent = `第 ${Math.min((sess.cur || 0) + 1, sess.total || 0)} 题 / 共 ${sess.total || 0} 题`;
     head.appendChild(prog);
     box.appendChild(head);
+    if (canGrade === false) {
+      const off = el("p", "tutor-notice");
+      off.textContent = "模型暂时用不了：可以看题、改答案、存草稿；现在作答会先存着，模型恢复后点「重判」。";
+      box.appendChild(off);
+    }
+    const slots = sess.slots || [];
+    const cur = sess.cur || 0;
+    const sl = (focusQid && slots.find((s) => s.qid === focusQid)) || slots[cur];
+    if (last && sl && last.qid !== sl.qid) {
+      const strip = el("div", "tutor-last");
+      const lp = el("p");
+      lp.textContent = last.status === "pass" ? "上一题 ✓ 通过" + (last.feedback ? `：${last.feedback}` : "")
+        : last.status === "pending" ? "上一题已保存，等模型恢复后判分"
+        : last.status === "skipped" ? "上一题已跳过"
+        : "上一题：" + last.feedback;
+      strip.appendChild(lp);
+      const look = el("button", "linkish", "看判语");
+      look.type = "button";
+      look.onclick = () => { focusQid = last.qid; paint(); };
+      const ok = el("button", "linkish", "知道了");
+      ok.type = "button";
+      ok.onclick = () => { last = null; paint(); };
+      strip.append(look, ok);
+      box.appendChild(strip);
+    }
     if (sess.notice) {
       const n = el("p", "tutor-notice");
       n.textContent = sess.notice;
       box.appendChild(n);
     }
-    const slots = sess.slots || [];
-    const cur = sess.cur || 0;
-    const sl = (focusQid && slots.find((s) => s.qid === focusQid)) || slots[cur];
     const followups = slots.filter((s) => s.status === "pending" || s.status === "retry");
     const paintFollowups = () => {
       followups.forEach((s) => {
         if (sl && s.qid === sl.qid) return;
         const row = el("p", "tutor-pending");
-        row.textContent = s.status === "pending" ? `这题稍后再判：${s.question || s.qid}` : `再改一改：${s.question || s.qid}`;
-        if (s.status === "pending") {
-          const rg = el("button", "linkish", "重判");
+        const idx = slots.indexOf(s);
+        row.textContent = s.status === "pending" ? `第 ${idx + 1} 题「${s.question || s.qid}」已保存，等模型恢复后判分` : `第 ${idx + 1} 题「${s.question || s.qid}」要再改一改`;
+        if (s.status === "pending" && canGrade !== false) {
+          const rg = el("button", "linkish", "现在重判");
           rg.type = "button";
           rg.onclick = () => turnTutor(s.qid, s.last || "", false, true);
           row.appendChild(rg);
@@ -5276,8 +5369,12 @@ function tutorPanel({ aid, kitId, scrollTo, selection, onPrefill, session }) {
       ? "用你自己的话写 10–160 字，可以粘贴"
       : "从左边原文复制一句粘贴进来，或选中后点「填进作答框」";
     ta.value = draft[sl.qid] ?? sl.last ?? sl.answer ?? "";
-    ta.addEventListener("input", () => { draft[sl.qid] = ta.value; send.disabled = !ta.value.trim(); });
+    ta.addEventListener("input", () => { draft[sl.qid] = ta.value; saveDraft(); dn.hidden = !ta.value.trim(); send.disabled = !ta.value.trim(); });
     box.appendChild(ta);
+    const dn = el("p", "tutor-draft-note");
+    dn.hidden = !(draft[sl.qid] && draft[sl.qid] !== (sl.last || sl.answer || ""));
+    dn.textContent = "草稿已自动保存在这台设备，换页回来还在";
+    box.appendChild(dn);
     const acts = el("div", "tutor-acts");
     if (sl.type === "find_quote" || sl.type === "number" || sl.type === "limitation") {
       const useSel = el("button", "linkish", "填进作答框");
@@ -5311,7 +5408,7 @@ function tutorPanel({ aid, kitId, scrollTo, selection, onPrefill, session }) {
       rg.onclick = () => turnTutor(sl.qid, sl.last || ta.value, false, true);
       acts.appendChild(rg);
     }
-    box.fillAnswer = (text) => { ta.value = text || ""; draft[sl.qid] = ta.value; send.disabled = !ta.value.trim(); };
+    box.fillAnswer = (text) => { ta.value = text || ""; draft[sl.qid] = ta.value; saveDraft(); send.disabled = !ta.value.trim(); };
     box.appendChild(acts);
     if (sl.note) {
       const note = el("p", "form-note");
@@ -5320,14 +5417,14 @@ function tutorPanel({ aid, kitId, scrollTo, selection, onPrefill, session }) {
     }
     const st = (sess.stations || []).find((x) => x.key === sl.station);
     if (st && scrollTo) {
-      const jump = el("button", "linkish", `跳到本节`);
+      const jump = el("button", "linkish", "看原文这一节");
       jump.type = "button";
       jump.onclick = () => scrollTo(st.heading || st.label, st.start);
       box.appendChild(jump);
     }
     if (sl.status === "pending") {
       const pend = el("p", "tutor-pending");
-      pend.textContent = "这题稍后再判";
+      pend.textContent = "这题已保存，等模型恢复后判分";
       box.appendChild(pend);
     }
     if (sl.feedback || sl.note) {
@@ -5356,6 +5453,7 @@ function tutorPanel({ aid, kitId, scrollTo, selection, onPrefill, session }) {
   async function startTutor(restart) {
     try {
       sess = await api("POST", `/api/tutor/${encodeURIComponent(aid)}/start`, { uid: S.uid, kit: kitId, restart: !!restart });
+      rememberTutor(aid, kitId, sess, title || aid);
       focusQid = null;
       box.hidden = false;
       paint();
@@ -5367,6 +5465,11 @@ function tutorPanel({ aid, kitId, scrollTo, selection, onPrefill, session }) {
         uid: S.uid, kit: kitId, qid, answer, skip: !!skip, rev: sess ? sess.rev : 0, regrade: !!regrade,
       });
       sess = out.session;
+      rememberTutor(aid, kitId, sess, title || aid);
+      const answered = (sess.slots || []).find((s) => s.qid === qid);
+      last = out.verdict && answered ? { qid, question: answered.question || "", status: answered.status, feedback: out.verdict.feedback || out.verdict.note || "" } : null;
+      const done = (sess.slots || []).find((s) => s.qid === qid);
+      if (done && ["pass", "pending", "skipped"].includes(done.status)) { delete draft[qid]; saveDraft(); }
       if (focusQid) {
         const focused = (sess.slots || []).find((s) => s.qid === focusQid);
         if (!focused || !["open", "pending", "retry"].includes(focused.status)) focusQid = null;
@@ -5381,6 +5484,7 @@ function tutorPanel({ aid, kitId, scrollTo, selection, onPrefill, session }) {
     try {
       const out = await api("POST", `/api/tutor/${encodeURIComponent(aid)}/finish`, { uid: S.uid, kit: kitId });
       sess = out.session;
+      rememberTutor(aid, kitId, sess, title || aid);
       const alts = onPrefill ? onPrefill(out.prefill || {}, out.missing || []) : [];
       paint();
       (alts || []).forEach((a) => {
@@ -5465,12 +5569,17 @@ async function renderCard() {
   head.appendChild(back);
   const kitP = (kit.papers || []).find((p) => p.arxiv_id === aid);
   const titleZh = paper.title_zh || (kitP && kitP.title_zh) || "";
-  const zhNote = /（[^（）]*）\s*$/.exec(titleZh);
-  const zhTitle = zhNote ? titleZh.slice(0, zhNote.index).trim() : titleZh;
+  const zt = splitZhTitle(titleZh);
+  const zhTitle = zt.zh;
   if (zhTitle) {
     const h2 = el("h2");
     h2.textContent = zhTitle;
     head.appendChild(h2);
+    if (zt.unverified) {
+      const flag = el("i", "kp-flag", "译名待校");
+      flag.title = "中文译名由机器生成，还没人工核对";
+      head.appendChild(flag);
+    }
     const en = el("p", "paper-en");
     en.textContent = paper.title;
     head.appendChild(en);
@@ -5486,25 +5595,20 @@ async function renderCard() {
   const kws = (paper.keywords && paper.keywords.length) ? paper.keywords : ((kitP && kitP.keywords) || []);
   let absNote = "正文已取到，引文可逐字核对";
   if (paper.source === "pdf") absNote = "你导入的 PDF · 只有你能看到";
-  else if (paper.source !== "html") absNote = "只取到摘要：正文引文核对不了，请先读 arXiv 原文";
+  else if (paper.source !== "html") absNote = "只取到摘要：正文引文核对不了，请先读原文";
   const status = el("div", "ws-status");
   if (!isLocal && paper.url) {
-    status.appendChild(el("span", "", `<a href="${esc(paper.url)}" target="_blank" rel="noopener">arXiv:${esc(aid)} ↗</a>`));
+    status.appendChild(el("span", "", `<a href="${esc(paper.url)}" target="_blank" rel="noopener">${esc(aid)} ↗</a>`));
   }
   status.appendChild(el("span", "", absNote));
-  if (zhNote) {
-    const noteSpan = el("span");
-    noteSpan.textContent = zhNote[0].replace(/^（|）$/g, "");
-    status.appendChild(noteSpan);
-  }
-  if (prev) status.appendChild(el("span", "", `上一版 v${prev.version} · ${prev.status === "pass" ? "过线" : "待改"}`));
+  if (prev) status.appendChild(el("span", "", `上一版 v${prev.version} · ${prev.status === "pass" ? "合格" : "待改"}`));
   if (paper.source !== "html" && paper.source !== "pdf") {
     const retry = el("button", "linkish", "重新取正文");
     retry.type = "button";
     const until = Number(paper.retry_after || 0);
     if (until && until * 1000 > Date.now()) {
       const hh = new Date(until * 1000);
-      retry.textContent = `arXiv 在 ${String(hh.getHours()).padStart(2, "0")}:${String(hh.getMinutes()).padStart(2, "0")} 前不会再试`;
+      retry.textContent = `${String(hh.getHours()).padStart(2, "0")}:${String(hh.getMinutes()).padStart(2, "0")} 前不会再试取正文`;
       retry.disabled = true;
     } else {
       retry.onclick = () => renderCard();
@@ -5529,7 +5633,9 @@ async function renderCard() {
     catch (_) { /* 没有会话就当没开始 */ }
     if (!isCurrent()) return;
   }
+  rememberTutor(aid, kitId, tutorMeta && tutorMeta.session, zhTitle || paper.title);
   const canGrade = !!(tutorMeta && tutorMeta.can_grade);
+  const hasSession = !!(tutorMeta && tutorMeta.session && tutorMeta.session.status);
   const inKit = !tutorMeta || tutorMeta.in_kit !== false;
   const modeKey = `rg_mode_${S.uid || "anon"}_${kitId}_${aid}`;
   let savedMode = "";
@@ -5548,10 +5654,12 @@ async function renderCard() {
   const tabCard = el("button", "linkish", "或：写阅读卡");
   tabCard.type = "button";
   tabCard.dataset.mode = "card";
-  if (!canGrade) {
+  if (!canGrade && !hasSession) {
     tabTutor.disabled = true;
     tabTutor.title = "现在用不了模型（没配 / 没同意隐私说明 / 今天额度用完），先写阅读卡";
     if (mode === "tutor") mode = "card";
+  } else if (!canGrade) {
+    tabTutor.title = "模型暂时用不了：能看进度、改答案、存草稿；作答会先存着，模型恢复后点「重判」";
   }
   if (!showCard) {
     tabCard.disabled = true;
@@ -5731,6 +5839,8 @@ async function renderCard() {
       return alts;
     },
     session: tutorMeta && tutorMeta.session,
+    canGrade,
+    title: zhTitle || paper.title,
   });
   fillChip.onclick = () => {
     const got = readSelection();
@@ -5845,7 +5955,7 @@ async function renderCard() {
       submit.disabled = false; submit.textContent = "交新一版";
     };
     acts.appendChild(submit);
-    acts.appendChild(el("span", "hint", "草稿自动存在本机。没过线也会记一版，改了再交。"));
+    acts.appendChild(el("span", "hint", "草稿自动存在本机。没合格也会记一版，改了再交。"));
     form.appendChild(acts);
   }
 
@@ -5858,7 +5968,7 @@ async function renderCard() {
       sec.appendChild(el("p", `review-delta ${d > 0 ? "up" : d < 0 ? "down" : ""}`, d > 0 ? `比上一版多过 ${d} 条（${card.prev_passed} → ${r.passed}）` : d < 0 ? `比上一版少了 ${-d} 条` : `和上一版一样是 ${r.passed} 条`));
     }
     const head = el("div", "feedback-head");
-    head.appendChild(el("div", "", `<h3>${card.status === "pass" ? "过线" : "还差一点"} · v${card.version}</h3><p>${card.status === "pass" ? "这张卡记进了你的账本，会出现在矩阵里。" : esc(r.next_step)}</p>`));
+    head.appendChild(el("div", "", `<h3>${card.status === "pass" ? "合格" : "还差一点"} · v${card.version}</h3><p>${card.status === "pass" ? "这张卡记进了你的账本，会出现在矩阵里。" : esc(r.next_step)}</p>`));
     head.appendChild(el("div", "score-ring", `<span class="num">${r.passed}</span>/ ${r.total} 条`));
     sec.appendChild(head);
     const list = el("div", "rubric-list");
@@ -5932,16 +6042,16 @@ async function dailyBlock(seq) {
   try {
     d = await api("GET", `/api/daily?uid=${S.uid}`);
   } catch (e) {
-    box.appendChild(el("p", "panel-sub", `今日情报暂时取不到（如实说明）：${esc(e.message)}`));
+    box.appendChild(el("p", "panel-sub", `今日情报暂时取不到：${esc(e.message)}`));
     return box;
   }
   if (stale(seq)) return box;
   if (d.day) box.dataset.day = d.day;
   const dirName = d.direction && d.direction.name ? `按你的方向「${d.direction.name}」` : "按你的兴趣";
   const head = el("div", "daily-head");
-  head.innerHTML = `<div><p class="section-label">最近的新论文 · 约 5 分钟 · 可跳过</p><h3 class="panel-title">分拣最近的新论文</h3><p class="panel-sub">${esc(dirName)}的新论文。只看标题和摘要原文，决定留还是过。</p></div><div class="score-ring"><span class="num">${d.done_today}</span>/ ${d.goal} 今天</div>`;
+  head.innerHTML = `<div><p class="section-label">最近的新论文 · 约 5 分钟 · 可跳过</p><h3 class="panel-title">分拣最近的新论文</h3><p class="panel-sub">${esc(dirName)}的新论文。只看标题和摘要，决定留下还是跳过</p></div><div class="score-ring"><span class="num">${d.done_today}</span>/ ${d.goal} 今天</div>`;
   box.appendChild(head);
-  if (d.error) box.appendChild(el("div", "note-box", `arXiv 暂时连不上（如实说明）：${esc(d.error)}`));
+  if (d.error) box.appendChild(el("div", "note-box", `arXiv 暂时连不上：${esc(d.error)}`));
   if (!d.items.length) {
     const reason = d.empty_reason;
     if (reason === "thin") {
@@ -5949,10 +6059,10 @@ async function dailyBlock(seq) {
       (d.channels || []).forEach((c) => {
         box.appendChild(el("p", "", `<a href="${esc(c.url)}" target="_blank" rel="noopener">${esc(c.name)} ↗</a>`));
       });
-    } else if (reason === "exhausted") box.appendChild(el("p", "panel-sub", "这个话题最近的都分拣完了。"));
+    } else if (reason === "exhausted") box.appendChild(el("p", "panel-sub", "本话题已分拣完毕。"));
     else if (reason === "upstream" || d.stale) box.appendChild(el("p", "panel-sub", `连不上来源，这是已缓存的候选。`));
     else if (reason === "no_topics") {
-      const tip = el("p", "panel-sub", "还没有能用来检索的兴趣话题。先聊几句或选定方向。");
+      const tip = el("p", "panel-sub", "先选一个方向，才知道给你推哪些论文。");
       const go = el("button", "btn small", "去选方向");
       go.type = "button";
       go.onclick = () => setView("dialogue");
@@ -5966,7 +6076,7 @@ async function dailyBlock(seq) {
     title.textContent = it.title;
     row.appendChild(title);
     if (it.lib === "html" || it.lib === "abstract") {
-      row.appendChild(el("i", "kp-lib", it.lib === "html" ? "库内" : "只有摘要"));
+      row.appendChild(el("i", "kp-lib", it.lib === "html" ? "有全文" : "只有摘要"));
     }
     if (it.title_zh) {
       const zh = el("p", "triage-zh");
@@ -5986,7 +6096,7 @@ async function dailyBlock(seq) {
     row.appendChild(el("small", "", `${esc((it.authors || []).join(", "))} · ${esc(it.published || "")}`));
     const ctl = el("div", "triage-ctl");
     const why = el("input");
-    why.placeholder = "留下／跳过的理由（4–80 字）：碰到了什么 / 离你的问题多远";
+    why.placeholder = "留下／跳过的理由（4–80 字）：";
     why.maxLength = 80;
     let sending = false;
     const send = async (verdict) => {
@@ -6025,7 +6135,7 @@ async function dailyBlock(seq) {
       card.onclick = () => { S.kitId = it.card_kit; S.cardFrom = "today"; openCard(it.arxiv_id, it.card_kit); };
       ctl.appendChild(card);
     } else {
-      const ext = el("a", "linkish", /arxiv/i.test(it.source || it.url || "") ? "在 arXiv 读" : "打开原文");
+      const ext = el("a", "linkish", (/^arxiv$/i.test(String(it.source || "")) || /arxiv\.org/i.test(String(it.url || ""))) ? "在 arXiv 读" : "打开原文");
       ext.href = it.url || "#"; ext.target = "_blank"; ext.rel = "noopener";
       ctl.appendChild(ext);
     }
@@ -6037,7 +6147,7 @@ async function dailyBlock(seq) {
     kept.appendChild(el("summary", "", `你最近留下的 ${d.recent_keeps.length} 篇（共分拣 ${d.triaged_total} 篇）`));
     const ul = el("ul");
     d.recent_keeps.forEach((k) => {
-      const href = k.url || (/^(psyarxiv|socarxiv):/i.test(k.arxiv_id || "") ? "#" : `https://arxiv.org/abs/${esc(k.arxiv_id)}`);
+      const href = k.url || (/^(psyarxiv|socarxiv|biorxiv|medrxiv):/i.test(k.arxiv_id || "") ? "#" : `https://arxiv.org/abs/${esc(k.arxiv_id)}`);
       ul.appendChild(el("li", "", `<a href="${esc(href)}" target="_blank" rel="noopener">${esc(k.title || k.arxiv_id)}</a><span>${esc(k.why)}</span>`));
     });
     kept.appendChild(ul);
@@ -6155,8 +6265,8 @@ async function paintEdges(seq, body) {
     ml.appendChild(li);
   });
   intro.appendChild(ml);
-  intro.appendChild(el("p", "section-label", `已证明 · ${proven.length}（来自账本，过线的作品自动进来，不能手改）`));
-  if (!proven.length) intro.appendChild(el("p", "form-note", "还没有。在「研读」交一张过线的阅读卡，这里就有第一条。"));
+  intro.appendChild(el("p", "section-label", `已证明 · ${proven.length}（来自账本，合格的作品自动进来，不能手改）`));
+  if (!proven.length) intro.appendChild(el("p", "form-note", "尚未在「研读」交过的合格阅读卡"));
   const pl = el("ul", "edge-list");
   proven.forEach((e) => pl.appendChild(el("li", "", `<span>${edgeChip(e)}</span>`)));
   intro.appendChild(pl);

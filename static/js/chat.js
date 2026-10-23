@@ -120,15 +120,15 @@ const ChatView = (() => {
     const head = el("header", "ws-head");
     head.appendChild(el("h2", "", S.entered ? "对话" : "先认识一下"));
     head.appendChild(el("p", "", S.entered
-      ? "继续聊你的问题和阅读近况。"
-      : "先聊院系、专业、年级和课程，再顺着你的想法慢慢了解。随时可以先进入使用。"));
+      ? "继续和启研聊一聊你的问题和阅读近况。"
+      : "和启研聊一聊你的大概情况（基本信息，兴趣点，未来规划...）也可以随时进入使用。"));
     if (!S.entered) {
       const bar = el("div", "enter-bar");
-      const go = el("button", "btn", "进入启研");
+      const go = el("button", "btn", "开始今天的一件事");  // 第四轮第三遍吐槽 3/3：「进入启研」不知道进去干嘛——按钮直接说去向（今日页）
       go.type = "button";
       go.onclick = () => enterApp();
       bar.appendChild(go);
-      bar.appendChild(el("span", "form-note", "不必聊完才能使用；信息较少时会先提醒你。"));
+      const read = el("button", "btn ghost", "先挑一篇论文读"); read.type = "button"; read.onclick = () => enterApp("read"); bar.appendChild(read);
       head.appendChild(bar);
     }
     return head;
@@ -157,7 +157,7 @@ const ChatView = (() => {
     const inputRow = el("div", "chat-input-row");
     const input = el("textarea");
     input.rows = 1;
-    input.placeholder = S.entered ? "想聊什么，直接说…" : "说说你的想法，也可以粘贴成绩单…";
+    input.placeholder = S.entered ? "想聊什么，直接说…" : "说说你的院系、年级，或直接问我…";
     input.setAttribute("aria-label", "对话输入");
     const sendBtn = el("button", "btn small", "发送");
     sendBtn.type = "button";
@@ -169,11 +169,16 @@ const ChatView = (() => {
     // 所以它归输入区，不归行动区——否则它会跟着行动卡一起滚走。
     inputZone.append(suggestions, stageLine, inputRow);
     inputZone.appendChild(el("p", "composer-hint", "Enter 发送 · Shift+Enter 换行"));
+    const extra = el("details", "composer-extra");
+    extra.appendChild(el("summary", "", "可选：粘贴成绩单，让我更了解你的基础"));
+    extra.appendChild(el("p", "", "打开树洞的成绩单页，全选复制后粘贴到上面的输入框；会存到你的资料里，先去掉不想分享的信息。"));
+    extra.hidden = true;  // 第一屏不提成绩单（面板三轮 3/3 被它吓到）；发过一句话或已进入后才露出
+    inputZone.appendChild(extra);
     chat.append(scroll, inputZone);
 
     const side = el("div", "panel side-panel mem-sum");
     const sideHead = el("div", "rank-head");
-    sideHead.appendChild(el("p", "side-title", S.entered ? "按你说过的，可能适合的方向" : "目前对你的了解"));
+    sideHead.appendChild(el("p", "side-title", S.entered ? "可能适合你的方向" : "目前对你的了解"));
     const treeBtn = el("button", "linkish", "查看方向树");
     treeBtn.type = "button";
     treeBtn.hidden = !S.entered;
@@ -212,12 +217,13 @@ const ChatView = (() => {
     } catch (e) { toast(e.message); }
     if (mySeq !== seq || S.view !== "dialogue") return;  // 等待期间切到了别的页：不能再往页面上写
     history.messages.forEach((m) => addBubble(m.role, m.text));
+    extra.hidden = !(S.entered || history.messages.some((m) => m.role === "user"));
     await refreshFacts();
     if (mySeq !== seq || S.view !== "dialogue") return;  // 等待期间切到了别的页：不能再往页面上写
     if (history.guide && !S.entered) renderGuide(history.guide);
     if (history.onboard_done && !S.entered) enterCard(history.guide);
     if (!history.messages.length) {
-      addBubble("assistant", history.welcome_message || "你好，我是启研。你可以直接问问题，不用先把背景填齐。也可以在树洞成绩单页全选、复制，再粘贴到这里，帮助我了解你的学习基础；这完全可选，粘贴后会保存到当前画像。");
+      addBubble("assistant", history.welcome_message || "你好，我是启研。你是哪个院系、几年级？也可以直接问我；不想聊就点上面的按钮。");
     }
 
     /* --- 发送 --- */
@@ -236,6 +242,7 @@ const ChatView = (() => {
       actions.remove();
       suggestions.innerHTML = "";
       addBubble("user", msg);
+      extra.hidden = false;
 
       const bubble = addBubble("assistant", "");
       bubble.classList.add("streaming");
@@ -446,6 +453,7 @@ const ChatView = (() => {
     }
 
     function renderGuide(profile) {
+      side.hidden = !S.entered && !(profile.areas || []).some((a) => a.known);  // 什么都还不知道时不摆「目前对你的了解」（面板 3/3 说像在建档）
       sideList.innerHTML = "";
       sideEmpty.style.display = "none";
       (profile.areas || []).forEach((area) => {
@@ -458,7 +466,7 @@ const ChatView = (() => {
       sideFoot.innerHTML = "";
       sideFoot.appendChild(el("p", "guide-note", profile.ready
         ? "已有适合开始的初步了解，剩下的可以在使用中慢慢补充。"
-        : "聊到足够了解你的主题和阅读需要时，我会回顾一下，再邀请你开始。也可以随时提前进入。"));
+        : "聊到足够了解你的主题和阅读需要时，我会回顾一下并邀请你开始，也可以随时提前进入。"));
       const go = el("button", "linkish", "查看或修改已记录的信息");
       go.onclick = () => setView("me");
       sideFoot.appendChild(go);
