@@ -6,6 +6,14 @@
 
 ---
 
+## [2026-10-23] [FIX] 日志统一走 server/logs.py：一行 JSON、写完就刷新、编码失败不再丢行
+
+- 变更内容：新增 `server/logs.py`：`line()` 给缺 ts 的行补北京时间，`emit()` 写一行 JSON 就 flush、任何异常都吞掉。server 里 30 处裸 `print(json.dumps(..., ensure_ascii=False))` 全换过去（main 6 / store 5 / admin 2 / arxiv 2 / llm 4 / account_store 10 / paper_collect 1），日志字段和内容一字不改，只换出口。修的三件事：① stdout 是 gbk 时编不出来的字符（例如「⚠️」）会抛 UnicodeEncodeError，那一条日志整条丢掉——它跑在请求中间件里，异常还会把这次请求变成 500；现在先按 stdout 自己的编码转成 `\uXXXX` 转义写法再写，行不丢、JSON 读回来还是原字符，也不会在同一个流里混进另一种编码。② 裸 `print` 走块缓冲，函数实例被冻结或回收时缓冲区里的日志根本不会出现；现在每行写完就 flush。③ 每条日志带 ts，SLS 里能排序、能对账。`tools/deploy/bootstrap` 加 `export PYTHONIOENCODING=utf-8`：现网日志固定按 UTF-8 出去。新增 `server/tests/test_logs.py`（gbk stdout 下不抛、行不丢、整行仍是同一种编码、坏 stdout 不外抛）。`server/admin.py` 顺手删掉换完之后不再用的 `import json`。
+- 影响文档：docs/CHANGELOG.md
+- 影响模块：server/logs.py（新增）、server/main.py、server/store.py、server/admin.py、server/arxiv.py、server/llm.py、server/account_store.py、server/paper_collect.py、tools/deploy/bootstrap、server/tests/test_logs.py（新增）
+- 决策来源：陈旭（用户反馈「用户使用之后，日志不能正常显示」）
+- 登记人：陈旭
+
 ## [2026-10-21] [FIX] --allow-ephemeral 发生产不再被 NAS 门挡住
 
 - 变更内容：现网仍是 `/tmp` + 速度优先。`production_release_checks` 在 `--allow-ephemeral` 时不再要求函数已挂 NAS、也不再要求 `health.db.ephemeral=false`，但仍带 `QIYAN_ALLOW_EPHEMERAL=1`，否则 PR #27 守门会让 `/api/*` 全 503。正常发生产（不带开关）规矩不变。

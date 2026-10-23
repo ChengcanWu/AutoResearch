@@ -23,6 +23,7 @@ from pathlib import Path
 from typing import Any
 
 import envfile  # noqa: F401  先读 .env，下面的 QIYAN_DB 才算数
+import logs
 from schemas import MicroTask, UserFact, new_id, now_iso
 
 # 部署时用 QIYAN_DB 指到持久盘（Dockerfile 指向卷 /data/qiyan.db）；不设就用仓库里的演示库。
@@ -608,7 +609,7 @@ def init_db() -> None:
     reason = db_blocked()
     if reason:
         DB_READY = False
-        print(json.dumps({"event": "db_blocked", "reason": reason, "path": str(DB_PATH)}, ensure_ascii=False))
+        logs.emit({"event": "db_blocked", "reason": reason, "path": str(DB_PATH)})
         return
     with _LOCK, _conn() as c:
         c.execute("PRAGMA journal_mode=WAL")  # 读写不互相阻塞，演示时多开几个页面也不锁库
@@ -629,8 +630,7 @@ def init_db() -> None:
         import account_store
         account_store.hydrate_file()
     except Exception as exc:
-        print(json.dumps({"event": "account_store_hydrate_failed", "error": type(exc).__name__},
-                         ensure_ascii=False))
+        logs.emit({"event": "account_store_hydrate_failed", "error": type(exc).__name__})
     DB_READY = True  # 本地副本灌回之前不开门：挂盘重试窗口里先进来一个注册会把唯一的旧副本覆盖成只剩他一人（Codex 第九轮复现）
 
 
@@ -856,8 +856,7 @@ def llm_secret(uid: str) -> dict[str, str] | None:
         from cryptography.exceptions import InvalidTag
         if not isinstance(exc, (InvalidTag, ValueError, UnicodeDecodeError)):
             raise
-        print(json.dumps({"event": "llm_secret_invalid", "uid": uid, "error": type(exc).__name__},
-                         ensure_ascii=False))
+        logs.emit({"event": "llm_secret_invalid", "uid": uid, "error": type(exc).__name__})
         return None
     if not key:
         return None
@@ -1245,7 +1244,7 @@ def delete_user(uid: str) -> dict[str, int]:
             c.execute("DELETE FROM wechat_tickets WHERE openid=?", (row["wechat_openid"],))
         c.execute("DELETE FROM wechat_tickets WHERE guest_uid=?", (uid,))
         counts["users"] = c.execute("DELETE FROM users WHERE id=?", (uid,)).rowcount
-    print(json.dumps({"event": "user_deleted", "uid": uid, "at": now_iso()}, ensure_ascii=False))
+    logs.emit({"event": "user_deleted", "uid": uid, "at": now_iso()})
     _accounts_changed(immediate=True)
     return counts
 
@@ -1256,8 +1255,7 @@ def _accounts_changed(immediate: bool = False) -> None:
         import account_store
         account_store.dump_accounts(immediate=immediate)
     except Exception as exc:
-        print(json.dumps({"event": "account_store_dump_failed", "error": type(exc).__name__},
-                         ensure_ascii=False))
+        logs.emit({"event": "account_store_dump_failed", "error": type(exc).__name__})
 
 
 def set_onboard_state(uid: str, state: dict[str, Any]) -> None:
